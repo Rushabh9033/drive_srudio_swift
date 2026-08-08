@@ -82,13 +82,16 @@ class _StudioScreenState extends State<StudioScreen>
     final latest = drafts.take(4).toList();
     final shownDrafts = _showLatestOnly ? latest : drafts;
 
-    final templates = Catalog.templates.where((t) {
-      final matchC = _stockCategory == null || t.category == _stockCategory;
-      final matchTier = _tier == 'all' ||
-          (_tier == 'free' && !t.premium) ||
-          (_tier == 'premium' && t.premium);
-      return matchC && matchTier;
-    }).toList(growable: false);
+    final templates = Catalog.templates
+        .where((t) {
+          final matchC = _stockCategory == null || t.category == _stockCategory;
+          final matchTier =
+              _tier == 'all' ||
+              (_tier == 'free' && !t.premium) ||
+              (_tier == 'premium' && t.premium);
+          return matchC && matchTier;
+        })
+        .toList(growable: false);
 
     // True when the free-user upgrade affordance should appear above the
     // stock grid (any tier that surfaces premium templates).
@@ -117,8 +120,9 @@ class _StudioScreenState extends State<StudioScreen>
                 const SizedBox(height: 4),
                 Text(
                   'Blank canvas to compose layers — stock is optional',
-                  style:
-                      GoogleFonts.manrope(color: DriveColors.mutedForeground),
+                  style: GoogleFonts.manrope(
+                    color: DriveColors.mutedForeground,
+                  ),
                 ),
                 const SizedBox(height: 18),
                 Row(
@@ -225,7 +229,9 @@ class _StudioScreenState extends State<StudioScreen>
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 180),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
                         color: DriveColors.carbon,
                         borderRadius: BorderRadius.circular(999),
@@ -297,8 +303,7 @@ class _StudioScreenState extends State<StudioScreen>
                             child: DriveChip(
                               label: c,
                               selected: _stockCategory == c,
-                              onTap: () =>
-                                  setState(() => _stockCategory = c),
+                              onTap: () => setState(() => _stockCategory = c),
                             ),
                           ),
                         ),
@@ -411,8 +416,9 @@ class _StudioScreenState extends State<StudioScreen>
                                 child: LiveBadge(
                                   maxWidth: 96,
                                   label: () {
-                                    final style =
-                                        templatePrimaryAnimLabel(t.spec);
+                                    final style = templatePrimaryAnimLabel(
+                                      t.spec,
+                                    );
                                     return style == null
                                         ? 'LIVE'
                                         : 'LIVE · $style';
@@ -482,9 +488,7 @@ class _EmptyCustomWidgets extends StatelessWidget {
           Text(
             'Tap Create New to start a blank canvas.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.manrope(
-              color: DriveColors.mutedForeground,
-            ),
+            style: GoogleFonts.manrope(color: DriveColors.mutedForeground),
           ),
         ],
       ),
@@ -692,9 +696,7 @@ class _LockedBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: DriveColors.graphite.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: DriveColors.primary.withValues(alpha: 0.6),
-        ),
+        border: Border.all(color: DriveColors.primary.withValues(alpha: 0.6)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -707,10 +709,7 @@ class _LockedBadge extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             'LOCKED',
-            style: driveMonoLabel(
-              size: 9,
-              color: DriveColors.primary,
-            ),
+            style: driveMonoLabel(size: 9, color: DriveColors.primary),
           ),
         ],
       ),

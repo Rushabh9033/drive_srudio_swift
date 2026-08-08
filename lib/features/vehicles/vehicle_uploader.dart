@@ -48,10 +48,7 @@ class VehicleUploader {
           children: [
             CupertinoActivityIndicator(radius: 20),
             SizedBox(height: 16),
-            Text(
-              'Processing image...',
-              style: TextStyle(color: Colors.white),
-            ),
+            Text('Processing image...', style: TextStyle(color: Colors.white)),
           ],
         ),
       ),
@@ -62,12 +59,14 @@ class VehicleUploader {
 
       if (removeBgPrompt == RemoveBgPromptChoice.removeBg) {
         await BackgroundRemover.instance.initializeOrt();
-        final ui.Image resultImage =
-            await BackgroundRemover.instance.removeBg(bytes);
-        
+        final ui.Image resultImage = await BackgroundRemover.instance.removeBg(
+          bytes,
+        );
+
         // Convert ui.Image back to PNG bytes
-        final byteData =
-            await resultImage.toByteData(format: ui.ImageByteFormat.png);
+        final byteData = await resultImage.toByteData(
+          format: ui.ImageByteFormat.png,
+        );
         if (byteData != null) {
           finalBytes = byteData.buffer.asUint8List();
         }
@@ -81,13 +80,16 @@ class VehicleUploader {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error processing image: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error processing image: $e')));
       }
     } finally {
       if (context.mounted) {
-        Navigator.of(context, rootNavigator: true).pop(); // Dismiss loading dialog
+        Navigator.of(
+          context,
+          rootNavigator: true,
+        ).pop(); // Dismiss loading dialog
       }
       try {
         BackgroundRemover.instance.dispose();

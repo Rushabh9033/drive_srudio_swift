@@ -24,8 +24,6 @@
 		C54ABC1CC461D10BEDBCF36A /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55866CC5F375762191C27658 /* Pods_Runner.framework */; };
 		CA00FACE0000000000000002 /* CarPlay.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA00FACE0000000000000001 /* CarPlay.framework */; };
 		CA00FACE0000000000000003 /* CarPlay.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA00FACE0000000000000001 /* CarPlay.framework */; };
-		CA00FACE0000000000000004 /* CarPlaySceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA00FACE0000000000000005 /* CarPlaySceneDelegate.swift */; };
-				CA00FACE0000000000000006 /* DriveStudioIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA00FACE0000000000000007 /* DriveStudioIntents.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -98,8 +96,6 @@
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A1B2C3D41E5F6071809A0B00 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		CA00FACE0000000000000001 /* CarPlay.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CarPlay.framework; path = System/Library/Frameworks/CarPlay.framework; sourceTree = SDKROOT; };
-		CA00FACE0000000000000005 /* CarPlaySceneDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarPlaySceneDelegate.swift; sourceTree = "<group>"; };
-		CA00FACE0000000000000007 /* DriveStudioIntents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DriveStudioIntents.swift; sourceTree = "<group>"; };
 				EE6DCD0CAFBC8D8EA4D0644E /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -229,8 +225,6 @@
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
-				CA00FACE0000000000000005 /* CarPlaySceneDelegate.swift */,
-				CA00FACE0000000000000007 /* DriveStudioIntents.swift */,
 							);
 			path = Runner;
 			sourceTree = "<group>";
@@ -457,8 +451,6 @@
 				2A6D5D6E30232FD7000A9968 /* AppGroupContract.swift in Sources */,
 				2A6D5D6F30232FD7000A9968 /* AppGroupChannel.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
-				CA00FACE0000000000000004 /* CarPlaySceneDelegate.swift in Sources */,
-				CA00FACE0000000000000006 /* DriveStudioIntents.swift in Sources */,
 							);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -594,7 +586,7 @@
 				INFOPLIST_FILE = DriveStudioWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DriveStudioWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -640,7 +632,7 @@
 				INFOPLIST_FILE = DriveStudioWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DriveStudioWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -683,7 +675,7 @@
 				INFOPLIST_FILE = DriveStudioWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DriveStudioWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

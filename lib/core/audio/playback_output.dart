@@ -18,29 +18,26 @@ enum PlaybackOutput {
 
 extension PlaybackOutputCopy on PlaybackOutput {
   String get label => switch (this) {
-        PlaybackOutput.phone => 'Phone',
-        PlaybackOutput.car => 'Car',
-        PlaybackOutput.auto => 'Auto',
-      };
+    PlaybackOutput.phone => 'Phone',
+    PlaybackOutput.car => 'Car',
+    PlaybackOutput.auto => 'Auto',
+  };
 
   String get subtitle => switch (this) {
-        PlaybackOutput.phone => 'iPhone speakers',
-        PlaybackOutput.car => 'Car Bluetooth / stereo',
-        PlaybackOutput.auto => 'Car when linked, else phone',
-      };
+    PlaybackOutput.phone => 'iPhone speakers',
+    PlaybackOutput.car => 'Car Bluetooth / stereo',
+    PlaybackOutput.auto => 'Car when linked, else phone',
+  };
 }
 
 /// Resolved physical target after applying [PlaybackOutput.auto].
-enum ResolvedPlaybackRoute {
-  phoneSpeaker,
-  carOrSystem,
-}
+enum ResolvedPlaybackRoute { phoneSpeaker, carOrSystem }
 
 extension ResolvedPlaybackRouteCopy on ResolvedPlaybackRoute {
   String get shortLabel => switch (this) {
-        ResolvedPlaybackRoute.phoneSpeaker => 'iPhone speakers',
-        ResolvedPlaybackRoute.carOrSystem => 'Car / Bluetooth route',
-      };
+    ResolvedPlaybackRoute.phoneSpeaker => 'iPhone speakers',
+    ResolvedPlaybackRoute.carOrSystem => 'Car / Bluetooth route',
+  };
 }
 
 ResolvedPlaybackRoute resolvePlaybackRoute({
@@ -50,9 +47,10 @@ ResolvedPlaybackRoute resolvePlaybackRoute({
   return switch (preference) {
     PlaybackOutput.phone => ResolvedPlaybackRoute.phoneSpeaker,
     PlaybackOutput.car => ResolvedPlaybackRoute.carOrSystem,
-    PlaybackOutput.auto => carConnected
-        ? ResolvedPlaybackRoute.carOrSystem
-        : ResolvedPlaybackRoute.phoneSpeaker,
+    PlaybackOutput.auto =>
+      carConnected
+          ? ResolvedPlaybackRoute.carOrSystem
+          : ResolvedPlaybackRoute.phoneSpeaker,
   };
 }
 
@@ -96,9 +94,7 @@ AudioContext audioContextForRoute(ResolvedPlaybackRoute route) {
     iOS: defaultTargetPlatform == TargetPlatform.iOS
         ? AudioContextIOS(
             category: AVAudioSessionCategory.playback,
-            options: const {
-              AVAudioSessionOptions.duckOthers,
-            },
+            options: const {AVAudioSessionOptions.duckOthers},
           )
         : null,
   );

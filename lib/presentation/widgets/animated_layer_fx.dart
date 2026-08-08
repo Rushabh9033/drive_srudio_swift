@@ -8,11 +8,7 @@ import '../../data/models/models.dart';
 /// Isolated motion wrapper — only mounts a [AnimationController] when needed.
 /// Never placed above the editor gesture overlay.
 class AnimatedLayerFx extends StatefulWidget {
-  const AnimatedLayerFx({
-    super.key,
-    required this.layer,
-    required this.child,
-  });
+  const AnimatedLayerFx({super.key, required this.layer, required this.child});
 
   final Layer layer;
   final Widget child;
@@ -55,18 +51,19 @@ class _AnimatedLayerFxState extends State<AnimatedLayerFx>
       AnimStyles.ripple => 2000,
       _ => 2200,
     };
-    return Duration(milliseconds: (ms / widget.layer.resolvedAnimSpeed).round());
+    return Duration(
+      milliseconds: (ms / widget.layer.resolvedAnimSpeed).round(),
+    );
   }
 
   bool get _reverse => switch (widget.layer.resolvedAnimStyle) {
-        AnimStyles.rotateSlow ||
-        AnimStyles.shimmer ||
-        AnimStyles.sweep ||
-        AnimStyles.slideInLoop ||
-        AnimStyles.ripple =>
-          false,
-        _ => true,
-      };
+    AnimStyles.rotateSlow ||
+    AnimStyles.shimmer ||
+    AnimStyles.sweep ||
+    AnimStyles.slideInLoop ||
+    AnimStyles.ripple => false,
+    _ => true,
+  };
 
   @override
   void initState() {
@@ -131,10 +128,7 @@ class _AnimatedLayerFxState extends State<AnimatedLayerFx>
               child: Transform.scale(scale: s, child: child),
             );
           case AnimStyles.rotateSlow:
-            return Transform.rotate(
-              angle: t * math.pi * 2,
-              child: child,
-            );
+            return Transform.rotate(angle: t * math.pi * 2, child: child);
           case AnimStyles.slideInLoop:
             final x = (1 - Curves.easeOutCubic.transform(t)) * 18;
             final op = 0.35 + 0.65 * Curves.easeOut.transform(t.clamp(0, 1));
@@ -157,7 +151,8 @@ class _AnimatedLayerFxState extends State<AnimatedLayerFx>
               child: Opacity(opacity: 0.85 + 0.15 * glow, child: child),
             );
           case AnimStyles.flickerNeon:
-            final flicker = 0.55 +
+            final flicker =
+                0.55 +
                 0.45 *
                     (0.5 +
                         0.5 *
@@ -180,10 +175,7 @@ class _AnimatedLayerFxState extends State<AnimatedLayerFx>
               children: [
                 Opacity(
                   opacity: (1 - t) * 0.35,
-                  child: Transform.scale(
-                    scale: 1 + t * 0.18,
-                    child: child,
-                  ),
+                  child: Transform.scale(scale: 1 + t * 0.18, child: child),
                 ),
                 Transform.scale(scale: s, child: child),
               ],
@@ -251,7 +243,9 @@ class _ColonBlinkClockState extends State<ColonBlinkClock>
     super.initState();
     _blink = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: (1000 / widget.speed.clamp(0.35, 2.5)).round()),
+      duration: Duration(
+        milliseconds: (1000 / widget.speed.clamp(0.35, 2.5)).round(),
+      ),
     );
     if (widget.enabled) _blink.repeat(reverse: true);
   }
@@ -260,8 +254,9 @@ class _ColonBlinkClockState extends State<ColonBlinkClock>
   void didUpdateWidget(covariant ColonBlinkClock oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.speed != widget.speed) {
-      _blink.duration =
-          Duration(milliseconds: (1000 / widget.speed.clamp(0.35, 2.5)).round());
+      _blink.duration = Duration(
+        milliseconds: (1000 / widget.speed.clamp(0.35, 2.5)).round(),
+      );
     }
     if (widget.enabled && !_blink.isAnimating) {
       _blink.repeat(reverse: true);
@@ -283,7 +278,8 @@ class _ColonBlinkClockState extends State<ColonBlinkClock>
     final label = _sanitizeClockLabel(widget.timeLabel);
     // Pulse opacity of the HH↔MM colon only; do not append an extra ":".
     final colon = label.indexOf(':');
-    final canBlink = widget.enabled &&
+    final canBlink =
+        widget.enabled &&
         colon > 0 &&
         colon < label.length - 1 &&
         label.substring(colon + 1).isNotEmpty;
@@ -314,8 +310,9 @@ class _ColonBlinkClockState extends State<ColonBlinkClock>
               TextSpan(
                 text: ':',
                 style: widget.style.copyWith(
-                  color: (widget.style.color ?? Colors.white)
-                      .withValues(alpha: on ? 1 : 0.18),
+                  color: (widget.style.color ?? Colors.white).withValues(
+                    alpha: on ? 1 : 0.18,
+                  ),
                 ),
               ),
               TextSpan(text: right),

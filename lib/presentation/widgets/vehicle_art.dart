@@ -77,11 +77,7 @@ class VehicleArt extends StatelessWidget {
         borderRadius: radius,
         child: expand
             ? SizedBox.expand(child: _image())
-            : SizedBox(
-                height: height,
-                width: double.infinity,
-                child: _image(),
-              ),
+            : SizedBox(height: height, width: double.infinity, child: _image()),
       ),
     );
   }
@@ -109,8 +105,11 @@ class _VehiclePainter extends CustomPainter {
 
   Path _parse(String d, double sx, double sy) {
     final path = Path();
-    final tokens =
-        d.replaceAll(',', ' ').split(RegExp(r'\s+')).where((t) => t.isNotEmpty).toList();
+    final tokens = d
+        .replaceAll(',', ' ')
+        .split(RegExp(r'\s+'))
+        .where((t) => t.isNotEmpty)
+        .toList();
     var i = 0;
     double x = 0, y = 0;
     while (i < tokens.length) {

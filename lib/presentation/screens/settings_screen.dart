@@ -72,7 +72,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() => _busy = false);
     final msg = result.pending
         ? pendingLabel
-        : (result.message ?? (result.ok ? 'Premium unlocked' : 'Purchase failed'));
+        : (result.message ??
+              (result.ok ? 'Premium unlocked' : 'Purchase failed'));
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
@@ -84,9 +85,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final purchases = context.read<PurchaseService>();
     final synced = store.lastLocalSync == 0
         ? 'Never'
-        : DateFormat('MMM d - HH:mm').format(
-            DateTime.fromMillisecondsSinceEpoch(store.lastLocalSync),
-          );
+        : DateFormat(
+            'MMM d - HH:mm',
+          ).format(DateTime.fromMillisecondsSinceEpoch(store.lastLocalSync));
 
     return AppScreen(
       child: Column(
@@ -114,20 +115,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   telemetry.isIphone
                       ? 'This iPhone'
                       : (kIsWeb || !telemetry.supportsLiveHardware
-                          ? 'Preview only'
-                          : 'This phone'),
+                            ? 'Preview only'
+                            : 'This phone'),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   telemetry.isIphone
                       ? 'Live data comes from this iPhone: battery, clock, '
-                          'charging, GPS speed, and Phone / Car link. Home Screen '
-                          'widgets still need a Mac WidgetKit build - not a CarPlay UI shell.'
+                            'charging, GPS speed, and Phone / Car link. Home Screen '
+                            'widgets still need a Mac WidgetKit build - not a CarPlay UI shell.'
                       : (kIsWeb || !telemetry.supportsLiveHardware
-                          ? 'Web/Windows is preview only. Install Drive Studio on '
-                              'your iPhone for real battery, charging, GPS speed, and car-link.'
-                          : 'Live data comes from this phone: battery, clock, '
-                              'charging, GPS speed, and Phone / Car link. Not a CarPlay UI shell.'),
+                            ? 'Web/Windows is preview only. Install Drive Studio on '
+                                  'your iPhone for real battery, charging, GPS speed, and car-link.'
+                            : 'Live data comes from this phone: battery, clock, '
+                                  'charging, GPS speed, and Phone / Car link. Not a CarPlay UI shell.'),
                   style: GoogleFonts.manrope(
                     fontSize: 13,
                     height: 1.4,
@@ -174,19 +175,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle: Text(
                     snap.batteryKnown
                         ? 'From this ${telemetry.isIphone ? 'iPhone' : 'device'}: '
-                            'battery ${snap.batteryPercent}%'
-                            '${snap.isCharging ? ' - charging' : ''}'
-                            '${snap.speedKnown && snap.speedKmh != null ? ' | ${snap.speedKmh!.round()} km/h' : ''}'
-                            ' - ${snap.networkOnline ? 'online' : 'offline'}'
+                              'battery ${snap.batteryPercent}%'
+                              '${snap.isCharging ? ' - charging' : ''}'
+                              '${snap.speedKnown && snap.speedKmh != null ? ' | ${snap.speedKmh!.round()} km/h' : ''}'
+                              ' - ${snap.networkOnline ? 'online' : 'offline'}'
                         : telemetry.supportsLiveHardware
-                            ? 'Binds this phone clock, battery, charging, GPS speed, and car link'
-                            : 'Preview: clocks stay live; battery & GPS show Unavailable until iPhone',
+                        ? 'Binds this phone clock, battery, charging, GPS speed, and car link'
+                        : 'Preview: clocks stay live; battery & GPS show Unavailable until iPhone',
                     style: GoogleFonts.manrope(
                       fontSize: 12,
                       color: DriveColors.mutedForeground,
                     ),
                   ),
-                  value: telemetry.supportsLiveHardware && store.useLiveDeviceData,
+                  value:
+                      telemetry.supportsLiveHardware && store.useLiveDeviceData,
                   onChanged: telemetry.supportsLiveHardware
                       ? (v) => _onLiveDataToggle(store, v)
                       : null,
@@ -200,13 +202,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle: Text(
                     snap.carConnected
                         ? (snap.carLinkSource == CarLinkSource.manual
-                            ? 'On - you marked iPhone in the car'
-                            : 'On - Bluetooth connectivity proxy (Android)')
-                        : (telemetry.isIphone || !telemetry.bluetoothProxySupported
-                            ? 'Turn on when this iPhone is linked to the car. '
-                                'Not a CarPlay session API - reliable manual flag.'
-                            : 'Manual toggle, or auto when Bluetooth connectivity '
-                                'is reported (not a CarPlay session)'),
+                              ? 'On - you marked iPhone in the car'
+                              : 'On - Bluetooth connectivity proxy (Android)')
+                        : (telemetry.isIphone ||
+                                  !telemetry.bluetoothProxySupported
+                              ? 'Turn on when this iPhone is linked to the car. '
+                                    'Not a CarPlay session API - reliable manual flag.'
+                              : 'Manual toggle, or auto when Bluetooth connectivity '
+                                    'is reported (not a CarPlay session)'),
                     style: GoogleFonts.manrope(
                       fontSize: 12,
                       color: DriveColors.mutedForeground,
@@ -274,7 +277,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SizedBox(height: 4),
                 Text(
                   'Last local sync - $synced',
-                  style: driveMono(size: 11, color: DriveColors.mutedForeground),
+                  style: driveMono(
+                    size: 11,
+                    color: DriveColors.mutedForeground,
+                  ),
                 ),
                 if (store.corruptDraftSkips > 0) ...[
                   const SizedBox(height: 8),
@@ -352,9 +358,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onPressed: _busy
                           ? null
                           : () => _runPurchase(
-                                purchases.purchasePremium,
-                                pendingLabel: 'Opening App Store purchase...',
-                              ),
+                              purchases.purchasePremium,
+                              pendingLabel: 'Opening App Store purchase...',
+                            ),
                       child: Text(_busy ? 'Working...' : 'Unlock Premium'),
                     ),
                   ),
@@ -365,9 +371,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onPressed: _busy
                           ? null
                           : () => _runPurchase(
-                                purchases.restorePurchases,
-                                pendingLabel: 'Restoring purchases...',
-                              ),
+                              purchases.restorePurchases,
+                              pendingLabel: 'Restoring purchases...',
+                            ),
                       child: const Text('Restore purchases'),
                     ),
                   ),
@@ -501,13 +507,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'Product ID: $kPremiumProductId',
-                  style: driveMono(size: 11, color: DriveColors.mutedForeground),
+                  style: driveMono(
+                    size: 11,
+                    color: DriveColors.mutedForeground,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 const Divider(color: DriveColors.border, height: 24),
                 _ActionRow(
                   title: 'Privacy Policy',
-                  subtitle: 'On-device drafts, photos, GPS speed, StoreKit - no tracking',
+                  subtitle:
+                      'On-device drafts, photos, GPS speed, StoreKit - no tracking',
                   onTap: () => context.push('/privacy'),
                 ),
                 const Divider(color: DriveColors.border, height: 24),
@@ -567,9 +577,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (ok == true) {
       store.clearDrafts();
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Drafts cleared')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Drafts cleared')));
       }
     }
   }

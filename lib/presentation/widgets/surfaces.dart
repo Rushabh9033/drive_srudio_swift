@@ -12,10 +12,7 @@ class MonoLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text.toUpperCase(),
-      style: driveMonoLabel(color: color),
-    );
+    return Text(text.toUpperCase(), style: driveMonoLabel(color: color));
   }
 }
 
@@ -41,25 +38,21 @@ class SurfaceCard extends StatelessWidget {
     final decoration = BoxDecoration(
       borderRadius: radius,
       border: Border.all(
-        color: glow ? DriveColors.primary.withValues(alpha: 0.45) : DriveColors.border,
+        color: glow
+            ? DriveColors.primary.withValues(alpha: 0.45)
+            : DriveColors.border,
       ),
       gradient: hero
           ? const RadialGradient(
               center: Alignment(-0.7, -1.0),
               radius: 1.35,
-              colors: [
-                Color(0x664D9EFF),
-                DriveColors.obsidian,
-              ],
+              colors: [Color(0x664D9EFF), DriveColors.obsidian],
               stops: [0.0, 0.72],
             )
           : const LinearGradient(
               begin: Alignment(-0.8, -1),
               end: Alignment(0.9, 1),
-              colors: [
-                Color(0xFF222430),
-                DriveColors.carbon,
-              ],
+              colors: [Color(0xFF222430), DriveColors.carbon],
             ),
       boxShadow: glow ? DriveShadows.glow : DriveShadows.elevated,
     );
@@ -68,10 +61,7 @@ class SurfaceCard extends StatelessWidget {
       width: double.infinity,
       padding: padding,
       decoration: decoration,
-      child: Material(
-        type: MaterialType.transparency,
-        child: child,
-      ),
+      child: Material(type: MaterialType.transparency, child: child),
     );
 
     if (onTap == null) return content;

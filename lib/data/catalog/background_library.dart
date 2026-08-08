@@ -39,11 +39,11 @@ abstract final class BackgroundLibrary {
   ];
 
   static String categoryLabel(BgCategory c) => switch (c) {
-        BgCategory.solid => 'Solid',
-        BgCategory.gradient => 'Gradient',
-        BgCategory.texture => 'Texture',
-        BgCategory.scene => 'Scene',
-      };
+    BgCategory.solid => 'Solid',
+    BgCategory.gradient => 'Gradient',
+    BgCategory.texture => 'Texture',
+    BgCategory.scene => 'Scene',
+  };
 
   static final List<BackgroundPreset> all = [
     // ── Solid ──────────────────────────────────────────────

@@ -71,23 +71,23 @@ class HomeScreen extends StatelessWidget {
                   telemetry.isIphone
                       ? 'Live from this iPhone'
                       : (kIsWeb || !telemetry.supportsLiveHardware
-                          ? 'Preview (not your iPhone)'
-                          : 'Live from this phone'),
+                            ? 'Preview (not your iPhone)'
+                            : 'Live from this phone'),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   kIsWeb || !telemetry.supportsLiveHardware
                       ? 'Web/Windows is preview only. Install on your iPhone for '
-                          'real battery, charging, GPS speed, and Phone / Car link. '
-                          'Home Screen widgets still need WidgetKit (Mac) - not a CarPlay dashboard.'
+                            'real battery, charging, GPS speed, and Phone / Car link. '
+                            'Home Screen widgets still need WidgetKit (Mac) - not a CarPlay dashboard.'
                       : snap.liveDataEnabled && snap.batteryKnown
-                          ? 'Live data from this ${telemetry.isIphone ? 'iPhone' : 'phone'}: '
-                              'battery ${snap.batteryPercent}%'
-                              '${snap.isCharging ? ' · charging' : ''} · '
-                              '${snap.carConnected ? 'Car link on' : 'Car link off'} · '
-                              'clocks live. Home Screen widgets need a Mac WidgetKit build - not a CarPlay dashboard.'
-                          : 'Clocks are live. Turn on “Use live device data” in '
-                              'Settings so battery + car link bind to this device.',
+                      ? 'Live data from this ${telemetry.isIphone ? 'iPhone' : 'phone'}: '
+                            'battery ${snap.batteryPercent}%'
+                            '${snap.isCharging ? ' · charging' : ''} · '
+                            '${snap.carConnected ? 'Car link on' : 'Car link off'} · '
+                            'clocks live. Home Screen widgets need a Mac WidgetKit build - not a CarPlay dashboard.'
+                      : 'Clocks are live. Turn on “Use live device data” in '
+                            'Settings so battery + car link bind to this device.',
                   style: GoogleFonts.manrope(
                     fontSize: 13,
                     height: 1.4,
@@ -106,11 +106,14 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 if (store.vehicle.customImage != null)
                   GestureDetector(
-                    onTap: () => VehicleUploader.uploadAndProcessVehicle(context),
+                    onTap: () =>
+                        VehicleUploader.uploadAndProcessVehicle(context),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(DriveRadii.lg),
                       child: Image.memory(
-                        base64Decode(store.vehicle.customImage!.split(',').last),
+                        base64Decode(
+                          store.vehicle.customImage!.split(',').last,
+                        ),
                         height: 168,
                         width: double.infinity,
                         fit: BoxFit.cover,
@@ -124,7 +127,8 @@ class HomeScreen extends StatelessWidget {
                   )
                 else
                   GestureDetector(
-                    onTap: () => VehicleUploader.uploadAndProcessVehicle(context),
+                    onTap: () =>
+                        VehicleUploader.uploadAndProcessVehicle(context),
                     child: Container(
                       height: 168,
                       width: double.infinity,
@@ -182,44 +186,46 @@ class HomeScreen extends StatelessWidget {
               for (var i = 0; i < 4; i++) ...[
                 if (i > 0) const SizedBox(width: 8),
                 Expanded(
-                  child: Builder(builder: (context) {
-                    final id = store.slots[i];
-                    final draft = id == null ? null : store.draftById(id);
-                    return GestureDetector(
-                      onTap: () => context.push('/studio/slots'),
-                      child: Column(
-                        children: [
-                          AspectRatio(
-                            aspectRatio: 1,
-                            child: draft == null
-                                ? DashedBorderBox(
-                                    child: Center(
-                                      child: Text(
-                                        'Empty',
-                                        style: driveMonoLabel(size: 9),
+                  child: Builder(
+                    builder: (context) {
+                      final id = store.slots[i];
+                      final draft = id == null ? null : store.draftById(id);
+                      return GestureDetector(
+                        onTap: () => context.push('/studio/slots'),
+                        child: Column(
+                          children: [
+                            AspectRatio(
+                              aspectRatio: 1,
+                              child: draft == null
+                                  ? DashedBorderBox(
+                                      child: Center(
+                                        child: Text(
+                                          'Empty',
+                                          style: driveMonoLabel(size: 9),
+                                        ),
                                       ),
+                                    )
+                                  : WidgetCanvas(
+                                      spec: draft.spec,
+                                      scale: 0.42,
+                                      previewMode: true,
                                     ),
-                                  )
-                                : WidgetCanvas(
-                                    spec: draft.spec,
-                                    scale: 0.42,
-                                    previewMode: true,
-                                  ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            draft?.name ?? 'Slot ${i + 1}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.manrope(
-                              fontSize: 11,
-                              color: DriveColors.mutedForeground,
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
+                            const SizedBox(height: 6),
+                            Text(
+                              draft?.name ?? 'Slot ${i + 1}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.manrope(
+                                fontSize: 11,
+                                color: DriveColors.mutedForeground,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ],
             ],
@@ -231,7 +237,11 @@ class HomeScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               child: Row(
                 children: [
-                  const Icon(CupertinoIcons.pencil, color: DriveColors.primary, size: 18),
+                  const Icon(
+                    CupertinoIcons.pencil,
+                    color: DriveColors.primary,
+                    size: 18,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -243,7 +253,9 @@ class HomeScreen extends StatelessWidget {
                           last.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.manrope(fontWeight: FontWeight.w700),
+                          style: GoogleFonts.manrope(
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ],
                     ),
@@ -354,14 +366,16 @@ class HomeScreen extends StatelessWidget {
                 _SoundLine(
                   label: 'Connect',
                   hint: 'When phone links to car',
-                  value: Catalog.soundById(store.sounds.connect)?.name ?? 'None',
+                  value:
+                      Catalog.soundById(store.sounds.connect)?.name ?? 'None',
                 ),
                 const SizedBox(height: 10),
                 _SoundLine(
                   label: 'Disconnect',
                   hint: 'When the link drops',
                   value:
-                      Catalog.soundById(store.sounds.disconnect)?.name ?? 'None',
+                      Catalog.soundById(store.sounds.disconnect)?.name ??
+                      'None',
                 ),
                 const SizedBox(height: 10),
                 _SoundLine(
@@ -385,10 +399,10 @@ class HomeScreen extends StatelessWidget {
                   text: kIsWeb
                       ? 'Web preview only - use your iPhone for live data'
                       : telemetry.isIphone
-                          ? 'iPhone telemetry ready (battery_plus + connectivity)'
-                          : telemetry.supportsLiveHardware
-                              ? 'Phone telemetry ready'
-                              : 'Desktop preview ready',
+                      ? 'iPhone telemetry ready (battery_plus + connectivity)'
+                      : telemetry.supportsLiveHardware
+                      ? 'Phone telemetry ready'
+                      : 'Desktop preview ready',
                 ),
                 const SizedBox(height: 8),
                 _StatusRow(
@@ -396,8 +410,8 @@ class HomeScreen extends StatelessWidget {
                   text: snap.batteryKnown && snap.liveDataEnabled
                       ? 'Live battery bound to this ${telemetry.isIphone ? 'iPhone' : 'device'}'
                       : (kIsWeb || !telemetry.supportsLiveHardware
-                          ? 'Battery unavailable on web/desktop - use iPhone'
-                          : 'Battery unavailable - enable live data or connect iPhone'),
+                            ? 'Battery unavailable on web/desktop - use iPhone'
+                            : 'Battery unavailable - enable live data or connect iPhone'),
                 ),
                 const SizedBox(height: 8),
                 _StatusRow(
@@ -482,7 +496,9 @@ class _StatusRow extends StatelessWidget {
     return Row(
       children: [
         Icon(
-          ok ? CupertinoIcons.checkmark_alt_circle_fill : CupertinoIcons.exclamationmark_triangle_fill,
+          ok
+              ? CupertinoIcons.checkmark_alt_circle_fill
+              : CupertinoIcons.exclamationmark_triangle_fill,
           size: 18,
           color: ok ? DriveColors.success : DriveColors.warning,
         ),

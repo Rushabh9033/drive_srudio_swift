@@ -28,7 +28,9 @@ class DriveSheet extends StatelessWidget {
       backgroundColor: DriveColors.carbon,
       barrierColor: const Color(0x99080808),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(DriveRadii.xxxl)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(DriveRadii.xxxl),
+        ),
       ),
       builder: builder,
     );
@@ -63,10 +65,7 @@ class DriveSheet extends StatelessWidget {
               ),
               if (title != null) ...[
                 const SizedBox(height: 16),
-                Text(
-                  title!.toUpperCase(),
-                  style: driveMonoLabel(),
-                ),
+                Text(title!.toUpperCase(), style: driveMonoLabel()),
               ],
               const SizedBox(height: 12),
               Flexible(child: child),
@@ -154,7 +153,9 @@ class WaveformBars extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: List.generate(4, (i) {
-          final h = active ? [8.0, 14.0, 10.0, 16.0][i] : [6.0, 9.0, 7.0, 8.0][i];
+          final h = active
+              ? [8.0, 14.0, 10.0, 16.0][i]
+              : [6.0, 9.0, 7.0, 8.0][i];
           return AnimatedContainer(
             duration: Duration(milliseconds: 180 + i * 40),
             width: 4,

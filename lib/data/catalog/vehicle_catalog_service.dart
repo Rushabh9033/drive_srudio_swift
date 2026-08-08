@@ -96,10 +96,7 @@ class VehicleCatalogService {
     r'd:/wise-hawking/squadrush/',
   ];
 
-  static const _remapRoots = [
-    'assets/vehicles/',
-    'assets/logos/',
-  ];
+  static const _remapRoots = ['assets/vehicles/', 'assets/logos/'];
 
   List<CatalogMakeEntry> _makes = const [];
   final Map<int, CatalogMakeEntry> _byId = {};
@@ -281,7 +278,8 @@ class VehicleCatalogService {
     if (make == null || entry == null) return null;
     return CatalogIds(
       brandId: make.catalogId ?? make.name.toLowerCase().replaceAll(' ', '_'),
-      modelId: entry.catalogId ??
+      modelId:
+          entry.catalogId ??
           '${make.name}_${entry.name}'.toLowerCase().replaceAll(' ', '_'),
     );
   }
@@ -363,9 +361,7 @@ class VehicleCatalogService {
       ..addEntries(filtered.map((m) => MapEntry(m.id, m)));
     _byName
       ..clear()
-      ..addEntries(
-        filtered.map((m) => MapEntry(m.name.toLowerCase(), m)),
-      );
+      ..addEntries(filtered.map((m) => MapEntry(m.name.toLowerCase(), m)));
     _byCatalogId
       ..clear()
       ..addEntries(
@@ -398,7 +394,8 @@ class VehicleCatalogService {
       if (row is! Map) continue;
       final map = Map<String, dynamic>.from(row);
       final catalogId = _asString(map['id']);
-      final name = _asString(map['display_name']) ??
+      final name =
+          _asString(map['display_name']) ??
           _asString(map['name']) ??
           _asString(map['make_name']);
       if (name == null || name.isEmpty) continue;
@@ -420,9 +417,7 @@ class VehicleCatalogService {
         ),
       );
     }
-    out.sort(
-      (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
-    );
+    out.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
     return out;
   }
 
@@ -433,15 +428,16 @@ class VehicleCatalogService {
     for (final row in raw) {
       if (row is! Map) continue;
       final map = Map<String, dynamic>.from(row);
-      final name = _asString(map['name']) ??
+      final name =
+          _asString(map['name']) ??
           _asString(map['model_name']) ??
           _asString(map['Model_Name']);
       if (name == null || name.isEmpty) continue;
       final key = name.toLowerCase();
       if (!seen.add(key)) continue;
       final catalogId = _asString(map['id']);
-      final category = _asString(map['category']) ??
-          _asString(map['vehicle_category']);
+      final category =
+          _asString(map['category']) ?? _asString(map['vehicle_category']);
       final mid = map['model_id'] ?? map['Model_ID'];
       final image = _firstString(map, const [
         'image',
@@ -462,8 +458,9 @@ class VehicleCatalogService {
         'logoPath',
         'logoUrl',
       ]);
-      final angles =
-          _parseAngles(map['angles'] ?? map['photos'] ?? map['images']);
+      final angles = _parseAngles(
+        map['angles'] ?? map['photos'] ?? map['images'],
+      );
       out.add(
         CatalogModelEntry(
           name: name,
@@ -503,14 +500,16 @@ class VehicleCatalogService {
       if (row is! Map) continue;
       final map = Map<String, dynamic>.from(row);
       final brandId = _asString(map['brand_id']);
-      final makeName = _asString(map['make_name']) ??
+      final makeName =
+          _asString(map['make_name']) ??
           (brandId != null ? brandNames[brandId] : null);
       final modelName = _asString(map['model_name']) ?? _asString(map['name']);
       if (makeName == null || modelName == null) continue;
       final key = brandId ?? makeName.toLowerCase();
       final list = byBrand.putIfAbsent(key, () => <CatalogModelEntry>[]);
-      final already =
-          list.any((m) => m.name.toLowerCase() == modelName.toLowerCase());
+      final already = list.any(
+        (m) => m.name.toLowerCase() == modelName.toLowerCase(),
+      );
       if (already) continue;
 
       int? sourceModelId;
@@ -526,8 +525,8 @@ class VehicleCatalogService {
           name: modelName,
           modelId: sourceModelId,
           catalogId: _asString(map['id']),
-          category: _asString(map['vehicle_category']) ??
-              _asString(map['category']),
+          category:
+              _asString(map['vehicle_category']) ?? _asString(map['category']),
           imagePath: _remapMediaPath(_asString(map['image'])),
           logoPath: _remapMediaPath(_asString(map['logo'])),
         ),
@@ -564,9 +563,7 @@ class VehicleCatalogService {
         ),
       );
     }
-    out.sort(
-      (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
-    );
+    out.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
     return out;
   }
 
@@ -598,9 +595,7 @@ class VehicleCatalogService {
         ),
       );
     }
-    out.sort(
-      (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
-    );
+    out.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
     return out;
   }
 
@@ -637,14 +632,15 @@ class VehicleCatalogService {
         'logoPath',
         'logoUrl',
       ]);
-      final angles =
-          _parseAngles(map['angles'] ?? map['photos'] ?? map['images']);
+      final angles = _parseAngles(
+        map['angles'] ?? map['photos'] ?? map['images'],
+      );
       out.add(
         CatalogModelEntry(
           name: trimmed,
           modelId: mid is num ? mid.toInt() : null,
-          category: _asString(map['category']) ??
-              _asString(map['vehicle_category']),
+          category:
+              _asString(map['category']) ?? _asString(map['vehicle_category']),
           imagePath: _remapMediaPath(image),
           logoPath: _remapMediaPath(logo),
           angles: angles,

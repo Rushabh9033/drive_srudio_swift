@@ -88,8 +88,9 @@ class _IntroScreenState extends State<IntroScreen> {
                             flex: 3,
                             child: Center(
                               child: ConstrainedBox(
-                                constraints:
-                                    const BoxConstraints(maxWidth: 320),
+                                constraints: const BoxConstraints(
+                                  maxWidth: 320,
+                                ),
                                 child: OnboardArt(variant: s.variant),
                               ),
                             ),
@@ -141,7 +142,9 @@ class _IntroScreenState extends State<IntroScreen> {
                     height: 8,
                     width: active ? 24 : 8,
                     decoration: BoxDecoration(
-                      color: active ? DriveColors.primary : DriveColors.graphite,
+                      color: active
+                          ? DriveColors.primary
+                          : DriveColors.graphite,
                       borderRadius: BorderRadius.circular(8),
                     ),
                   );
@@ -164,7 +167,9 @@ class _IntroScreenState extends State<IntroScreen> {
                       }
                     },
                     child: Text(
-                      _page < _slides.length - 1 ? 'Continue' : 'Enter Drive Studio',
+                      _page < _slides.length - 1
+                          ? 'Continue'
+                          : 'Enter Drive Studio',
                     ),
                   ),
                 ),

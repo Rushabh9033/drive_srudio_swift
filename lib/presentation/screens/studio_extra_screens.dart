@@ -50,10 +50,7 @@ class MyWidgetsScreen extends StatelessWidget {
             SurfaceCard(
               child: Column(
                 children: [
-                  const SizedBox(
-                    height: 140,
-                    child: OnboardArt(variant: 2),
-                  ),
+                  const SizedBox(height: 140, child: OnboardArt(variant: 2)),
                   const SizedBox(height: 12),
                   Text(
                     'No saved widgets yet',
@@ -63,7 +60,9 @@ class MyWidgetsScreen extends StatelessWidget {
                   Text(
                     'Browse templates to create your first draft.',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.manrope(color: DriveColors.mutedForeground),
+                    style: GoogleFonts.manrope(
+                      color: DriveColors.mutedForeground,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
@@ -95,7 +94,9 @@ class MyWidgetsScreen extends StatelessWidget {
                             d.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.manrope(fontWeight: FontWeight.w700),
+                            style: GoogleFonts.manrope(
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                           Text(
                             formatWhen(d.updatedAt),
@@ -150,7 +151,10 @@ class MyWidgetsScreen extends StatelessWidget {
         title: const Text('Rename widget'),
         content: TextField(controller: ctrl, autofocus: true),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, ctrl.text),
             child: const Text('Save'),
@@ -169,9 +173,14 @@ class MyWidgetsScreen extends StatelessWidget {
         title: const Text('Delete draft?'),
         content: const Text('This removes the widget from slots that use it.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: DriveColors.destructive),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: DriveColors.destructive,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Delete'),
           ),
@@ -256,7 +265,10 @@ class _SlotCard extends StatelessWidget {
                         aspectRatio: 1,
                         child: DashedBorderBox(
                           child: Center(
-                            child: Text('Empty', style: driveMonoLabel(size: 9)),
+                            child: Text(
+                              'Empty',
+                              style: driveMonoLabel(size: 9),
+                            ),
                           ),
                         ),
                       )
@@ -304,7 +316,8 @@ class _SlotCard extends StatelessWidget {
                                   title: const Text('Remove from slot?'),
                                   actions: [
                                     TextButton(
-                                      onPressed: () => Navigator.pop(ctx, false),
+                                      onPressed: () =>
+                                          Navigator.pop(ctx, false),
                                       child: const Text('Cancel'),
                                     ),
                                     ElevatedButton(
@@ -318,7 +331,9 @@ class _SlotCard extends StatelessWidget {
                             },
                             child: Text(
                               'Remove',
-                              style: GoogleFonts.manrope(color: DriveColors.destructive),
+                              style: GoogleFonts.manrope(
+                                color: DriveColors.destructive,
+                              ),
                             ),
                           ),
                       ],
@@ -336,9 +351,9 @@ class _SlotCard extends StatelessWidget {
   Future<void> _pickDraft(BuildContext context, int index) async {
     final store = context.read<AppStore>();
     if (store.drafts.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Create a draft first')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Create a draft first')));
       return;
     }
     await DriveSheet.show<void>(
@@ -516,7 +531,10 @@ class TemplateDetailScreen extends StatelessWidget {
             children: [
               for (final l in t.spec.layers)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: DriveColors.carbon,
                     borderRadius: BorderRadius.circular(DriveRadii.sm),
@@ -526,9 +544,12 @@ class TemplateDetailScreen extends StatelessWidget {
                     l.label.isNotEmpty
                         ? l.label
                         : (l.format.isNotEmpty
-                            ? '${l.kind.name} · ${l.format}'
-                            : l.kind.name),
-                    style: driveMono(size: 11, color: DriveColors.mutedForeground),
+                              ? '${l.kind.name} · ${l.format}'
+                              : l.kind.name),
+                    style: driveMono(
+                      size: 11,
+                      color: DriveColors.mutedForeground,
+                    ),
                   ),
                 ),
             ],
@@ -657,7 +678,7 @@ class TemplateDetailScreen extends StatelessWidget {
                                 store.slots[i] == null
                                     ? 'Empty'
                                     : (store.draftById(store.slots[i]!)?.name ??
-                                        'Occupied'),
+                                          'Occupied'),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 textAlign: TextAlign.right,
@@ -688,9 +709,7 @@ class TemplateDetailScreen extends StatelessWidget {
     }
     store.assignSlot(slot, draftId);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${template.name} assigned to Slot ${slot + 1}'),
-      ),
+      SnackBar(content: Text('${template.name} assigned to Slot ${slot + 1}')),
     );
     context.push('/studio/slots');
   }

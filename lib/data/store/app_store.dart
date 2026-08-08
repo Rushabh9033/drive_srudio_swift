@@ -37,7 +37,8 @@ class AppStore extends ChangeNotifier {
   /// When true, widgets bind battery / car-link / network from [DeviceTelemetry].
   /// Default: ON on iPhone/Android, OFF on web/desktop preview (set in hydrate /
   /// [DeviceTelemetry.start] if the user has not chosen yet).
-  bool useLiveDeviceData = !kIsWeb &&
+  bool useLiveDeviceData =
+      !kIsWeb &&
       (defaultTargetPlatform == TargetPlatform.iOS ||
           defaultTargetPlatform == TargetPlatform.android);
 
@@ -92,16 +93,17 @@ class AppStore extends ChangeNotifier {
         }
         // Drop slot refs that point at missing/corrupt drafts.
         final ids = drafts.map((d) => d.id).toSet();
-        slots = slots.map((s) => s != null && ids.contains(s) ? s : null).toList();
+        slots = slots
+            .map((s) => s != null && ids.contains(s) ? s : null)
+            .toList();
         vehicle = Vehicle.fromJson(
           Map<String, dynamic>.from(map['vehicle'] as Map? ?? {}),
         );
         sounds = SoundPrefs.fromJson(
           Map<String, dynamic>.from(map['sounds'] as Map? ?? {}),
         );
-        lastLocalSync = map['lastLocalSync'] as int? ??
-            map['lastRefresh'] as int? ??
-            0;
+        lastLocalSync =
+            map['lastLocalSync'] as int? ?? map['lastRefresh'] as int? ?? 0;
         lastEditedDraftId = map['lastEditedDraftId'] as String?;
         isPremium = map['isPremium'] as bool? ?? false;
         howToSeen = map['howToSeen'] as bool? ?? false;
@@ -296,7 +298,9 @@ class AppStore extends ChangeNotifier {
         slots.add(null);
       }
       final ids = drafts.map((d) => d.id).toSet();
-      slots = slots.map((s) => s != null && ids.contains(s) ? s : null).toList();
+      slots = slots
+          .map((s) => s != null && ids.contains(s) ? s : null)
+          .toList();
       if (lastEditedDraftId != null && !ids.contains(lastEditedDraftId)) {
         lastEditedDraftId = null;
       }
@@ -308,7 +312,8 @@ class AppStore extends ChangeNotifier {
   }
 
   String vehicleDisplayName() {
-    if (vehicle.displayName.trim().isNotEmpty) return vehicle.displayName.trim();
+    if (vehicle.displayName.trim().isNotEmpty)
+      return vehicle.displayName.trim();
     final brand = Catalog.brandById(vehicle.brandId);
     final model = Catalog.modelById(vehicle.brandId, vehicle.modelId);
     return '${brand?.name ?? 'Vehicle'} ${model?.name ?? ''}'.trim();

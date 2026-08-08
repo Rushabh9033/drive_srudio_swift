@@ -114,7 +114,10 @@ class _EditorScreenState extends State<EditorScreen> {
       final cloned = draft.spec.clone();
       _spec = WidgetSpec(
         background: cloned.background,
-        layers: [for (final l in cloned.layers) if (!l.isEmptyDraw) l],
+        layers: [
+          for (final l in cloned.layers)
+            if (!l.isEmptyDraw) l,
+        ],
       );
       _name = TextEditingController(text: draft.name);
     }
@@ -186,7 +189,8 @@ class _EditorScreenState extends State<EditorScreen> {
           break;
         }
       }
-      final changed = prior == null ||
+      final changed =
+          prior == null ||
           prior.x != x ||
           prior.y != y ||
           prior.w != w ||
@@ -260,9 +264,9 @@ class _EditorScreenState extends State<EditorScreen> {
       setState(() => _dirty = false);
     }
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Draft saved')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Draft saved')));
   }
 
   /// Captures the WidgetCanvas inside [RepaintBoundary] as a PNG and
@@ -453,91 +457,77 @@ class _EditorScreenState extends State<EditorScreen> {
 
     final cutting = mode != null;
 
-    await _withProcessing(
-      () async {
-        var bytes = await file.readAsBytes();
-        var label = source == ImageSource.camera ? 'Camera' : 'Gallery';
-        const role = 'gallery';
+    await _withProcessing(() async {
+      var bytes = await file.readAsBytes();
+      var label = source == ImageSource.camera ? 'Camera' : 'Gallery';
+      const role = 'gallery';
 
-        if (mode != null) {
-          final result = await BgCutoutService().cutout(
-            bytes,
-            mode: mode,
-          );
-          if (!result.ok || result.pngBytes == null) {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    result.error ?? 'Background removal failed',
-                  ),
-                ),
-              );
-            }
-            return;
+      if (mode != null) {
+        final result = await BgCutoutService().cutout(bytes, mode: mode);
+        if (!result.ok || result.pngBytes == null) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(result.error ?? 'Background removal failed'),
+              ),
+            );
           }
-          bytes = result.pngBytes!;
-          label = 'Cutout';
-          final path = await persistPickedPng(bytes, maxEdge: 1024);
-          if (!mounted || path == null) {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Could not save cutout')),
-              );
-            }
-            return;
+          return;
+        }
+        bytes = result.pngBytes!;
+        label = 'Cutout';
+        final path = await persistPickedPng(bytes, maxEdge: 1024);
+        if (!mounted || path == null) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Could not save cutout')),
+            );
           }
-          final layer = baseLayer(LayerKind.image, overrides: {
+          return;
+        }
+        final layer = baseLayer(
+          LayerKind.image,
+          overrides: {
             'label': label,
             'x': 0.0,
             'y': 0.0,
             'w': 100.0,
             'h': 100.0,
-          }).copyWith(
-            role: role,
-            src: path,
-            fit: BoxFit.cover,
-            radius: 0,
-          );
-          _commit(WidgetSpec(
+          },
+        ).copyWith(role: role, src: path, fit: BoxFit.cover, radius: 0);
+        _commit(
+          WidgetSpec(
             background: _spec.background,
             layers: [..._spec.layers, layer],
-          ));
-          setState(() => _selectedId = layer.id);
-          DriveHaptics.light();
-          return;
-        }
-
-        final path = await persistPickedImage(bytes, maxEdge: 1024);
-        if (!mounted || path == null) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Could not process image')),
-            );
-          }
-          return;
-        }
-        final layer = baseLayer(LayerKind.image, overrides: {
-          'label': label,
-          'x': 0.0,
-          'y': 0.0,
-          'w': 100.0,
-          'h': 100.0,
-        }).copyWith(
-          role: role,
-          src: path,
-          fit: BoxFit.cover,
-          radius: 0,
+          ),
         );
-        _commit(WidgetSpec(
-          background: _spec.background,
-          layers: [..._spec.layers, layer],
-        ));
         setState(() => _selectedId = layer.id);
         DriveHaptics.light();
-      },
-      label: cutting ? 'Remove BG…' : 'Processing image…',
-    );
+        return;
+      }
+
+      final path = await persistPickedImage(bytes, maxEdge: 1024);
+      if (!mounted || path == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not process image')),
+          );
+        }
+        return;
+      }
+      final layer = baseLayer(
+        LayerKind.image,
+        overrides: {'label': label, 'x': 0.0, 'y': 0.0, 'w': 100.0, 'h': 100.0},
+      ).copyWith(role: role, src: path, fit: BoxFit.cover, radius: 0);
+      _commit(
+        WidgetSpec(
+          background: _spec.background,
+          layers: [..._spec.layers, layer],
+        ),
+      );
+      setState(() => _selectedId = layer.id);
+      DriveHaptics.light();
+    }, label: cutting ? 'Remove BG…' : 'Processing image…');
     if (mounted) await _maybeHowTo();
   }
 
@@ -585,52 +575,49 @@ class _EditorScreenState extends State<EditorScreen> {
       return;
     }
 
-    await _withProcessing(
-      () async {
-        final bytes = await loadImageBytes(sel.src);
-        if (bytes == null || bytes.isEmpty) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Could not load image')),
-            );
-          }
-          return;
+    await _withProcessing(() async {
+      final bytes = await loadImageBytes(sel.src);
+      if (bytes == null || bytes.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Could not load image')));
         }
-        final result = await BgCutoutService().cutout(
-          bytes,
-          mode: BgCutoutMode.onDevice,
-        );
-        if (!result.ok || result.pngBytes == null) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(result.error ?? 'Background removal failed'),
-              ),
-            );
-          }
-          return;
+        return;
+      }
+      final result = await BgCutoutService().cutout(
+        bytes,
+        mode: BgCutoutMode.onDevice,
+      );
+      if (!result.ok || result.pngBytes == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result.error ?? 'Background removal failed'),
+            ),
+          );
         }
-        final path = await persistPickedPng(result.pngBytes!, maxEdge: 1024);
-        if (!mounted || path == null) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Could not save cutout')),
-            );
-          }
-          return;
+        return;
+      }
+      final path = await persistPickedPng(result.pngBytes!, maxEdge: 1024);
+      if (!mounted || path == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not save cutout')),
+          );
         }
-        _patchLayer(
-          sel.id,
-          (l) => l.copyWith(
-            src: path,
-            label: 'Cutout',
-            fit: BoxFit.contain,
-            radius: 0,
-          ),
-        );
-      },
-      label: 'Remove BG…',
-    );
+        return;
+      }
+      _patchLayer(
+        sel.id,
+        (l) => l.copyWith(
+          src: path,
+          label: 'Cutout',
+          fit: BoxFit.contain,
+          radius: 0,
+        ),
+      );
+    }, label: 'Remove BG…');
   }
 
   Future<void> _onTextTab() async {
@@ -645,23 +632,29 @@ class _EditorScreenState extends State<EditorScreen> {
     if (!mounted || result == null) return;
     final text = (result['text'] as String?)?.trim() ?? '';
     if (text.isEmpty) return;
-    final layer = baseLayer(LayerKind.text, overrides: {
-      'text': text,
-      'x': 12.0,
-      'y': 40.0,
-      'fontSize': 18.0,
-      'weight': result['weight'] as int? ?? 700,
-      'color': result['color'] as String? ?? '#F2F5FA',
-    }).copyWith(
-      shadow: result['shadow'] as bool? ?? false,
-      radius: (result['radius'] as num?)?.toDouble() ?? 0,
-      color2: result['color2'] as String?,
-      shadowColor: result['shadowColor'] as String?,
+    final layer =
+        baseLayer(
+          LayerKind.text,
+          overrides: {
+            'text': text,
+            'x': 12.0,
+            'y': 40.0,
+            'fontSize': 18.0,
+            'weight': result['weight'] as int? ?? 700,
+            'color': result['color'] as String? ?? '#F2F5FA',
+          },
+        ).copyWith(
+          shadow: result['shadow'] as bool? ?? false,
+          radius: (result['radius'] as num?)?.toDouble() ?? 0,
+          color2: result['color2'] as String?,
+          shadowColor: result['shadowColor'] as String?,
+        );
+    _commit(
+      WidgetSpec(
+        background: _spec.background,
+        layers: [..._spec.layers, layer],
+      ),
     );
-    _commit(WidgetSpec(
-      background: _spec.background,
-      layers: [..._spec.layers, layer],
-    ));
     setState(() => _selectedId = layer.id);
   }
 
@@ -887,11 +880,15 @@ class _EditorScreenState extends State<EditorScreen> {
   void _addSpeedometerLayer() {
     final nest = countSpeedometerClusters(_spec.layers);
     final cluster = composeSpeedometerLayers(nestIndex: nest);
-    final digits = cluster.firstWhere((l) => l.format == 'gpsspeed' && l.kind == LayerKind.text);
-    _commit(WidgetSpec(
-      background: _spec.background,
-      layers: [..._spec.layers, ...cluster],
-    ));
+    final digits = cluster.firstWhere(
+      (l) => l.format == 'gpsspeed' && l.kind == LayerKind.text,
+    );
+    _commit(
+      WidgetSpec(
+        background: _spec.background,
+        layers: [..._spec.layers, ...cluster],
+      ),
+    );
     setState(() => _selectedId = digits.id);
   }
 
@@ -913,8 +910,7 @@ class _EditorScreenState extends State<EditorScreen> {
     final dy = (nest % 4) * 8.0;
     final cloned = match.spec.clone(remintLayerIds: true);
     final dropped = [
-      for (final l in cloned.layers)
-        l.copyWith(x: l.x + dx, y: l.y + dy),
+      for (final l in cloned.layers) l.copyWith(x: l.x + dx, y: l.y + dy),
     ];
     Layer? digits;
     for (final l in dropped) {
@@ -923,68 +919,89 @@ class _EditorScreenState extends State<EditorScreen> {
         break;
       }
     }
-    _commit(WidgetSpec(
-      background: _spec.background,
-      layers: [..._spec.layers, ...dropped],
-    ));
+    _commit(
+      WidgetSpec(
+        background: _spec.background,
+        layers: [..._spec.layers, ...dropped],
+      ),
+    );
     setState(() => _selectedId = digits?.id ?? dropped.last.id);
   }
 
   void _addSimple(LayerKind kind) {
-    final layer = baseLayer(kind, overrides: {
-      'y': 20.0 + _spec.layers.length * 4,
-    });
-    _commit(WidgetSpec(
-      background: _spec.background,
-      layers: [..._spec.layers, layer],
-    ));
+    final layer = baseLayer(
+      kind,
+      overrides: {'y': 20.0 + _spec.layers.length * 4},
+    );
+    _commit(
+      WidgetSpec(
+        background: _spec.background,
+        layers: [..._spec.layers, layer],
+      ),
+    );
     setState(() => _selectedId = layer.id);
   }
 
   double _composeNestY() => 20.0 + (_spec.layers.length % 6) * 6.0;
 
   void _addDigitalClockLayer() {
-    final layer = baseLayer(LayerKind.clock, overrides: {
-      'x': 12.0 + (_spec.layers.length % 4) * 4.0,
-      'y': 38.0 + (_spec.layers.length % 5) * 4.0,
-      'fontSize': 32.0,
-      'weight': 800,
-      'format': '24',
-    });
-    _commit(WidgetSpec(
-      background: _spec.background,
-      layers: [..._spec.layers, layer],
-    ));
+    final layer = baseLayer(
+      LayerKind.clock,
+      overrides: {
+        'x': 12.0 + (_spec.layers.length % 4) * 4.0,
+        'y': 38.0 + (_spec.layers.length % 5) * 4.0,
+        'fontSize': 32.0,
+        'weight': 800,
+        'format': '24',
+      },
+    );
+    _commit(
+      WidgetSpec(
+        background: _spec.background,
+        layers: [..._spec.layers, layer],
+      ),
+    );
     setState(() => _selectedId = layer.id);
   }
 
   void _addAnalogClockLayer() {
-    final nest = (_spec.layers.where((l) => l.kind == LayerKind.analog).length % 3);
-    final layer = baseLayer(LayerKind.analog, overrides: {
-      'x': 18.0 + nest * 8.0,
-      'y': 14.0 + nest * 6.0,
-      'w': 52.0,
-      'h': 52.0,
-    });
-    _commit(WidgetSpec(
-      background: _spec.background,
-      layers: [..._spec.layers, layer],
-    ));
+    final nest =
+        (_spec.layers.where((l) => l.kind == LayerKind.analog).length % 3);
+    final layer = baseLayer(
+      LayerKind.analog,
+      overrides: {
+        'x': 18.0 + nest * 8.0,
+        'y': 14.0 + nest * 6.0,
+        'w': 52.0,
+        'h': 52.0,
+      },
+    );
+    _commit(
+      WidgetSpec(
+        background: _spec.background,
+        layers: [..._spec.layers, layer],
+      ),
+    );
     setState(() => _selectedId = layer.id);
   }
 
   void _addDateLayer() {
-    final layer = baseLayer(LayerKind.date, overrides: {
-      'x': 12.0,
-      'y': _composeNestY(),
-      'fontSize': 14.0,
-      'format': 'abbrev',
-      'color': '#A8B6CC',
-    });
-    _commit(WidgetSpec(
-      background: _spec.background,
-      layers: [..._spec.layers, layer],
-    ));
+    final layer = baseLayer(
+      LayerKind.date,
+      overrides: {
+        'x': 12.0,
+        'y': _composeNestY(),
+        'fontSize': 14.0,
+        'format': 'abbrev',
+        'color': '#A8B6CC',
+      },
+    );
+    _commit(
+      WidgetSpec(
+        background: _spec.background,
+        layers: [..._spec.layers, layer],
+      ),
+    );
     setState(() => _selectedId = layer.id);
   }
 
@@ -1011,15 +1028,18 @@ class _EditorScreenState extends State<EditorScreen> {
       if (draw != null) {
         _selectedId = draw.id;
         try {
-          final raw = jsonDecode(
-            draw.strokes.isEmpty ? '[]' : draw.strokes,
-          ) as List;
+          final raw =
+              jsonDecode(draw.strokes.isEmpty ? '[]' : draw.strokes) as List;
           _activeStrokes = raw
-              .map((s) => (s as List)
-                  .map((p) => (p as List)
-                      .map((n) => (n as num).toDouble())
-                      .toList())
-                  .toList())
+              .map(
+                (s) => (s as List)
+                    .map(
+                      (p) => (p as List)
+                          .map((n) => (n as num).toDouble())
+                          .toList(),
+                    )
+                    .toList(),
+              )
               .toList();
         } catch (_) {
           _activeStrokes = [];
@@ -1071,20 +1091,19 @@ class _EditorScreenState extends State<EditorScreen> {
       }
     }
     if (draw == null) {
-      final layer = baseLayer(LayerKind.draw).copyWith(
-        strokes: jsonEncode(_activeStrokes),
+      final layer = baseLayer(
+        LayerKind.draw,
+      ).copyWith(strokes: jsonEncode(_activeStrokes));
+      _commit(
+        WidgetSpec(
+          background: _spec.background,
+          layers: [..._spec.layers, layer],
+        ),
       );
-      _commit(WidgetSpec(
-        background: _spec.background,
-        layers: [..._spec.layers, layer],
-      ));
       setState(() => _selectedId = layer.id);
       return;
     }
-    _patchLayer(
-      id!,
-      (l) => l.copyWith(strokes: jsonEncode(_activeStrokes)),
-    );
+    _patchLayer(id!, (l) => l.copyWith(strokes: jsonEncode(_activeStrokes)));
   }
 
   Future<void> _onBackgroundTab() async {
@@ -1185,10 +1204,7 @@ class _EditorScreenState extends State<EditorScreen> {
       return;
     }
 
-    _patchLayer(
-      id,
-      (l) => l.copyWith(w: next, h: nh, x: x, y: y),
-    );
+    _patchLayer(id, (l) => l.copyWith(w: next, h: nh, x: x, y: y));
     setState(() => _selectedId = id);
   }
 
@@ -1212,10 +1228,12 @@ class _EditorScreenState extends State<EditorScreen> {
 
   void _deleteLayerById(String id) {
     DriveHaptics.medium();
-    _commit(WidgetSpec(
-      background: _spec.background,
-      layers: _spec.layers.where((l) => l.id != id).toList(),
-    ));
+    _commit(
+      WidgetSpec(
+        background: _spec.background,
+        layers: _spec.layers.where((l) => l.id != id).toList(),
+      ),
+    );
     if (_selectedId == id) {
       setState(() => _selectedId = null);
     }
@@ -1237,10 +1255,9 @@ class _EditorScreenState extends State<EditorScreen> {
       y: (src.y + 4).clamp(-100.0, 200.0).toDouble(),
       label: '${src.label} copy',
     );
-    _commit(WidgetSpec(
-      background: _spec.background,
-      layers: [..._spec.layers, copy],
-    ));
+    _commit(
+      WidgetSpec(background: _spec.background, layers: [..._spec.layers, copy]),
+    );
     setState(() => _selectedId = copy.id);
   }
 
@@ -1402,9 +1419,9 @@ class _EditorScreenState extends State<EditorScreen> {
   void _openWidgetSettings() {
     final sel = _selected;
     if (sel == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Select a widget first')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Select a widget first')));
       _sheetLayers();
       return;
     }
@@ -1418,7 +1435,9 @@ class _EditorScreenState extends State<EditorScreen> {
       sel.id,
       (l) => l.copyWith(
         animate: value,
-        animStyle: value && l.animStyle.isEmpty ? l.resolvedAnimStyle : l.animStyle,
+        animStyle: value && l.animStyle.isEmpty
+            ? l.resolvedAnimStyle
+            : l.animStyle,
       ),
     );
   }
@@ -1448,7 +1467,7 @@ class _EditorScreenState extends State<EditorScreen> {
                         _onCarTab();
                       },
                       icon: const Icon(CupertinoIcons.car_fill, size: 16),
-                        label: const Text('Add photo'),
+                      label: const Text('Add photo'),
                     ),
                   ],
                 ),
@@ -1595,8 +1614,11 @@ class _EditorScreenState extends State<EditorScreen> {
       bindings: {
         const SingleActivator(LogicalKeyboardKey.keyZ, control: true): _undo,
         const SingleActivator(LogicalKeyboardKey.keyZ, meta: true): _undo,
-        const SingleActivator(LogicalKeyboardKey.keyZ,
-            control: true, shift: true): _redo,
+        const SingleActivator(
+          LogicalKeyboardKey.keyZ,
+          control: true,
+          shift: true,
+        ): _redo,
         const SingleActivator(LogicalKeyboardKey.keyZ, meta: true, shift: true):
             _redo,
         const SingleActivator(LogicalKeyboardKey.keyY, control: true): _redo,
@@ -1645,8 +1667,10 @@ class _EditorScreenState extends State<EditorScreen> {
                       IconButton(
                         tooltip: 'Undo',
                         onPressed: _past.isEmpty ? null : _undo,
-                        icon: const Icon(CupertinoIcons.arrow_uturn_left,
-                            size: 20),
+                        icon: const Icon(
+                          CupertinoIcons.arrow_uturn_left,
+                          size: 20,
+                        ),
                       ),
                       IconButton(
                         tooltip: 'Save',
@@ -1695,13 +1719,9 @@ class _EditorScreenState extends State<EditorScreen> {
                       // Add tools row
                       Row(
                         children: [
-                          Expanded(
-                            child: _AddCarPill(onTap: _onCarTab),
-                          ),
+                          Expanded(child: _AddCarPill(onTap: _onCarTab)),
                           const SizedBox(width: 8),
-                          Expanded(
-                            child: _AddWidgetPill(onTap: _onWidgetTab),
-                          ),
+                          Expanded(child: _AddWidgetPill(onTap: _onWidgetTab)),
                         ],
                       ),
                       if (_spec.layers.isNotEmpty) ...[
@@ -1754,63 +1774,70 @@ class _EditorScreenState extends State<EditorScreen> {
                                 spec: _spec,
                                 tickSeconds: 30,
                                 paintListenable: _paintTick,
-                              child: _drawMode
-                                  ? LayoutBuilder(
-                                      builder: (context, constraints) {
-                                        return GestureDetector(
-                                          behavior: HitTestBehavior.opaque,
-                                          onPanStart: (d) {
-                                            final x = (d.localPosition.dx /
-                                                    constraints.maxWidth) *
-                                                100;
-                                            final y = (d.localPosition.dy /
-                                                    constraints.maxHeight) *
-                                                100;
-                                            setState(() {
-                                              _currentStroke = [
-                                                [x, y]
-                                              ];
-                                            });
-                                          },
-                                          onPanUpdate: (d) {
-                                            final x = (d.localPosition.dx /
-                                                    constraints.maxWidth) *
-                                                100;
-                                            final y = (d.localPosition.dy /
-                                                    constraints.maxHeight) *
-                                                100;
-                                            setState(() {
-                                              _currentStroke =
-                                                  [...?_currentStroke, [x, y]];
-                                            });
-                                          },
-                                          onPanEnd: (_) {
-                                            if (_currentStroke != null &&
-                                                _currentStroke!.length > 1) {
-                                              _activeStrokes = [
-                                                ..._activeStrokes,
-                                                _currentStroke!,
-                                              ];
-                                              _currentStroke = null;
-                                              _persistStrokes();
-                                            } else {
-                                              setState(
-                                                  () => _currentStroke = null);
-                                            }
-                                          },
-                                        );
-                                      },
-                                    )
-                                  : LayerEditorOverlay(
-                                      key: _layerEditorKey,
-                                      spec: _spec,
-                                      selectedId: _selectedId,
-                                      onSelect: _selectLayer,
-                                      onInspect: _openLayerSettings,
-                                      onGeometryPreview: _previewGeometry,
-                                      onGeometryCommit: _commitGeometry,
-                                    ),
-                            ),
+                                child: _drawMode
+                                    ? LayoutBuilder(
+                                        builder: (context, constraints) {
+                                          return GestureDetector(
+                                            behavior: HitTestBehavior.opaque,
+                                            onPanStart: (d) {
+                                              final x =
+                                                  (d.localPosition.dx /
+                                                      constraints.maxWidth) *
+                                                  100;
+                                              final y =
+                                                  (d.localPosition.dy /
+                                                      constraints.maxHeight) *
+                                                  100;
+                                              setState(() {
+                                                _currentStroke = [
+                                                  [x, y],
+                                                ];
+                                              });
+                                            },
+                                            onPanUpdate: (d) {
+                                              final x =
+                                                  (d.localPosition.dx /
+                                                      constraints.maxWidth) *
+                                                  100;
+                                              final y =
+                                                  (d.localPosition.dy /
+                                                      constraints.maxHeight) *
+                                                  100;
+                                              setState(() {
+                                                _currentStroke = [
+                                                  ...?_currentStroke,
+                                                  [x, y],
+                                                ];
+                                              });
+                                            },
+                                            onPanEnd: (_) {
+                                              if (_currentStroke != null &&
+                                                  _currentStroke!.length > 1) {
+                                                _activeStrokes = [
+                                                  ..._activeStrokes,
+                                                  _currentStroke!,
+                                                ];
+                                                _currentStroke = null;
+                                                _persistStrokes();
+                                              } else {
+                                                setState(
+                                                  () => _currentStroke = null,
+                                                );
+                                              }
+                                            },
+                                          );
+                                        },
+                                      )
+                                    : LayerEditorOverlay(
+                                        key: _layerEditorKey,
+                                        spec: _spec,
+                                        selectedId: _selectedId,
+                                        onSelect: _selectLayer,
+                                        onInspect: _openLayerSettings,
+                                        onGeometryPreview: _previewGeometry,
+                                        onGeometryCommit: _commitGeometry,
+                                      ),
+                              ),
                             ),
                             if (_spec.layers.isEmpty &&
                                 !_drawMode &&
@@ -1870,7 +1897,8 @@ class _EditorScreenState extends State<EditorScreen> {
                                         ),
                                         const SizedBox(height: 16),
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             ElevatedButton.icon(
                                               onPressed: _onCarTab,
@@ -1895,15 +1923,16 @@ class _EditorScreenState extends State<EditorScreen> {
                                         TextButton(
                                           onPressed: () =>
                                               StudioBrowse.goToCategory(
-                                            context,
-                                            'Speedometer',
-                                          ),
+                                                context,
+                                                'Speedometer',
+                                              ),
                                           child: Text(
                                             'Start from template',
                                             style: GoogleFonts.manrope(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w600,
-                                              color: DriveColors.mutedForeground,
+                                              color:
+                                                  DriveColors.mutedForeground,
                                             ),
                                           ),
                                         ),
@@ -1917,8 +1946,9 @@ class _EditorScreenState extends State<EditorScreen> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     color: const Color(0x99080808),
-                                    borderRadius:
-                                        BorderRadius.circular(DriveRadii.xxxl),
+                                    borderRadius: BorderRadius.circular(
+                                      DriveRadii.xxxl,
+                                    ),
                                   ),
                                   alignment: Alignment.center,
                                   child: Column(
@@ -1936,34 +1966,34 @@ class _EditorScreenState extends State<EditorScreen> {
                                   ),
                                 ),
                               ),
-                              // Hidden canvas for capturing the static
-                              // design (no live layers). The widget extension
-                              // displays this PNG as a base and overlays its
-                              // own live values (clock/battery/analog) on top.
-                              // NOTE (Flutter-3): Offstage skips painting, which
-                              // would yield an empty PNG from toImage. Use
-                              // Visibility with maintainState/Size/Animation so
-                              // the widget stays in the tree and paints.
-                              Visibility(
-                                visible: false,
-                                maintainState: true,
-                                maintainSize: true,
-                                maintainAnimation: true,
-                                child: SizedBox(
-                                  width: 338,
-                                  height: 354,
-                                  child: RepaintBoundary(
-                                    key: _staticCaptureKey,
-                                    child: WidgetCanvas(
-                                      spec: _spec,
-                                      scale: 1.0,
-                                      previewMode: true,
-                                      hideLiveLayers: true,
-                                      aspectRatio: 338 / 354,
-                                    ),
+                            // Hidden canvas for capturing the static
+                            // design (no live layers). The widget extension
+                            // displays this PNG as a base and overlays its
+                            // own live values (clock/battery/analog) on top.
+                            // NOTE (Flutter-3): Offstage skips painting, which
+                            // would yield an empty PNG from toImage. Use
+                            // Visibility with maintainState/Size/Animation so
+                            // the widget stays in the tree and paints.
+                            Visibility(
+                              visible: false,
+                              maintainState: true,
+                              maintainSize: true,
+                              maintainAnimation: true,
+                              child: SizedBox(
+                                width: 338,
+                                height: 354,
+                                child: RepaintBoundary(
+                                  key: _staticCaptureKey,
+                                  child: WidgetCanvas(
+                                    spec: _spec,
+                                    scale: 1.0,
+                                    previewMode: true,
+                                    hideLiveLayers: true,
+                                    aspectRatio: 338 / 354,
                                   ),
                                 ),
                               ),
+                            ),
                           ],
                         ),
                       ),
@@ -1975,8 +2005,7 @@ class _EditorScreenState extends State<EditorScreen> {
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 6),
                     child: Row(
                       children: [
-                        if (_selected != null &&
-                            _selected!.supportsAnimation)
+                        if (_selected != null && _selected!.supportsAnimation)
                           Expanded(
                             child: Row(
                               children: [
@@ -2020,13 +2049,10 @@ class _EditorScreenState extends State<EditorScreen> {
                     child: _SizeChrome(
                       label: sizeLabel,
                       value: sizeValue.toDouble(),
-                      onChanged: (v) =>
-                          _setImageSize(v, commit: false),
-                      onChangeEnd: (v) =>
-                          _setImageSize(v, commit: true),
+                      onChanged: (v) => _setImageSize(v, commit: false),
+                      onChangeEnd: (v) => _setImageSize(v, commit: true),
                       onNudge: _nudgeSize,
-                      onDelete:
-                          _selected == null ? null : _deleteSelected,
+                      onDelete: _selected == null ? null : _deleteSelected,
                     ),
                   )
                 else if (_drawMode)
@@ -2064,57 +2090,57 @@ class _EditorScreenState extends State<EditorScreen> {
                           ),
                         ],
                       ),
-                  child: Row(
-                    children: [
-                      for (final item in [
-                        (
-                          _EditorTab.car,
-                          CupertinoIcons.car_fill,
-                          'Car',
-                          true
-                        ),
-                        (
-                          _EditorTab.text,
-                          CupertinoIcons.textformat,
-                          'Text',
-                          false
-                        ),
-                        (
-                          _EditorTab.widget,
-                          CupertinoIcons.square_grid_2x2,
-                          'Widget',
-                          false
-                        ),
-                        (
-                          _EditorTab.draw,
-                          CupertinoIcons.pencil_outline,
-                          'Draw',
-                          false
-                        ),
-                        (
-                          _EditorTab.background,
-                          CupertinoIcons.paintbrush,
-                          'BG',
-                          false
-                        ),
-                      ])
-                        Expanded(
-                          child: _TabTool(
-                            icon: item.$2,
-                            label: item.$3,
-                            selected: item.$1 == _EditorTab.draw
-                                ? _drawMode
-                                : _tab == item.$1,
-                            emphasize: item.$4,
-                            onTap: () => _handleTab(item.$1),
-                          ),
-                        ),
-                    ],
+                      child: Row(
+                        children: [
+                          for (final item in [
+                            (
+                              _EditorTab.car,
+                              CupertinoIcons.car_fill,
+                              'Car',
+                              true,
+                            ),
+                            (
+                              _EditorTab.text,
+                              CupertinoIcons.textformat,
+                              'Text',
+                              false,
+                            ),
+                            (
+                              _EditorTab.widget,
+                              CupertinoIcons.square_grid_2x2,
+                              'Widget',
+                              false,
+                            ),
+                            (
+                              _EditorTab.draw,
+                              CupertinoIcons.pencil_outline,
+                              'Draw',
+                              false,
+                            ),
+                            (
+                              _EditorTab.background,
+                              CupertinoIcons.paintbrush,
+                              'BG',
+                              false,
+                            ),
+                          ])
+                            Expanded(
+                              child: _TabTool(
+                                icon: item.$2,
+                                label: item.$3,
+                                selected: item.$1 == _EditorTab.draw
+                                    ? _drawMode
+                                    : _tab == item.$1,
+                                emphasize: item.$4,
+                                onTap: () => _handleTab(item.$1),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ],
+              ],
             ),
           ),
         ),
@@ -2154,9 +2180,7 @@ class _SizeChrome extends StatelessWidget {
             DriveColors.graphite.withValues(alpha: 0.72),
           ],
         ),
-        border: Border.all(
-          color: DriveColors.primary.withValues(alpha: 0.18),
-        ),
+        border: Border.all(color: DriveColors.primary.withValues(alpha: 0.18)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.28),
@@ -2193,15 +2217,9 @@ class _SizeChrome extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              _MiniStep(
-                icon: CupertinoIcons.minus,
-                onTap: () => onNudge(-5),
-              ),
+              _MiniStep(icon: CupertinoIcons.minus, onTap: () => onNudge(-5)),
               const SizedBox(width: 4),
-              _MiniStep(
-                icon: CupertinoIcons.plus,
-                onTap: () => onNudge(5),
-              ),
+              _MiniStep(icon: CupertinoIcons.plus, onTap: () => onNudge(5)),
               if (onDelete != null) ...[
                 const SizedBox(width: 6),
                 _MiniStep(
@@ -2285,8 +2303,8 @@ class _TabTool extends StatelessWidget {
     final c = selected
         ? DriveColors.primary
         : emphasize
-            ? DriveColors.primaryGlow.withValues(alpha: 0.85)
-            : DriveColors.mutedForeground;
+        ? DriveColors.primaryGlow.withValues(alpha: 0.85)
+        : DriveColors.mutedForeground;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: InkWell(
@@ -2737,8 +2755,11 @@ class _WidgetAddTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(CupertinoIcons.chevron_forward,
-                    size: 16, color: DriveColors.mutedForeground),
+                const Icon(
+                  CupertinoIcons.chevron_forward,
+                  size: 16,
+                  color: DriveColors.mutedForeground,
+                ),
               ],
             ),
           ),

@@ -39,9 +39,9 @@ class LayerEditorOverlay extends StatefulWidget {
   final ValueChanged<String?> onSelect;
   final ValueChanged<String>? onInspect;
   final void Function(String id, double x, double y, double w, double h)
-      onGeometryPreview;
+  onGeometryPreview;
   final void Function(String id, double x, double y, double w, double h)
-      onGeometryCommit;
+  onGeometryCommit;
   final double snapThresholdPct;
 
   @override
@@ -92,17 +92,17 @@ class _LayerEditorOverlayState extends State<LayerEditorOverlay> {
   }
 
   List<Layer> get _visibleLayers => [
-        for (final l in widget.spec.layers)
-          if (!l.hidden) l,
-      ];
+    for (final l in widget.spec.layers)
+      if (!l.hidden) l,
+  ];
 
   /// Layers that participate in tap/drag hit-testing.
   /// Empty full-canvas draw layers are skipped so they never look like
   /// "one big selection" over the whole widget.
   List<Layer> get _hittableLayers => [
-        for (final l in _visibleLayers)
-          if (!l.isEmptyDraw) l,
-      ];
+    for (final l in _visibleLayers)
+      if (!l.isEmptyDraw) l,
+  ];
 
   /// Bounds used for selection chrome / handles during an active drag.
   (double, double, double, double) _displayGeom(Layer layer) {
@@ -271,8 +271,8 @@ class _LayerEditorOverlayState extends State<LayerEditorOverlay> {
     }
 
     final snapped = _snap(x, y, w, h);
-    final guides = ((snapped.$1 + snapped.$3 / 2) - 50).abs() <=
-            widget.snapThresholdPct ||
+    final guides =
+        ((snapped.$1 + snapped.$3 / 2) - 50).abs() <= widget.snapThresholdPct ||
         ((snapped.$2 + snapped.$4 / 2) - 50).abs() <= widget.snapThresholdPct;
 
     setState(() {
@@ -558,7 +558,8 @@ class _HandleKnob extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isCorner = handle == ResizeHandle.nw ||
+    final isCorner =
+        handle == ResizeHandle.nw ||
         handle == ResizeHandle.ne ||
         handle == ResizeHandle.se ||
         handle == ResizeHandle.sw;

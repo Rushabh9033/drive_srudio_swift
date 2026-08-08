@@ -39,6 +39,7 @@ class WidgetCanvas extends StatefulWidget {
   final WidgetSpec spec;
   final double scale;
   final Widget? child;
+
   /// When true, live-data layers (clock/battery/analog) are NOT rendered.
   /// Used when capturing the static base for the iOS widget so the widget
   /// can overlay its own live values on top.
@@ -95,29 +96,22 @@ class _WidgetCanvasState extends State<WidgetCanvas> {
   Listenable? _mergedPaint;
   Listenable? _mergedExternal;
 
-  bool _specNeedsTick(WidgetSpec spec) => spec.layers.any(
-        (l) => !l.hidden && layerNeedsClockTick(l.kind),
-      );
+  bool _specNeedsTick(WidgetSpec spec) =>
+      spec.layers.any((l) => !l.hidden && layerNeedsClockTick(l.kind));
 
   bool _specHasAnalog(WidgetSpec spec) =>
       spec.layers.any((l) => !l.hidden && l.kind == LayerKind.analog);
 
   bool _specNeedsSecondTick(WidgetSpec spec) => spec.layers.any(
-        (l) =>
-            !l.hidden &&
-            l.kind == LayerKind.clock &&
-            l.animate &&
-            l.showSeconds,
-      );
+    (l) => !l.hidden && l.kind == LayerKind.clock && l.animate && l.showSeconds,
+  );
 
   int _intervalFor(WidgetSpec spec, int tickSeconds) =>
       (_specHasAnalog(spec) || _specNeedsSecondTick(spec)) ? 1 : tickSeconds;
 
-  bool get _needsTick =>
-      !widget.previewMode && _specNeedsTick(widget.spec);
+  bool get _needsTick => !widget.previewMode && _specNeedsTick(widget.spec);
 
-  int get _tickInterval =>
-      _intervalFor(widget.spec, widget.tickSeconds);
+  int get _tickInterval => _intervalFor(widget.spec, widget.tickSeconds);
 
   @override
   void initState() {
@@ -128,10 +122,8 @@ class _WidgetCanvasState extends State<WidgetCanvas> {
   @override
   void didUpdateWidget(covariant WidgetCanvas oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final oldNeeds =
-        !oldWidget.previewMode && _specNeedsTick(oldWidget.spec);
-    final oldInterval =
-        _intervalFor(oldWidget.spec, oldWidget.tickSeconds);
+    final oldNeeds = !oldWidget.previewMode && _specNeedsTick(oldWidget.spec);
+    final oldInterval = _intervalFor(oldWidget.spec, oldWidget.tickSeconds);
     if (oldNeeds != _needsTick ||
         oldInterval != _tickInterval ||
         oldWidget.tickSeconds != widget.tickSeconds ||
@@ -192,104 +184,103 @@ class _WidgetCanvasState extends State<WidgetCanvas> {
                 : budget;
             final hostSide = canvasSide + pad * 2;
 
-          Widget paintStack(Size canvas) {
-            return DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(DriveRadii.xxxl),
-                border: Border.all(color: DriveColors.border),
-                boxShadow: DriveShadows.elevated,
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(DriveRadii.xxxl),
-                clipBehavior: Clip.antiAlias,
-                child: ListenableBuilder(
-                  listenable: _paintSignal,
-                  builder: (context, _) {
-                    final stamp = _now.value;
-                    return Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        IgnorePointer(
-                          child: _BackgroundPaint(
-                            background: widget.spec.background,
-                            previewMode: widget.previewMode,
+            Widget paintStack(Size canvas) {
+              return DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(DriveRadii.xxxl),
+                  border: Border.all(color: DriveColors.border),
+                  boxShadow: DriveShadows.elevated,
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(DriveRadii.xxxl),
+                  clipBehavior: Clip.antiAlias,
+                  child: ListenableBuilder(
+                    listenable: _paintSignal,
+                    builder: (context, _) {
+                      final stamp = _now.value;
+                      return Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          IgnorePointer(
+                            child: _BackgroundPaint(
+                              background: widget.spec.background,
+                              previewMode: widget.previewMode,
+                            ),
                           ),
-                        ),
-                        IgnorePointer(
-                          child: Transform.scale(
-                            scale: hasOverlay ? widget.scale : 1.0,
-                            alignment: Alignment.center,
-                            child: SizedBox(
-                              width: canvas.width,
-                              height: canvas.height,
-                              child: Stack(
-                                clipBehavior: Clip.none,
-                                children: [
-                                  for (final layer in widget.spec.layers)
-                                    if (!layer.hidden && !(widget.hideLiveLayers && WidgetCanvas._isLiveLayer(layer)))
-                                      Positioned(
-                                        left: canvas.width * layer.x / 100,
-                                        top: canvas.height * layer.y / 100,
-                                        width: canvas.width * layer.w / 100,
-                                        height: canvas.height * layer.h / 100,
-                                        child: LayerNode(
-                                          key: ValueKey(layer.id),
-                                          layer: layer,
-                                          now: layerNeedsClockTick(layer.kind)
-                                              ? stamp
-                                              : null,
-                                          previewMode: widget.previewMode,
-                                          samplePreview: widget.samplePreview,
+                          IgnorePointer(
+                            child: Transform.scale(
+                              scale: hasOverlay ? widget.scale : 1.0,
+                              alignment: Alignment.center,
+                              child: SizedBox(
+                                width: canvas.width,
+                                height: canvas.height,
+                                child: Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    for (final layer in widget.spec.layers)
+                                      if (!layer.hidden &&
+                                          !(widget.hideLiveLayers &&
+                                              WidgetCanvas._isLiveLayer(layer)))
+                                        Positioned(
+                                          left: canvas.width * layer.x / 100,
+                                          top: canvas.height * layer.y / 100,
+                                          width: canvas.width * layer.w / 100,
+                                          height: canvas.height * layer.h / 100,
+                                          child: LayerNode(
+                                            key: ValueKey(layer.id),
+                                            layer: layer,
+                                            now: layerNeedsClockTick(layer.kind)
+                                                ? stamp
+                                                : null,
+                                            previewMode: widget.previewMode,
+                                            samplePreview: widget.samplePreview,
+                                          ),
                                         ),
-                                      ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    );
-                  },
+                        ],
+                      );
+                    },
+                  ),
                 ),
+              );
+            }
+
+            if (!hasOverlay) {
+              return paintStack(Size(maxW, maxH));
+            }
+
+            // Editor: host is larger than the clipped frame so fringe hits work.
+            final canvas = Size(canvasSide, canvasSide);
+            return SizedBox(
+              width: hostSide,
+              height: hostSide,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Positioned(
+                    left: pad,
+                    top: pad,
+                    width: canvasSide,
+                    height: canvasSide,
+                    child: paintStack(canvas),
+                  ),
+                  Positioned.fill(child: widget.child!),
+                ],
               ),
             );
-          }
-
-          if (!hasOverlay) {
-            return paintStack(Size(maxW, maxH));
-          }
-
-          // Editor: host is larger than the clipped frame so fringe hits work.
-          final canvas = Size(canvasSide, canvasSide);
-          return SizedBox(
-            width: hostSide,
-            height: hostSide,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Positioned(
-                  left: pad,
-                  top: pad,
-                  width: canvasSide,
-                  height: canvasSide,
-                  child: paintStack(canvas),
-                ),
-                Positioned.fill(child: widget.child!),
-              ],
-            ),
-          );
-        },
-      ),
+          },
+        ),
       ),
     );
   }
 }
 
 class _BackgroundPaint extends StatelessWidget {
-  const _BackgroundPaint({
-    required this.background,
-    this.previewMode = false,
-  });
+  const _BackgroundPaint({required this.background, this.previewMode = false});
   final WidgetBackground background;
   final bool previewMode;
 
@@ -314,8 +305,9 @@ class _BackgroundPaint extends StatelessWidget {
           StoredImage(
             src: background.imageSrc,
             fit: BoxFit.cover,
-            filterQuality:
-                previewMode ? FilterQuality.low : FilterQuality.medium,
+            filterQuality: previewMode
+                ? FilterQuality.low
+                : FilterQuality.medium,
           ),
         ],
       );
@@ -328,10 +320,10 @@ class _BackgroundPaint extends StatelessWidget {
         gradient: switch (background.type) {
           BgType.solid => LinearGradient(colors: [from, from]),
           BgType.gradient || BgType.image => LinearGradient(
-              begin: const Alignment(-0.6, -1),
-              end: const Alignment(0.8, 1),
-              colors: [from, to],
-            ),
+            begin: const Alignment(-0.6, -1),
+            end: const Alignment(0.8, 1),
+            colors: [from, to],
+          ),
         },
       ),
     );
@@ -434,7 +426,8 @@ class _StoredImageState extends State<StoredImage> {
         // Format: premium-battery-icon:level=full,style=neon
         final params = _parsePremiumParams(src);
         final level = _parseBatteryLevel(params['level']) ?? BatteryLevel.half;
-        final style = _parseBatteryStyle(params['style']) ?? BatteryStyle.classic;
+        final style =
+            _parseBatteryStyle(params['style']) ?? BatteryStyle.classic;
         return await PremiumAssetGenerator.generateBatteryIcon(
           level: level,
           style: style,
@@ -447,17 +440,15 @@ class _StoredImageState extends State<StoredImage> {
       }
       if (src.startsWith('premium-clock-face:')) {
         final params = _parsePremiumParams(src);
-        final style = _parseClockStyle(params['style']) ?? ClockFaceStyle.classic;
-        return await PremiumAssetGenerator.generateClockFace(
-          style: style,
-        );
+        final style =
+            _parseClockStyle(params['style']) ?? ClockFaceStyle.classic;
+        return await PremiumAssetGenerator.generateClockFace(style: style);
       }
       if (src.startsWith('premium-background:')) {
         final params = _parsePremiumParams(src);
-        final preset = _parseBackgroundPreset(params['preset']) ?? BackgroundPreset.aurora;
-        return await PremiumAssetGenerator.generateBackground(
-          preset: preset,
-        );
+        final preset =
+            _parseBackgroundPreset(params['preset']) ?? BackgroundPreset.aurora;
+        return await PremiumAssetGenerator.generateBackground(preset: preset);
       }
     } catch (_) {}
     return null;
@@ -468,52 +459,75 @@ class _StoredImageState extends State<StoredImage> {
     if (colonIdx < 0) return const {};
     return {
       for (final part in src.substring(colonIdx + 1).split(','))
-        if (part.contains('='))
-          part.split('=').first: part.split('=').last,
+        if (part.contains('=')) part.split('=').first: part.split('=').last,
     };
   }
 
   BatteryLevel? _parseBatteryLevel(String? s) {
     switch (s) {
-      case 'zero': return BatteryLevel.zero;
-      case 'quarter': return BatteryLevel.quarter;
-      case 'half': return BatteryLevel.half;
-      case 'threeQuarters': return BatteryLevel.threeQuarters;
-      case 'full': return BatteryLevel.full;
-      default: return null;
+      case 'zero':
+        return BatteryLevel.zero;
+      case 'quarter':
+        return BatteryLevel.quarter;
+      case 'half':
+        return BatteryLevel.half;
+      case 'threeQuarters':
+        return BatteryLevel.threeQuarters;
+      case 'full':
+        return BatteryLevel.full;
+      default:
+        return null;
     }
   }
 
   BatteryStyle? _parseBatteryStyle(String? s) {
     switch (s) {
-      case 'classic': return BatteryStyle.classic;
-      case 'neon': return BatteryStyle.neon;
-      case 'minimal': return BatteryStyle.minimal;
-      case 'premium': return BatteryStyle.premium;
-      case 'energy': return BatteryStyle.energy;
-      default: return null;
+      case 'classic':
+        return BatteryStyle.classic;
+      case 'neon':
+        return BatteryStyle.neon;
+      case 'minimal':
+        return BatteryStyle.minimal;
+      case 'premium':
+        return BatteryStyle.premium;
+      case 'energy':
+        return BatteryStyle.energy;
+      default:
+        return null;
     }
   }
 
   ClockFaceStyle? _parseClockStyle(String? s) {
     switch (s) {
-      case 'classic': return ClockFaceStyle.classic;
-      case 'pixel': return ClockFaceStyle.pixel;
-      case 'neon': return ClockFaceStyle.neon;
-      case 'sport': return ClockFaceStyle.sport;
-      case 'rings': return ClockFaceStyle.rings;
-      default: return null;
+      case 'classic':
+        return ClockFaceStyle.classic;
+      case 'pixel':
+        return ClockFaceStyle.pixel;
+      case 'neon':
+        return ClockFaceStyle.neon;
+      case 'sport':
+        return ClockFaceStyle.sport;
+      case 'rings':
+        return ClockFaceStyle.rings;
+      default:
+        return null;
     }
   }
 
   BackgroundPreset? _parseBackgroundPreset(String? s) {
     switch (s) {
-      case 'aurora': return BackgroundPreset.aurora;
-      case 'midnight': return BackgroundPreset.midnight;
-      case 'sandstorm': return BackgroundPreset.sandstorm;
-      case 'neonGrid': return BackgroundPreset.neonGrid;
-      case 'ocean': return BackgroundPreset.ocean;
-      default: return null;
+      case 'aurora':
+        return BackgroundPreset.aurora;
+      case 'midnight':
+        return BackgroundPreset.midnight;
+      case 'sandstorm':
+        return BackgroundPreset.sandstorm;
+      case 'neonGrid':
+        return BackgroundPreset.neonGrid;
+      case 'ocean':
+        return BackgroundPreset.ocean;
+      default:
+        return null;
     }
   }
 
@@ -608,24 +622,28 @@ String formatClockLabel(
   bool showSeconds = false,
 }) {
   final raw = switch (format) {
-    '12' => showSeconds
-        ? DateFormat('h:mm:ss').format(stamp)
-        : DateFormat('h:mm').format(stamp),
-    '12ap' => showSeconds
-        ? DateFormat('h:mm:ss a').format(stamp)
-        : DateFormat('h:mm a').format(stamp),
+    '12' =>
+      showSeconds
+          ? DateFormat('h:mm:ss').format(stamp)
+          : DateFormat('h:mm').format(stamp),
+    '12ap' =>
+      showSeconds
+          ? DateFormat('h:mm:ss a').format(stamp)
+          : DateFormat('h:mm a').format(stamp),
     'hh' || 'hour' => DateFormat('HH').format(stamp),
     'h12' => DateFormat('h').format(stamp),
     'mm' || 'minute' => DateFormat('mm').format(stamp),
     'ss' || 'second' => DateFormat('ss').format(stamp),
     'colon' => ':',
     // Guard against presets that accidentally end with ":".
-    final f when f.endsWith(':') => showSeconds
-        ? DateFormat('HH:mm:ss').format(stamp)
-        : DateFormat('HH:mm').format(stamp),
-    _ => showSeconds
-        ? DateFormat('HH:mm:ss').format(stamp)
-        : DateFormat('HH:mm').format(stamp),
+    final f when f.endsWith(':') =>
+      showSeconds
+          ? DateFormat('HH:mm:ss').format(stamp)
+          : DateFormat('HH:mm').format(stamp),
+    _ =>
+      showSeconds
+          ? DateFormat('HH:mm:ss').format(stamp)
+          : DateFormat('HH:mm').format(stamp),
   };
   // Standalone colon separator layer is intentional; otherwise never trail.
   if (format == 'colon') return raw;
@@ -666,8 +684,7 @@ class LayerNode extends StatelessWidget {
       orElse: () => FontWeight.w600,
     );
     final stamp = now ?? ClockTicker.peek(context) ?? DateTime.now();
-    final imageQuality =
-        previewMode ? FilterQuality.low : FilterQuality.medium;
+    final imageQuality = previewMode ? FilterQuality.low : FilterQuality.medium;
 
     Widget content;
     switch (layer.kind) {
@@ -719,18 +736,14 @@ class LayerNode extends StatelessWidget {
         } else if (src == null || src.isEmpty) {
           // Logo role without a file → sized monogram fallback.
           if (layer.role == 'logo') {
-            final brand =
-                layer.text.isNotEmpty ? layer.text : layer.label;
+            final brand = layer.text.isNotEmpty ? layer.text : layer.label;
             content = LayoutBuilder(
               builder: (context, c) {
-                final side =
-                    math.min(c.maxWidth, c.maxHeight).clamp(8.0, 512.0);
+                final side = math
+                    .min(c.maxWidth, c.maxHeight)
+                    .clamp(8.0, 512.0);
                 return Center(
-                  child: BrandMonogram(
-                    brand: brand,
-                    size: side,
-                    color: color,
-                  ),
+                  child: BrandMonogram(brand: brand, size: side, color: color),
                 );
               },
             );
@@ -761,7 +774,8 @@ class LayerNode extends StatelessWidget {
           );
         }
       case LayerKind.badge:
-        final badgeLabel = _telemetryBadgeLabel(
+        final badgeLabel =
+            _telemetryBadgeLabel(
               context,
               layer,
               listen: !previewMode && !samplePreview,
@@ -791,14 +805,16 @@ class LayerNode extends StatelessWidget {
       case LayerKind.date:
         final label = switch (layer.kind) {
           LayerKind.clock => _formatClock(
-              stamp,
-              layer.format,
-              showSeconds: layer.showSeconds ||
-                  layer.format == 'ss' ||
-                  layer.format == 'second',
-            ),
+            stamp,
+            layer.format,
+            showSeconds:
+                layer.showSeconds ||
+                layer.format == 'ss' ||
+                layer.format == 'second',
+          ),
           LayerKind.date => _formatDate(stamp, layer.format),
-          _ when layer.format == 'gpsspeed' ||
+          _
+              when layer.format == 'gpsspeed' ||
                   layer.format == 'gps-speed' ||
                   layer.format == 'speed' =>
             resolveSpeedDigits(
@@ -810,23 +826,24 @@ class LayerNode extends StatelessWidget {
         final shadowColor = layer.shadowColor != null
             ? hexColor(layer.shadowColor!, opacity: 0.7)
             : const Color(0x88000000);
-        final baseStyle = (layer.kind == LayerKind.clock
-                ? GoogleFonts.dmMono
-                : GoogleFonts.manrope)(
-          fontSize: layer.fontSize,
-          fontWeight: weight,
-          letterSpacing: layer.letterSpacing,
-          color: color,
-          shadows: layer.shadow
-              ? [
-                  Shadow(
-                    color: shadowColor,
-                    blurRadius: 8 + layer.radius,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        );
+        final baseStyle =
+            (layer.kind == LayerKind.clock
+            ? GoogleFonts.dmMono
+            : GoogleFonts.manrope)(
+              fontSize: layer.fontSize,
+              fontWeight: weight,
+              letterSpacing: layer.letterSpacing,
+              color: color,
+              shadows: layer.shadow
+                  ? [
+                      Shadow(
+                        color: shadowColor,
+                        blurRadius: 8 + layer.radius,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
+            );
         if (layer.color2 != null &&
             layer.color2!.isNotEmpty &&
             layer.kind == LayerKind.text) {
@@ -884,7 +901,8 @@ class LayerNode extends StatelessWidget {
       'slide-in-loop',
       'ripple',
     };
-    final needsWrapperFx = !previewMode &&
+    final needsWrapperFx =
+        !previewMode &&
         layer.animate &&
         layer.kind != LayerKind.battery &&
         layer.kind != LayerKind.analog &&
@@ -913,7 +931,8 @@ class LayerNode extends StatelessWidget {
     bool listen = true,
     bool samplePreview = false,
   }) {
-    final isStatus = layer.format == 'carlink' ||
+    final isStatus =
+        layer.format == 'carlink' ||
         layer.format == 'car-link' ||
         layer.format == 'batterylive' ||
         layer.format == 'battery-live' ||
@@ -941,8 +960,7 @@ class LayerNode extends StatelessWidget {
     DateTime stamp,
     String format, {
     bool showSeconds = false,
-  }) =>
-      formatClockLabel(stamp, format, showSeconds: showSeconds);
+  }) => formatClockLabel(stamp, format, showSeconds: showSeconds);
 
   static String _formatDate(DateTime stamp, String format) {
     return switch (format) {

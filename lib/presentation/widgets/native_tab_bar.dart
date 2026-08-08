@@ -28,8 +28,7 @@ class _NativeBottomTabBarState extends State<NativeBottomTabBar> {
   MethodChannel? _channel;
   bool _isNativeUpdating = false;
 
-  bool get _useNative =>
-      !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+  bool get _useNative => !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
 
   @override
   void didUpdateWidget(NativeBottomTabBar oldWidget) {
@@ -37,7 +36,9 @@ class _NativeBottomTabBarState extends State<NativeBottomTabBar> {
     if (widget.selectedIndex != oldWidget.selectedIndex &&
         _channel != null &&
         !_isNativeUpdating) {
-      _channel?.invokeMethod('setSelectedIndex', {'index': widget.selectedIndex});
+      _channel?.invokeMethod('setSelectedIndex', {
+        'index': widget.selectedIndex,
+      });
     }
   }
 
@@ -51,7 +52,10 @@ class _NativeBottomTabBarState extends State<NativeBottomTabBar> {
     if (call.method == 'onTabSelected') {
       final args = call.arguments as Map?;
       final index = args?['index'] as int?;
-      if (index != null && index >= 0 && index < 4 && index != widget.selectedIndex) {
+      if (index != null &&
+          index >= 0 &&
+          index < 4 &&
+          index != widget.selectedIndex) {
         _isNativeUpdating = true;
         try {
           DriveHaptics.selection();

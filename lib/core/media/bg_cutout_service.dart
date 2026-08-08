@@ -23,9 +23,7 @@ class BgCutoutService {
     if (local.ok && local.pngBytes != null) {
       return BgCutoutResult.ok(local.pngBytes!, engine: 'on-device');
     }
-    return BgCutoutResult.fail(
-      local.error ?? 'Background removal failed',
-    );
+    return BgCutoutResult.fail(local.error ?? 'Background removal failed');
   }
 }
 

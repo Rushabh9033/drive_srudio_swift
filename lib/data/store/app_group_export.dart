@@ -82,7 +82,8 @@ Future<Map<String, dynamic>> _slotPayload(
     'updatedAt': draft?.updatedAt,
     'summary': summary,
     'spec': spec,
-    if (draft?.widgetImagePath != null) 'widgetImagePath': draft!.widgetImagePath,
+    if (draft?.widgetImagePath != null)
+      'widgetImagePath': draft!.widgetImagePath,
   };
 }
 
@@ -160,10 +161,7 @@ Future<Map<String, dynamic>> _compactSpec(WidgetSpec spec) async {
     layers.add(m);
   }
 
-  return {
-    'background': bg,
-    'layers': layers,
-  };
+  return {'background': bg, 'layers': layers};
 }
 
 /// Resolves a Flutter asset path (`assets/...`) to either:
@@ -192,10 +190,9 @@ Future<String?> _resolveToDataUri(String? src) async {
     if (rawLen > 200 * 1024) {
       return src;
     }
-    final encoded = base64Encode(bytes.buffer.asUint8List(
-      bytes.offsetInBytes,
-      bytes.lengthInBytes,
-    ));
+    final encoded = base64Encode(
+      bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes),
+    );
     return 'data:image/png;base64,$encoded';
   } catch (e) {
     if (kDebugMode) debugPrint('Failed to load Flutter asset $src: $e');
@@ -228,13 +225,11 @@ String encodeAppGroupPayload(Map<String, dynamic> payload) {
   if (bytes > appGroupMaxJsonBytes) {
     // Strip specs, keep summaries — still useful for WidgetKit title/clock.
     final slim = Map<String, dynamic>.from(payload);
-    final slots = (slim['slots'] as List)
-        .map((e) {
-          final m = Map<String, dynamic>.from(e as Map);
-          m.remove('spec');
-          return m;
-        })
-        .toList();
+    final slots = (slim['slots'] as List).map((e) {
+      final m = Map<String, dynamic>.from(e as Map);
+      m.remove('spec');
+      return m;
+    }).toList();
     slim['slots'] = slots;
     slim['trimmed'] = true;
     return jsonEncode(slim);

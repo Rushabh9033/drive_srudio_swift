@@ -1,0 +1,291 @@
+{"protocolVersion":"0.1.1","runnerVersion":null,"pid":57528,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"/Users/radhikamac/backup2/car-play-cursor/test/bg_cutout_service_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading /Users/radhikamac/backup2/car-play-cursor/test/bg_cutout_service_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":0}
+{"suite":{"id":2,"platform":"vm","path":"/Users/radhikamac/backup2/car-play-cursor/test/phone_bars_regression_test.dart"},"type":"suite","time":1}
+{"test":{"id":3,"name":"loading /Users/radhikamac/backup2/car-play-cursor/test/phone_bars_regression_test.dart","suiteID":2,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":1}
+{"suite":{"id":4,"platform":"vm","path":"/Users/radhikamac/backup2/car-play-cursor/test/telemetry_test.dart"},"type":"suite","time":2}
+{"test":{"id":5,"name":"loading /Users/radhikamac/backup2/car-play-cursor/test/telemetry_test.dart","suiteID":4,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":2}
+{"suite":{"id":6,"platform":"vm","path":"/Users/radhikamac/backup2/car-play-cursor/test/catalog_exact_contract_test.dart"},"type":"suite","time":2}
+{"test":{"id":7,"name":"loading /Users/radhikamac/backup2/car-play-cursor/test/catalog_exact_contract_test.dart","suiteID":6,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":2}
+{"suite":{"id":8,"platform":"vm","path":"/Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart"},"type":"suite","time":2}
+{"test":{"id":9,"name":"loading /Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart","suiteID":8,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":2}
+{"count":13,"time":2,"type":"allSuites"}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1102}
+{"group":{"id":10,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":2,"line":null,"column":null,"url":null},"type":"group","time":1103}
+{"test":{"id":11,"name":"OnDeviceBgRemover.isSupported matches platform stub/io","suiteID":0,"groupIDs":[10],"metadata":{"skip":false,"skipReason":null},"line":8,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/bg_cutout_service_test.dart"},"type":"testStart","time":1103}
+{"testID":11,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1111}
+{"test":{"id":12,"name":"BgCutoutService uses on-device only — no rembg fallback","suiteID":0,"groupIDs":[10],"metadata":{"skip":false,"skipReason":null},"line":14,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/bg_cutout_service_test.dart"},"type":"testStart","time":1111}
+{"testID":12,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1124}
+{"suite":{"id":13,"platform":"vm","path":"/Users/radhikamac/backup2/car-play-cursor/test/draft_layer_integrity_test.dart"},"type":"suite","time":1132}
+{"test":{"id":14,"name":"loading /Users/radhikamac/backup2/car-play-cursor/test/draft_layer_integrity_test.dart","suiteID":13,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":1132}
+{"testID":3,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1133}
+{"group":{"id":15,"suiteID":2,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":null,"column":null,"url":null},"type":"group","time":1133}
+{"test":{"id":16,"name":"Phone Bars: battery-bars contract","suiteID":2,"groupIDs":[15],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":5,"root_column":3,"root_url":"file:///Users/radhikamac/backup2/car-play-cursor/test/phone_bars_regression_test.dart"},"type":"testStart","time":1133}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":16,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1268}
+{"suite":{"id":17,"platform":"vm","path":"/Users/radhikamac/backup2/car-play-cursor/test/permissions_copy_test.dart"},"type":"suite","time":1273}
+{"test":{"id":18,"name":"loading /Users/radhikamac/backup2/car-play-cursor/test/permissions_copy_test.dart","suiteID":17,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":1273}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":5,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1536}
+{"group":{"id":19,"suiteID":4,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":12,"line":null,"column":null,"url":null},"type":"group","time":1537}
+{"group":{"id":20,"suiteID":4,"parentID":19,"name":"resolveLiveBatteryPercent","metadata":{"skip":false,"skipReason":null},"testCount":4,"line":13,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/telemetry_test.dart"},"type":"group","time":1537}
+{"test":{"id":21,"name":"resolveLiveBatteryPercent uses live telemetry when enabled and known","suiteID":4,"groupIDs":[19,20],"metadata":{"skip":false,"skipReason":null},"line":14,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/telemetry_test.dart"},"type":"testStart","time":1537}
+{"testID":7,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1539}
+{"group":{"id":22,"suiteID":6,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":8,"line":null,"column":null,"url":null},"type":"group","time":1539}
+{"group":{"id":23,"suiteID":6,"parentID":22,"name":"Exact Catalog Contract","metadata":{"skip":false,"skipReason":null},"testCount":8,"line":12,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/catalog_exact_contract_test.dart"},"type":"group","time":1539}
+{"test":{"id":24,"name":"Exact Catalog Contract Exact template counts","suiteID":6,"groupIDs":[22,23],"metadata":{"skip":false,"skipReason":null},"line":13,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/catalog_exact_contract_test.dart"},"type":"testStart","time":1539}
+{"testID":21,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1557}
+{"test":{"id":25,"name":"resolveLiveBatteryPercent returns null when battery unavailable — never invents %","suiteID":4,"groupIDs":[19,20],"metadata":{"skip":false,"skipReason":null},"line":30,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/telemetry_test.dart"},"type":"testStart","time":1557}
+{"testID":25,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1558}
+{"test":{"id":26,"name":"resolveLiveBatteryPercent rejects sample-preview snapshot on live resolver","suiteID":4,"groupIDs":[19,20],"metadata":{"skip":false,"skipReason":null},"line":46,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/telemetry_test.dart"},"type":"testStart","time":1558}
+{"testID":26,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1560}
+{"test":{"id":27,"name":"resolveLiveBatteryPercent dayprogress ignores device battery","suiteID":4,"groupIDs":[19,20],"metadata":{"skip":false,"skipReason":null},"line":51,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/telemetry_test.dart"},"type":"testStart","time":1560}
+{"testID":27,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1561}
+{"group":{"id":28,"suiteID":4,"parentID":19,"name":"resolveDisplayBatteryPercent sample vs live","metadata":{"skip":false,"skipReason":null},"testCount":3,"line":72,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/telemetry_test.dart"},"type":"group","time":1562}
+{"test":{"id":29,"name":"resolveDisplayBatteryPercent sample vs live samplePreview paints stable catalog fill","suiteID":4,"groupIDs":[19,28],"metadata":{"skip":false,"skipReason":null},"line":73,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/telemetry_test.dart"},"type":"testStart","time":1562}
+{"testID":29,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1563}
+{"test":{"id":30,"name":"resolveDisplayBatteryPercent sample vs live live path with no sensor stays null — no sample fallback","suiteID":4,"groupIDs":[19,28],"metadata":{"skip":false,"skipReason":null},"line":89,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/telemetry_test.dart"},"type":"testStart","time":1563}
+{"testID":30,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1565}
+{"test":{"id":31,"name":"resolveDisplayBatteryPercent sample vs live samplePreview never leaks into liveSource of DeviceTelemetry path","suiteID":4,"groupIDs":[19,28],"metadata":{"skip":false,"skipReason":null},"line":112,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/telemetry_test.dart"},"type":"testStart","time":1565}
+{"testID":31,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1566}
+{"group":{"id":32,"suiteID":4,"parentID":19,"name":"telemetryStatusLabel","metadata":{"skip":false,"skipReason":null},"testCount":2,"line":123,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/telemetry_test.dart"},"type":"group","time":1566}
+{"test":{"id":33,"name":"telemetryStatusLabel car link and charging labels","suiteID":4,"groupIDs":[19,32],"metadata":{"skip":false,"skipReason":null},"line":124,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/telemetry_test.dart"},"type":"testStart","time":1566}
+{"testID":33,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1568}
+{"test":{"id":34,"name":"telemetryStatusLabel sample preview labels look filled","suiteID":4,"groupIDs":[19,32],"metadata":{"skip":false,"skipReason":null},"line":167,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/telemetry_test.dart"},"type":"testStart","time":1568}
+{"testID":34,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1570}
+{"group":{"id":35,"suiteID":4,"parentID":19,"name":"DeviceTelemetry + AppStore","metadata":{"skip":false,"skipReason":null},"testCount":3,"line":184,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/telemetry_test.dart"},"type":"group","time":1570}
+{"test":{"id":36,"name":"DeviceTelemetry + AppStore manual car connected and app group telemetry mirror","suiteID":4,"groupIDs":[19,35],"metadata":{"skip":false,"skipReason":null},"line":185,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/telemetry_test.dart"},"type":"testStart","time":1570}
+{"testID":24,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1575}
+{"test":{"id":37,"name":"Exact Catalog Contract Template IDs are strictly unique within the template namespace","suiteID":6,"groupIDs":[22,23],"metadata":{"skip":false,"skipReason":null},"line":34,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/catalog_exact_contract_test.dart"},"type":"testStart","time":1575}
+{"testID":37,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1576}
+{"test":{"id":38,"name":"Exact Catalog Contract Apex IDs are unique and do not replace stock IDs","suiteID":6,"groupIDs":[22,23],"metadata":{"skip":false,"skipReason":null},"line":44,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/catalog_exact_contract_test.dart"},"type":"testStart","time":1576}
+{"testID":36,"messageType":"print","message":"DeviceTelemetry batteryLevel: MissingPluginException(No implementation found for method getBatteryLevel on channel dev.fluttercommunity.plus/battery)","type":"print","time":1581}
+{"testID":36,"messageType":"print","message":"DeviceTelemetry batteryState: MissingPluginException(No implementation found for method getBatteryState on channel dev.fluttercommunity.plus/battery)","type":"print","time":1581}
+{"testID":36,"messageType":"print","message":"DeviceTelemetry connectivity: MissingPluginException(No implementation found for method check on channel dev.fluttercommunity.plus/connectivity)","type":"print","time":1581}
+{"testID":38,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1581}
+{"test":{"id":39,"name":"Exact Catalog Contract All 12 Apex templates survive V2 JSON round-trip","suiteID":6,"groupIDs":[22,23],"metadata":{"skip":false,"skipReason":null},"line":74,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/catalog_exact_contract_test.dart"},"type":"testStart","time":1582}
+{"testID":36,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1586}
+{"test":{"id":40,"name":"DeviceTelemetry + AppStore live off does not claim batteryKnown or invent percent","suiteID":4,"groupIDs":[19,35],"metadata":{"skip":false,"skipReason":null},"line":229,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/telemetry_test.dart"},"type":"testStart","time":1586}
+{"testID":39,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1592}
+{"test":{"id":41,"name":"Exact Catalog Contract Draft save and reopen preserve their layers","suiteID":6,"groupIDs":[22,23],"metadata":{"skip":false,"skipReason":null},"line":88,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/catalog_exact_contract_test.dart"},"type":"testStart","time":1593}
+{"testID":36,"messageType":"print","message":"DeviceTelemetry GPS start: MissingPluginException(No implementation found for method isLocationServiceEnabled on channel flutter.baseflow.com/geolocator)","type":"print","time":1602}
+{"testID":41,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1602}
+{"test":{"id":42,"name":"Exact Catalog Contract Slot export preserves the correct document","suiteID":6,"groupIDs":[22,23],"metadata":{"skip":false,"skipReason":null},"line":106,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/catalog_exact_contract_test.dart"},"type":"testStart","time":1602}
+{"testID":42,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1604}
+{"testID":40,"messageType":"print","message":"DeviceTelemetry batteryLevel: MissingPluginException(No implementation found for method getBatteryLevel on channel dev.fluttercommunity.plus/battery)","type":"print","time":1605}
+{"testID":40,"messageType":"print","message":"DeviceTelemetry batteryState: MissingPluginException(No implementation found for method getBatteryState on channel dev.fluttercommunity.plus/battery)","type":"print","time":1605}
+{"testID":40,"messageType":"print","message":"DeviceTelemetry connectivity: MissingPluginException(No implementation found for method check on channel dev.fluttercommunity.plus/connectivity)","type":"print","time":1605}
+{"test":{"id":43,"name":"Exact Catalog Contract Every production-visible layer kind is supported by both renderers","suiteID":6,"groupIDs":[22,23],"metadata":{"skip":false,"skipReason":null},"line":135,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/catalog_exact_contract_test.dart"},"type":"testStart","time":1605}
+{"testID":40,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1606}
+{"test":{"id":44,"name":"DeviceTelemetry + AppStore first-run live default follows supportsLiveHardware","suiteID":4,"groupIDs":[19,35],"metadata":{"skip":false,"skipReason":null},"line":247,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/telemetry_test.dart"},"type":"testStart","time":1606}
+{"testID":43,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1608}
+{"test":{"id":45,"name":"Exact Catalog Contract Existing compatibility-sensitive template IDs remain resolvable","suiteID":6,"groupIDs":[22,23],"metadata":{"skip":false,"skipReason":null},"line":151,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/catalog_exact_contract_test.dart"},"type":"testStart","time":1608}
+{"testID":45,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1609}
+{"testID":44,"messageType":"print","message":"DeviceTelemetry batteryLevel: MissingPluginException(No implementation found for method getBatteryLevel on channel dev.fluttercommunity.plus/battery)","type":"print","time":1609}
+{"testID":44,"messageType":"print","message":"DeviceTelemetry batteryState: MissingPluginException(No implementation found for method getBatteryState on channel dev.fluttercommunity.plus/battery)","type":"print","time":1609}
+{"testID":44,"messageType":"print","message":"DeviceTelemetry connectivity: MissingPluginException(No implementation found for method check on channel dev.fluttercommunity.plus/connectivity)","type":"print","time":1609}
+{"testID":44,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1611}
+{"suite":{"id":46,"platform":"vm","path":"/Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"suite","time":1614}
+{"test":{"id":47,"name":"loading /Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart","suiteID":46,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":1614}
+{"suite":{"id":48,"platform":"vm","path":"/Users/radhikamac/backup2/car-play-cursor/test/telemetry_audit_test.dart"},"type":"suite","time":1616}
+{"test":{"id":49,"name":"loading /Users/radhikamac/backup2/car-play-cursor/test/telemetry_audit_test.dart","suiteID":48,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":1616}
+{"testID":9,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1634}
+{"group":{"id":50,"suiteID":8,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":16,"line":null,"column":null,"url":null},"type":"group","time":1634}
+{"group":{"id":51,"suiteID":8,"parentID":50,"name":"CarOnlyFilter unit rules","metadata":{"skip":false,"skipReason":null},"testCount":8,"line":11,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart"},"type":"group","time":1634}
+{"test":{"id":52,"name":"CarOnlyFilter unit rules BMW bikes excluded","suiteID":8,"groupIDs":[50,51],"metadata":{"skip":false,"skipReason":null},"line":12,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart"},"type":"testStart","time":1634}
+{"testID":52,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1645}
+{"test":{"id":53,"name":"CarOnlyFilter unit rules BMW cars kept","suiteID":8,"groupIDs":[50,51],"metadata":{"skip":false,"skipReason":null},"line":54,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart"},"type":"testStart","time":1645}
+{"testID":53,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1647}
+{"test":{"id":54,"name":"CarOnlyFilter unit rules Honda bikes out, cars in","suiteID":8,"groupIDs":[50,51],"metadata":{"skip":false,"skipReason":null},"line":87,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart"},"type":"testStart","time":1647}
+{"testID":54,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1648}
+{"test":{"id":55,"name":"CarOnlyFilter unit rules Suzuki bikes out, cars in","suiteID":8,"groupIDs":[50,51],"metadata":{"skip":false,"skipReason":null},"line":127,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart"},"type":"testStart","time":1648}
+{"testID":55,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1649}
+{"test":{"id":56,"name":"CarOnlyFilter unit rules Toyota / Ford / Tesla cars kept","suiteID":8,"groupIDs":[50,51],"metadata":{"skip":false,"skipReason":null},"line":155,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart"},"type":"testStart","time":1649}
+{"testID":56,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1650}
+{"test":{"id":57,"name":"CarOnlyFilter unit rules bus / trailer / chassis / golf cart excluded","suiteID":8,"groupIDs":[50,51],"metadata":{"skip":false,"skipReason":null},"line":171,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart"},"type":"testStart","time":1650}
+{"testID":57,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1650}
+{"test":{"id":58,"name":"CarOnlyFilter unit rules does not exclude valid cars based only on short letters/numbers","suiteID":8,"groupIDs":[50,51],"metadata":{"skip":false,"skipReason":null},"line":203,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart"},"type":"testStart","time":1651}
+{"testID":58,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1651}
+{"test":{"id":59,"name":"CarOnlyFilter unit rules does not trust passenger_car alone for bikes","suiteID":8,"groupIDs":[50,51],"metadata":{"skip":false,"skipReason":null},"line":212,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart"},"type":"testStart","time":1651}
+{"testID":59,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1652}
+{"group":{"id":60,"suiteID":8,"parentID":50,"name":"Master catalog integration","metadata":{"skip":false,"skipReason":null},"testCount":7,"line":232,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart"},"type":"group","time":1652}
+{"test":{"id":61,"name":"Master catalog integration filter stats and brand invariant","suiteID":8,"groupIDs":[50,60],"metadata":{"skip":false,"skipReason":null},"line":244,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart"},"type":"testStart","time":1652}
+{"testID":14,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1662}
+{"group":{"id":62,"suiteID":13,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":4,"line":null,"column":null,"url":null},"type":"group","time":1662}
+{"test":{"id":63,"name":"Sport Badge Edit copy keeps every layer separate","suiteID":13,"groupIDs":[62],"metadata":{"skip":false,"skipReason":null},"line":12,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/draft_layer_integrity_test.dart"},"type":"testStart","time":1662}
+{"testID":63,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1699}
+{"test":{"id":64,"name":"Draft JSON round-trip never flattens multi-layer specs","suiteID":13,"groupIDs":[62],"metadata":{"skip":false,"skipReason":null},"line":43,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/draft_layer_integrity_test.dart"},"type":"testStart","time":1700}
+{"testID":64,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1707}
+{"test":{"id":65,"name":"Empty draw layers are detected for hit-test skip","suiteID":13,"groupIDs":[62],"metadata":{"skip":false,"skipReason":null},"line":74,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/draft_layer_integrity_test.dart"},"type":"testStart","time":1707}
+{"testID":65,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1708}
+{"test":{"id":66,"name":"WidgetSpec.clone(remintLayerIds) preserves layer count","suiteID":13,"groupIDs":[62],"metadata":{"skip":false,"skipReason":null},"line":97,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/draft_layer_integrity_test.dart"},"type":"testStart","time":1708}
+{"testID":66,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1709}
+{"suite":{"id":67,"platform":"vm","path":"/Users/radhikamac/backup2/car-play-cursor/test/speedometer_compose_test.dart"},"type":"suite","time":1713}
+{"test":{"id":68,"name":"loading /Users/radhikamac/backup2/car-play-cursor/test/speedometer_compose_test.dart","suiteID":67,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":1713}
+{"testID":61,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1714}
+{"test":{"id":69,"name":"Master catalog integration BMW bikes not selectable; BMW cars are","suiteID":8,"groupIDs":[50,60],"metadata":{"skip":false,"skipReason":null},"line":261,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart"},"type":"testStart","time":1715}
+{"testID":69,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1742}
+{"test":{"id":70,"name":"Master catalog integration Honda / Suzuki / Toyota / Ford / Tesla cars selectable","suiteID":8,"groupIDs":[50,60],"metadata":{"skip":false,"skipReason":null},"line":270,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart"},"type":"testStart","time":1742}
+{"testID":70,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1765}
+{"test":{"id":71,"name":"Master catalog integration chassis / motorhome rows excluded from catalog","suiteID":8,"groupIDs":[50,60],"metadata":{"skip":false,"skipReason":null},"line":282,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart"},"type":"testStart","time":1765}
+{"testID":71,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1786}
+{"test":{"id":72,"name":"Master catalog integration VehicleCatalogService search never returns empty-model brands","suiteID":8,"groupIDs":[50,60],"metadata":{"skip":false,"skipReason":null},"line":289,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart"},"type":"testStart","time":1786}
+{"testID":72,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1814}
+{"test":{"id":73,"name":"Master catalog integration excluded models cannot be restored as selection","suiteID":8,"groupIDs":[50,60],"metadata":{"skip":false,"skipReason":null},"line":310,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart"},"type":"testStart","time":1814}
+{"testID":73,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1835}
+{"test":{"id":74,"name":"Master catalog integration stats printable snapshot","suiteID":8,"groupIDs":[50,60],"metadata":{"skip":false,"skipReason":null},"line":318,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart"},"type":"testStart","time":1835}
+{"testID":74,"messageType":"print","message":"STATS raw=2333 valid=2208 bikes=69 other=56 brands=61","type":"print","time":1856}
+{"testID":74,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1856}
+{"group":{"id":75,"suiteID":8,"parentID":50,"name":"vehicle_models.json path","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":330,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart"},"type":"group","time":1856}
+{"test":{"id":76,"name":"vehicle_models.json path brands+models combine through filter","suiteID":8,"groupIDs":[50,75],"metadata":{"skip":false,"skipReason":null},"line":331,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart"},"type":"testStart","time":1856}
+{"testID":76,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1882}
+{"suite":{"id":77,"platform":"vm","path":"/Users/radhikamac/backup2/car-play-cursor/test/rembg_client_test.dart"},"type":"suite","time":1886}
+{"test":{"id":78,"name":"loading /Users/radhikamac/backup2/car-play-cursor/test/rembg_client_test.dart","suiteID":77,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":1886}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":18,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":2368}
+{"group":{"id":79,"suiteID":17,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":4,"line":null,"column":null,"url":null},"type":"group","time":2368}
+{"test":{"id":80,"name":"DrivePermissionKind covers photos camera location","suiteID":17,"groupIDs":[79],"metadata":{"skip":false,"skipReason":null},"line":8,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/permissions_copy_test.dart"},"type":"testStart","time":2369}
+{"testID":80,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2378}
+{"test":{"id":81,"name":"supportsOsPermissions matches iOS/Android only","suiteID":17,"groupIDs":[79],"metadata":{"skip":false,"skipReason":null},"line":20,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/permissions_copy_test.dart"},"type":"testStart","time":2378}
+{"testID":81,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2380}
+{"test":{"id":82,"name":"isLocationGranted is false without plugins","suiteID":17,"groupIDs":[79],"metadata":{"skip":false,"skipReason":null},"line":28,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/permissions_copy_test.dart"},"type":"testStart","time":2380}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":82,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2387}
+{"test":{"id":83,"name":"DrivePermissionOutcome has Settings path","suiteID":17,"groupIDs":[79],"metadata":{"skip":false,"skipReason":null},"line":33,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/permissions_copy_test.dart"},"type":"testStart","time":2387}
+{"testID":83,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2389}
+{"suite":{"id":84,"platform":"vm","path":"/Users/radhikamac/backup2/car-play-cursor/test/deep_links_test.dart"},"type":"suite","time":2392}
+{"test":{"id":85,"name":"loading /Users/radhikamac/backup2/car-play-cursor/test/deep_links_test.dart","suiteID":84,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":2392}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":49,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":2603}
+{"group":{"id":86,"suiteID":48,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":null,"column":null,"url":null},"type":"group","time":2642}
+{"test":{"id":87,"name":"Telemetry Safety: Live templates do not leak fake data in preview, V2 JSON, or slot export","suiteID":48,"groupIDs":[86],"metadata":{"skip":false,"skipReason":null},"line":7,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/telemetry_audit_test.dart"},"type":"testStart","time":2642}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":87,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2689}
+{"suite":{"id":88,"platform":"vm","path":"/Users/radhikamac/backup2/car-play-cursor/test/playback_output_test.dart"},"type":"suite","time":2693}
+{"test":{"id":89,"name":"loading /Users/radhikamac/backup2/car-play-cursor/test/playback_output_test.dart","suiteID":88,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":2693}
+{"testID":68,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":2724}
+{"group":{"id":90,"suiteID":67,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":6,"line":null,"column":null,"url":null},"type":"group","time":2724}
+{"group":{"id":91,"suiteID":67,"parentID":90,"name":"Speedometer catalog","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":9,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/speedometer_compose_test.dart"},"type":"group","time":2724}
+{"test":{"id":92,"name":"Speedometer catalog Speedometer category is first-class and has templates","suiteID":67,"groupIDs":[90,91],"metadata":{"skip":false,"skipReason":null},"line":10,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/speedometer_compose_test.dart"},"type":"testStart","time":2724}
+{"testID":47,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":2733}
+{"group":{"id":93,"suiteID":46,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":25,"line":null,"column":null,"url":null},"type":"group","time":2733}
+{"test":{"id":94,"name":"AppStore hydrates and completes intro","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":20,"root_column":3,"root_url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":2733}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":92,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2761}
+{"group":{"id":95,"suiteID":67,"parentID":90,"name":"composeSpeedometerLayers","metadata":{"skip":false,"skipReason":null},"testCount":2,"line":50,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/speedometer_compose_test.dart"},"type":"group","time":2761}
+{"test":{"id":96,"name":"composeSpeedometerLayers drops independent speed + unit + GPS badge layers","suiteID":67,"groupIDs":[90,95],"metadata":{"skip":false,"skipReason":null},"line":51,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/speedometer_compose_test.dart"},"type":"testStart","time":2761}
+{"testID":96,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2763}
+{"test":{"id":97,"name":"composeSpeedometerLayers multiple nests offset so layers do not stack","suiteID":67,"groupIDs":[90,95],"metadata":{"skip":false,"skipReason":null},"line":67,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/speedometer_compose_test.dart"},"type":"testStart","time":2763}
+{"testID":97,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2765}
+{"group":{"id":98,"suiteID":67,"parentID":90,"name":"resolveSpeedDigits honesty","metadata":{"skip":false,"skipReason":null},"testCount":3,"line":77,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/speedometer_compose_test.dart"},"type":"group","time":2765}
+{"test":{"id":99,"name":"resolveSpeedDigits honesty sample preview shows catalog digits; live shows em dash","suiteID":67,"groupIDs":[90,98],"metadata":{"skip":false,"skipReason":null},"line":78,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/speedometer_compose_test.dart"},"type":"testStart","time":2765}
+{"testID":99,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2767}
+{"test":{"id":100,"name":"resolveSpeedDigits honesty telemetry badge never invents live GPS speed","suiteID":67,"groupIDs":[90,98],"metadata":{"skip":false,"skipReason":null},"line":90,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/speedometer_compose_test.dart"},"type":"testStart","time":2767}
+{"testID":100,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2768}
+{"test":{"id":101,"name":"resolveSpeedDigits honesty live GPS digits when speedKnown","suiteID":67,"groupIDs":[90,98],"metadata":{"skip":false,"skipReason":null},"line":113,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/speedometer_compose_test.dart"},"type":"testStart","time":2768}
+{"testID":101,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2770}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":94,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2857}
+{"test":{"id":102,"name":"Premium gate blocks until unlocked","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":35,"root_column":3,"root_url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":2858}
+{"testID":102,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2863}
+{"test":{"id":103,"name":"Premium templates and sounds stay gated","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":46,"root_column":3,"root_url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":2863}
+{"testID":103,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2888}
+{"test":{"id":104,"name":"Draft CRUD: create save duplicate delete","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":71,"root_column":3,"root_url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":2889}
+{"testID":104,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2896}
+{"test":{"id":105,"name":"DebugPurchaseService unlocks via PurchaseService","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":96,"root_column":3,"root_url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":2896}
+{"testID":105,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2901}
+{"test":{"id":106,"name":"Corrupt drafts are skipped safely","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":113,"root_column":3,"root_url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":2901}
+{"testID":106,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2915}
+{"test":{"id":107,"name":"App Group payload validates and includes summary","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":139,"root_column":3,"root_url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":2915}
+{"testID":107,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2920}
+{"test":{"id":108,"name":"Locking premium strips premium sound assignments","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":161,"root_column":3,"root_url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":2920}
+{"testID":108,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2925}
+{"test":{"id":109,"name":"Hydrate scrubs premium sounds when not premium","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":190,"root_column":3,"root_url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":2925}
+{"testID":109,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2928}
+{"test":{"id":110,"name":"App Group encode trims oversized specs","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":211,"root_column":3,"root_url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":2928}
+{"testID":110,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2933}
+{"test":{"id":111,"name":"Catalog has free and premium templates","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":242,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":2933}
+{"testID":111,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2938}
+{"test":{"id":112,"name":"Theme is dark Electric Blue, not purple seed","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":247,"root_column":3,"root_url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":2938}
+{"testID":78,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":2952}
+{"group":{"id":113,"suiteID":77,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":5,"line":null,"column":null,"url":null},"type":"group","time":2953}
+{"test":{"id":114,"name":"default and production URL constants","suiteID":77,"groupIDs":[113],"metadata":{"skip":false,"skipReason":null},"line":9,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/rembg_client_test.dart"},"type":"testStart","time":2953}
+{"testID":114,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2962}
+{"test":{"id":115,"name":"healthCheck true on 200","suiteID":77,"groupIDs":[113],"metadata":{"skip":false,"skipReason":null},"line":15,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/rembg_client_test.dart"},"type":"testStart","time":2962}
+{"testID":115,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2967}
+{"test":{"id":116,"name":"healthCheck false on network error","suiteID":77,"groupIDs":[113],"metadata":{"skip":false,"skipReason":null},"line":25,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/rembg_client_test.dart"},"type":"testStart","time":2967}
+{"testID":116,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2969}
+{"test":{"id":117,"name":"removeBackground returns PNG bytes on 200","suiteID":77,"groupIDs":[113],"metadata":{"skip":false,"skipReason":null},"line":34,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/rembg_client_test.dart"},"type":"testStart","time":2969}
+{"testID":117,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2974}
+{"test":{"id":118,"name":"removeBackground maps connection failure to server-down message","suiteID":77,"groupIDs":[113],"metadata":{"skip":false,"skipReason":null},"line":52,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/rembg_client_test.dart"},"type":"testStart","time":2974}
+{"testID":118,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2975}
+{"testID":85,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":2988}
+{"group":{"id":119,"suiteID":84,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":4,"line":null,"column":null,"url":null},"type":"group","time":2988}
+{"group":{"id":120,"suiteID":84,"parentID":119,"name":"DriveDeepLink.resolve","metadata":{"skip":false,"skipReason":null},"testCount":4,"line":5,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/deep_links_test.dart"},"type":"group","time":2988}
+{"test":{"id":121,"name":"DriveDeepLink.resolve maps drivestudio:// host targets","suiteID":84,"groupIDs":[119,120],"metadata":{"skip":false,"skipReason":null},"line":6,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/deep_links_test.dart"},"type":"testStart","time":2988}
+{"testID":121,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2998}
+{"test":{"id":122,"name":"DriveDeepLink.resolve maps path and app-host forms","suiteID":84,"groupIDs":[119,120],"metadata":{"skip":false,"skipReason":null},"line":19,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/deep_links_test.dart"},"type":"testStart","time":2998}
+{"testID":122,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2999}
+{"test":{"id":123,"name":"DriveDeepLink.resolve maps /deeplink aliases and web query","suiteID":84,"groupIDs":[119,120],"metadata":{"skip":false,"skipReason":null},"line":30,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/deep_links_test.dart"},"type":"testStart","time":2999}
+{"testID":123,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3000}
+{"test":{"id":124,"name":"DriveDeepLink.resolve returns null for unrelated uris","suiteID":84,"groupIDs":[119,120],"metadata":{"skip":false,"skipReason":null},"line":42,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/deep_links_test.dart"},"type":"testStart","time":3000}
+{"testID":124,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3001}
+{"testID":89,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":3046}
+{"group":{"id":125,"suiteID":88,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":5,"line":null,"column":null,"url":null},"type":"group","time":3046}
+{"group":{"id":126,"suiteID":88,"parentID":125,"name":"resolvePlaybackRoute","metadata":{"skip":false,"skipReason":null},"testCount":3,"line":5,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/playback_output_test.dart"},"type":"group","time":3046}
+{"test":{"id":127,"name":"resolvePlaybackRoute phone always resolves to phone speaker","suiteID":88,"groupIDs":[125,126],"metadata":{"skip":false,"skipReason":null},"line":6,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/playback_output_test.dart"},"type":"testStart","time":3046}
+{"testID":127,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3053}
+{"test":{"id":128,"name":"resolvePlaybackRoute car always resolves to car/system route","suiteID":88,"groupIDs":[125,126],"metadata":{"skip":false,"skipReason":null},"line":23,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/playback_output_test.dart"},"type":"testStart","time":3053}
+{"testID":128,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3053}
+{"test":{"id":129,"name":"resolvePlaybackRoute auto follows carConnected","suiteID":88,"groupIDs":[125,126],"metadata":{"skip":false,"skipReason":null},"line":33,"column":5,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/playback_output_test.dart"},"type":"testStart","time":3054}
+{"testID":129,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3054}
+{"test":{"id":130,"name":"playbackOutput JSON round-trip defaults to auto","suiteID":88,"groupIDs":[125],"metadata":{"skip":false,"skipReason":null},"line":51,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/playback_output_test.dart"},"type":"testStart","time":3054}
+{"testID":130,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3055}
+{"test":{"id":131,"name":"audioContextForRoute builds without throwing","suiteID":88,"groupIDs":[125],"metadata":{"skip":false,"skipReason":null},"line":60,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/playback_output_test.dart"},"type":"testStart","time":3055}
+{"testID":131,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3057}
+{"testID":112,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3109}
+{"test":{"id":132,"name":"WidgetCanvas renders clock layer without overflow","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":260,"root_column":3,"root_url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":3109}
+{"testID":132,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3143}
+{"test":{"id":133,"name":"Catalog has 12+ templates and 14+ sounds with premium mix","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":299,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":3143}
+{"testID":133,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3145}
+{"test":{"id":134,"name":"Stock templates have unique layout signatures","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":331,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":3145}
+{"testID":134,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3147}
+{"test":{"id":135,"name":"Bundled vehicle and sound asset paths cover catalog","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":376,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":3147}
+{"testID":135,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3148}
+{"test":{"id":136,"name":"Layer animate fields round-trip in JSON","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":401,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":3148}
+{"testID":136,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3149}
+{"test":{"id":137,"name":"Digital clock labels never trailing-colon","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":428,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":3149}
+{"testID":137,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3149}
+{"test":{"id":138,"name":"Anim style aliases and kind defaults resolve uniquely","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":453,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":3150}
+{"testID":138,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3150}
+{"test":{"id":139,"name":"Background library has categories and premium subset","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":470,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":3150}
+{"testID":139,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3151}
+{"test":{"id":140,"name":"Live templates include clocks batteries and weather breathe","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":486,"column":3,"url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":3151}
+{"testID":140,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3153}
+{"test":{"id":141,"name":"Editor overlay survives clock paint ticks","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":527,"root_column":3,"root_url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":3153}
+{"testID":141,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3178}
+{"test":{"id":142,"name":"Logo asset layers use StoredImage not fixed monogram","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":584,"root_column":3,"root_url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":3178}
+{"testID":142,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3200}
+{"test":{"id":143,"name":"Animated battery and analog paint without crashing","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":620,"root_column":3,"root_url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":3200}
+{"testID":143,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3219}
+{"test":{"id":144,"name":"previewMode wires samplePreview; live path does not","suiteID":46,"groupIDs":[93],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":673,"root_column":3,"root_url":"file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart"},"type":"testStart","time":3219}
+{"testID":144,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3240}
+{"success":true,"type":"done","time":3245}

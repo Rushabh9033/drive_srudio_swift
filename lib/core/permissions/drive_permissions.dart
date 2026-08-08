@@ -7,11 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../theme/drive_colors.dart';
 
 /// Permissions Drive Studio asks for before system dialogs.
-enum DrivePermissionKind {
-  photos,
-  camera,
-  locationWhenInUse,
-}
+enum DrivePermissionKind { photos, camera, locationWhenInUse }
 
 /// Outcome of [DrivePermissions.ensure].
 enum DrivePermissionOutcome {
@@ -63,11 +59,7 @@ class DrivePermissions {
       return _ensureLocation(context, showPrePrompt: showPrePrompt);
     }
 
-    return _ensureMedia(
-      context,
-      kind: kind,
-      showPrePrompt: showPrePrompt,
-    );
+    return _ensureMedia(context, kind: kind, showPrePrompt: showPrePrompt);
   }
 
   static Future<DrivePermissionOutcome> _ensureMedia(
@@ -348,28 +340,29 @@ class DrivePermissions {
   }) {
     return switch (kind) {
       DrivePermissionKind.photos => (
-          title: soft ? 'Choose a photo' : 'Allow photo access',
-          body: soft
-              ? 'Your browser or system may ask to share a photo. '
+        title: soft ? 'Choose a photo' : 'Allow photo access',
+        body: soft
+            ? 'Your browser or system may ask to share a photo. '
                   'Images stay on this device for your widgets — only pick photos you have rights to use.'
-              : 'Drive Studio needs Photo Library access to place your car photos on widgets. '
+            : 'Drive Studio needs Photo Library access to place your car photos on widgets. '
                   'Photos stay on this device. We do not upload them.',
-        ),
+      ),
       DrivePermissionKind.camera => (
-          title: soft ? 'Take a photo' : 'Allow camera access',
-          body: soft
-              ? 'Your browser or system may ask for camera access to photograph your car. '
+        title: soft ? 'Take a photo' : 'Allow camera access',
+        body: soft
+            ? 'Your browser or system may ask for camera access to photograph your car. '
                   'Photos stay on this device.'
-              : 'Drive Studio needs the Camera to photograph your car for widget artwork. '
+            : 'Drive Studio needs the Camera to photograph your car for widget artwork. '
                   'Photos stay on this device. We do not upload them.',
-        ),
+      ),
       DrivePermissionKind.locationWhenInUse => (
-          title: 'Allow location while using',
-          body: 'Drive Studio uses your location only while the app is open '
-              'to show live GPS speed on speedometer widgets. '
-              'If you decline, speed stays Unavailable — we never invent a reading. '
-              'Location is not used for ads or tracking.',
-        ),
+        title: 'Allow location while using',
+        body:
+            'Drive Studio uses your location only while the app is open '
+            'to show live GPS speed on speedometer widgets. '
+            'If you decline, speed stays Unavailable — we never invent a reading. '
+            'Location is not used for ads or tracking.',
+      ),
     };
   }
 }

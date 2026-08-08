@@ -24,7 +24,6 @@ class _BootstrapScreenState extends State<BootstrapScreen> {
       final target = store.introDone ? '/home' : '/intro';
       context.go(target);
       if (!mounted) return;
-
     });
   }
 
@@ -37,7 +36,8 @@ class _BootstrapScreenState extends State<BootstrapScreen> {
           tween: Tween(begin: 0.4, end: 1),
           duration: const Duration(milliseconds: 900),
           curve: Curves.easeInOut,
-          builder: (context, value, child) => Opacity(opacity: value, child: child),
+          builder: (context, value, child) =>
+              Opacity(opacity: value, child: child),
           child: Text('Loading Drive Studio', style: driveMonoLabel()),
         ),
       ),

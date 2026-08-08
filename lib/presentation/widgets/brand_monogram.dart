@@ -21,12 +21,7 @@ class BrandMonogram extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _PaintedMonogram(
-      brand: brand,
-      size: size,
-      color: color,
-      fill: fill,
-    );
+    return _PaintedMonogram(brand: brand, size: size, color: color, fill: fill);
   }
 }
 
@@ -45,7 +40,9 @@ class _PaintedMonogram extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mark = brand.trim().isEmpty ? '?' : brand.trim().substring(0, 1).toUpperCase();
+    final mark = brand.trim().isEmpty
+        ? '?'
+        : brand.trim().substring(0, 1).toUpperCase();
     final hue = (brand.toLowerCase().hashCode.abs() % 360).toDouble();
     final accent = HSLColor.fromAHSL(1, hue, 0.45, 0.52).toColor();
 
@@ -57,10 +54,7 @@ class _PaintedMonogram extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            fill,
-            Color.lerp(fill, accent, 0.35)!,
-          ],
+          colors: [fill, Color.lerp(fill, accent, 0.35)!],
         ),
         border: Border.all(color: accent.withValues(alpha: 0.55), width: 1.5),
         boxShadow: [
@@ -86,11 +80,7 @@ class _PaintedMonogram extends StatelessWidget {
 }
 
 class BrandTextBadge extends StatelessWidget {
-  const BrandTextBadge({
-    super.key,
-    required this.brand,
-    this.compact = false,
-  });
+  const BrandTextBadge({super.key, required this.brand, this.compact = false});
 
   final String brand;
   final bool compact;

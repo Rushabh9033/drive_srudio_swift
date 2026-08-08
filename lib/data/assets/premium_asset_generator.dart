@@ -69,13 +69,7 @@ enum ClockFaceStyle {
 
 /// Background texture presets — pixel-art gradient compositions sized
 /// to the 338x354 design canvas.
-enum BackgroundPreset {
-  aurora,
-  midnight,
-  sandstorm,
-  neonGrid,
-  ocean,
-}
+enum BackgroundPreset { aurora, midnight, sandstorm, neonGrid, ocean }
 
 /// Shared battery geometry — every style renders onto the same
 /// 24x12 cell body with a 2x4 terminal at a 6-cell gap. Centred in a
@@ -134,10 +128,12 @@ class PremiumAssetGenerator {
     Size size = const Size(140, 70),
     double pixelRatio = 3.0,
   }) async {
-    final key = _key(
-      'bat',
-      <String>[level.name, style.name, _sizeKey(size), _prKey(pixelRatio)],
-    );
+    final key = _key('bat', <String>[
+      level.name,
+      style.name,
+      _sizeKey(size),
+      _prKey(pixelRatio),
+    ]);
     final cached = _cache[key];
     if (cached != null) return cached;
     final bytes = await _render(
@@ -158,10 +154,11 @@ class PremiumAssetGenerator {
     Size size = const Size(140, 140),
     double pixelRatio = 3.0,
   }) async {
-    final key = _key(
-      'clk',
-      <String>[style.name, _sizeKey(size), _prKey(pixelRatio)],
-    );
+    final key = _key('clk', <String>[
+      style.name,
+      _sizeKey(size),
+      _prKey(pixelRatio),
+    ]);
     final cached = _cache[key];
     if (cached != null) return cached;
     final bytes = await _render(
@@ -181,10 +178,11 @@ class PremiumAssetGenerator {
     Size size = const Size(338, 354),
     double pixelRatio = 3.0,
   }) async {
-    final key = _key(
-      'bg',
-      <String>[preset.name, _sizeKey(size), _prKey(pixelRatio)],
-    );
+    final key = _key('bg', <String>[
+      preset.name,
+      _sizeKey(size),
+      _prKey(pixelRatio),
+    ]);
     final cached = _cache[key];
     if (cached != null) return cached;
     final bytes = await _render(
@@ -198,8 +196,7 @@ class PremiumAssetGenerator {
 
   // --- key helpers -------------------------------------------------------
 
-  static String _key(String ns, List<String> parts) =>
-      '$ns|${parts.join('|')}';
+  static String _key(String ns, List<String> parts) => '$ns|${parts.join('|')}';
 
   static String _sizeKey(Size s) =>
       '${s.width.toStringAsFixed(2)}x${s.height.toStringAsFixed(2)}';
@@ -229,9 +226,7 @@ class PremiumAssetGenerator {
     try {
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       if (byteData == null) {
-        throw StateError(
-          'PremiumAssetGenerator: PNG encode returned null',
-        );
+        throw StateError('PremiumAssetGenerator: PNG encode returned null');
       }
       return byteData.buffer.asUint8List();
     } finally {
@@ -243,18 +238,9 @@ class PremiumAssetGenerator {
   /// Stamp a single pixel-art cell at grid coords (x, y) with size
   /// [ps] (logical points). Uses an opaque paint so the call is cheap
   /// to issue thousands of times per icon.
-  static void _px(
-    Canvas c,
-    int x,
-    int y,
-    Color color, {
-    double ps = 4,
-  }) {
+  static void _px(Canvas c, int x, int y, Color color, {double ps = 4}) {
     final p = Paint()..color = color;
-    c.drawRect(
-      Rect.fromLTWH(x.toDouble() * ps, y.toDouble() * ps, ps, ps),
-      p,
-    );
+    c.drawRect(Rect.fromLTWH(x.toDouble() * ps, y.toDouble() * ps, ps, ps), p);
   }
 
   /// Stamp an opaque horizontal run of [n] pixels starting at (x, y).
@@ -303,8 +289,12 @@ class PremiumAssetGenerator {
     if (r < l || b < t) return;
     final p = Paint()..color = color;
     c.drawRect(
-      Rect.fromLTWH(l.toDouble() * ps, t.toDouble() * ps,
-          (r - l + 1) * ps, (b - t + 1) * ps),
+      Rect.fromLTWH(
+        l.toDouble() * ps,
+        t.toDouble() * ps,
+        (r - l + 1) * ps,
+        (b - t + 1) * ps,
+      ),
       p,
     );
   }
@@ -359,10 +349,38 @@ class PremiumAssetGenerator {
   /// Draw a 2-pixel thick outline for the body — top + bottom rows and
   /// left + right columns.
   static void _drawBodyOutline(Canvas c, Color color) {
-    _run(c, _BatteryGrid.bodyL, _BatteryGrid.bodyT, _BatteryGrid.bodyR - _BatteryGrid.bodyL + 1, color, ps: _BatteryGrid.ps);
-    _run(c, _BatteryGrid.bodyL, _BatteryGrid.bodyB, _BatteryGrid.bodyR - _BatteryGrid.bodyL + 1, color, ps: _BatteryGrid.ps);
-    _runV(c, _BatteryGrid.bodyL, _BatteryGrid.bodyT, _BatteryGrid.bodyB - _BatteryGrid.bodyT + 1, color, ps: _BatteryGrid.ps);
-    _runV(c, _BatteryGrid.bodyR, _BatteryGrid.bodyT, _BatteryGrid.bodyB - _BatteryGrid.bodyT + 1, color, ps: _BatteryGrid.ps);
+    _run(
+      c,
+      _BatteryGrid.bodyL,
+      _BatteryGrid.bodyT,
+      _BatteryGrid.bodyR - _BatteryGrid.bodyL + 1,
+      color,
+      ps: _BatteryGrid.ps,
+    );
+    _run(
+      c,
+      _BatteryGrid.bodyL,
+      _BatteryGrid.bodyB,
+      _BatteryGrid.bodyR - _BatteryGrid.bodyL + 1,
+      color,
+      ps: _BatteryGrid.ps,
+    );
+    _runV(
+      c,
+      _BatteryGrid.bodyL,
+      _BatteryGrid.bodyT,
+      _BatteryGrid.bodyB - _BatteryGrid.bodyT + 1,
+      color,
+      ps: _BatteryGrid.ps,
+    );
+    _runV(
+      c,
+      _BatteryGrid.bodyR,
+      _BatteryGrid.bodyT,
+      _BatteryGrid.bodyB - _BatteryGrid.bodyT + 1,
+      color,
+      ps: _BatteryGrid.ps,
+    );
   }
 
   /// Draw a 1-pixel inner-inset outline (used by neon for the cyan
@@ -385,13 +403,22 @@ class PremiumAssetGenerator {
     const Color fill = Color(0xFFFFE066);
 
     // Track interior.
-    _rect(c, _BatteryGrid.innerL, _BatteryGrid.innerT, _BatteryGrid.innerR, _BatteryGrid.innerB, track, ps: _BatteryGrid.ps);
+    _rect(
+      c,
+      _BatteryGrid.innerL,
+      _BatteryGrid.innerT,
+      _BatteryGrid.innerR,
+      _BatteryGrid.innerB,
+      track,
+      ps: _BatteryGrid.ps,
+    );
 
     // Chevron-fill by level — each level draws N chevrons along the
     // bottom row, growing leftward.
     final fillCount = _chevronCount(level);
     if (fillCount > 0) {
-      final fillW = _BatteryGrid.innerR - _BatteryGrid.innerL + 1; // 22 cells wide.
+      final fillW =
+          _BatteryGrid.innerR - _BatteryGrid.innerL + 1; // 22 cells wide.
       // Chevron 5x3 cell. Pattern:
       //   .X.
       //   XOX
@@ -402,30 +429,72 @@ class PremiumAssetGenerator {
       for (var i = 0; i < fillCount; i++) {
         final base = _BatteryGrid.innerR - i * 5;
         if (base - 4 < _BatteryGrid.innerL) continue;
-        _drawChevron(c, base - 4, _BatteryGrid.innerB - 2, fill, ps: _BatteryGrid.ps);
+        _drawChevron(
+          c,
+          base - 4,
+          _BatteryGrid.innerB - 2,
+          fill,
+          ps: _BatteryGrid.ps,
+        );
       }
       // For half / threeQuarters / full also fill the sliver space
       // before the first chevron so the gradient feels continuous.
       final fillStart = _BatteryGrid.innerL;
       final fillEnd = _BatteryGrid.innerR - fillCount * 5;
       if (fillEnd >= fillStart) {
-        _rect(c, fillStart, _BatteryGrid.innerB, fillEnd, _BatteryGrid.innerB, fill, ps: _BatteryGrid.ps);
+        _rect(
+          c,
+          fillStart,
+          _BatteryGrid.innerB,
+          fillEnd,
+          _BatteryGrid.innerB,
+          fill,
+          ps: _BatteryGrid.ps,
+        );
         if (level.index >= BatteryLevel.half.index) {
-          _rect(c, fillStart, _BatteryGrid.innerB - 1, fillEnd, _BatteryGrid.innerB - 1, fill,
-              ps: _BatteryGrid.ps);
+          _rect(
+            c,
+            fillStart,
+            _BatteryGrid.innerB - 1,
+            fillEnd,
+            _BatteryGrid.innerB - 1,
+            fill,
+            ps: _BatteryGrid.ps,
+          );
         }
         if (level.index >= BatteryLevel.threeQuarters.index) {
-          _rect(c, fillStart, _BatteryGrid.innerB - 2, fillEnd, _BatteryGrid.innerB - 2, fill,
-              ps: _BatteryGrid.ps);
+          _rect(
+            c,
+            fillStart,
+            _BatteryGrid.innerB - 2,
+            fillEnd,
+            _BatteryGrid.innerB - 2,
+            fill,
+            ps: _BatteryGrid.ps,
+          );
         }
         if (level == BatteryLevel.full) {
-          _rect(c, _BatteryGrid.innerL, _BatteryGrid.innerT, _BatteryGrid.innerR, _BatteryGrid.innerB, fill, ps: _BatteryGrid.ps);
+          _rect(
+            c,
+            _BatteryGrid.innerL,
+            _BatteryGrid.innerT,
+            _BatteryGrid.innerR,
+            _BatteryGrid.innerB,
+            fill,
+            ps: _BatteryGrid.ps,
+          );
           // Restore chevron pattern in the bottom row so full doesn't
           // feel flat.
           for (var i = 0; i < fillCount - 1; i++) {
             final base = _BatteryGrid.innerR - i * 5;
             if (base - 4 < _BatteryGrid.innerL) continue;
-            _drawChevron(c, base - 4, _BatteryGrid.innerB - 2, fill, ps: _BatteryGrid.ps);
+            _drawChevron(
+              c,
+              base - 4,
+              _BatteryGrid.innerB - 2,
+              fill,
+              ps: _BatteryGrid.ps,
+            );
           }
         }
       }
@@ -496,8 +565,15 @@ class PremiumAssetGenerator {
     _drawTerminal(c, glow);
 
     // Body shell.
-    _rect(c, _BatteryGrid.bodyL + 1, _BatteryGrid.bodyT + 1, _BatteryGrid.bodyR - 1, _BatteryGrid.bodyB - 1, shell,
-        ps: _BatteryGrid.ps);
+    _rect(
+      c,
+      _BatteryGrid.bodyL + 1,
+      _BatteryGrid.bodyT + 1,
+      _BatteryGrid.bodyR - 1,
+      _BatteryGrid.bodyB - 1,
+      shell,
+      ps: _BatteryGrid.ps,
+    );
 
     // Cell-matrix fill: 22 interior cells wide × 10 tall = small block
     // grid. Each level selects how many columns (4) of cells are
@@ -630,7 +706,15 @@ class PremiumAssetGenerator {
     const Color track = Color(0xFF120C04);
 
     // Track.
-    _rect(c, _BatteryGrid.bodyL, _BatteryGrid.bodyT, _BatteryGrid.bodyR, _BatteryGrid.bodyB, track, ps: _BatteryGrid.ps);
+    _rect(
+      c,
+      _BatteryGrid.bodyL,
+      _BatteryGrid.bodyT,
+      _BatteryGrid.bodyR,
+      _BatteryGrid.bodyB,
+      track,
+      ps: _BatteryGrid.ps,
+    );
     // Brushed-metal pattern: 1-pixel alternating dot per row.
     for (var y = _BatteryGrid.innerT; y <= _BatteryGrid.innerB; y++) {
       var alt = (y - _BatteryGrid.innerT).isEven;
@@ -645,7 +729,15 @@ class PremiumAssetGenerator {
     if (fillRows > 0) {
       final bottom = _BatteryGrid.innerB;
       final top = _BatteryGrid.innerB - fillRows + 1;
-      _rect(c, _BatteryGrid.innerL, top, _BatteryGrid.innerR, bottom, gold, ps: _BatteryGrid.ps);
+      _rect(
+        c,
+        _BatteryGrid.innerL,
+        top,
+        _BatteryGrid.innerR,
+        bottom,
+        gold,
+        ps: _BatteryGrid.ps,
+      );
     }
 
     // Outline (2-px thick gold) — draw outline AFTER fill.
@@ -705,12 +797,24 @@ class PremiumAssetGenerator {
     const Color boltRed = Color(0xFFE63946);
 
     // Track.
-    _rect(c, _BatteryGrid.bodyL, _BatteryGrid.bodyT, _BatteryGrid.bodyR, _BatteryGrid.bodyB, track, ps: _BatteryGrid.ps);
+    _rect(
+      c,
+      _BatteryGrid.bodyL,
+      _BatteryGrid.bodyT,
+      _BatteryGrid.bodyR,
+      _BatteryGrid.bodyB,
+      track,
+      ps: _BatteryGrid.ps,
+    );
 
     // Fill — diagonal stripes pattern grows with level.
     final rowsLit = _fillRows(level);
     if (rowsLit > 0) {
-      for (var y = _BatteryGrid.innerB; y >= _BatteryGrid.innerB - rowsLit + 1; y--) {
+      for (
+        var y = _BatteryGrid.innerB;
+        y >= _BatteryGrid.innerB - rowsLit + 1;
+        y--
+      ) {
         var phase = (y - _BatteryGrid.innerT) % 4;
         for (var x = _BatteryGrid.innerL; x <= _BatteryGrid.innerR; x++) {
           // 2-cell-wide diagonal stripe every 4 cells.
@@ -749,26 +853,42 @@ class PremiumAssetGenerator {
 
   /// Tiny lightning stamp anchored at its top-tip cell (cx, cy).
   /// The shape is 9 cols × 13 rows — explicit list of filled cells.
-  static void _bolt(
-    Canvas c,
-    int cx,
-    int cy,
-    Color color, {
-    double ps = 4,
-  }) {
+  static void _bolt(Canvas c, int cx, int cy, Color color, {double ps = 4}) {
     // Offsets relative to (cx, cy) — bolt-graphic is hand-coded.
     const offsets = <List<int>>[
-      [-2, 0], [-1, 0], [0, 0],
-      [-3, 1], [-2, 1], [-1, 1],
-      [-1, 2], [0, 2], [1, 2],
-      [0, 3], [1, 3], [2, 3],
-      [1, 4], [2, 4], [3, 4],
-      [2, 5], [3, 5], [4, 5],
-      [1, 6], [2, 6], [3, 6],
-      [0, 7], [1, 7], [2, 7],
-      [-1, 8], [0, 8], [1, 8],
-      [-2, 9], [-1, 9], [0, 9],
-      [-3, 10], [-2, 10], [-1, 10],
+      [-2, 0],
+      [-1, 0],
+      [0, 0],
+      [-3, 1],
+      [-2, 1],
+      [-1, 1],
+      [-1, 2],
+      [0, 2],
+      [1, 2],
+      [0, 3],
+      [1, 3],
+      [2, 3],
+      [1, 4],
+      [2, 4],
+      [3, 4],
+      [2, 5],
+      [3, 5],
+      [4, 5],
+      [1, 6],
+      [2, 6],
+      [3, 6],
+      [0, 7],
+      [1, 7],
+      [2, 7],
+      [-1, 8],
+      [0, 8],
+      [1, 8],
+      [-2, 9],
+      [-1, 9],
+      [0, 9],
+      [-3, 10],
+      [-2, 10],
+      [-1, 10],
     ];
     for (final o in offsets) {
       _px(c, cx + o[0], cy + o[1], color, ps: ps);
@@ -792,10 +912,7 @@ class PremiumAssetGenerator {
         ..shader = RadialGradient(
           center: Alignment.center,
           radius: 0.6,
-          colors: const [
-            Color(0xFF111A2C),
-            Color(0xFF0A0E1A),
-          ],
+          colors: const [Color(0xFF111A2C), Color(0xFF0A0E1A)],
         ).createShader(Offset.zero & size),
     );
     switch (style) {
@@ -820,8 +937,14 @@ class PremiumAssetGenerator {
   /// Pixel-art numeral shape for hour value 1..12 (or 0 for noon is
   /// intentionally treated as "12"). Drawn within a 5x7 cell bounding
   /// box anchored at top-left (x, y).
-  static void _drawDigit(Canvas c, int digit, int x, int y, Color color,
-      {double ps = 4}) {
+  static void _drawDigit(
+    Canvas c,
+    int digit,
+    int x,
+    int y,
+    Color color, {
+    double ps = 4,
+  }) {
     final rows = _digitRows(digit);
     for (var row = 0; row < rows.length; row++) {
       final s = rows[row];
@@ -937,7 +1060,15 @@ class PremiumAssetGenerator {
           'XXXXX',
         ];
       default:
-        return const ['XXXXX', 'X...X', 'X...X', 'XXXXX', 'X...X', 'X...X', 'XXXXX'];
+        return const [
+          'XXXXX',
+          'X...X',
+          'X...X',
+          'XXXXX',
+          'X...X',
+          'X...X',
+          'XXXXX',
+        ];
     }
   }
 
@@ -1004,7 +1135,14 @@ class PremiumAssetGenerator {
       final ty = (cy + math.sin(angle) * numR - 3).round();
       // Cardinals use accent.
       final col = (hour % 3 == 0) ? accent : fg;
-      _drawDigit(c, hour % 10 == 0 ? 1 : hour % 10, tx, ty, col, ps: _ClockGrid.ps);
+      _drawDigit(
+        c,
+        hour % 10 == 0 ? 1 : hour % 10,
+        tx,
+        ty,
+        col,
+        ps: _ClockGrid.ps,
+      );
       if (hour == 10) {
         _drawDigit(c, 0, tx - 6, ty, col, ps: _ClockGrid.ps);
       } else if (hour == 11) {
@@ -1172,7 +1310,11 @@ class PremiumAssetGenerator {
   static void _paintClockRings(Canvas c) {
     final cx = _ClockGrid.dim ~/ 2;
     final cy = _ClockGrid.dim ~/ 2;
-    final radii = [_ClockGrid.dim ~/ 2 - 1, _ClockGrid.dim ~/ 2 - 5, _ClockGrid.dim ~/ 2 - 9];
+    final radii = [
+      _ClockGrid.dim ~/ 2 - 1,
+      _ClockGrid.dim ~/ 2 - 5,
+      _ClockGrid.dim ~/ 2 - 9,
+    ];
     final colors = [
       const Color(0xFF7EB8FF),
       const Color(0xFFFFFFFF),
@@ -1266,12 +1408,14 @@ class PremiumAssetGenerator {
         final local = (t - a.key) / (b.key - a.key == 0 ? 1 : b.key - a.key);
         final colA = a.value;
         final colB = b.value;
-        final r = (colA.r * 255 * (1 - local) + colB.r * 255 * local).round()
+        final r = (colA.r * 255 * (1 - local) + colB.r * 255 * local)
+            .round()
             .clamp(0, 255);
         final gC = (colA.g * 255 * (1 - local) + colB.g * 255 * local)
             .round()
             .clamp(0, 255);
-        final bl = (colA.b * 255 * (1 - local) + colB.b * 255 * local).round()
+        final bl = (colA.b * 255 * (1 - local) + colB.b * 255 * local)
+            .round()
             .clamp(0, 255);
         return Color.fromARGB(255, r, gC, bl);
       }
@@ -1417,9 +1561,7 @@ class PremiumAssetGenerator {
         final dx = x - gridW / 2;
         final dy = y - gridH / 2;
         final dist = math.sqrt(dx * dx + dy * dy);
-        final maxD = math.sqrt(
-          math.pow(gridW / 2, 2) + math.pow(gridH / 2, 2),
-        );
+        final maxD = math.sqrt(math.pow(gridW / 2, 2) + math.pow(gridH / 2, 2));
         final t = (dist / maxD).clamp(0.0, 1.0);
         col = _mix(col, const Color(0xFF03070D), t * 0.6);
         // Grid lines every 8 cells (mod == 0).

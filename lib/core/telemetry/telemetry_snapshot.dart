@@ -62,21 +62,21 @@ class TelemetrySnapshot {
   bool get isSamplePreview => liveSource == 'sample-preview';
 
   Map<String, dynamic> toJson() => {
-        'batteryPercent': batteryKnown ? batteryPercent : null,
-        'isCharging': batteryKnown ? isCharging : false,
-        'batteryKnown': batteryKnown,
-        'carConnected': carConnected,
-        'carLinkSource': carLinkSource.name,
-        'networkOnline': networkOnline,
-        'liveDataEnabled': liveDataEnabled,
-        'supportsLiveHardware': supportsLiveHardware,
-        'liveSource': liveSource,
-        'bluetoothProxySupported': bluetoothProxySupported,
-        'carLinkLabel': carLinkLabel,
-        'speedKmh': speedKnown ? speedKmh : null,
-        'speedKnown': speedKnown,
-        'updatedAt': updatedAt.toUtc().toIso8601String(),
-      };
+    'batteryPercent': batteryKnown ? batteryPercent : null,
+    'isCharging': batteryKnown ? isCharging : false,
+    'batteryKnown': batteryKnown,
+    'carConnected': carConnected,
+    'carLinkSource': carLinkSource.name,
+    'networkOnline': networkOnline,
+    'liveDataEnabled': liveDataEnabled,
+    'supportsLiveHardware': supportsLiveHardware,
+    'liveSource': liveSource,
+    'bluetoothProxySupported': bluetoothProxySupported,
+    'carLinkLabel': carLinkLabel,
+    'speedKmh': speedKnown ? speedKmh : null,
+    'speedKnown': speedKnown,
+    'updatedAt': updatedAt.toUtc().toIso8601String(),
+  };
 }
 
 /// Stable display-only fill for Studio stock tiles, Home rails, and template
@@ -116,7 +116,8 @@ int? resolveLiveBatteryPercent(
     return ((elapsed / 86400) * 100).round().clamp(0, 100);
   }
 
-  final live = telemetry != null &&
+  final live =
+      telemetry != null &&
       telemetry.liveDataEnabled &&
       telemetry.batteryKnown &&
       !telemetry.isSamplePreview;
@@ -152,8 +153,8 @@ String? telemetryStatusLabel(Layer layer, TelemetrySnapshot snap) {
   final key = layer.format.isNotEmpty
       ? layer.format
       : (layer.role.startsWith('telemetry:')
-          ? layer.role.substring('telemetry:'.length)
-          : '');
+            ? layer.role.substring('telemetry:'.length)
+            : '');
   switch (key) {
     case 'carlink':
     case 'car-link':

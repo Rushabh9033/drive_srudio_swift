@@ -1,0 +1,121 @@
+Total tests passed: 93
+Exact names:
+
+file:///Users/radhikamac/backup2/car-play-cursor/test/bg_cutout_service_test.dart (2 tests):
+  - OnDeviceBgRemover.isSupported matches platform stub/io
+  - BgCutoutService uses on-device only — no rembg fallback
+
+file:///Users/radhikamac/backup2/car-play-cursor/test/phone_bars_regression_test.dart (1 tests):
+  - Phone Bars: battery-bars contract
+
+file:///Users/radhikamac/backup2/car-play-cursor/test/telemetry_test.dart (12 tests):
+  - resolveLiveBatteryPercent uses live telemetry when enabled and known
+  - resolveLiveBatteryPercent returns null when battery unavailable — never invents %
+  - resolveLiveBatteryPercent rejects sample-preview snapshot on live resolver
+  - resolveLiveBatteryPercent dayprogress ignores device battery
+  - resolveDisplayBatteryPercent sample vs live samplePreview paints stable catalog fill
+  - resolveDisplayBatteryPercent sample vs live live path with no sensor stays null — no sample fallback
+  - resolveDisplayBatteryPercent sample vs live samplePreview never leaks into liveSource of DeviceTelemetry path
+  - telemetryStatusLabel car link and charging labels
+  - telemetryStatusLabel sample preview labels look filled
+  - DeviceTelemetry + AppStore manual car connected and app group telemetry mirror
+  - DeviceTelemetry + AppStore live off does not claim batteryKnown or invent percent
+  - DeviceTelemetry + AppStore first-run live default follows supportsLiveHardware
+
+file:///Users/radhikamac/backup2/car-play-cursor/test/catalog_exact_contract_test.dart (8 tests):
+  - Exact Catalog Contract Exact template counts
+  - Exact Catalog Contract Template IDs are strictly unique within the template namespace
+  - Exact Catalog Contract Apex IDs are unique and do not replace stock IDs
+  - Exact Catalog Contract All 12 Apex templates survive V2 JSON round-trip
+  - Exact Catalog Contract Draft save and reopen preserve their layers
+  - Exact Catalog Contract Slot export preserves the correct document
+  - Exact Catalog Contract Every production-visible layer kind is supported by both renderers
+  - Exact Catalog Contract Existing compatibility-sensitive template IDs remain resolvable
+
+file:///Users/radhikamac/backup2/car-play-cursor/test/features/vehicles/car_only_filter_test.dart (16 tests):
+  - CarOnlyFilter unit rules BMW bikes excluded
+  - CarOnlyFilter unit rules BMW cars kept
+  - CarOnlyFilter unit rules Honda bikes out, cars in
+  - CarOnlyFilter unit rules Suzuki bikes out, cars in
+  - CarOnlyFilter unit rules Toyota / Ford / Tesla cars kept
+  - CarOnlyFilter unit rules bus / trailer / chassis / golf cart excluded
+  - CarOnlyFilter unit rules does not exclude valid cars based only on short letters/numbers
+  - CarOnlyFilter unit rules does not trust passenger_car alone for bikes
+  - Master catalog integration filter stats and brand invariant
+  - Master catalog integration BMW bikes not selectable; BMW cars are
+  - Master catalog integration Honda / Suzuki / Toyota / Ford / Tesla cars selectable
+  - Master catalog integration chassis / motorhome rows excluded from catalog
+  - Master catalog integration VehicleCatalogService search never returns empty-model brands
+  - Master catalog integration excluded models cannot be restored as selection
+  - Master catalog integration stats printable snapshot
+  - vehicle_models.json path brands+models combine through filter
+
+file:///Users/radhikamac/backup2/car-play-cursor/test/draft_layer_integrity_test.dart (4 tests):
+  - Sport Badge Edit copy keeps every layer separate
+  - Draft JSON round-trip never flattens multi-layer specs
+  - Empty draw layers are detected for hit-test skip
+  - WidgetSpec.clone(remintLayerIds) preserves layer count
+
+file:///Users/radhikamac/backup2/car-play-cursor/test/permissions_copy_test.dart (4 tests):
+  - DrivePermissionKind covers photos camera location
+  - supportsOsPermissions matches iOS/Android only
+  - isLocationGranted is false without plugins
+  - DrivePermissionOutcome has Settings path
+
+file:///Users/radhikamac/backup2/car-play-cursor/test/telemetry_audit_test.dart (1 tests):
+  - Telemetry Safety: Live templates do not leak fake data in preview, V2 JSON, or slot export
+
+file:///Users/radhikamac/backup2/car-play-cursor/test/speedometer_compose_test.dart (6 tests):
+  - Speedometer catalog Speedometer category is first-class and has templates
+  - composeSpeedometerLayers drops independent speed + unit + GPS badge layers
+  - composeSpeedometerLayers multiple nests offset so layers do not stack
+  - resolveSpeedDigits honesty sample preview shows catalog digits; live shows em dash
+  - resolveSpeedDigits honesty telemetry badge never invents live GPS speed
+  - resolveSpeedDigits honesty live GPS digits when speedKnown
+
+file:///Users/radhikamac/backup2/car-play-cursor/test/widget_test.dart (25 tests):
+  - AppStore hydrates and completes intro
+  - Premium gate blocks until unlocked
+  - Premium templates and sounds stay gated
+  - Draft CRUD: create save duplicate delete
+  - DebugPurchaseService unlocks via PurchaseService
+  - Corrupt drafts are skipped safely
+  - App Group payload validates and includes summary
+  - Locking premium strips premium sound assignments
+  - Hydrate scrubs premium sounds when not premium
+  - App Group encode trims oversized specs
+  - Catalog has free and premium templates
+  - Theme is dark Electric Blue, not purple seed
+  - WidgetCanvas renders clock layer without overflow
+  - Catalog has 12+ templates and 14+ sounds with premium mix
+  - Stock templates have unique layout signatures
+  - Bundled vehicle and sound asset paths cover catalog
+  - Layer animate fields round-trip in JSON
+  - Digital clock labels never trailing-colon
+  - Anim style aliases and kind defaults resolve uniquely
+  - Background library has categories and premium subset
+  - Live templates include clocks batteries and weather breathe
+  - Editor overlay survives clock paint ticks
+  - Logo asset layers use StoredImage not fixed monogram
+  - Animated battery and analog paint without crashing
+  - previewMode wires samplePreview; live path does not
+
+file:///Users/radhikamac/backup2/car-play-cursor/test/rembg_client_test.dart (5 tests):
+  - default and production URL constants
+  - healthCheck true on 200
+  - healthCheck false on network error
+  - removeBackground returns PNG bytes on 200
+  - removeBackground maps connection failure to server-down message
+
+file:///Users/radhikamac/backup2/car-play-cursor/test/deep_links_test.dart (4 tests):
+  - DriveDeepLink.resolve maps drivestudio:// host targets
+  - DriveDeepLink.resolve maps path and app-host forms
+  - DriveDeepLink.resolve maps /deeplink aliases and web query
+  - DriveDeepLink.resolve returns null for unrelated uris
+
+file:///Users/radhikamac/backup2/car-play-cursor/test/playback_output_test.dart (5 tests):
+  - resolvePlaybackRoute phone always resolves to phone speaker
+  - resolvePlaybackRoute car always resolves to car/system route
+  - resolvePlaybackRoute auto follows carConnected
+  - playbackOutput JSON round-trip defaults to auto
+  - audioContextForRoute builds without throwing

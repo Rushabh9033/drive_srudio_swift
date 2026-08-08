@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Drive Studio — Support</title>
+  <style>
+    :root { color-scheme: light dark; --fg: #1a1b22; --muted: #5c5e6a; --bg: #f7f8fb; --card: #fff; --accent: #2f7de1; }
+    @media (prefers-color-scheme: dark) {
+      :root { --fg: #f2f3f7; --muted: #9a9ba8; --bg: #14151c; --card: #1c1d26; --accent: #4d9eff; }
+    }
+    body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--fg); line-height: 1.55; }
+    main { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+    h1 { font-size: 2rem; letter-spacing: -0.03em; margin: 0 0 8px; }
+    h2 { font-size: 1.15rem; margin: 28px 0 8px; }
+    p, li { color: var(--muted); }
+    a { color: var(--accent); }
+    .meta { font-size: 0.9rem; color: var(--muted); margin-bottom: 28px; }
+    .card { background: var(--card); border-radius: 12px; padding: 20px 22px; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Support</h1>
+    <p class="meta">Drive Studio · Help &amp; contact</p>
+
+    <div class="card">
+      <p>
+        Drive Studio designs Home Screen drive widgets, four slot assignments, and short
+        connect / disconnect / reminder cues for Shortcuts. It is <strong>not</strong> a
+        custom CarPlay dashboard shell — Apple does not allow third-party CarPlay UI replacements.
+      </p>
+    </div>
+
+    <h2>Quick answers</h2>
+    <ul>
+      <li><strong>Where is my data?</strong> Drafts and photos stay on your iPhone. No account required.</li>
+      <li><strong>GPS speed blank?</strong> Grant Location While In Use and wait for a fix while the app is open. Otherwise widgets show Unavailable.</li>
+      <li><strong>Home Screen widgets missing?</strong> After Wave 2 (WidgetKit linked on Mac), long-press Home Screen → Add Widget → Drive Studio → Slot 1–4.</li>
+      <li><strong>Premium?</strong> One-time purchase <code>drive_studio_premium</code>. Use Restore purchases with the same Apple ID after reinstall.</li>
+      <li><strong>Remove BG?</strong> Runs on-device. Use Gallery or Camera for your own car photos — no stock OEM car library.</li>
+      <li><strong>Sounds in the car?</strong> Wire Connect / Disconnect cues in Shortcuts → Automation → CarPlay or Bluetooth.</li>
+    </ul>
+
+    <h2>Privacy &amp; terms</h2>
+    <p>
+      <a href="./privacy.html">Privacy Policy</a> ·
+      <a href="./terms.html">Terms of Use (short)</a>
+    </p>
+
+    <h2>Contact</h2>
+    <p>
+      Email <a href="mailto:support@drivestudio.app">support@drivestudio.app</a>
+      (replace with your production inbox before App Store Connect submission).
+      Include your iOS version and a short description of the issue.
+    </p>
+
+    <p class="meta" style="margin-top:40px">
+      Host this file at <code>https://drivestudio.app/support</code> (or your GitHub Pages URL)
+      before submitting to App Store Connect. Source in-repo: <code>docs/legal/support.html</code>.
+    </p>
+  </main>
+</body>
+</html>

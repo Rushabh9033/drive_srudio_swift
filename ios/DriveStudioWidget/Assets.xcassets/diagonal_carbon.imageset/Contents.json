@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "diagonal_carbon.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

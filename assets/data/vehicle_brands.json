@@ -1,0 +1,602 @@
+[
+  {
+    "id": "brand_acura",
+    "name": "Acura",
+    "display_name": "Acura",
+    "market_priority": [
+      "usa",
+      "global"
+    ]
+  },
+  {
+    "id": "brand_alfa_romeo",
+    "name": "Alfa Romeo",
+    "display_name": "Alfa Romeo",
+    "market_priority": [
+      "global",
+      "europe",
+      "usa"
+    ]
+  },
+  {
+    "id": "brand_aston_martin",
+    "name": "Aston Martin",
+    "display_name": "Aston Martin",
+    "market_priority": [
+      "global",
+      "europe",
+      "usa"
+    ]
+  },
+  {
+    "id": "brand_audi",
+    "name": "Audi",
+    "display_name": "Audi",
+    "market_priority": [
+      "global",
+      "europe",
+      "usa"
+    ]
+  },
+  {
+    "id": "brand_bmw",
+    "name": "BMW",
+    "display_name": "BMW",
+    "market_priority": [
+      "global",
+      "europe",
+      "usa",
+      "india"
+    ]
+  },
+  {
+    "id": "brand_byd",
+    "name": "BYD",
+    "display_name": "BYD",
+    "market_priority": [
+      "global",
+      "europe",
+      "asia"
+    ]
+  },
+  {
+    "id": "brand_bentley",
+    "name": "Bentley",
+    "display_name": "Bentley",
+    "market_priority": [
+      "global",
+      "europe",
+      "usa"
+    ]
+  },
+  {
+    "id": "brand_buick",
+    "name": "Buick",
+    "display_name": "Buick",
+    "market_priority": [
+      "usa",
+      "global"
+    ]
+  },
+  {
+    "id": "brand_cadillac",
+    "name": "Cadillac",
+    "display_name": "Cadillac",
+    "market_priority": [
+      "usa",
+      "global"
+    ]
+  },
+  {
+    "id": "brand_chery",
+    "name": "Chery",
+    "display_name": "Chery",
+    "market_priority": [
+      "global",
+      "asia"
+    ]
+  },
+  {
+    "id": "brand_chevrolet",
+    "name": "Chevrolet",
+    "display_name": "Chevrolet",
+    "market_priority": [
+      "usa",
+      "global"
+    ]
+  },
+  {
+    "id": "brand_chrysler",
+    "name": "Chrysler",
+    "display_name": "Chrysler",
+    "market_priority": [
+      "usa",
+      "global"
+    ]
+  },
+  {
+    "id": "brand_citroen",
+    "name": "Citroën",
+    "display_name": "Citroën",
+    "market_priority": [
+      "europe",
+      "global",
+      "india"
+    ]
+  },
+  {
+    "id": "brand_dacia",
+    "name": "Dacia",
+    "display_name": "Dacia",
+    "market_priority": [
+      "europe",
+      "global"
+    ]
+  },
+  {
+    "id": "brand_dodge",
+    "name": "Dodge",
+    "display_name": "Dodge",
+    "market_priority": [
+      "usa",
+      "global"
+    ]
+  },
+  {
+    "id": "brand_ferrari",
+    "name": "Ferrari",
+    "display_name": "Ferrari",
+    "market_priority": [
+      "global",
+      "europe",
+      "usa"
+    ]
+  },
+  {
+    "id": "brand_fiat",
+    "name": "Fiat",
+    "display_name": "Fiat",
+    "market_priority": [
+      "europe",
+      "global",
+      "usa"
+    ]
+  },
+  {
+    "id": "brand_ford",
+    "name": "Ford",
+    "display_name": "Ford",
+    "market_priority": [
+      "usa",
+      "global",
+      "europe",
+      "india"
+    ]
+  },
+  {
+    "id": "brand_gmc",
+    "name": "GMC",
+    "display_name": "GMC",
+    "market_priority": [
+      "usa",
+      "global"
+    ]
+  },
+  {
+    "id": "brand_genesis",
+    "name": "Genesis",
+    "display_name": "Genesis",
+    "market_priority": [
+      "global",
+      "usa",
+      "asia"
+    ]
+  },
+  {
+    "id": "brand_honda",
+    "name": "Honda",
+    "display_name": "Honda",
+    "market_priority": [
+      "global",
+      "usa",
+      "asia",
+      "india"
+    ]
+  },
+  {
+    "id": "brand_hyundai",
+    "name": "Hyundai",
+    "display_name": "Hyundai",
+    "market_priority": [
+      "global",
+      "usa",
+      "asia",
+      "india"
+    ]
+  },
+  {
+    "id": "brand_infiniti",
+    "name": "Infiniti",
+    "display_name": "Infiniti",
+    "market_priority": [
+      "usa",
+      "global"
+    ]
+  },
+  {
+    "id": "brand_isuzu",
+    "name": "Isuzu",
+    "display_name": "Isuzu",
+    "market_priority": [
+      "global",
+      "asia"
+    ]
+  },
+  {
+    "id": "brand_jaguar",
+    "name": "Jaguar",
+    "display_name": "Jaguar",
+    "market_priority": [
+      "global",
+      "europe",
+      "usa"
+    ]
+  },
+  {
+    "id": "brand_jeep",
+    "name": "Jeep",
+    "display_name": "Jeep",
+    "market_priority": [
+      "usa",
+      "global",
+      "india"
+    ]
+  },
+  {
+    "id": "brand_kia",
+    "name": "Kia",
+    "display_name": "Kia",
+    "market_priority": [
+      "global",
+      "usa",
+      "asia",
+      "india"
+    ]
+  },
+  {
+    "id": "brand_koenigsegg",
+    "name": "Koenigsegg",
+    "display_name": "Koenigsegg",
+    "market_priority": [
+      "global",
+      "europe"
+    ]
+  },
+  {
+    "id": "brand_lamborghini",
+    "name": "Lamborghini",
+    "display_name": "Lamborghini",
+    "market_priority": [
+      "global",
+      "europe",
+      "usa"
+    ]
+  },
+  {
+    "id": "brand_land_rover",
+    "name": "Land Rover",
+    "display_name": "Land Rover",
+    "market_priority": [
+      "global",
+      "europe",
+      "usa",
+      "india"
+    ]
+  },
+  {
+    "id": "brand_lexus",
+    "name": "Lexus",
+    "display_name": "Lexus",
+    "market_priority": [
+      "global",
+      "usa",
+      "asia"
+    ]
+  },
+  {
+    "id": "brand_lincoln",
+    "name": "Lincoln",
+    "display_name": "Lincoln",
+    "market_priority": [
+      "usa",
+      "global"
+    ]
+  },
+  {
+    "id": "brand_lotus",
+    "name": "Lotus",
+    "display_name": "Lotus",
+    "market_priority": [
+      "global",
+      "europe"
+    ]
+  },
+  {
+    "id": "brand_lucid",
+    "name": "Lucid",
+    "display_name": "Lucid",
+    "market_priority": [
+      "usa",
+      "global"
+    ]
+  },
+  {
+    "id": "brand_mg",
+    "name": "MG",
+    "display_name": "MG",
+    "market_priority": [
+      "global",
+      "europe",
+      "india"
+    ]
+  },
+  {
+    "id": "brand_mini",
+    "name": "MINI",
+    "display_name": "MINI",
+    "market_priority": [
+      "global",
+      "europe",
+      "usa"
+    ]
+  },
+  {
+    "id": "brand_maserati",
+    "name": "Maserati",
+    "display_name": "Maserati",
+    "market_priority": [
+      "global",
+      "europe",
+      "usa"
+    ]
+  },
+  {
+    "id": "brand_mazda",
+    "name": "Mazda",
+    "display_name": "Mazda",
+    "market_priority": [
+      "global",
+      "usa",
+      "japan"
+    ]
+  },
+  {
+    "id": "brand_mclaren",
+    "name": "McLaren",
+    "display_name": "McLaren",
+    "market_priority": [
+      "global",
+      "europe",
+      "usa"
+    ]
+  },
+  {
+    "id": "brand_mercedes_benz",
+    "name": "Mercedes-Benz",
+    "display_name": "Mercedes-Benz",
+    "market_priority": [
+      "global",
+      "europe",
+      "usa",
+      "india"
+    ]
+  },
+  {
+    "id": "brand_mitsubishi",
+    "name": "Mitsubishi",
+    "display_name": "Mitsubishi",
+    "market_priority": [
+      "global",
+      "asia",
+      "usa"
+    ]
+  },
+  {
+    "id": "brand_nissan",
+    "name": "Nissan",
+    "display_name": "Nissan",
+    "market_priority": [
+      "global",
+      "usa",
+      "japan",
+      "india"
+    ]
+  },
+  {
+    "id": "brand_opel",
+    "name": "Opel",
+    "display_name": "Opel",
+    "market_priority": [
+      "europe",
+      "global"
+    ]
+  },
+  {
+    "id": "brand_peugeot",
+    "name": "Peugeot",
+    "display_name": "Peugeot",
+    "market_priority": [
+      "europe",
+      "global"
+    ]
+  },
+  {
+    "id": "brand_polestar",
+    "name": "Polestar",
+    "display_name": "Polestar",
+    "market_priority": [
+      "global",
+      "europe",
+      "usa"
+    ]
+  },
+  {
+    "id": "brand_porsche",
+    "name": "Porsche",
+    "display_name": "Porsche",
+    "market_priority": [
+      "global",
+      "europe",
+      "usa"
+    ]
+  },
+  {
+    "id": "brand_ram",
+    "name": "Ram",
+    "display_name": "Ram",
+    "market_priority": [
+      "usa",
+      "global"
+    ]
+  },
+  {
+    "id": "brand_renault",
+    "name": "Renault",
+    "display_name": "Renault",
+    "market_priority": [
+      "europe",
+      "global",
+      "india"
+    ]
+  },
+  {
+    "id": "brand_rivian",
+    "name": "Rivian",
+    "display_name": "Rivian",
+    "market_priority": [
+      "usa",
+      "global"
+    ]
+  },
+  {
+    "id": "brand_rolls_royce",
+    "name": "Rolls-Royce",
+    "display_name": "Rolls-Royce",
+    "market_priority": [
+      "global",
+      "europe",
+      "usa"
+    ]
+  },
+  {
+    "id": "brand_saab",
+    "name": "Saab",
+    "display_name": "Saab",
+    "market_priority": [
+      "europe",
+      "global"
+    ]
+  },
+  {
+    "id": "brand_smart",
+    "name": "Smart",
+    "display_name": "Smart",
+    "market_priority": [
+      "europe",
+      "global"
+    ]
+  },
+  {
+    "id": "brand_subaru",
+    "name": "Subaru",
+    "display_name": "Subaru",
+    "market_priority": [
+      "global",
+      "usa",
+      "japan"
+    ]
+  },
+  {
+    "id": "brand_suzuki",
+    "name": "Suzuki",
+    "display_name": "Suzuki",
+    "market_priority": [
+      "global",
+      "asia",
+      "india",
+      "europe"
+    ]
+  },
+  {
+    "id": "brand_tata",
+    "name": "Tata",
+    "display_name": "Tata",
+    "market_priority": [
+      "india",
+      "global"
+    ]
+  },
+  {
+    "id": "brand_tesla",
+    "name": "Tesla",
+    "display_name": "Tesla",
+    "market_priority": [
+      "global",
+      "usa",
+      "europe",
+      "asia"
+    ]
+  },
+  {
+    "id": "brand_toyota",
+    "name": "Toyota",
+    "display_name": "Toyota",
+    "market_priority": [
+      "global",
+      "usa",
+      "japan",
+      "india"
+    ]
+  },
+  {
+    "id": "brand_vinfast",
+    "name": "VinFast",
+    "display_name": "VinFast",
+    "market_priority": [
+      "global",
+      "usa",
+      "asia"
+    ]
+  },
+  {
+    "id": "brand_volkswagen",
+    "name": "Volkswagen",
+    "display_name": "Volkswagen",
+    "market_priority": [
+      "global",
+      "europe",
+      "usa",
+      "india"
+    ]
+  },
+  {
+    "id": "brand_volvo",
+    "name": "Volvo",
+    "display_name": "Volvo",
+    "market_priority": [
+      "global",
+      "europe",
+      "usa"
+    ]
+  },
+  {
+    "id": "brand_skoda",
+    "name": "Škoda",
+    "display_name": "Škoda",
+    "market_priority": [
+      "europe",
+      "global",
+      "india"
+    ]
+  }
+]

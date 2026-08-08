@@ -1,0 +1,657 @@
+[
+  {
+    "key": "body/coupe",
+    "out": "coupe.png",
+    "angle": "front34",
+    "url": "https://images.pexels.com/photos/2365572/pexels-photo-2365572.jpeg?auto=compress&cs=tinysrgb&w=1600",
+    "crop": [
+      0.05,
+      0.12,
+      0.95,
+      0.92
+    ],
+    "note": "Yellow sports coupe front 3/4",
+    "path": "assets\\vehicles\\coupe.png",
+    "bytes": 1301117,
+    "ok": true
+  },
+  {
+    "key": "body/sedan",
+    "out": "sedan.png",
+    "angle": "side",
+    "url": "https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=1600",
+    "crop": [
+      0.02,
+      0.18,
+      0.98,
+      0.88
+    ],
+    "note": "Black sedan side profile, clean fill",
+    "path": "assets\\vehicles\\sedan.png",
+    "bytes": 1011794,
+    "ok": true
+  },
+  {
+    "key": "body/suv",
+    "out": "suv.png",
+    "angle": "front34",
+    "url": "https://images.pexels.com/photos/116675/pexels-photo-116675.jpeg?auto=compress&cs=tinysrgb&w=1600",
+    "crop": [
+      0.08,
+      0.18,
+      0.92,
+      0.9
+    ],
+    "note": "White SUV front 3/4",
+    "path": "assets\\vehicles\\suv.png",
+    "bytes": 779890,
+    "ok": true
+  },
+  {
+    "key": "body/wagon",
+    "out": "wagon.png",
+    "angle": "side",
+    "url": "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=1600&q=85",
+    "crop": [
+      0.05,
+      0.2,
+      0.95,
+      0.88
+    ],
+    "note": "Estate/wagon side",
+    "path": "assets\\vehicles\\wagon.png",
+    "bytes": 391035,
+    "ok": true
+  },
+  {
+    "key": "body/roadster",
+    "out": "roadster.png",
+    "angle": "front34",
+    "url": "https://images.pexels.com/photos/1335077/pexels-photo-1335077.jpeg?auto=compress&cs=tinysrgb&w=1600",
+    "crop": [
+      0.06,
+      0.15,
+      0.94,
+      0.9
+    ],
+    "note": "Red convertible front 3/4",
+    "path": "assets\\vehicles\\roadster.png",
+    "bytes": 1545495,
+    "ok": true
+  },
+  {
+    "key": "body/hatch",
+    "out": "hatch.png",
+    "angle": "side",
+    "url": "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=1600&q=85",
+    "crop": [
+      0.04,
+      0.22,
+      0.96,
+      0.9
+    ],
+    "note": "Hatchback side",
+    "path": "assets\\vehicles\\hatch.png",
+    "bytes": 1219142,
+    "ok": true
+  },
+  {
+    "key": "stock/sedan-front34",
+    "out": "stock/sedan-front34.png",
+    "angle": "front34",
+    "body": "Sedan",
+    "brand": "Mercedes-Benz",
+    "model": "E-Class",
+    "url": "https://images.pexels.com/photos/112460/pexels-photo-112460.jpeg?auto=compress&cs=tinysrgb&w=1400",
+    "crop": [
+      0.08,
+      0.15,
+      0.95,
+      0.9
+    ],
+    "note": "Black sedan front 3/4",
+    "path": "assets\\vehicles\\stock\\sedan-front34.png",
+    "bytes": 1125152,
+    "ok": true
+  },
+  {
+    "key": "stock/sedan-side",
+    "out": "stock/sedan-side.png",
+    "angle": "side",
+    "body": "Sedan",
+    "brand": "BMW",
+    "model": "5 Series",
+    "url": "https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=1400",
+    "crop": [
+      0.02,
+      0.2,
+      0.98,
+      0.88
+    ],
+    "note": "Sedan side profile",
+    "path": "assets\\vehicles\\stock\\sedan-side.png",
+    "bytes": 971035,
+    "ok": true
+  },
+  {
+    "key": "stock/sedan-rear34",
+    "out": "stock/sedan-rear34.png",
+    "angle": "rear34",
+    "body": "Sedan",
+    "brand": "Audi",
+    "model": "A4",
+    "url": "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.1,
+      0.18,
+      0.95,
+      0.88
+    ],
+    "note": "Wagon/sedan rear-bias 3/4",
+    "path": "assets\\vehicles\\stock\\sedan-rear34.png",
+    "bytes": 346303,
+    "ok": true
+  },
+  {
+    "key": "stock/suv-front34",
+    "out": "stock/suv-front34.png",
+    "angle": "front34",
+    "body": "SUV",
+    "brand": "Land Rover",
+    "model": "Range Rover Evoque",
+    "url": "https://images.pexels.com/photos/116675/pexels-photo-116675.jpeg?auto=compress&cs=tinysrgb&w=1400",
+    "crop": [
+      0.1,
+      0.18,
+      0.9,
+      0.9
+    ],
+    "note": "SUV front 3/4",
+    "path": "assets\\vehicles\\stock\\suv-front34.png",
+    "bytes": 756222,
+    "ok": true
+  },
+  {
+    "key": "stock/suv-side",
+    "out": "stock/suv-side.png",
+    "angle": "side",
+    "body": "SUV",
+    "brand": "Toyota",
+    "model": "RAV4",
+    "url": "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.05,
+      0.2,
+      0.95,
+      0.9
+    ],
+    "note": "SUV side/front mix cropped",
+    "path": "assets\\vehicles\\stock\\suv-side.png",
+    "bytes": 963062,
+    "ok": true
+  },
+  {
+    "key": "stock/suv-rear34",
+    "out": "stock/suv-rear34.png",
+    "angle": "rear34",
+    "body": "SUV",
+    "brand": "Porsche",
+    "model": "Cayenne",
+    "url": "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.08,
+      0.15,
+      0.95,
+      0.9
+    ],
+    "note": "SUV trail rear 3/4 lean",
+    "path": "assets\\vehicles\\stock\\suv-rear34.png",
+    "bytes": 1169612,
+    "ok": true
+  },
+  {
+    "key": "stock/coupe-front34",
+    "out": "stock/coupe-front34.png",
+    "angle": "front34",
+    "body": "Coupe",
+    "brand": "Chevrolet",
+    "model": "Camaro",
+    "url": "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.05,
+      0.12,
+      0.95,
+      0.9
+    ],
+    "note": "Orange Camaro front 3/4",
+    "path": "assets\\vehicles\\stock\\coupe-front34.png",
+    "bytes": 1025237,
+    "ok": true
+  },
+  {
+    "key": "stock/coupe-side",
+    "out": "stock/coupe-side.png",
+    "angle": "side",
+    "body": "Coupe",
+    "brand": "Ford",
+    "model": "Mustang",
+    "url": "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.05,
+      0.18,
+      0.95,
+      0.9
+    ],
+    "note": "Classic coupe side/front",
+    "path": "assets\\vehicles\\stock\\coupe-side.png",
+    "bytes": 615210,
+    "ok": true
+  },
+  {
+    "key": "stock/sports-front34",
+    "out": "stock/sports-front34.png",
+    "angle": "front34",
+    "body": "Sports",
+    "brand": "Ferrari",
+    "model": "488",
+    "url": "https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.06,
+      0.14,
+      0.94,
+      0.9
+    ],
+    "note": "Red Ferrari front 3/4",
+    "path": "assets\\vehicles\\stock\\sports-front34.png",
+    "bytes": 656905,
+    "ok": true
+  },
+  {
+    "key": "stock/sports-side",
+    "out": "stock/sports-side.png",
+    "angle": "side",
+    "body": "Sports",
+    "brand": "Lamborghini",
+    "model": "Hurac\u00e1n",
+    "url": "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.04,
+      0.16,
+      0.96,
+      0.9
+    ],
+    "note": "Dark supercar",
+    "path": "assets\\vehicles\\stock\\sports-side.png",
+    "bytes": 688240,
+    "ok": true
+  },
+  {
+    "key": "stock/sports-rear34",
+    "out": "stock/sports-rear34.png",
+    "angle": "rear34",
+    "body": "Sports",
+    "brand": "Porsche",
+    "model": "911",
+    "url": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.08,
+      0.15,
+      0.95,
+      0.9
+    ],
+    "note": "Sports rear 3/4",
+    "path": "assets\\vehicles\\stock\\sports-rear34.png",
+    "bytes": 768625,
+    "ok": true
+  },
+  {
+    "key": "stock/hatch-front34",
+    "out": "stock/hatch-front34.png",
+    "angle": "front34",
+    "body": "Hatch",
+    "brand": "Volkswagen",
+    "model": "Golf",
+    "url": "https://images.unsplash.com/photo-1489824904134-891ab64532f1?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.06,
+      0.18,
+      0.94,
+      0.9
+    ],
+    "note": "City hatch front 3/4",
+    "path": "assets\\vehicles\\stock\\hatch-front34.png",
+    "bytes": 827695,
+    "ok": true
+  },
+  {
+    "key": "stock/hatch-side",
+    "out": "stock/hatch-side.png",
+    "angle": "side",
+    "body": "Hatch",
+    "brand": "Mini",
+    "model": "Cooper",
+    "url": "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.04,
+      0.22,
+      0.96,
+      0.9
+    ],
+    "note": "Compact hatch side",
+    "path": "assets\\vehicles\\stock\\hatch-side.png",
+    "bytes": 1150434,
+    "ok": true
+  },
+  {
+    "key": "stock/truck-front34",
+    "out": "stock/truck-front34.png",
+    "angle": "front34",
+    "body": "Truck",
+    "brand": "Ford",
+    "model": "F-150",
+    "url": "https://images.unsplash.com/photo-1605893477799-b99e3b8b93fe?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.06,
+      0.12,
+      0.94,
+      0.92
+    ],
+    "note": "Pickup front 3/4",
+    "path": "assets\\vehicles\\stock\\truck-front34.png",
+    "bytes": 970281,
+    "ok": true
+  },
+  {
+    "key": "stock/truck-side",
+    "out": "stock/truck-side.png",
+    "angle": "side",
+    "body": "Truck",
+    "brand": "Toyota",
+    "model": "Tacoma",
+    "url": "https://images.unsplash.com/photo-1464219789935-c2d9d9aba644?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.04,
+      0.15,
+      0.96,
+      0.9
+    ],
+    "note": "Pickup trail",
+    "path": "assets\\vehicles\\stock\\truck-side.png",
+    "bytes": 1089395,
+    "ok": true
+  },
+  {
+    "key": "stock/ev-front34",
+    "out": "stock/ev-front34.png",
+    "angle": "front34",
+    "body": "Sedan",
+    "brand": "Tesla",
+    "model": "Model 3",
+    "url": "https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.08,
+      0.18,
+      0.92,
+      0.9
+    ],
+    "note": "EV sedan front 3/4",
+    "path": "assets\\vehicles\\stock\\ev-front34.png",
+    "bytes": 1017847,
+    "ok": true
+  },
+  {
+    "key": "stock/ev-suv",
+    "out": "stock/ev-suv.png",
+    "angle": "front34",
+    "body": "SUV",
+    "brand": "Tesla",
+    "model": "Model Y",
+    "url": "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.08,
+      0.16,
+      0.92,
+      0.9
+    ],
+    "note": "EV crossover",
+    "path": "assets\\vehicles\\stock\\ev-suv.png",
+    "bytes": 605460,
+    "ok": true
+  },
+  {
+    "key": "stock/neon-sports",
+    "out": "stock/neon-sports.png",
+    "angle": "front34",
+    "body": "Sports",
+    "brand": "Lamborghini",
+    "model": "Aventador",
+    "url": "https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.05,
+      0.12,
+      0.95,
+      0.9
+    ],
+    "note": "Neon sports front 3/4",
+    "path": "assets\\vehicles\\stock\\neon-sports.png",
+    "bytes": 636564,
+    "ok": true
+  },
+  {
+    "key": "stock/luxury-front34",
+    "out": "stock/luxury-front34.png",
+    "angle": "front34",
+    "body": "Sedan",
+    "brand": "BMW",
+    "model": "3 Series",
+    "url": "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.06,
+      0.16,
+      0.94,
+      0.9
+    ],
+    "note": "Luxury sedan front 3/4",
+    "path": "assets\\vehicles\\stock\\luxury-front34.png",
+    "bytes": 726203,
+    "ok": true
+  },
+  {
+    "key": "stock/japan-sports",
+    "out": "stock/japan-sports.png",
+    "angle": "side",
+    "body": "Sports",
+    "brand": "Toyota",
+    "model": "Supra",
+    "url": "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.05,
+      0.18,
+      0.95,
+      0.9
+    ],
+    "note": "Compact sports",
+    "path": "assets\\vehicles\\stock\\japan-sports.png",
+    "bytes": 1002891,
+    "ok": true
+  },
+  {
+    "key": "stock/roadster-front34",
+    "out": "stock/roadster-front34.png",
+    "angle": "front34",
+    "body": "Sports",
+    "brand": "Mazda",
+    "model": "MX-5",
+    "url": "https://images.pexels.com/photos/1335077/pexels-photo-1335077.jpeg?auto=compress&cs=tinysrgb&w=1400",
+    "crop": [
+      0.08,
+      0.16,
+      0.92,
+      0.9
+    ],
+    "note": "Roadster front 3/4",
+    "path": "assets\\vehicles\\stock\\roadster-front34.png",
+    "bytes": 1460203,
+    "ok": true
+  },
+  {
+    "key": "models/aurelio-gt",
+    "out": "models/aurelio-gt.png",
+    "angle": "front34",
+    "url": "https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.06,
+      0.14,
+      0.94,
+      0.9
+    ],
+    "note": "Sports coupe",
+    "path": "assets\\vehicles\\models\\aurelio-gt.png",
+    "bytes": 656905,
+    "ok": true
+  },
+  {
+    "key": "models/aurelio-lumen",
+    "out": "models/aurelio-lumen.png",
+    "angle": "front34",
+    "url": "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.06,
+      0.16,
+      0.94,
+      0.9
+    ],
+    "note": "Sedan",
+    "path": "assets\\vehicles\\models\\aurelio-lumen.png",
+    "bytes": 726203,
+    "ok": true
+  },
+  {
+    "key": "models/aurelio-vento",
+    "out": "models/aurelio-vento.png",
+    "angle": "front34",
+    "url": "https://images.pexels.com/photos/1335077/pexels-photo-1335077.jpeg?auto=compress&cs=tinysrgb&w=1400",
+    "crop": [
+      0.08,
+      0.16,
+      0.92,
+      0.9
+    ],
+    "note": "Roadster",
+    "path": "assets\\vehicles\\models\\aurelio-vento.png",
+    "bytes": 1460203,
+    "ok": true
+  },
+  {
+    "key": "models/velora-pulse",
+    "out": "models/velora-pulse.png",
+    "angle": "front34",
+    "url": "https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.05,
+      0.12,
+      0.95,
+      0.9
+    ],
+    "note": "Sports EV look",
+    "path": "assets\\vehicles\\models\\velora-pulse.png",
+    "bytes": 636564,
+    "ok": true
+  },
+  {
+    "key": "models/velora-ex",
+    "out": "models/velora-ex.png",
+    "angle": "front34",
+    "url": "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.05,
+      0.12,
+      0.95,
+      0.9
+    ],
+    "note": "Coupe",
+    "path": "assets\\vehicles\\models\\velora-ex.png",
+    "bytes": 1025237,
+    "ok": true
+  },
+  {
+    "key": "models/velora-arc",
+    "out": "models/velora-arc.png",
+    "angle": "side",
+    "url": "https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=1400",
+    "crop": [
+      0.02,
+      0.2,
+      0.98,
+      0.88
+    ],
+    "note": "Sedan side",
+    "path": "assets\\vehicles\\models\\velora-arc.png",
+    "bytes": 971035,
+    "ok": true
+  },
+  {
+    "key": "models/northstar-trail",
+    "out": "models/northstar-trail.png",
+    "angle": "front34",
+    "url": "https://images.pexels.com/photos/116675/pexels-photo-116675.jpeg?auto=compress&cs=tinysrgb&w=1400",
+    "crop": [
+      0.1,
+      0.18,
+      0.9,
+      0.9
+    ],
+    "note": "SUV",
+    "path": "assets\\vehicles\\models\\northstar-trail.png",
+    "bytes": 756222,
+    "ok": true
+  },
+  {
+    "key": "models/northstar-peak",
+    "out": "models/northstar-peak.png",
+    "angle": "side",
+    "url": "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.05,
+      0.2,
+      0.95,
+      0.88
+    ],
+    "note": "Wagon",
+    "path": "assets\\vehicles\\models\\northstar-peak.png",
+    "bytes": 384112,
+    "ok": true
+  },
+  {
+    "key": "models/kinetic-mono",
+    "out": "models/kinetic-mono.png",
+    "angle": "front34",
+    "url": "https://images.unsplash.com/photo-1489824904134-891ab64532f1?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.06,
+      0.18,
+      0.94,
+      0.9
+    ],
+    "note": "Hatch",
+    "path": "assets\\vehicles\\models\\kinetic-mono.png",
+    "bytes": 827695,
+    "ok": true
+  },
+  {
+    "key": "models/kinetic-flux",
+    "out": "models/kinetic-flux.png",
+    "angle": "side",
+    "url": "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=1400&q=85",
+    "crop": [
+      0.04,
+      0.22,
+      0.96,
+      0.9
+    ],
+    "note": "Compact",
+    "path": "assets\\vehicles\\models\\kinetic-flux.png",
+    "bytes": 1150434,
+    "ok": true
+  }
+]

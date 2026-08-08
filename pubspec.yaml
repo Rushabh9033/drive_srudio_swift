@@ -1,0 +1,51 @@
+name: drive_studio
+description: Drive Studio — design your drive view widgets, slots, and sounds.
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  go_router: ^16.2.0
+  provider: ^6.1.5
+  shared_preferences: ^2.5.3
+  google_fonts: ^6.3.1
+  uuid: ^4.5.1
+  intl: ^0.20.2
+  image_picker: ^1.2.0
+  collection: ^1.19.1
+  audioplayers: ^6.7.1
+  path_provider: ^2.1.5
+  image: ^4.8.0
+  in_app_purchase: ^3.2.3
+  http: ^1.6.0
+  battery_plus: ^7.1.1
+  connectivity_plus: ^7.3.1
+  image_background_remover: 2.0.1
+  geolocator: 13.0.4
+  permission_handler: ^13.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/logos/
+    - assets/vehicles/
+    - assets/vehicles/models/
+    - assets/vehicles/stock/
+    - assets/vehicles/catalog/
+    - assets/sounds/
+    - assets/sounds/connect/
+    - assets/sounds/disconnect/
+    - assets/sounds/model_connect/
+    - assets/data/
+    - assets/backgrounds/

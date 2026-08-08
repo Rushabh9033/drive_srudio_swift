@@ -1,0 +1,60 @@
+Launching lib/main.dart on iPhone (wireless) in debug mode...
+Wireless debugging on iOS 26 may be slower than expected. For better performance, consider using a wired (USB) connection.
+To ensure your app continues to launch on upcoming iOS versions, UIScene lifecycle support will soon be required. Please see https://flutter.dev/to/uiscene-migration for the migration guide.
+
+All plugins found for ios are Swift Packages, but your project still has CocoaPods integration. Your project uses a non-standard Podfile and will need to be migrated to Swift Package Manager manually. Some steps you may need to complete include:
+  * In the ios/ directory run "pod deintegrate"
+  * Transition any Pod dependencies to Swift Package equivalents. See https://developer.apple.com/documentation/xcode/adding-package-dependencies-to-your-app
+  * Transition any custom logic
+  * Remove the include to "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig" in your ios/Flutter/Debug.xcconfig
+  * Remove the include to "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig" in your ios/Flutter/Release.xcconfig
+
+Removing CocoaPods integration will improve the project's build time.
+Automatically signing iOS for device deployment using specified development team in Xcode project: YZ6GW884AL
+Running Xcode build...                                          
+Xcode build done.                                           13.9s
+Installing and launching...                                     
+[UIKit App Config] `UIScene` lifecycle will soon be required. Failure to adopt will result in an assert in the future.
+Installing and launching...                                       105.8s
+Syncing files to device iPhone (wireless)...                        61ms
+
+Flutter run key commands.
+r Hot reload. 🔥🔥🔥
+R Hot restart.
+h List all available interactive commands.
+d Detach (terminate "flutter run" but leave application running).
+c Clear the screen
+q Quit (terminate the application on the device).
+
+A Dart VM Service on iPhone is available at: http://127.0.0.1:50111/6MRRZyW7Z50=/
+The Flutter DevTools debugger and profiler on iPhone is available at: http://127.0.0.1:50111/6MRRZyW7Z50=/devtools/?uri=ws://127.0.0.1:50111/6MRRZyW7Z50=/ws
+[AppGroupChannel] 🗑 Deleted orphan generation: A61A0BAC-AC54-4F27-9D86-6A5B7F41EDEA
+[AppGroupChannel] 🗑 Deleted orphan generation: E384F7CC-ECE9-4371-ACDE-45116265DC8C
+[AppGroupChannel] 🗑 Deleted orphan generation: B584D8F4-5643-46D2-AD8C-C16EAB82D76D
+[AppGroupChannel] 🗑 Deleted orphan generation: 5B88185B-3F7D-4383-B15E-306B80F6C39D
+[AppGroupChannel] 🗑 Deleted orphan generation: C35067E4-9436-4472-96FD-DCACB550E658
+[AppGroupChannel] 🗑 Deleted orphan generation: 778D5F97-4DAE-4F78-BD3E-2A6CE9A7CC8A
+[AppGroupChannel] 🗑 Deleted orphan generation: 573DF52A-5224-44D2-B7F7-6F4493DEA0D9
+[AppGroupChannel] 🗑 Deleted orphan generation: CA63FEFF-48D5-490D-990C-D5664439FE59
+[AppGroupChannel] 🗑 Deleted orphan generation: F47661A9-395F-4FBE-92B6-733F32466B1D
+[AppGroupChannel] 🗑 Deleted orphan generation: 0C817F81-511D-41BE-97AB-C1D81D1BAE7C
+[AppGroupChannel] 🗑 Deleted orphan generation: 7DB7AB0B-3F37-4DB0-AB5E-D8EE22EA2673
+[AppGroupChannel] 🗑 Deleted orphan generation: E0D245A0-F7E2-4FA0-BD35-A69793469485
+[AppGroupChannel] 🗑 Deleted orphan generation: 82A35712-73A0-475F-98A6-138F58A33958
+[AppGroupChannel] 🗑 Deleted orphan generation: BD236D03-2E7F-421B-9D42-0BDB5685C49B
+[AppGroupChannel] 🗑 Deleted orphan generation: 84A9CD54-155E-402A-9150-B8E34193C252
+[AppGroupChannel] 🗑 Deleted orphan generation: ADBACAF7-0D00-4DEF-8514-978A8A96F904
+[AppGroupChannel] 🗑 Deleted orphan generation: ED55F49B-0391-4A37-9CBA-D6CAE321BDF7
+[AppGroupChannel] 🗑 Deleted orphan generation: B32BF1A4-963A-49F5-922D-E0B98B38D2CE
+[AppGroupChannel] 🗑 Deleted orphan generation: 75E2CA5C-D27F-4701-AA10-026C27365EE4
+[AppGroupChannel] 🗑 Deleted orphan generation: C458043A-9F2C-40FD-B16B-68B27F1681ED
+[AppGroupChannel] 🗑 Deleted orphan generation: 3D018A6B-2894-4154-BF0A-873F5B64380D
+[AppGroupChannel] 🗑 Deleted orphan generation: 5ACCE995-BAC1-41A2-96FB-631F92A74CB2
+[AppGroupChannel] 🗑 Deleted orphan generation: E13F0528-562F-46F6-98E2-F1B73C984F30
+[AppGroupChannel] 🗑 Deleted orphan generation: 3B77CBFD-6950-4F0D-AC39-57EEE6740BBB
+[AppGroupChannel] 🗑 Deleted orphan generation: 944D94D3-3B5F-4CC5-A090-476A47763B0D
+[AppGroupChannel] 🗑 Deleted orphan generation: 3795AF92-5B5C-4A6C-9AC8-904C4A5908FF
+The OS has terminated the Flutter debug connection for being inactive in the background for too long.
+There are no errors with your Flutter application.
+To reconnect, launch your application again via 'flutter run'
+Lost connection to device.

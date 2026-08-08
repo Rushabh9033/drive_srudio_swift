@@ -28,11 +28,11 @@ class StockCarImage {
   final String thumb;
 
   String get angleLabel => switch (angle) {
-    'front34' => 'Front ¾',
-    'side' => 'Side',
-    'rear34' => 'Rear ¾',
-    _ => angle,
-  };
+        'front34' => 'Front ¾',
+        'side' => 'Side',
+        'rear34' => 'Rear ¾',
+        _ => angle,
+      };
 
   String get displaySrc =>
       assetPath.isNotEmpty ? assetPath : (url.isNotEmpty ? url : thumb);
@@ -54,10 +54,7 @@ abstract final class StockCars {
   /// No bundled car photos.
   static const items = <StockCarImage>[];
 
-  static List<StockCarImage> filtered(
-    String bodyClass, {
-    String angle = 'All',
-  }) {
+  static List<StockCarImage> filtered(String bodyClass, {String angle = 'All'}) {
     return const [];
   }
 

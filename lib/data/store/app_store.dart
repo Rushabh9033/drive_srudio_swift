@@ -37,8 +37,7 @@ class AppStore extends ChangeNotifier {
   /// When true, widgets bind battery / car-link / network from [DeviceTelemetry].
   /// Default: ON on iPhone/Android, OFF on web/desktop preview (set in hydrate /
   /// [DeviceTelemetry.start] if the user has not chosen yet).
-  bool useLiveDeviceData =
-      !kIsWeb &&
+  bool useLiveDeviceData = !kIsWeb &&
       (defaultTargetPlatform == TargetPlatform.iOS ||
           defaultTargetPlatform == TargetPlatform.android);
 
@@ -93,17 +92,16 @@ class AppStore extends ChangeNotifier {
         }
         // Drop slot refs that point at missing/corrupt drafts.
         final ids = drafts.map((d) => d.id).toSet();
-        slots = slots
-            .map((s) => s != null && ids.contains(s) ? s : null)
-            .toList();
+        slots = slots.map((s) => s != null && ids.contains(s) ? s : null).toList();
         vehicle = Vehicle.fromJson(
           Map<String, dynamic>.from(map['vehicle'] as Map? ?? {}),
         );
         sounds = SoundPrefs.fromJson(
           Map<String, dynamic>.from(map['sounds'] as Map? ?? {}),
         );
-        lastLocalSync =
-            map['lastLocalSync'] as int? ?? map['lastRefresh'] as int? ?? 0;
+        lastLocalSync = map['lastLocalSync'] as int? ??
+            map['lastRefresh'] as int? ??
+            0;
         lastEditedDraftId = map['lastEditedDraftId'] as String?;
         isPremium = map['isPremium'] as bool? ?? false;
         howToSeen = map['howToSeen'] as bool? ?? false;
@@ -154,12 +152,12 @@ class AppStore extends ChangeNotifier {
       };
       await prefs.setString(_storageKey, jsonEncode(payload));
       // Keep App Group mirror in sync for future WidgetKit consumers.
-      await writeAppGroupMirror(buildAppGroupPayload());
+      await writeAppGroupMirror(await buildAppGroupPayload());
     } catch (_) {}
   }
 
   /// Payload contract shared with iOS WidgetKit via App Group (see README_IOS_NATIVE.md).
-  Map<String, dynamic> buildAppGroupPayload() {
+  Future<Map<String, dynamic>> buildAppGroupPayload() async {
     return buildWidgetKitSharedState(
       slots: slots,
       drafts: drafts,
@@ -174,7 +172,7 @@ class AppStore extends ChangeNotifier {
   Future<void> mirrorTelemetry(TelemetrySnapshot snap) async {
     lastTelemetry = snap;
     try {
-      await writeAppGroupMirror(buildAppGroupPayload());
+      await writeAppGroupMirror(await buildAppGroupPayload());
     } catch (_) {}
   }
 
@@ -298,9 +296,7 @@ class AppStore extends ChangeNotifier {
         slots.add(null);
       }
       final ids = drafts.map((d) => d.id).toSet();
-      slots = slots
-          .map((s) => s != null && ids.contains(s) ? s : null)
-          .toList();
+      slots = slots.map((s) => s != null && ids.contains(s) ? s : null).toList();
       if (lastEditedDraftId != null && !ids.contains(lastEditedDraftId)) {
         lastEditedDraftId = null;
       }
@@ -312,8 +308,7 @@ class AppStore extends ChangeNotifier {
   }
 
   String vehicleDisplayName() {
-    if (vehicle.displayName.trim().isNotEmpty)
-      return vehicle.displayName.trim();
+    if (vehicle.displayName.trim().isNotEmpty) return vehicle.displayName.trim();
     final brand = Catalog.brandById(vehicle.brandId);
     final model = Catalog.modelById(vehicle.brandId, vehicle.modelId);
     return '${brand?.name ?? 'Vehicle'} ${model?.name ?? ''}'.trim();
@@ -350,7 +345,12 @@ class AppStore extends ChangeNotifier {
     return createDraft(name ?? '${template.name} copy', template.spec);
   }
 
-  void saveDraft(String id, {String? name, WidgetSpec? spec}) {
+  void saveDraft(
+    String id, {
+    String? name,
+    WidgetSpec? spec,
+    String? widgetImagePath,
+  }) {
     drafts = drafts.map((d) {
       if (d.id != id) return d;
       return Draft(
@@ -359,9 +359,28 @@ class AppStore extends ChangeNotifier {
         updatedAt: DateTime.now().millisecondsSinceEpoch,
         // Persist full multi-layer WidgetSpec — never bake to one image.
         spec: spec?.clone() ?? d.spec.clone(),
+        // Persist the pre-rendered PNG path for the iOS widget. Live data
+        // (clock/battery/analog) is NOT baked into the PNG.
+        widgetImagePath: widgetImagePath ?? d.widgetImagePath,
       );
     }).toList();
     lastEditedDraftId = id;
+    _commit();
+  }
+
+  /// Updates only the widgetImagePath on a draft (called by the editor
+  /// after capturing the static PNG).
+  void setWidgetImagePath(String id, String path) {
+    drafts = drafts.map((d) {
+      if (d.id != id) return d;
+      return Draft(
+        id: d.id,
+        name: d.name,
+        updatedAt: d.updatedAt,
+        spec: d.spec,
+        widgetImagePath: path,
+      );
+    }).toList();
     _commit();
   }
 
@@ -437,11 +456,6 @@ class AppStore extends ChangeNotifier {
   void markLocalSync() {
     lastLocalSync = DateTime.now().millisecondsSinceEpoch;
     _commit();
-  }
-
-  @Deprecated('Use markLocalSync — no remote manifest in V1')
-  Future<void> refreshManifest() async {
-    markLocalSync();
   }
 }
 

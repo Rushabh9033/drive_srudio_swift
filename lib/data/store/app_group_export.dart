@@ -29,17 +29,22 @@ const _channel = MethodChannel('drive_studio/app_group');
 /// live battery / charging / car-link / network from that device so a future
 /// Mac-built WidgetKit extension can render without inventing values.
 ///
-/// Spec layers are included for rich SwiftUI rendering. Large image `src` /
-/// `imageSrc` data-URLs are stripped so the payload stays under the soft cap.
-Map<String, dynamic> buildWidgetKitSharedState({
+/// Spec layers are included for rich SwiftUI rendering. Flutter asset
+/// references (`assets/vehicles/coupe.png`, `assets/backgrounds/...`,
+/// etc.) are resolved into `data:image/png;base64,…` URIs via
+/// [rootBundle] at JSON-build time so the widget extension can decode
+/// them inline without needing filesystem access to the Flutter assets.
+Future<Map<String, dynamic>> buildWidgetKitSharedState({
   required List<String?> slots,
   required List<Draft> drafts,
   required Vehicle vehicle,
   required SoundPrefs sounds,
   required bool isPremium,
   TelemetrySnapshot? telemetry,
-}) {
+}) async {
   final byId = {for (final d in drafts) d.id: d};
+  // Resolve vehicle.customImage: if it's a Flutter asset path, encode it.
+  final customImageDataUri = await _resolveToDataUri(vehicle.customImage);
   return {
     'schemaVersion': appGroupSchemaVersion,
     'updatedAt': DateTime.now().toUtc().toIso8601String(),
@@ -49,26 +54,26 @@ Map<String, dynamic> buildWidgetKitSharedState({
       'modelId': vehicle.modelId,
       'artwork': vehicle.artwork.name,
       'displayName': vehicle.displayName,
-      'hasCustomImage': vehicle.customImage != null,
-      'customImage': vehicle.customImage,
+      'hasCustomImage': customImageDataUri != null,
+      'customImage': customImageDataUri,
     },
     'sounds': sounds.toJson(),
     if (telemetry != null && !telemetry.isSamplePreview)
       'telemetry': telemetry.toJson(),
     'slots': [
       for (var i = 0; i < 4; i++)
-        _slotPayload(i, slots.length > i ? slots[i] : null, byId),
+        await _slotPayload(i, slots.length > i ? slots[i] : null, byId),
     ],
   };
 }
 
-Map<String, dynamic> _slotPayload(
+Future<Map<String, dynamic>> _slotPayload(
   int index,
   String? draftId,
   Map<String, Draft> byId,
-) {
+) async {
   final draft = draftId == null ? null : byId[draftId];
-  final spec = draft == null ? null : _compactSpec(draft.spec);
+  final spec = draft == null ? null : await _compactSpec(draft.spec);
   final summary = draft == null ? null : _slotSummary(draft.spec);
   return {
     'index': index,
@@ -77,6 +82,7 @@ Map<String, dynamic> _slotPayload(
     'updatedAt': draft?.updatedAt,
     'summary': summary,
     'spec': spec,
+    if (draft?.widgetImagePath != null) 'widgetImagePath': draft!.widgetImagePath,
   };
 }
 
@@ -124,10 +130,16 @@ Map<String, dynamic> _slotSummary(WidgetSpec spec) {
   };
 }
 
-Map<String, dynamic> _compactSpec(WidgetSpec spec) {
+Future<Map<String, dynamic>> _compactSpec(WidgetSpec spec) async {
   final bg = Map<String, dynamic>.from(spec.background.toJson());
-  final imageSrc = bg['imageSrc'] as String?;
-  if (imageSrc != null && imageSrc.length > 256 * 1024) {
+  // Resolve background imageSrc: Flutter asset → data URI; otherwise leave
+  // as-is so the V2 writer (native) can copy it through the App Group.
+  if (bg['imageSrc'] is String && (bg['imageSrc'] as String).isNotEmpty) {
+    final resolved = await _resolveToDataUri(bg['imageSrc'] as String);
+    if (resolved != null) bg['imageSrc'] = resolved;
+  }
+  if (bg['imageSrc'] != null &&
+      (bg['imageSrc'] as String).length > 256 * 1024) {
     bg.remove('imageSrc');
     bg['imageOmitted'] = true;
   }
@@ -136,14 +148,59 @@ Map<String, dynamic> _compactSpec(WidgetSpec spec) {
   for (final layer in spec.layers) {
     final m = Map<String, dynamic>.from(layer.toJson());
     final src = m['src'] as String?;
-    if (src != null && src.length > 256 * 1024) {
+    if (src != null && src.isNotEmpty) {
+      final resolved = await _resolveToDataUri(src);
+      if (resolved != null) m['src'] = resolved;
+    }
+    final finalSrc = m['src'] as String?;
+    if (finalSrc != null && finalSrc.length > 256 * 1024) {
       m.remove('src');
       m['srcOmitted'] = true;
     }
     layers.add(m);
   }
 
-  return {'background': bg, 'layers': layers};
+  return {
+    'background': bg,
+    'layers': layers,
+  };
+}
+
+/// Resolves a Flutter asset path (`assets/...`) to either:
+///   - **Small assets** (≤ 200 KB raw bytes): inline as a base64 data URI.
+///     Widget decodes inline. No filesystem coupling.
+///   - **Large assets** (> 200 KB raw bytes): keep as `assets/...` path.
+///     The native V2 writer (`AppGroupChannel.swift`) copies them through
+///     the App Group container so the widget can read them from disk.
+///
+/// The 200 KB threshold is empirical: body-style heroes (~1 MB) and model
+/// heroes (~1 MB) blow past the 256 KB cap and 2 MB total JSON cap. Keeping
+/// the path lets the V2 writer handle them via App Group instead.
+///
+/// Returns the input unchanged for data URIs, HTTP(S) URLs, or anything
+/// else the widget extension should handle itself.
+Future<String?> _resolveToDataUri(String? src) async {
+  if (src == null || src.isEmpty) return src;
+  if (src.startsWith('data:')) return src;
+  if (src.startsWith('http://') || src.startsWith('https://')) return src;
+  if (!src.startsWith('assets/')) return src;
+  try {
+    final bytes = await rootBundle.load(src);
+    final rawLen = bytes.lengthInBytes;
+    // Skip encoding for large assets — the native V2 writer will copy them
+    // through the App Group container. Keeps the JSON payload small.
+    if (rawLen > 200 * 1024) {
+      return src;
+    }
+    final encoded = base64Encode(bytes.buffer.asUint8List(
+      bytes.offsetInBytes,
+      bytes.lengthInBytes,
+    ));
+    return 'data:image/png;base64,$encoded';
+  } catch (e) {
+    if (kDebugMode) debugPrint('Failed to load Flutter asset $src: $e');
+    return null;
+  }
 }
 
 /// Validates required top-level keys before mirroring / bridging.
@@ -171,11 +228,13 @@ String encodeAppGroupPayload(Map<String, dynamic> payload) {
   if (bytes > appGroupMaxJsonBytes) {
     // Strip specs, keep summaries — still useful for WidgetKit title/clock.
     final slim = Map<String, dynamic>.from(payload);
-    final slots = (slim['slots'] as List).map((e) {
-      final m = Map<String, dynamic>.from(e as Map);
-      m.remove('spec');
-      return m;
-    }).toList();
+    final slots = (slim['slots'] as List)
+        .map((e) {
+          final m = Map<String, dynamic>.from(e as Map);
+          m.remove('spec');
+          return m;
+        })
+        .toList();
     slim['slots'] = slots;
     slim['trimmed'] = true;
     return jsonEncode(slim);

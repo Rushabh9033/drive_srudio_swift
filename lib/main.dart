@@ -12,7 +12,9 @@ import 'data/store/app_store.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -28,7 +30,11 @@ Future<void> main() async {
   final purchases = createPurchaseService(store);
   await purchases.init();
   runApp(
-    DriveStudioApp(store: store, purchases: purchases, telemetry: telemetry),
+    DriveStudioApp(
+      store: store,
+      purchases: purchases,
+      telemetry: telemetry,
+    ),
   );
 }
 

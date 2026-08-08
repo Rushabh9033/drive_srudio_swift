@@ -4,6 +4,10 @@ enum AppGroupContract {
     static let suiteName = "group.com.drivestudio.shared"
     static let stateKey = "widget_state_v1"
     static let schemaVersion = 1
+    /// Schema version of the V2 envelope (metadata blob + generation folder).
+    /// Used by AppGroupChannel.Metadata(...) when writing, and matched by the
+    /// widget extension's AppGroupHelper when reading.
+    static let schemaVersionV2 = 2
 }
 
 /*

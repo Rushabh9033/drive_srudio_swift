@@ -16,27 +16,27 @@ abstract final class DriveRadii {
 
 abstract final class DriveShadows {
   static List<BoxShadow> get elevated => [
-    BoxShadow(
-      color: DriveColors.shadowElevated,
-      blurRadius: 60,
-      offset: const Offset(0, -28),
-      spreadRadius: -28,
-    ),
-  ];
+        BoxShadow(
+          color: DriveColors.shadowElevated,
+          blurRadius: 60,
+          offset: const Offset(0, -28),
+          spreadRadius: -28,
+        ),
+      ];
 
   static List<BoxShadow> get glow => [
-    const BoxShadow(
-      color: DriveColors.glowRing,
-      blurRadius: 0,
-      spreadRadius: 1,
-    ),
-    BoxShadow(
-      color: DriveColors.glowSoft.withValues(alpha: 0.35),
-      blurRadius: 45,
-      offset: const Offset(0, 18),
-      spreadRadius: -22,
-    ),
-  ];
+        const BoxShadow(
+          color: DriveColors.glowRing,
+          blurRadius: 0,
+          spreadRadius: 1,
+        ),
+        BoxShadow(
+          color: DriveColors.glowSoft.withValues(alpha: 0.35),
+          blurRadius: 45,
+          offset: const Offset(0, 18),
+          spreadRadius: -22,
+        ),
+      ];
 }
 
 ThemeData buildDriveTheme() {
@@ -139,10 +139,7 @@ ThemeData buildDriveTheme() {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(DriveRadii.lg),
         ),
-        textStyle: GoogleFonts.manrope(
-          fontWeight: FontWeight.w700,
-          fontSize: 15,
-        ),
+        textStyle: GoogleFonts.manrope(fontWeight: FontWeight.w700, fontSize: 15),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -153,10 +150,7 @@ ThemeData buildDriveTheme() {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(DriveRadii.lg),
         ),
-        textStyle: GoogleFonts.manrope(
-          fontWeight: FontWeight.w600,
-          fontSize: 15,
-        ),
+        textStyle: GoogleFonts.manrope(fontWeight: FontWeight.w600, fontSize: 15),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
@@ -173,8 +167,7 @@ ThemeData buildDriveTheme() {
     ),
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith((s) {
-        if (s.contains(WidgetState.selected))
-          return DriveColors.primaryForeground;
+        if (s.contains(WidgetState.selected)) return DriveColors.primaryForeground;
         return DriveColors.mutedForeground;
       }),
       trackColor: WidgetStateProperty.resolveWith((s) {
@@ -186,9 +179,7 @@ ThemeData buildDriveTheme() {
       backgroundColor: DriveColors.carbon,
       modalBackgroundColor: DriveColors.carbon,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(DriveRadii.xxxl),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(DriveRadii.xxxl)),
       ),
     ),
     dialogTheme: DialogThemeData(

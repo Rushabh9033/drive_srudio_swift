@@ -15,16 +15,19 @@ void main() {
     await store.hydrate();
     store.unlockPremiumDebug();
 
-    final template = Catalog.templates.firstWhere((t) => t.id == 'clock-split');
+    final template = Catalog.templates.firstWhere(
+      (t) => t.id == 'analog-sport-badge',
+    );
     expect(template.spec.layers.length, greaterThanOrEqualTo(3));
     final kinds = template.spec.layers.map((l) => l.kind).toList();
+    expect(kinds, contains(LayerKind.badge));
     expect(kinds, contains(LayerKind.clock));
-    expect(kinds, contains(LayerKind.divider));
+    expect(kinds, contains(LayerKind.analog));
 
     final draftId = store.createDraftFromTemplate(template);
     expect(draftId, isNotNull);
     final draft = store.draftById(draftId!)!;
-    expect(draft.name, 'Split Time copy');
+    expect(draft.name, 'Sport Badge copy');
     expect(draft.spec.layers.length, template.spec.layers.length);
     expect(
       draft.spec.layers.map((l) => l.kind).toList(),
@@ -92,7 +95,9 @@ void main() {
   });
 
   test('WidgetSpec.clone(remintLayerIds) preserves layer count', () {
-    final tpl = Catalog.templates.firstWhere((t) => t.id == 'clock-split');
+    final tpl = Catalog.templates.firstWhere(
+      (t) => t.id == 'analog-sport-badge',
+    );
     final a = tpl.spec.clone(remintLayerIds: true);
     final b = tpl.spec.clone(remintLayerIds: true);
     expect(a.layers.length, tpl.spec.layers.length);

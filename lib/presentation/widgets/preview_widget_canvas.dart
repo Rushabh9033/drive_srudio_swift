@@ -14,14 +14,12 @@ class PreviewWidgetCanvas extends StatefulWidget {
   const PreviewWidgetCanvas({
     super.key,
     required this.spec,
-    this.scale = 1.0,
-    this.logicalSize = 360,
-    this.samplePreview,
+    this.scale = 0.55,
+    this.logicalSize = 180,
   });
 
   final WidgetSpec spec;
   final double scale;
-  final bool? samplePreview;
 
   /// Logical canvas size before [FittedBox] shrinks into the tile.
   final double logicalSize;
@@ -56,7 +54,6 @@ class _PreviewWidgetCanvasState extends State<PreviewWidgetCanvas> {
                   spec: widget.spec,
                   scale: widget.scale,
                   previewMode: true,
-                  samplePreview: widget.samplePreview,
                 )
               : DecoratedBox(
                   decoration: BoxDecoration(

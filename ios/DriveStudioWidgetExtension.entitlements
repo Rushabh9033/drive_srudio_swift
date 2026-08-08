@@ -6,5 +6,16 @@
 	<array>
 		<string>group.com.drivestudio.shared</string>
 	</array>
+	<!--
+		Mirror the same CarPlay entitlement as Runner.entitlements once Apple
+		grants approval — both targets need it for the widget to surface in
+		Settings → General → CarPlay → [My Car] → Customize → Widgets.
+
+		Until Apple grants the entitlement, keep this commented out.
+	-->
+	<!--
+	<key>com.apple.developer.carplay-driving-task</key>
+	<true/>
+	-->
 </dict>
 </plist>

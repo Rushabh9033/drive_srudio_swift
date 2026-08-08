@@ -91,8 +91,7 @@ class _BatteryLayerViewState extends State<BatteryLayerView>
         duration: Duration(milliseconds: ms),
       );
       final style = widget.layer.resolvedAnimStyle;
-      final reverse =
-          style != AnimStyles.progressLoop &&
+      final reverse = style != AnimStyles.progressLoop &&
           style != AnimStyles.shimmer &&
           style != AnimStyles.sweep &&
           style != AnimStyles.rotateSlow;
@@ -117,8 +116,7 @@ class _BatteryLayerViewState extends State<BatteryLayerView>
         ? samplePreviewTelemetry
         : _snapOrNull(context, listen: true);
     final layer = widget.layer;
-    final knownBattery =
-        telemetry != null &&
+    final knownBattery = telemetry != null &&
         telemetry.liveDataEnabled &&
         telemetry.batteryKnown;
     final charging = knownBattery && telemetry.isCharging;
@@ -211,7 +209,11 @@ class _BatteryLayerViewState extends State<BatteryLayerView>
 
 /// Live analog faces — hands driven by [now], optional smooth second-hand ticker.
 class AnalogLayerView extends StatefulWidget {
-  const AnalogLayerView({super.key, required this.layer, this.now});
+  const AnalogLayerView({
+    super.key,
+    required this.layer,
+    this.now,
+  });
 
   final Layer layer;
   final DateTime? now;
@@ -288,21 +290,21 @@ class _AnalogLayerViewState extends State<AnalogLayerView>
     final ctrl = _smooth;
 
     Widget face(DateTime stamp) => CustomPaint(
-      painter: _AnalogPainter(
-        style: style,
-        now: stamp,
-        accent: accent,
-        face: faceColor,
-        ink: hands,
-        muted: ticks,
-        showSeconds: showSeconds,
-        ringSpin:
-            layer.animate && layer.resolvedAnimStyle == AnimStyles.rotateSlow
-            ? (ctrl?.value ?? 0)
-            : 0,
-      ),
-      child: const SizedBox.expand(),
-    );
+          painter: _AnalogPainter(
+            style: style,
+            now: stamp,
+            accent: accent,
+            face: faceColor,
+            ink: hands,
+            muted: ticks,
+            showSeconds: showSeconds,
+            ringSpin: layer.animate &&
+                    layer.resolvedAnimStyle == AnimStyles.rotateSlow
+                ? (ctrl?.value ?? 0)
+                : 0,
+          ),
+          child: const SizedBox.expand(),
+        );
 
     if (ctrl == null) {
       return face(widget.now ?? DateTime.now());
@@ -409,7 +411,9 @@ class _BatteryPainter extends CustomPainter {
 
     final label = TextPainter(
       text: TextSpan(
-        text: !known ? 'UNAVAILABLE' : (isCharging ? 'CHARGING' : 'BATTERY'),
+        text: !known
+            ? 'UNAVAILABLE'
+            : (isCharging ? 'CHARGING' : 'BATTERY'),
         style: GoogleFonts.dmMono(
           fontSize: size.width * 0.07,
           fontWeight: FontWeight.w700,
@@ -452,7 +456,10 @@ class _BatteryPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    pctPainter.paint(canvas, Offset(size.width * 0.1, size.height * 0.28));
+    pctPainter.paint(
+      canvas,
+      Offset(size.width * 0.1, size.height * 0.28),
+    );
 
     final barTop = size.height * 0.72;
     final barH = size.height * 0.1;
@@ -481,7 +488,9 @@ class _BatteryPainter extends CustomPainter {
   void _paintMetrics(Canvas canvas, Size size) {
     final title = TextPainter(
       text: TextSpan(
-        text: !known ? 'UNAVAILABLE' : (isCharging ? 'CHARGING' : 'ON BATTERY'),
+        text: !known
+            ? 'UNAVAILABLE'
+            : (isCharging ? 'CHARGING' : 'ON BATTERY'),
         style: GoogleFonts.dmMono(
           fontSize: size.width * 0.065,
           fontWeight: FontWeight.w700,
@@ -627,7 +636,10 @@ class _BatteryPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    pct.paint(canvas, Offset((size.width - pct.width) / 2, size.height * 0.72));
+    pct.paint(
+      canvas,
+      Offset((size.width - pct.width) / 2, size.height * 0.72),
+    );
   }
 
   void _paintDots(Canvas canvas, Size size) {
@@ -666,7 +678,10 @@ class _BatteryPainter extends CustomPainter {
           ),
           Radius.circular(dotW * 0.2),
         );
-        canvas.drawRRect(rect, Paint()..color = on ? accent : track);
+        canvas.drawRRect(
+          rect,
+          Paint()..color = on ? accent : track,
+        );
         i++;
       }
     }
@@ -682,7 +697,10 @@ class _BatteryPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    pct.paint(canvas, Offset((size.width - pct.width) / 2, size.height * 0.78));
+    pct.paint(
+      canvas,
+      Offset((size.width - pct.width) / 2, size.height * 0.78),
+    );
   }
 
   void _paintMatrix(Canvas canvas, Size size) {
@@ -726,7 +744,10 @@ class _BatteryPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    pct.paint(canvas, Offset((size.width - pct.width) / 2, size.height * 0.86));
+    pct.paint(
+      canvas,
+      Offset((size.width - pct.width) / 2, size.height * 0.86),
+    );
   }
 
   void _paintLightning(Canvas canvas, Size size) {
@@ -760,7 +781,10 @@ class _BatteryPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    pct.paint(canvas, Offset((size.width - pct.width) / 2, size.height * 0.78));
+    pct.paint(
+      canvas,
+      Offset((size.width - pct.width) / 2, size.height * 0.78),
+    );
   }
 
   void _paintPill(Canvas canvas, Size size) {
@@ -785,12 +809,11 @@ class _BatteryPainter extends CustomPainter {
         pillH,
       ),
       Paint()
-        ..shader =
-            LinearGradient(
-              colors: [accent.withValues(alpha: 0.75), accent],
-            ).createShader(
-              Rect.fromLTWH(size.width * 0.11, 0, size.width * 0.78, pillH),
-            ),
+        ..shader = LinearGradient(
+          colors: [accent.withValues(alpha: 0.75), accent],
+        ).createShader(
+          Rect.fromLTWH(size.width * 0.11, 0, size.width * 0.78, pillH),
+        ),
     );
     canvas.restore();
 
@@ -805,7 +828,10 @@ class _BatteryPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    pct.paint(canvas, Offset((size.width - pct.width) / 2, size.height * 0.68));
+    pct.paint(
+      canvas,
+      Offset((size.width - pct.width) / 2, size.height * 0.68),
+    );
   }
 
   void _paintPie(Canvas canvas, Size size) {
@@ -854,7 +880,10 @@ class _BatteryPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    sub.paint(canvas, Offset((size.width - sub.width) / 2, size.height * 0.78));
+    sub.paint(
+      canvas,
+      Offset((size.width - sub.width) / 2, size.height * 0.78),
+    );
   }
 
   void _paintLarge(Canvas canvas, Size size) {
@@ -870,7 +899,10 @@ class _BatteryPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    pct.paint(canvas, Offset((size.width - pct.width) / 2, size.height * 0.12));
+    pct.paint(
+      canvas,
+      Offset((size.width - pct.width) / 2, size.height * 0.12),
+    );
 
     final unit = TextPainter(
       text: TextSpan(
@@ -959,7 +991,10 @@ class _BatteryPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    sub.paint(canvas, Offset((size.width - sub.width) / 2, size.height * 0.84));
+    sub.paint(
+      canvas,
+      Offset((size.width - sub.width) / 2, size.height * 0.84),
+    );
   }
 
   void _paintBars(Canvas canvas, Size size) {
@@ -1005,12 +1040,7 @@ class _BatteryPainter extends CustomPainter {
   void _paintHud(Canvas canvas, Size size) {
     final inset = size.width * 0.08;
     final frame = RRect.fromRectAndRadius(
-      Rect.fromLTWH(
-        inset,
-        inset,
-        size.width - inset * 2,
-        size.height - inset * 2,
-      ),
+      Rect.fromLTWH(inset, inset, size.width - inset * 2, size.height - inset * 2),
       const Radius.circular(10),
     );
     canvas.drawRRect(
@@ -1086,40 +1116,11 @@ class _BatteryPainter extends CustomPainter {
   }
 
   void _paintMinimalBatt(Canvas canvas, Size size) {
-    if (size.width > size.height * 1.5) {
-      final text = TextPainter(
-        text: TextSpan(
-          text: _num,
-          style: GoogleFonts.manrope(
-            fontSize: size.height * 0.8,
-            fontWeight: FontWeight.w700,
-            color: ink,
-          ),
-          children: [
-            TextSpan(
-              text: '%',
-              style: GoogleFonts.dmMono(
-                fontSize: size.height * 0.45,
-                color: accent,
-              ),
-            ),
-          ],
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
-      text.paint(
-        canvas,
-        Offset((size.width - text.width) / 2, (size.height - text.height) / 2),
-      );
-      return;
-    }
-
-    final ref = math.min(size.width, size.height);
     final pct = TextPainter(
       text: TextSpan(
         text: _num,
         style: GoogleFonts.manrope(
-          fontSize: ref * 0.38,
+          fontSize: size.width * 0.38,
           fontWeight: FontWeight.w700,
           color: ink,
           height: 0.95,
@@ -1129,25 +1130,29 @@ class _BatteryPainter extends CustomPainter {
     )..layout();
     pct.paint(
       canvas,
-      Offset((size.width - pct.width) / 2, size.height / 2 - ref * 0.28),
+      Offset((size.width - pct.width) / 2, size.height * 0.22),
     );
     final unit = TextPainter(
       text: TextSpan(
         text: '%',
-        style: GoogleFonts.dmMono(fontSize: ref * 0.1, color: accent),
+        style: GoogleFonts.dmMono(
+          fontSize: size.width * 0.1,
+          color: accent,
+        ),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
     unit.paint(
       canvas,
-      Offset((size.width - unit.width) / 2, size.height / 2 + ref * 0.12),
+      Offset((size.width - unit.width) / 2, size.height * 0.62),
     );
     canvas.drawLine(
-      Offset(size.width / 2 - ref * 0.15, size.height / 2 + ref * 0.28),
-      Offset(size.width / 2 + ref * 0.15, size.height / 2 + ref * 0.28),
+      Offset(size.width * 0.35, size.height * 0.78),
+      Offset(size.width * 0.65, size.height * 0.78),
       Paint()
         ..color = accent
-        ..strokeWidth = 1.5,
+        ..strokeWidth = 2
+        ..strokeCap = StrokeCap.round,
     );
   }
 
@@ -1156,11 +1161,17 @@ class _BatteryPainter extends CustomPainter {
     _dualBlock(
       canvas,
       size,
-      x: size.width * 0.05,
+      x: size.width * 0.08,
       label: 'SOC',
       value: known ? percent : 0,
     );
-    _dualBlock(canvas, size, x: size.width * 0.55, label: 'USE', value: usable);
+    _dualBlock(
+      canvas,
+      size,
+      x: size.width * 0.52,
+      label: 'USE',
+      value: usable,
+    );
     canvas.drawLine(
       Offset(size.width * 0.5, size.height * 0.22),
       Offset(size.width * 0.5, size.height * 0.78),
@@ -1194,7 +1205,7 @@ class _BatteryPainter extends CustomPainter {
       text: TextSpan(
         text: known ? '$value%' : '—',
         style: GoogleFonts.manrope(
-          fontSize: size.width * 0.14,
+          fontSize: size.width * 0.16,
           fontWeight: FontWeight.w800,
           color: ink,
         ),
@@ -1248,8 +1259,8 @@ class _BatteryPainter extends CustomPainter {
         Paint()
           ..color = i < lit
               ? (i >= segs - 2
-                    ? DriveColors.primaryGlow
-                    : accent.withValues(alpha: 0.55 + 0.45 * (i / segs)))
+                  ? DriveColors.primaryGlow
+                  : accent.withValues(alpha: 0.55 + 0.45 * (i / segs)))
               : track,
       );
     }
@@ -1303,7 +1314,10 @@ class _BatteryPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    pct.paint(canvas, Offset((size.width - pct.width) / 2, size.height * 0.18));
+    pct.paint(
+      canvas,
+      Offset((size.width - pct.width) / 2, size.height * 0.18),
+    );
   }
 
   void _paintVertBar(Canvas canvas, Size size) {
@@ -1347,7 +1361,10 @@ class _BatteryPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    pct.paint(canvas, Offset((size.width - pct.width) / 2, size.height * 0.8));
+    pct.paint(
+      canvas,
+      Offset((size.width - pct.width) / 2, size.height * 0.8),
+    );
   }
 
   void _paintOrbit(Canvas canvas, Size size) {
@@ -1475,14 +1492,8 @@ class _AnalogPainter extends CustomPainter {
     );
     for (var i = 0; i < 12; i++) {
       final a = i * math.pi / 6 - math.pi / 2;
-      final outer = Offset(
-        c.dx + math.cos(a) * r * 0.88,
-        c.dy + math.sin(a) * r * 0.88,
-      );
-      final inner = Offset(
-        c.dx + math.cos(a) * r * 0.72,
-        c.dy + math.sin(a) * r * 0.72,
-      );
+      final outer = Offset(c.dx + math.cos(a) * r * 0.88, c.dy + math.sin(a) * r * 0.88);
+      final inner = Offset(c.dx + math.cos(a) * r * 0.72, c.dy + math.sin(a) * r * 0.72);
       canvas.drawLine(
         inner,
         outer,
@@ -1658,10 +1669,8 @@ class _AnalogPainter extends CustomPainter {
       final a = i * math.pi / 6 - math.pi / 2;
       final major = i % 3 == 0;
       canvas.drawLine(
-        Offset(
-          c.dx + math.cos(a) * r * (major ? 0.68 : 0.78),
-          c.dy + math.sin(a) * r * (major ? 0.68 : 0.78),
-        ),
+        Offset(c.dx + math.cos(a) * r * (major ? 0.68 : 0.78),
+            c.dy + math.sin(a) * r * (major ? 0.68 : 0.78)),
         Offset(c.dx + math.cos(a) * r * 0.88, c.dy + math.sin(a) * r * 0.88),
         Paint()
           ..color = major ? ink : muted
@@ -1723,14 +1732,8 @@ class _AnalogPainter extends CustomPainter {
     for (var i = 0; i < 8; i++) {
       final a = i * math.pi / 4 - math.pi / 2;
       canvas.drawLine(
-        Offset(
-          sub.dx + math.cos(a) * sr * 0.55,
-          sub.dy + math.sin(a) * sr * 0.55,
-        ),
-        Offset(
-          sub.dx + math.cos(a) * sr * 0.85,
-          sub.dy + math.sin(a) * sr * 0.85,
-        ),
+        Offset(sub.dx + math.cos(a) * sr * 0.55, sub.dy + math.sin(a) * sr * 0.55),
+        Offset(sub.dx + math.cos(a) * sr * 0.85, sub.dy + math.sin(a) * sr * 0.85),
         Paint()
           ..color = muted
           ..strokeWidth = 1,
@@ -1788,10 +1791,7 @@ class _AnalogPainter extends CustomPainter {
 
     canvas.drawLine(
       c,
-      Offset(
-        c.dx + math.cos(hourA) * r * 0.45,
-        c.dy + math.sin(hourA) * r * 0.45,
-      ),
+      Offset(c.dx + math.cos(hourA) * r * 0.45, c.dy + math.sin(hourA) * r * 0.45),
       Paint()
         ..color = handColor
         ..strokeWidth = 3.8
@@ -1799,10 +1799,7 @@ class _AnalogPainter extends CustomPainter {
     );
     canvas.drawLine(
       c,
-      Offset(
-        c.dx + math.cos(minA) * r * 0.68,
-        c.dy + math.sin(minA) * r * 0.68,
-      ),
+      Offset(c.dx + math.cos(minA) * r * 0.68, c.dy + math.sin(minA) * r * 0.68),
       Paint()
         ..color = handColor.withValues(alpha: 0.9)
         ..strokeWidth = 2.6
@@ -1811,10 +1808,7 @@ class _AnalogPainter extends CustomPainter {
     if (showSeconds && style != 'minimal') {
       canvas.drawLine(
         c,
-        Offset(
-          c.dx + math.cos(secA) * r * 0.78,
-          c.dy + math.sin(secA) * r * 0.78,
-        ),
+        Offset(c.dx + math.cos(secA) * r * 0.78, c.dy + math.sin(secA) * r * 0.78),
         Paint()
           ..color = accentHand
           ..strokeWidth = 1.4

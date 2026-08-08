@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/nav/studio_browse.dart';
 import '../../core/theme/drive_colors.dart';
-import '../widgets/brand_monogram.dart';
 import '../widgets/drive_ui.dart';
 
 /// Image Selection: user photo only (gallery / camera) + in-app Remove BG.
@@ -53,10 +52,8 @@ Future<ImageSelectionChoice?> showImageSelectionSheet(BuildContext context) {
                     backgroundColor: DriveColors.graphite,
                     foregroundColor: DriveColors.foreground,
                     shape: const StadiumBorder(),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
-                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   ),
                   child: const Text('Close'),
                 ),
@@ -113,12 +110,18 @@ Future<ImageSelectionChoice?> showImageSelectionSheet(BuildContext context) {
   );
 }
 
-enum ImageSelectionChoice { gallery, camera, removeBg }
+enum ImageSelectionChoice {
+  gallery,
+  camera,
+  removeBg,
+}
 
 /// Post-pick sheet — Remove BG or keep original.
 enum RemoveBgPromptChoice { keep, removeBg }
 
-Future<RemoveBgPromptChoice?> showRemoveBackgroundPrompt(BuildContext context) {
+Future<RemoveBgPromptChoice?> showRemoveBackgroundPrompt(
+  BuildContext context,
+) {
   return DriveSheet.show<RemoveBgPromptChoice>(
     context: context,
     builder: (ctx) => DriveSheet(
@@ -146,7 +149,8 @@ Future<RemoveBgPromptChoice?> showRemoveBackgroundPrompt(BuildContext context) {
                 fontSize: 16,
               ),
             ),
-            onPressed: () => Navigator.pop(ctx, RemoveBgPromptChoice.removeBg),
+            onPressed: () =>
+                Navigator.pop(ctx, RemoveBgPromptChoice.removeBg),
             icon: const Icon(Icons.auto_fix_high, size: 22),
             label: const Text('Remove BG'),
           ),
@@ -223,6 +227,7 @@ class _ImageOption extends StatelessWidget {
     );
   }
 }
+
 
 /// Text editor: color, weight, shadow, radius, optional gradient.
 Future<Map<String, dynamic>?> showTextEditorSheet(
@@ -395,10 +400,7 @@ class _TextEditorBodyState extends State<_TextEditorBody> {
               ),
             ),
             const SizedBox(height: 16),
-            Text(
-              'Color',
-              style: GoogleFonts.manrope(fontWeight: FontWeight.w700),
-            ),
+            Text('Color', style: GoogleFonts.manrope(fontWeight: FontWeight.w700)),
             const SizedBox(height: 10),
             Wrap(
               spacing: 10,
@@ -430,10 +432,8 @@ class _TextEditorBodyState extends State<_TextEditorBody> {
               ],
             ),
             const SizedBox(height: 16),
-            Text(
-              'Gradient',
-              style: GoogleFonts.manrope(fontWeight: FontWeight.w700),
-            ),
+            Text('Gradient',
+                style: GoogleFonts.manrope(fontWeight: FontWeight.w700)),
             const SizedBox(height: 10),
             SizedBox(
               height: 28,
@@ -454,18 +454,10 @@ class _TextEditorBodyState extends State<_TextEditorBody> {
                             borderRadius: BorderRadius.circular(999),
                             gradient: LinearGradient(
                               colors: [
-                                Color(
-                                  int.parse(
-                                    'FF${g.$1.substring(1)}',
-                                    radix: 16,
-                                  ),
-                                ),
-                                Color(
-                                  int.parse(
-                                    'FF${g.$2.substring(1)}',
-                                    radix: 16,
-                                  ),
-                                ),
+                                Color(int.parse('FF${g.$1.substring(1)}',
+                                    radix: 16)),
+                                Color(int.parse('FF${g.$2.substring(1)}',
+                                    radix: 16)),
                               ],
                             ),
                             border: Border.all(
@@ -481,10 +473,8 @@ class _TextEditorBodyState extends State<_TextEditorBody> {
               ),
             ),
             const SizedBox(height: 16),
-            Text(
-              'Weight',
-              style: GoogleFonts.manrope(fontWeight: FontWeight.w700),
-            ),
+            Text('Weight',
+                style: GoogleFonts.manrope(fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -500,10 +490,8 @@ class _TextEditorBodyState extends State<_TextEditorBody> {
             const SizedBox(height: 12),
             Row(
               children: [
-                Text(
-                  'Shadow',
-                  style: GoogleFonts.manrope(fontWeight: FontWeight.w700),
-                ),
+                Text('Shadow',
+                    style: GoogleFonts.manrope(fontWeight: FontWeight.w700)),
                 const Spacer(),
                 Switch(
                   value: _shadow,
@@ -511,10 +499,8 @@ class _TextEditorBodyState extends State<_TextEditorBody> {
                 ),
               ],
             ),
-            Text(
-              'Radius',
-              style: GoogleFonts.manrope(fontWeight: FontWeight.w700),
-            ),
+            Text('Radius',
+                style: GoogleFonts.manrope(fontWeight: FontWeight.w700)),
             Slider(
               value: _radius.clamp(0, 24),
               min: 0,
@@ -554,7 +540,10 @@ Future<Map<String, String>?> showClockEditorSheet(
 }
 
 class _ClockEditorBody extends StatefulWidget {
-  const _ClockEditorBody({required this.clockFormat, required this.dateFormat});
+  const _ClockEditorBody({
+    required this.clockFormat,
+    required this.dateFormat,
+  });
   final String clockFormat;
   final String dateFormat;
 
@@ -664,10 +653,8 @@ class _ClockEditorBodyState extends State<_ClockEditorBody> {
                 onTap: () => _browseStock('Drive'),
               ),
               const SizedBox(height: 16),
-              Text(
-                'Time format',
-                style: GoogleFonts.manrope(fontWeight: FontWeight.w700),
-              ),
+              Text('Time format',
+                  style: GoogleFonts.manrope(fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               _FmtTile(
                 title: 'Standard (12:55)',
@@ -680,10 +667,8 @@ class _ClockEditorBodyState extends State<_ClockEditorBody> {
                 onTap: () => setState(() => _clock = '24'),
               ),
               const SizedBox(height: 16),
-              Text(
-                'Date format',
-                style: GoogleFonts.manrope(fontWeight: FontWeight.w700),
-              ),
+              Text('Date format',
+                  style: GoogleFonts.manrope(fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               _FmtTile(
                 title: 'Standard (Oct 13)',
@@ -792,11 +777,8 @@ class _FmtTile extends StatelessWidget {
                   ),
                 ),
                 if (selected)
-                  const Icon(
-                    CupertinoIcons.check_mark_circled_solid,
-                    color: DriveColors.primary,
-                    size: 20,
-                  ),
+                  const Icon(CupertinoIcons.check_mark_circled_solid,
+                      color: DriveColors.primary, size: 20),
               ],
             ),
           ),

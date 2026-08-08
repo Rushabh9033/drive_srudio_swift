@@ -5,8 +5,7 @@ import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
-import 'image_store_io.dart'
-    if (dart.library.html) 'image_store_stub.dart'
+import 'image_store_io.dart' if (dart.library.html) 'image_store_stub.dart'
     as io;
 
 const _uuid = Uuid();
@@ -18,10 +17,8 @@ Future<String?> persistPickedImage(
   int maxEdge = 1024,
   int jpegQuality = 82,
 }) async {
-  final resized = await compute(
-    _resizeJpeg,
-    _ResizeArgs(bytes, maxEdge, jpegQuality),
-  );
+  final resized =
+      await compute(_resizeJpeg, _ResizeArgs(bytes, maxEdge, jpegQuality));
   if (resized == null) return null;
 
   if (kIsWeb) {
@@ -39,8 +36,12 @@ Future<String?> persistPickedImage(
 }
 
 /// Persists a PNG (keeps alpha — for rembg cutouts).
-Future<String?> persistPickedPng(Uint8List bytes, {int maxEdge = 1024}) async {
-  final resized = await compute(_resizePng, _ResizeArgs(bytes, maxEdge, 100));
+Future<String?> persistPickedPng(
+  Uint8List bytes, {
+  int maxEdge = 1024,
+}) async {
+  final resized =
+      await compute(_resizePng, _ResizeArgs(bytes, maxEdge, 100));
   if (resized == null) return null;
 
   if (kIsWeb) {
@@ -66,10 +67,10 @@ Future<Uint8List?> loadImageBytes(String? src) async {
       return base64Decode(src.substring(comma + 1));
     }
     if (kIsWeb) return null;
-
+    
     var bytes = await io.readImageFile(src);
     if (bytes != null) return bytes;
-
+    
     // Resolve dynamic iOS sandbox paths
     final filename = src.split('/').last;
     final dir = await getApplicationDocumentsDirectory();
@@ -87,9 +88,8 @@ class _ResizeArgs {
 }
 
 img.Image? _scaleToMaxEdge(img.Image decoded, int maxEdge) {
-  final longest = decoded.width > decoded.height
-      ? decoded.width
-      : decoded.height;
+  final longest =
+      decoded.width > decoded.height ? decoded.width : decoded.height;
   if (longest <= maxEdge) return decoded;
   if (decoded.width >= decoded.height) {
     return img.copyResize(

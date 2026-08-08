@@ -203,7 +203,7 @@ void main() {
       expect(snap.liveSource, isNotEmpty);
       expect(snap.isSamplePreview, isFalse);
 
-      final payload = store.buildAppGroupPayload();
+      final payload = await store.buildAppGroupPayload();
       expect(payload['telemetry'], isA<Map>());
       final tel = payload['telemetry'] as Map;
       expect(tel['batteryPercent'], 67);

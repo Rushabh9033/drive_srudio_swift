@@ -19,9 +19,8 @@ class LegalScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final isPrivacy = document == LegalDocument.privacy;
     final title = isPrivacy ? LegalCopy.privacyTitle : LegalCopy.termsTitle;
-    final sections = isPrivacy
-        ? LegalCopy.privacySections
-        : LegalCopy.termsSections;
+    final sections =
+        isPrivacy ? LegalCopy.privacySections : LegalCopy.termsSections;
 
     return AppScreen(
       child: Column(

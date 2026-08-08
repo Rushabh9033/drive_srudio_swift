@@ -2,21 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSMotionUsageDescription</key>
-	<string>Drive Studio uses motion data to automatically detect when you are driving and update your dashboard context.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Drive Studio uses your location to fetch local weather conditions and support navigation services.</string>
-	<key>NSCalendarsUsageDescription</key>
-	<string>Drive Studio needs calendar access to show your upcoming events on the dashboard.</string>
-	<key>NSCalendarsFullAccessUsageDescription</key>
-	<string>Drive Studio needs full calendar access to show and manage your upcoming events on the dashboard.</string>
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>comgooglemaps</string>
-		<string>waze</string>
-	</array>
-	<key>NSAppleMusicUsageDescription</key>
-	<string>Drive Studio uses Apple Music to control playback directly from your dashboard.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -75,21 +60,6 @@
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
-	<key>NSMotionUsageDescription</key>
-	<string>Drive Studio uses motion data to automatically detect when you are driving and update your dashboard context.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Drive Studio uses your location to fetch local weather conditions and support navigation services.</string>
-	<key>NSCalendarsUsageDescription</key>
-	<string>Drive Studio needs calendar access to show your upcoming events on the dashboard.</string>
-	<key>NSCalendarsFullAccessUsageDescription</key>
-	<string>Drive Studio needs full calendar access to show and manage your upcoming events on the dashboard.</string>
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>comgooglemaps</string>
-		<string>waze</string>
-	</array>
-	<key>NSAppleMusicUsageDescription</key>
-	<string>Drive Studio uses Apple Music to control playback directly from your dashboard.</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
@@ -103,6 +73,6 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>MinimumOSVersion</key>
-	<string>15.0</string>
+	<string>16.0</string>
 </dict>
 </plist>

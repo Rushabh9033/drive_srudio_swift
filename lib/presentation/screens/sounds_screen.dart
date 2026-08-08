@@ -35,7 +35,8 @@ class _SoundsScreenState extends State<SoundsScreen> {
 
   Future<void> _preview(SoundCue sound) async {
     final store = context.read<AppStore>();
-    final carConnected = context.read<DeviceTelemetry>().snapshot.carConnected;
+    final carConnected =
+        context.read<DeviceTelemetry>().snapshot.carConnected;
     await HapticFeedback.selectionClick();
     setState(() => _playing = sound.id);
     await TonePlayer.instance.play(
@@ -57,10 +58,10 @@ class _SoundsScreenState extends State<SoundsScreen> {
   }
 
   String? _selectedFor(AppStore store) => switch (_group) {
-    SoundGroup.connect => store.sounds.connect,
-    SoundGroup.disconnect => store.sounds.disconnect,
-    SoundGroup.reminder => store.sounds.reminder,
-  };
+        SoundGroup.connect => store.sounds.connect,
+        SoundGroup.disconnect => store.sounds.disconnect,
+        SoundGroup.reminder => store.sounds.reminder,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -120,14 +121,14 @@ class _SoundsScreenState extends State<SoundsScreen> {
                             onTap: () => store.setPlaybackOutput(o),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
-                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 10),
                               decoration: BoxDecoration(
                                 color: store.playbackOutput == o
                                     ? DriveColors.graphite
                                     : Colors.transparent,
-                                borderRadius: BorderRadius.circular(
-                                  DriveRadii.md,
-                                ),
+                                borderRadius:
+                                    BorderRadius.circular(DriveRadii.md),
                               ),
                               alignment: Alignment.center,
                               child: FittedBox(

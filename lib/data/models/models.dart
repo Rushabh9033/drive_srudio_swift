@@ -14,12 +14,10 @@ enum LayerKind {
   divider,
   shape,
   draw,
-
   /// Device battery visual. [Layer.format] selects template style.
   /// Percent comes only from live phone battery (`battery_plus`); when
   /// unavailable the canvas shows "—" / Unavailable — never invented %.
   battery,
-
   /// Analog clock face with live hands. [Layer.format] selects face style.
   analog,
 }
@@ -86,41 +84,30 @@ class Layer {
   BoxFit fit;
   bool flipH;
   int maxLines;
-
   /// File path, data URL, network URL, or `monogram:Brand` for [LayerKind.image].
   String? src;
-
   /// Semantic role: logo | stock | gallery | ''.
   String role;
-
   /// Clock: `12` | `24`. Date: `short` | `medium` | `full` | `abbrev`.
   /// Battery: `panel` | `metrics` | `icon` | `dots` | `matrix` | `lightning` |
   /// `pill` | `pie` | `large` | `ring` | `dayprogress` | …
   /// Analog: `classic` | `minimal` | `neon` | `rings` | `sport` | `arc` | …
   String format;
-
   /// Secondary / accent / gradient end / hand color.
   String? color2;
-
   /// Tertiary: label text, tick marks, etc.
   String? color3;
-
   /// Track / face / background accent fill.
   String? trackColor;
   String? shadowColor;
-
   /// JSON stroke paths for [LayerKind.draw]: list of point lists in 0–100 space.
   String strokes;
-
   /// When true, layer runs isolated motion (pulse / shimmer / colon blink / smooth hands).
   bool animate;
-
   /// Motion style id — see [AnimStyles]. Empty uses kind default.
   String animStyle;
-
   /// Motion speed multiplier (0.35–2.5). Default 1.
   double animSpeed;
-
   /// Analog / digital: show second hand or seconds field.
   bool showSeconds;
 
@@ -229,7 +216,8 @@ class Layer {
       color2: clearColor2 ? null : (color2 ?? this.color2),
       color3: clearColor3 ? null : (color3 ?? this.color3),
       trackColor: clearTrackColor ? null : (trackColor ?? this.trackColor),
-      shadowColor: clearShadowColor ? null : (shadowColor ?? this.shadowColor),
+      shadowColor:
+          clearShadowColor ? null : (shadowColor ?? this.shadowColor),
       strokes: strokes ?? this.strokes,
       animate: animate ?? this.animate,
       animStyle: animStyle ?? this.animStyle,
@@ -239,42 +227,42 @@ class Layer {
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'kind': kind.name,
-    'label': label,
-    'text': text,
-    'x': x,
-    'y': y,
-    'w': w,
-    'h': h,
-    'fontSize': fontSize,
-    'weight': weight,
-    'align': align.name,
-    'color': color,
-    'opacity': opacity,
-    'radius': radius,
-    'letterSpacing': letterSpacing,
-    'shadow': shadow,
-    'locked': locked,
-    'hidden': hidden,
-    'fit': fit.name,
-    'flipH': flipH,
-    'maxLines': maxLines,
-    if (src != null) 'src': src,
-    if (role.isNotEmpty) 'role': role,
-    if (format.isNotEmpty) 'format': format,
-    if (color2 != null) 'color2': color2,
-    if (color3 != null) 'color3': color3,
-    if (trackColor != null) 'trackColor': trackColor,
-    if (shadowColor != null) 'shadowColor': shadowColor,
-    if (strokes.isNotEmpty) 'strokes': strokes,
-    if (animate) 'animate': animate,
-    if (animStyle.isNotEmpty) 'animStyle': animStyle,
-    if (animSpeed != 1) 'animSpeed': animSpeed,
-    // Persist always for clock/analog so HH:mm vs HH:mm:ss is unambiguous.
-    if (kind == LayerKind.clock || kind == LayerKind.analog)
-      'showSeconds': showSeconds,
-  };
+        'id': id,
+        'kind': kind.name,
+        'label': label,
+        'text': text,
+        'x': x,
+        'y': y,
+        'w': w,
+        'h': h,
+        'fontSize': fontSize,
+        'weight': weight,
+        'align': align.name,
+        'color': color,
+        'opacity': opacity,
+        'radius': radius,
+        'letterSpacing': letterSpacing,
+        'shadow': shadow,
+        'locked': locked,
+        'hidden': hidden,
+        'fit': fit.name,
+        'flipH': flipH,
+        'maxLines': maxLines,
+        if (src != null) 'src': src,
+        if (role.isNotEmpty) 'role': role,
+        if (format.isNotEmpty) 'format': format,
+        if (color2 != null) 'color2': color2,
+        if (color3 != null) 'color3': color3,
+        if (trackColor != null) 'trackColor': trackColor,
+        if (shadowColor != null) 'shadowColor': shadowColor,
+        if (strokes.isNotEmpty) 'strokes': strokes,
+        if (animate) 'animate': animate,
+        if (animStyle.isNotEmpty) 'animStyle': animStyle,
+        if (animSpeed != 1) 'animSpeed': animSpeed,
+        // Persist always for clock/analog so HH:mm vs HH:mm:ss is unambiguous.
+        if (kind == LayerKind.clock || kind == LayerKind.analog)
+          'showSeconds': showSeconds,
+      };
 
   factory Layer.fromJson(Map<String, dynamic> j) {
     final kind = LayerKind.values.firstWhere(
@@ -282,7 +270,7 @@ class Layer {
       orElse: () => LayerKind.text,
     );
     return Layer(
-      id: j['id'] as String? ?? 'layer-${j.hashCode}',
+      id: j['id'] as String? ?? 'layer-${_layerIdUuid.v4()}',
       kind: kind,
       label: j['label'] as String? ?? '',
       text: j['text'] as String? ?? '',
@@ -340,16 +328,15 @@ class WidgetBackground {
   final BgType type;
   final String from;
   final String? to;
-
   /// File path or data URL when [type] is [BgType.image].
   final String? imageSrc;
 
   Map<String, dynamic> toJson() => {
-    'type': type.name,
-    'from': from,
-    if (to != null) 'to': to,
-    if (imageSrc != null) 'imageSrc': imageSrc,
-  };
+        'type': type.name,
+        'from': from,
+        if (to != null) 'to': to,
+        if (imageSrc != null) 'imageSrc': imageSrc,
+      };
 
   factory WidgetBackground.fromJson(Map<String, dynamic> j) {
     return WidgetBackground(
@@ -375,24 +362,24 @@ class WidgetSpec {
   /// When [remintLayerIds] is true (draft create / Edit copy), each layer gets
   /// a fresh id so drafts never share identity with the template catalog.
   WidgetSpec clone({bool remintLayerIds = false}) => WidgetSpec(
-    background: WidgetBackground(
-      type: background.type,
-      from: background.from,
-      to: background.to,
-      imageSrc: background.imageSrc,
-    ),
-    layers: [
-      for (final l in layers)
-        remintLayerIds
-            ? Layer.fromJson(l.toJson()).copyWith(id: _layerIdUuid.v4())
-            : Layer.fromJson(l.toJson()),
-    ],
-  );
+        background: WidgetBackground(
+          type: background.type,
+          from: background.from,
+          to: background.to,
+          imageSrc: background.imageSrc,
+        ),
+        layers: [
+          for (final l in layers)
+            remintLayerIds
+                ? Layer.fromJson(l.toJson()).copyWith(id: _layerIdUuid.v4())
+                : Layer.fromJson(l.toJson()),
+        ],
+      );
 
   Map<String, dynamic> toJson() => {
-    'background': background.toJson(),
-    'layers': layers.map((l) => l.toJson()).toList(),
-  };
+        'background': background.toJson(),
+        'layers': layers.map((l) => l.toJson()).toList(),
+      };
 
   factory WidgetSpec.fromJson(Map<String, dynamic> j) {
     final rawLayers = j['layers'];
@@ -420,19 +407,25 @@ class Draft {
     required this.name,
     required this.updatedAt,
     required this.spec,
+    this.widgetImagePath,
   });
 
   final String id;
   String name;
   int updatedAt;
   WidgetSpec spec;
+  /// Path to a pre-rendered PNG of the static (non-live) design. The iOS
+  /// widget extension displays this as a base layer and overlays live data
+  /// (clock/battery/analog) on top.
+  String? widgetImagePath;
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name,
-    'updatedAt': updatedAt,
-    'spec': spec.toJson(),
-  };
+        'id': id,
+        'name': name,
+        'updatedAt': updatedAt,
+        'spec': spec.toJson(),
+        if (widgetImagePath != null) 'widgetImagePath': widgetImagePath,
+      };
 
   factory Draft.fromJson(Map<String, dynamic> j) {
     final id = j['id'];
@@ -446,6 +439,7 @@ class Draft {
       spec: WidgetSpec.fromJson(
         Map<String, dynamic>.from(j['spec'] as Map? ?? {}),
       ),
+      widgetImagePath: j['widgetImagePath'] as String?,
     );
   }
 }
@@ -467,7 +461,6 @@ class Vehicle {
   String modelId;
   ArtworkKind artwork;
   String displayName;
-
   /// File path or data URL for custom garage photo.
   String? customImage;
 
@@ -478,16 +471,16 @@ class Vehicle {
   String? catalogModelId;
 
   Map<String, dynamic> toJson() => {
-    'brandId': brandId,
-    'modelId': modelId,
-    'artwork': artwork.name,
-    'displayName': displayName,
-    'customImage': customImage,
-    'catalogBrand': catalogBrand,
-    'catalogModel': catalogModel,
-    'catalogBrandId': catalogBrandId,
-    'catalogModelId': catalogModelId,
-  };
+        'brandId': brandId,
+        'modelId': modelId,
+        'artwork': artwork.name,
+        'displayName': displayName,
+        'customImage': customImage,
+        'catalogBrand': catalogBrand,
+        'catalogModel': catalogModel,
+        'catalogBrandId': catalogBrandId,
+        'catalogModelId': catalogModelId,
+      };
 
   factory Vehicle.fromJson(Map<String, dynamic> j) {
     return Vehicle(
@@ -507,16 +500,16 @@ class Vehicle {
   }
 
   Vehicle copy() => Vehicle(
-    brandId: brandId,
-    modelId: modelId,
-    artwork: artwork,
-    displayName: displayName,
-    customImage: customImage,
-    catalogBrand: catalogBrand,
-    catalogModel: catalogModel,
-    catalogBrandId: catalogBrandId,
-    catalogModelId: catalogModelId,
-  );
+        brandId: brandId,
+        modelId: modelId,
+        artwork: artwork,
+        displayName: displayName,
+        customImage: customImage,
+        catalogBrand: catalogBrand,
+        catalogModel: catalogModel,
+        catalogBrandId: catalogBrandId,
+        catalogModelId: catalogModelId,
+      );
 }
 
 class SoundPrefs {
@@ -527,10 +520,10 @@ class SoundPrefs {
   String? reminder;
 
   Map<String, dynamic> toJson() => {
-    'connect': connect,
-    'disconnect': disconnect,
-    'reminder': reminder,
-  };
+        'connect': connect,
+        'disconnect': disconnect,
+        'reminder': reminder,
+      };
 
   factory SoundPrefs.fromJson(Map<String, dynamic> j) {
     return SoundPrefs(
@@ -600,19 +593,20 @@ class SoundCue {
 /// UI copy for Connect / Disconnect / Reminder cue slots.
 extension SoundGroupCopy on SoundGroup {
   String get monoLabel => switch (this) {
-    SoundGroup.connect => 'Connect',
-    SoundGroup.disconnect => 'Disconnect',
-    SoundGroup.reminder => 'Reminder',
-  };
+        SoundGroup.connect => 'Connect',
+        SoundGroup.disconnect => 'Disconnect',
+        SoundGroup.reminder => 'Reminder',
+      };
 
   /// Short product meaning for in-app labels.
   String get oneLiner => switch (this) {
-    SoundGroup.connect =>
-      'Plays when iPhone connects to the car (CarPlay / Bluetooth)',
-    SoundGroup.disconnect => 'Plays when the phone disconnects from the car',
-    SoundGroup.reminder =>
-      'Optional cue for a reminder automation — not a music track',
-  };
+        SoundGroup.connect =>
+          'Plays when iPhone connects to the car (CarPlay / Bluetooth)',
+        SoundGroup.disconnect =>
+          'Plays when the phone disconnects from the car',
+        SoundGroup.reminder =>
+          'Optional cue for a reminder automation — not a music track',
+      };
 }
 
 class TemplateItem {

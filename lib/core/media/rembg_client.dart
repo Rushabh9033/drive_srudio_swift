@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 /// (`image_background_remover`) via [BgCutoutService]. No editor UI entry.
 class RembgClient {
   RembgClient({this.baseUrl = defaultBaseUrl, http.Client? client})
-    : _client = client ?? http.Client();
+      : _client = client ?? http.Client();
 
   /// Local Windows / desktop demo (uvicorn on 8787).
   static const defaultBaseUrl = 'http://127.0.0.1:8787';
@@ -26,9 +26,7 @@ class RembgClient {
   Uri get _healthUri => Uri.parse('${_normalize(baseUrl)}/health');
   Uri get _removeUri => Uri.parse('${_normalize(baseUrl)}/remove-bg');
 
-  Future<bool> healthCheck({
-    Duration timeout = const Duration(seconds: 3),
-  }) async {
+  Future<bool> healthCheck({Duration timeout = const Duration(seconds: 3)}) async {
     try {
       final res = await _client.get(_healthUri).timeout(timeout);
       return res.statusCode == 200;
@@ -46,13 +44,19 @@ class RembgClient {
     try {
       final req = http.MultipartRequest('POST', _removeUri)
         ..files.add(
-          http.MultipartFile.fromBytes('file', bytes, filename: filename),
+          http.MultipartFile.fromBytes(
+            'file',
+            bytes,
+            filename: filename,
+          ),
         );
       final streamed = await _client.send(req).timeout(timeout);
       final res = await http.Response.fromStream(streamed);
       if (res.statusCode != 200) {
         final body = res.body.trim();
-        if (res.statusCode == 404 || res.statusCode >= 500 || body.isEmpty) {
+        if (res.statusCode == 404 ||
+            res.statusCode >= 500 ||
+            body.isEmpty) {
           return RembgResult.fail(serverDownMessage);
         }
         return RembgResult.fail(

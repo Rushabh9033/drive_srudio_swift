@@ -66,7 +66,10 @@ class TonePlayer {
     bool carConnected = false,
   }) async {
     await stop();
-    await applyOutputRoute(preference: output, carConnected: carConnected);
+    await applyOutputRoute(
+      preference: output,
+      carConnected: carConnected,
+    );
 
     _playingId = id;
     _onStopped = onStopped;
@@ -163,10 +166,8 @@ Uint8List synthesizeToneWav({
     } else if (t < releaseStart) {
       env = peak;
     } else {
-      final p = ((t - releaseStart) / (durationSec - releaseStart)).clamp(
-        0.0,
-        1.0,
-      );
+      final p =
+          ((t - releaseStart) / (durationSec - releaseStart)).clamp(0.0, 1.0);
       env = peak * math.pow(floor / peak, p);
     }
     final sample = math.sin(2 * math.pi * freq * t) * env;

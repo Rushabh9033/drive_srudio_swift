@@ -6,5 +6,29 @@
 	<array>
 		<string>group.com.drivestudio.shared</string>
 	</array>
+	<!--
+		CarPlay entitlement — gated behind Apple approval.
+		Apply at https://developer.apple.com/contact/carplay/ — choose ONE of:
+		  - com.apple.developer.carplay-driving-task (broadest; recommended for Drive Studio)
+		  - com.apple.developer.carplay-audio         (audio apps)
+		  - com.apple.developer.carplay-maps          (navigation)
+		  - com.apple.developer.carplay-messaging     (messaging)
+		  - com.apple.developer.carplay-voip          (VoIP)
+		  - com.apple.developer.carplay-fuel          (EV / fuel)
+		  - com.apple.developer.carplay-parking       (parking)
+		  - com.apple.developer.carplay-food-ordering (food)
+
+		Until Apple grants the entitlement, keep this commented out — adding
+		it without approval will fail provisioning. The widget still appears
+		in the iPhone widget gallery without it, and the CarPlay scene
+		registration in Info.plist is harmless (iOS just won't activate the
+		CarPlay Dashboard widget list for unentitled apps).
+
+		Once approved, uncomment the matching entitlement block below.
+	-->
+	<!--
+	<key>com.apple.developer.carplay-driving-task</key>
+	<true/>
+	-->
 </dict>
 </plist>

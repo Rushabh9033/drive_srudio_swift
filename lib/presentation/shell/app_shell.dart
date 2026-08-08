@@ -21,11 +21,7 @@ class AppShell extends StatelessWidget {
       icon: CupertinoIcons.square_grid_2x2_fill,
       path: '/studio',
     ),
-    _TabSpec(
-      label: 'Sounds',
-      icon: CupertinoIcons.music_note_2,
-      path: '/sounds',
-    ),
+    _TabSpec(label: 'Sounds', icon: CupertinoIcons.music_note_2, path: '/sounds'),
     _TabSpec(label: 'Settings', icon: CupertinoIcons.gear, path: '/settings'),
   ];
 
@@ -42,8 +38,7 @@ class AppShell extends StatelessWidget {
     final active = navigationShell.currentIndex >= 0
         ? navigationShell.currentIndex
         : _indexFor(location);
-    final hideNav =
-        location.startsWith('/studio/editor') ||
+    final hideNav = location.startsWith('/studio/editor') ||
         location == '/intro' ||
         location == '/';
 
@@ -51,7 +46,9 @@ class AppShell extends StatelessWidget {
       return DecoratedBox(
         decoration: const BoxDecoration(
           color: DriveColors.carbon,
-          border: Border(top: BorderSide(color: DriveColors.border)),
+          border: Border(
+            top: BorderSide(color: DriveColors.border),
+          ),
         ),
         child: SafeArea(
           top: false,
@@ -89,7 +86,6 @@ class AppShell extends StatelessWidget {
     }
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       backgroundColor: DriveColors.background,
       // IndexedStack lives inside StatefulNavigationShell — tab bodies stay alive.
       body: navigationShell,

@@ -82,16 +82,18 @@ class _StudioScreenState extends State<StudioScreen>
     final latest = drafts.take(4).toList();
     final shownDrafts = _showLatestOnly ? latest : drafts;
 
-    final templates = Catalog.templates
-        .where((t) {
-          final matchC = _stockCategory == null || t.category == _stockCategory;
-          final matchTier =
-              _tier == 'all' ||
-              (_tier == 'free' && !t.premium) ||
-              (_tier == 'premium' && t.premium);
-          return matchC && matchTier;
-        })
-        .toList(growable: false);
+    final templates = Catalog.templates.where((t) {
+      final matchC = _stockCategory == null || t.category == _stockCategory;
+      final matchTier = _tier == 'all' ||
+          (_tier == 'free' && !t.premium) ||
+          (_tier == 'premium' && t.premium);
+      return matchC && matchTier;
+    }).toList(growable: false);
+
+    // True when the free-user upgrade affordance should appear above the
+    // stock grid (any tier that surfaces premium templates).
+    final showUpgradeCard =
+        !store.isPremium && (_tier == 'all' || _tier == 'premium');
 
     // Own CustomScrollView so SliverGrid only mounts visible tiles.
     // Nested shrinkWrap GridViews previously built every stock canvas at once.
@@ -115,9 +117,8 @@ class _StudioScreenState extends State<StudioScreen>
                 const SizedBox(height: 4),
                 Text(
                   'Blank canvas to compose layers — stock is optional',
-                  style: GoogleFonts.manrope(
-                    color: DriveColors.mutedForeground,
-                  ),
+                  style:
+                      GoogleFonts.manrope(color: DriveColors.mutedForeground),
                 ),
                 const SizedBox(height: 18),
                 Row(
@@ -183,7 +184,11 @@ class _StudioScreenState extends State<StudioScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          child: PreviewWidgetCanvas(spec: d.spec, scale: 0.55),
+                          child: PreviewWidgetCanvas(
+                            spec: d.spec,
+                            scale: 0.55,
+                            logicalSize: 180,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -220,9 +225,7 @@ class _StudioScreenState extends State<StudioScreen>
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 180),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
+                          horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
                         color: DriveColors.carbon,
                         borderRadius: BorderRadius.circular(999),
@@ -294,7 +297,8 @@ class _StudioScreenState extends State<StudioScreen>
                             child: DriveChip(
                               label: c,
                               selected: _stockCategory == c,
-                              onTap: () => setState(() => _stockCategory = c),
+                              onTap: () =>
+                                  setState(() => _stockCategory = c),
                             ),
                           ),
                         ),
@@ -343,6 +347,13 @@ class _StudioScreenState extends State<StudioScreen>
               ],
             ),
           ),
+          if (showUpgradeCard)
+            SliverToBoxAdapter(
+              child: _UpgradePremiumCard(
+                premiumCount: templates.where((t) => t.premium).length,
+                totalCount: templates.length,
+              ),
+            ),
           SliverGrid(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
@@ -353,8 +364,15 @@ class _StudioScreenState extends State<StudioScreen>
             delegate: SliverChildBuilderDelegate(
               (context, i) {
                 final t = templates[i];
+                final locked = Catalog.isLocked(t, isPremium: store.isPremium);
                 return GestureDetector(
-                  onTap: () => context.push('/studio/templates/${t.id}'),
+                  onTap: () {
+                    if (locked) {
+                      context.push('/settings');
+                      return;
+                    }
+                    context.push('/studio/templates/${t.id}');
+                  },
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -363,22 +381,38 @@ class _StudioScreenState extends State<StudioScreen>
                           clipBehavior: Clip.none,
                           fit: StackFit.expand,
                           children: [
-                            PreviewWidgetCanvas(spec: t.spec, scale: 0.55),
+                            if (locked)
+                              _LockedTemplateTile(
+                                spec: t.spec,
+                                scale: 0.55,
+                                logicalSize: 180,
+                              )
+                            else
+                              PreviewWidgetCanvas(
+                                spec: t.spec,
+                                scale: 0.55,
+                                logicalSize: 180,
+                              ),
                             Positioned(
                               top: 8,
                               left: 8,
                               child: TierBadge(premium: t.premium),
                             ),
-                            if (templateHasLiveMotion(t.spec))
+                            if (locked)
+                              const Positioned(
+                                top: 8,
+                                right: 8,
+                                child: _LockedBadge(),
+                              )
+                            else if (templateHasLiveMotion(t.spec))
                               Positioned(
                                 top: 8,
                                 right: 8,
                                 child: LiveBadge(
                                   maxWidth: 96,
                                   label: () {
-                                    final style = templatePrimaryAnimLabel(
-                                      t.spec,
-                                    );
+                                    final style =
+                                        templatePrimaryAnimLabel(t.spec);
                                     return style == null
                                         ? 'LIVE'
                                         : 'LIVE · $style';
@@ -448,7 +482,9 @@ class _EmptyCustomWidgets extends StatelessWidget {
           Text(
             'Tap Create New to start a blank canvas.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.manrope(color: DriveColors.mutedForeground),
+            style: GoogleFonts.manrope(
+              color: DriveColors.mutedForeground,
+            ),
           ),
         ],
       ),
@@ -495,6 +531,188 @@ class _HeroAction extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// "Upgrade to Premium" card shown above the stock grid when a free user
+/// is browsing tiers that include premium templates.
+class _UpgradePremiumCard extends StatelessWidget {
+  const _UpgradePremiumCard({
+    required this.premiumCount,
+    required this.totalCount,
+  });
+
+  final int premiumCount;
+  final int totalCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: DriveColors.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: () => context.push('/settings'),
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: DriveColors.primary.withValues(alpha: 0.35),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: DriveColors.primary.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    CupertinoIcons.sparkles,
+                    size: 22,
+                    color: DriveColors.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Upgrade to Premium',
+                        style: GoogleFonts.manrope(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '$premiumCount of $totalCount stock layouts are'
+                        ' premium — unlock to edit and assign.',
+                        style: GoogleFonts.manrope(
+                          fontSize: 12,
+                          height: 1.35,
+                          color: DriveColors.mutedForeground,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Icon(
+                  CupertinoIcons.chevron_right,
+                  size: 16,
+                  color: DriveColors.primary,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Premium template tile shown to non-premium users. Renders the preview
+/// dimmed beneath a lock + "Upgrade" CTA so the catalog stays browseable.
+class _LockedTemplateTile extends StatelessWidget {
+  const _LockedTemplateTile({
+    required this.spec,
+    required this.scale,
+    required this.logicalSize,
+  });
+
+  final WidgetSpec spec;
+  final double scale;
+  final double logicalSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Opacity(
+          opacity: 0.35,
+          child: PreviewWidgetCanvas(
+            spec: spec,
+            scale: scale,
+            logicalSize: logicalSize,
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: DriveColors.carbon.withValues(alpha: 0.55),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: DriveColors.primary.withValues(alpha: 0.5),
+            ),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  CupertinoIcons.lock_fill,
+                  size: 22,
+                  color: DriveColors.primary,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Upgrade',
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12,
+                    color: DriveColors.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Compact corner badge that overlays the locked template tile.
+class _LockedBadge extends StatelessWidget {
+  const _LockedBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: DriveColors.graphite.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: DriveColors.primary.withValues(alpha: 0.6),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            CupertinoIcons.lock_fill,
+            size: 9,
+            color: DriveColors.primary,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            'LOCKED',
+            style: driveMonoLabel(
+              size: 9,
+              color: DriveColors.primary,
+            ),
+          ),
+        ],
       ),
     );
   }

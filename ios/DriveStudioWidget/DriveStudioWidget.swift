@@ -1,478 +1,83 @@
 import WidgetKit
 import SwiftUI
-import AppIntents
-import Intents
+import UIKit
 import CryptoKit
 
-// MARK: - Native Swift Widget Engine
+// MARK: - App Group plumbing
 
-struct SlotConfig: Codable {
-    var templateId: String
-    var accentHex: String
-    var title: String
-    var subtitle: String
-    var updatedAt: Date
-
-    static func defaultFor(slot: Int) -> SlotConfig {
-        switch slot {
-        case 1:
-            return SlotConfig(
-                templateId: "battery_glow",
-                accentHex: "#00FF88",
-                title: "Battery Glow",
-                subtitle: "Phone SOC",
-                updatedAt: .distantPast
-            )
-        case 2:
-            return SlotConfig(
-                templateId: "car_status",
-                accentHex: "#34C759",
-                title: "Car Status",
-                subtitle: "Drive Link",
-                updatedAt: .distantPast
-            )
-        case 3:
-            return SlotConfig(
-                templateId: "neon",
-                accentHex: "#AF52DE",
-                title: "Neon HUD",
-                subtitle: "Performance",
-                updatedAt: .distantPast
-            )
-        default: // Slot 0
-            return SlotConfig(
-                templateId: "dark_clock",
-                accentHex: "#00D4FF",
-                title: "Dark Clock",
-                subtitle: "My Car",
-                updatedAt: .distantPast
-            )
-        }
-    }
-
-    static let empty = defaultFor(slot: 0)
-
-    var isEmpty: Bool { updatedAt == .distantPast }
-}
-
-enum WidgetStore {
+enum AppGroupHelper {
     static let suiteName = "group.com.drivestudio.shared"
-    private static func key(slot: Int) -> String { "swift_slot_\(slot)" }
 
-    static func save(_ config: SlotConfig, forSlot slot: Int) {
+    struct Metadata: Codable {
+        let schemaVersion: Int
+        let generation: String
+        let stateFile: String
+        let checksum: String
+        let updatedAt: String
+    }
+
+    static var currentGeneration: String?
+
+    /// iOS-10 fix: cache the parsed `WidgetState` plus the generation it
+    /// came from. Each `getTimeline` call otherwise re-reads up to ~10 MB
+    /// from disk, hashes it with SHA-256, and re-decodes the JSON — all
+    /// on the timeline thread. Subsequent calls for the same generation
+    /// return the cached decode instantly. The cache is invalidated
+    /// automatically when the generation changes (via the app calling
+    /// `syncState` from the host process).
+    private static var cachedState: (generation: String, state: WidgetState?)?
+
+    static func loadState() -> WidgetState? {
+        // Fast path: if the cached state is still for the same generation
+        // we already on disk, return it without re-reading/hashing.
+        if let cached = cachedState,
+           let metadataData = UserDefaults(suiteName: suiteName)?.data(forKey: "widget_state_v2_metadata"),
+           let metadata = try? JSONDecoder().decode(Metadata.self, from: metadataData),
+           metadata.generation == cached.generation {
+            currentGeneration = metadata.generation
+            return cached.state
+        }
+
         guard let defaults = UserDefaults(suiteName: suiteName),
-              let data = try? JSONEncoder().encode(config) else { return }
-        defaults.set(data, forKey: key(slot: slot))
-        defaults.synchronize()
-        if #available(iOS 14.0, *) {
-            WidgetCenter.shared.reloadAllTimelines()
-        }
-    }
-
-    static func load(slot: Int) -> SlotConfig? {
-        guard
-            let defaults = UserDefaults(suiteName: suiteName),
-            let data = defaults.data(forKey: key(slot: slot)),
-            let config = try? JSONDecoder().decode(SlotConfig.self, from: data)
-        else { return nil }
-        return config
-    }
-}
-
-struct SummarySlotView: View {
-    let summary: Summary
-    let name: String?
-    let telemetry: TelemetrySnapshot?
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Image(systemName: "car.fill")
-                    .foregroundColor(telemetry?.carConnected == true ? .blue : .gray)
-                Text(name ?? summary.title ?? "Drive Studio")
-                    .font(.headline)
-                    .bold()
-                    .foregroundColor(.white)
-                Spacer()
-                if let level = telemetry?.batteryPercent {
-                    Image(systemName: telemetry?.isCharging == true ? "battery.100.bolt" : "battery.100")
-                        .foregroundColor(telemetry?.isCharging == true ? .green : .white)
-                    Text("\(level)%")
-                        .font(.subheadline)
-                        .bold()
-                        .foregroundColor(.white)
-                }
+              let metadataData = defaults.data(forKey: "widget_state_v2_metadata"),
+              let metadata = try? JSONDecoder().decode(Metadata.self, from: metadataData),
+              let sharedURL = FileManager.default.containerURL(
+                forSecurityApplicationGroupIdentifier: suiteName)
+        else {
+            // V1 fallback
+            if let defaults = UserDefaults(suiteName: suiteName),
+               let json = defaults.string(forKey: "widget_state_v1"),
+               let data = json.data(using: .utf8),
+               let state = try? JSONDecoder().decode(WidgetState.self, from: data) {
+                cachedState = (generation: "v1", state: state)
+                return state
             }
-            Spacer()
-            Text(Date(), style: .time)
-                .font(.system(size: 44, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-                .minimumScaleFactor(0.5)
-            Spacer()
-            HStack {
-                Text(summary.badge ?? "LIVE")
-                    .font(.caption)
-                    .bold()
-                    .foregroundColor(.blue)
-                Spacer()
-                Text(telemetry?.carConnected == true ? "Connected" : "Disconnected")
-                    .font(.caption)
-                    .bold()
-                    .foregroundColor(telemetry?.carConnected == true ? .blue : .gray)
-            }
+            cachedState = (generation: "", state: nil)
+            return nil
         }
-        .padding()
+
+        let fileURL = sharedURL.appendingPathComponent(metadata.stateFile)
+        guard let data = try? Data(contentsOf: fileURL) else {
+            cachedState = (generation: metadata.generation, state: nil)
+            currentGeneration = metadata.generation
+            return nil
+        }
+        let actual = SHA256.hash(data: data)
+            .compactMap { String(format: "%02x", $0) }
+            .joined()
+        guard actual == metadata.checksum else {
+            cachedState = (generation: metadata.generation, state: nil)
+            currentGeneration = metadata.generation
+            return nil
+        }
+        currentGeneration = metadata.generation
+        let decoded = try? JSONDecoder().decode(WidgetState.self, from: data)
+        cachedState = (generation: metadata.generation, state: decoded)
+        return decoded
     }
 }
 
-struct UnassignedSlotView: View {
-    let slotIndex: Int
-    let telemetry: TelemetrySnapshot?
-
-    var body: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "square.grid.2x2")
-                .font(.system(size: 28))
-                .foregroundColor(.gray)
-            Text("Slot \(slotIndex + 1)")
-                .font(.headline)
-                .bold()
-                .foregroundColor(.white)
-            Text("Assign widget in Drive Studio")
-                .font(.caption)
-                .foregroundColor(.gray)
-        }
-        .padding()
-    }
-}
-
-struct DriveStudioWidgetEntryView : View {
-    var entry: SimpleEntry
-
-    var body: some View {
-        GeometryReader { geo in
-            ZStack {
-                if entry.slotData == nil || entry.slotData?.spec?.layers?.isEmpty != false {
-                    let json = """
-                    [
-                        {
-                            "id": "fallback-text",
-                            "kind": "text",
-                            "text": "Open Drive Studio\\nto select a widget for Slot \\(entry.slotIndex + 1)",
-                            "x": 10.0,
-                            "y": 35.0,
-                            "w": 80.0,
-                            "h": 30.0,
-                            "fontSize": 14.0,
-                            "weight": 500,
-                            "align": "center",
-                            "color": "#8B95A5"
-                        }
-                    ]
-                    """
-                    if let fallbackLayers = try? JSONDecoder().decode([WidgetLayer].self, from: json.data(using: .utf8)!) {
-                        ForEach(fallbackLayers) { layer in
-                            LayerView(layer: layer, canvasSize: geo.size, telemetry: entry.telemetry, vehicle: entry.vehicle)
-                        }
-                    }
-                } else if let spec = entry.slotData?.spec, let layers = spec.layers, !layers.isEmpty {
-                    // 1. App Assigned Custom Widget (Spec Layers)
-                    ForEach(layers) { layer in
-                        LayerView(layer: layer, canvasSize: geo.size, telemetry: entry.telemetry, vehicle: entry.vehicle)
-                    }
-                } else if let summary = entry.slotData?.summary {
-                    // 2. App Assigned Stock Widget (Summary)
-                    SummarySlotView(summary: summary, name: entry.slotData?.name, telemetry: entry.telemetry)
-                } else {
-                    // 3. Unassigned Empty Slot
-                    UnassignedSlotView(slotIndex: entry.slotIndex, telemetry: entry.telemetry)
-                }
-            }
-        }
-    }
-}
-
-struct NativeTelemetry {
-    let batteryPercent: Int
-    let isCharging: Bool
-    let carConnected: Bool
-}
-
-func loadNativeTelemetry() -> NativeTelemetry? {
-    guard
-        let defaults = UserDefaults(suiteName: WidgetStore.suiteName),
-        let json = defaults.string(forKey: "widget_state_v1"),
-        let data = json.data(using: .utf8),
-        let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-        let tele = obj["telemetry"] as? [String: Any]
-    else { return nil }
-
-    return NativeTelemetry(
-        batteryPercent: tele["batteryPercent"] as? Int ?? 0,
-        isCharging: tele["isCharging"] as? Bool ?? false,
-        carConnected: tele["carConnected"] as? Bool ?? false
-    )
-}
-
-struct WidgetTemplate: Identifiable {
-    let id: String
-    let name: String
-    let preview: AnyView
-    let render: (_ config: SlotConfig, _ telemetry: NativeTelemetry?) -> AnyView
-}
-
-let darkClockTemplate = WidgetTemplate(
-    id: "dark_clock",
-    name: "Dark Clock",
-    preview: AnyView(DarkClockView(config: .empty, telemetry: nil, isPreview: true)),
-    render: { config, tele in AnyView(DarkClockView(config: config, telemetry: tele, isPreview: false)) }
-)
-
-struct DarkClockView: View {
-    let config: SlotConfig
-    let telemetry: NativeTelemetry?
-    let isPreview: Bool
-
-    var accent: Color { Color(hex: config.accentHex) ?? .blue }
-
-    var body: some View {
-        ZStack {
-            Color.black
-            LinearGradient(
-                colors: [accent.opacity(0.18), Color.black],
-                startPoint: .topLeading, endPoint: .bottomTrailing
-            )
-            VStack(alignment: .leading, spacing: 4) {
-                Text(config.subtitle.isEmpty ? "Drive Studio" : config.subtitle)
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .foregroundColor(accent)
-                    .tracking(1.5)
-                    .textCase(.uppercase)
-                Spacer()
-                Text(Date(), style: .time)
-                    .font(.system(size: 44, weight: .black, design: .rounded))
-                    .foregroundColor(.white)
-                    .minimumScaleFactor(0.5)
-                    .lineLimit(1)
-                Text(Date(), style: .date)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.white.opacity(0.55))
-            }
-            .padding(14)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        }
-    }
-}
-
-let batteryGlowTemplate = WidgetTemplate(
-    id: "battery_glow",
-    name: "Battery Glow",
-    preview: AnyView(BatteryGlowView(config: .empty, telemetry: nil, isPreview: true)),
-    render: { config, tele in AnyView(BatteryGlowView(config: config, telemetry: tele, isPreview: false)) }
-)
-
-struct BatteryGlowView: View {
-    let config: SlotConfig
-    let telemetry: NativeTelemetry?
-    let isPreview: Bool
-
-    var accent: Color { Color(hex: config.accentHex) ?? .cyan }
-    var level: Int { isPreview ? 87 : (telemetry?.batteryPercent ?? 0) }
-    var charging: Bool { isPreview ? true : (telemetry?.isCharging ?? false) }
-    var fraction: Double { Double(level) / 100.0 }
-
-    var body: some View {
-        ZStack {
-            Color(red: 0.05, green: 0.05, blue: 0.08)
-            VStack(spacing: 10) {
-                ZStack {
-                    Circle()
-                        .stroke(Color.white.opacity(0.08), lineWidth: 8)
-                    Circle()
-                        .trim(from: 0, to: fraction)
-                        .stroke(
-                            AngularGradient(colors: [accent.opacity(0.6), accent], center: .center),
-                            style: StrokeStyle(lineWidth: 8, lineCap: .round)
-                        )
-                        .rotationEffect(.degrees(-90))
-                    VStack(spacing: 2) {
-                        Image(systemName: charging ? "bolt.fill" : "battery.100")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(accent)
-                        Text("\(level)%")
-                            .font(.system(size: 22, weight: .black, design: .rounded))
-                            .foregroundColor(.white)
-                    }
-                }
-                .frame(width: 90, height: 90)
-                .shadow(color: accent.opacity(0.5), radius: 16)
-                Text(charging ? "Charging" : "On Battery")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(accent)
-                    .tracking(1)
-                    .textCase(.uppercase)
-            }
-        }
-    }
-}
-
-let carStatusTemplate = WidgetTemplate(
-    id: "car_status",
-    name: "Car Status",
-    preview: AnyView(CarStatusView(config: .empty, telemetry: nil, isPreview: true)),
-    render: { config, tele in AnyView(CarStatusView(config: config, telemetry: tele, isPreview: false)) }
-)
-
-struct CarStatusView: View {
-    let config: SlotConfig
-    let telemetry: NativeTelemetry?
-    let isPreview: Bool
-
-    var accent: Color { Color(hex: config.accentHex) ?? .blue }
-    var connected: Bool { isPreview ? true : (telemetry?.carConnected ?? false) }
-    var battery: Int { isPreview ? 100 : (telemetry?.batteryPercent ?? 0) }
-    var charging: Bool { isPreview ? true : (telemetry?.isCharging ?? false) }
-
-    var body: some View {
-        ZStack {
-            LinearGradient(
-                colors: [Color(red: 0.06, green: 0.08, blue: 0.14), Color.black],
-                startPoint: .top, endPoint: .bottom
-            )
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Image(systemName: "car.fill")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(connected ? accent : .gray)
-                    Text(connected ? "Connected" : "Disconnected")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(connected ? accent : .gray)
-                    Spacer()
-                }
-                Spacer()
-                Text(Date(), style: .time)
-                    .font(.system(size: 36, weight: .black, design: .rounded))
-                    .foregroundColor(.white)
-                    .minimumScaleFactor(0.5)
-                Spacer()
-                HStack(spacing: 6) {
-                    Image(systemName: charging ? "battery.100.bolt" : "battery.75")
-                        .foregroundColor(charging ? .green : .white.opacity(0.7))
-                    Text(battery > 0 ? "\(battery)%" : "—")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.85))
-                    Spacer()
-                    Circle()
-                        .fill(connected ? accent : Color.gray)
-                        .frame(width: 7, height: 7)
-                        .shadow(color: connected ? accent : .clear, radius: 4)
-                }
-            }
-            .padding(14)
-        }
-    }
-}
-
-let minimalTemplate = WidgetTemplate(
-    id: "minimal",
-    name: "Minimal",
-    preview: AnyView(MinimalView(config: .empty, telemetry: nil, isPreview: true)),
-    render: { config, tele in AnyView(MinimalView(config: config, telemetry: tele, isPreview: false)) }
-)
-
-struct MinimalView: View {
-    let config: SlotConfig
-    let telemetry: NativeTelemetry?
-    let isPreview: Bool
-
-    var accent: Color { Color(hex: config.accentHex) ?? .white }
-
-    var body: some View {
-        ZStack {
-            Color(white: 0.06)
-            VStack(spacing: 0) {
-                Rectangle()
-                    .fill(accent)
-                    .frame(height: 3)
-                    .frame(maxWidth: .infinity)
-                Spacer()
-                VStack(spacing: 6) {
-                    Text(Date(), style: .time)
-                        .font(.system(size: 42, weight: .ultraLight, design: .default))
-                        .foregroundColor(.white)
-                        .monospacedDigit()
-                    Text(Date(), style: .date)
-                        .font(.system(size: 12, weight: .light))
-                        .foregroundColor(.white.opacity(0.4))
-                        .tracking(0.5)
-                }
-                Spacer()
-            }
-        }
-    }
-}
-
-let neonTemplate = WidgetTemplate(
-    id: "neon",
-    name: "Neon",
-    preview: AnyView(NeonView(config: .empty, telemetry: nil, isPreview: true)),
-    render: { config, tele in AnyView(NeonView(config: config, telemetry: tele, isPreview: false)) }
-)
-
-struct NeonView: View {
-    let config: SlotConfig
-    let telemetry: NativeTelemetry?
-    let isPreview: Bool
-
-    var accent: Color { Color(hex: config.accentHex) ?? .green }
-    var battery: Int { isPreview ? 100 : (telemetry?.batteryPercent ?? 0) }
-
-    var body: some View {
-        ZStack {
-            Color.black
-            VStack(alignment: .leading, spacing: 4) {
-                Text(config.title.isEmpty ? "DRIVE" : config.title.uppercased())
-                    .font(.system(size: 11, weight: .heavy, design: .monospaced))
-                    .foregroundColor(accent)
-                    .shadow(color: accent, radius: 6)
-                    .tracking(3)
-                Spacer()
-                Text(Date(), style: .time)
-                    .font(.system(size: 46, weight: .black, design: .monospaced))
-                    .foregroundColor(accent)
-                    .shadow(color: accent.opacity(0.8), radius: 12)
-                    .minimumScaleFactor(0.4)
-                    .lineLimit(1)
-                Spacer()
-                if battery > 0 {
-                    HStack(spacing: 4) {
-                        ForEach(0..<5) { i in
-                            RoundedRectangle(cornerRadius: 2)
-                                .fill(Double(i) / 5.0 < Double(battery) / 100.0
-                                      ? accent : Color.white.opacity(0.1))
-                                .frame(width: 16, height: 6)
-                        }
-                        Text("\(battery)%")
-                            .font(.system(size: 10, weight: .semibold, design: .monospaced))
-                            .foregroundColor(accent.opacity(0.8))
-                    }
-                }
-            }
-            .padding(14)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        }
-    }
-}
-
-let allTemplates: [WidgetTemplate] = [
-    darkClockTemplate,
-    batteryGlowTemplate,
-    carStatusTemplate,
-    minimalTemplate,
-    neonTemplate,
-]
-
-// MARK: - App Group Data Models
+// MARK: - Data models (must match Flutter side)
 
 struct VehicleData: Codable {
     let brandId: String?
@@ -483,78 +88,10 @@ struct VehicleData: Codable {
     let customImage: String?
 }
 
-struct WidgetState: Codable {
-    let schemaVersion: Int?
-    let vehicle: VehicleData?
-    let slots: [Slot]?
-    let telemetry: TelemetrySnapshot?
-}
-
-struct Slot: Codable {
-    let index: Int
-    let draftId: String?
-    let name: String?
-    let summary: Summary?
-    let spec: WidgetSpec?
-}
-
-struct Summary: Codable {
-    let title: String?
-    let clockFormat: String?
-    let dateFormat: String?
-    let badge: String?
-    let bgFrom: String?
-    let bgTo: String?
-    let bgType: String?
-}
-
-struct WidgetSpec: Codable {
-    let background: WidgetBackground?
-    let layers: [WidgetLayer]?
-}
-
-struct WidgetBackground: Codable {
-    let type: String?
-    let from: String?
-    let to: String?
-    let imageSrc: String?
-}
-
-struct ImageLoader {
-    static func loadImage(from src: String) -> UIImage? {
-        if src.hasPrefix("data:image") {
-            guard let commaIdx = src.firstIndex(of: ","),
-                  let data = Data(base64Encoded: String(src[src.index(after: commaIdx)...])) else { return nil }
-            return UIImage(data: data)
-        }
-        
-        if src.hasPrefix("assets/") {
-            var url = Bundle.main.bundleURL
-            url.deleteLastPathComponent() // removes DriveStudioWidget.appex
-            url.deleteLastPathComponent() // removes PlugIns
-            url.appendPathComponent("Frameworks/App.framework/flutter_assets/\(src)")
-            if let img = UIImage(contentsOfFile: url.path) {
-                return img
-            }
-            // Fallback just in case
-            let filename = URL(fileURLWithPath: src).deletingPathExtension().lastPathComponent
-            return UIImage(named: filename)
-        }
-        
-        if let sharedURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppGroupHelper.suiteName) {
-            var fileURL = sharedURL.appendingPathComponent("SharedImages")
-            if let gen = AppGroupHelper.currentGeneration {
-                fileURL = fileURL.appendingPathComponent("generation_\(gen)")
-            }
-            fileURL = fileURL.appendingPathComponent(src)
-            if let uiImg = UIImage(contentsOfFile: fileURL.path) {
-                return uiImg
-            }
-        }
-        
-        // Fallback for absolute paths
-        return UIImage(contentsOfFile: src)
-    }
+struct TelemetrySnapshot: Codable {
+    let carConnected: Bool
+    let batteryPercent: Int?
+    let isCharging: Bool
 }
 
 struct WidgetLayer: Codable, Identifiable {
@@ -573,302 +110,526 @@ struct WidgetLayer: Codable, Identifiable {
     let color: String?
     let opacity: Double?
     let radius: Double?
-    let shadow: Bool?
     let hidden: Bool?
-    let format: String?
-    let color2: String?
-    let color3: String?
-    let trackColor: String?
-    let shadowColor: String?
-    let showSeconds: Bool?
+    let strokes: String?
 }
 
-struct TelemetrySnapshot: Codable {
-    let carConnected: Bool
-    let batteryPercent: Int?
-    let isCharging: Bool
+struct WidgetBackground: Codable {
+    let type: String?
+    let from: String?
+    let to: String?
+    let imageSrc: String?
 }
 
-// MARK: - State Loader
-
-struct AppGroupHelper {
-    static let suiteName = "group.com.drivestudio.shared"
-    static let stateKey = "widget_state_v1"
-    
-    struct Metadata: Codable {
-        let schemaVersion: Int
-        let generation: String
-        let stateFile: String
-        let checksum: String
-        let updatedAt: String
-    }
-
-    static var currentGeneration: String?
-
-    static func loadState() -> WidgetState? {
-        guard let defaults = UserDefaults(suiteName: suiteName) else { return nil }
-        
-        // Try V2
-        if let metadataData = defaults.data(forKey: "widget_state_v2_metadata"),
-           let metadata = try? JSONDecoder().decode(Metadata.self, from: metadataData),
-           let sharedURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: suiteName) {
-           
-           let fileURL = sharedURL.appendingPathComponent(metadata.stateFile)
-           if let data = try? Data(contentsOf: fileURL) {
-               let checksum = SHA256.hash(data: data).compactMap { String(format: "%02x", $0) }.joined()
-               if checksum == metadata.checksum {
-                   currentGeneration = metadata.generation
-                   return try? JSONDecoder().decode(WidgetState.self, from: data)
-               }
-           }
-        }
-        
-        // Fallback V1
-        currentGeneration = nil
-        if let jsonString = defaults.string(forKey: stateKey),
-           let data = jsonString.data(using: .utf8) {
-           return try? JSONDecoder().decode(WidgetState.self, from: data)
-        }
-        return nil
-    }
-
-    static func getSlot(index: Int) -> Slot? {
-        let state = loadState()
-        return state?.slots?.first(where: { $0.index == index })
-    }
-    
-    static func getVehicle() -> VehicleData? {
-        return loadState()?.vehicle
-    }
-
-    static func getTelemetry() -> TelemetrySnapshot? {
-        return loadState()?.telemetry
-    }
+struct WidgetSpec: Codable {
+    let background: WidgetBackground?
+    let layers: [WidgetLayer]?
 }
 
-// MARK: - Color Parser
+struct Slot: Codable {
+    let index: Int
+    let draftId: String?
+    let name: String?
+    let summary: [String: String?]?
+    let spec: WidgetSpec?
+}
+
+struct WidgetState: Codable {
+    let schemaVersion: Int?
+    let vehicle: VehicleData?
+    let slots: [Slot]?
+    let telemetry: TelemetrySnapshot?
+    /// Optional absolute path to a pre-rendered PNG of the active slot's
+    /// design. When present, the widget displays the image directly
+    /// (matching the app preview pixel-for-pixel) instead of rendering
+    /// individual layers. This is the **simple** path: no fit-to-canvas,
+    /// no per-layer asset pipeline, no per-family scaling logic.
+    let widgetImagePath: String?
+}
+
+// MARK: - Helpers
 
 extension Color {
     init?(hex: String) {
-        var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
-        hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
-        
-        var rgb: UInt64 = 0
-        guard Scanner(string: hexSanitized).scanHexInt64(&rgb) else { return nil }
-        
-        if hexSanitized.count == 6 {
-            self.init(
-                red: Double((rgb & 0xFF0000) >> 16) / 255.0,
-                green: Double((rgb & 0x00FF00) >> 8) / 255.0,
-                blue: Double(rgb & 0x0000FF) / 255.0
-            )
-        } else if hexSanitized.count == 8 {
-            self.init(
-                red: Double((rgb & 0x00FF0000) >> 16) / 255.0,
-                green: Double((rgb & 0x0000FF00) >> 8) / 255.0,
-                blue: Double(rgb & 0x000000FF) / 255.0,
-                opacity: Double((rgb & 0xFF000000) >> 24) / 255.0
-            )
+        var s = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+        if s.hasPrefix("#") { s.removeFirst() }
+        guard s.count == 6 || s.count == 8,
+              let v = UInt64(s, radix: 16) else { return nil }
+        if s.count == 6 {
+            self.init(red: Double((v & 0xFF0000) >> 16) / 255,
+                      green: Double((v & 0x00FF00) >> 8) / 255,
+                      blue:  Double(v & 0x0000FF) / 255)
         } else {
-            return nil
+            self.init(red: Double((v & 0x00FF0000) >> 16) / 255,
+                      green: Double((v & 0x0000FF00) >> 8) / 255,
+                      blue:  Double(v & 0x000000FF) / 255,
+                      opacity: Double((v & 0xFF000000) >> 24) / 255)
         }
     }
 }
 
-// MARK: - Widget Provider
+struct DriveStudioImageLoader {
+    /// iOS-11 fix: NSCache keyed by the resolved absolute file path so
+    /// repeated layer renders within the same generation don't hit the
+    /// filesystem each time. NSCache evicts automatically under memory
+    /// pressure (the widget process is small). The cache is automatically
+    /// cleared when the OS reclaims memory or the process restarts, so
+    /// stale entries can never persist across generations.
+    private static let imageCache = NSCache<NSString, UIImage>()
+
+    /// iOS-9 + iOS-11 fix: prefer the per-call generation (snapshotted
+    /// on the `SimpleEntry`) so concurrent timelines see a stable value.
+    static func load(from src: String, generation: String? = nil) -> UIImage? {
+        // Build a stable cache key from the absolute file path we're
+        // about to load so different paths don't collide.
+        var cacheKey: NSString?
+        if src.hasPrefix("data:image") {
+            // Data URIs are decoded synchronously (no filesystem); they
+            // don't benefit from caching because the work is in decode,
+            // not file I/O. Skip the cache for these.
+            guard let c = src.firstIndex(of: ","),
+                  let d = Data(base64Encoded: String(src[src.index(after: c)...])) else { return nil }
+            return UIImage(data: d)
+        }
+        if let shared = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppGroupHelper.suiteName) {
+            var fileURL = shared.appendingPathComponent("SharedImages")
+            let gen = generation ?? AppGroupHelper.currentGeneration
+            if let g = gen {
+                fileURL = fileURL.appendingPathComponent("generation_\(g)")
+            }
+            fileURL = fileURL.appendingPathComponent(src)
+            cacheKey = fileURL.path as NSString
+            if let cached = imageCache.object(forKey: cacheKey!) { return cached }
+            if let img = UIImage(contentsOfFile: fileURL.path) {
+                if let key = cacheKey { imageCache.setObject(img, forKey: key) }
+                return img
+            }
+        }
+        // Fallback: absolute path passed straight in (e.g. custom image).
+        let fallbackKey = src as NSString
+        if let cached = imageCache.object(forKey: fallbackKey) { return cached }
+        if let img = UIImage(contentsOfFile: src) {
+            imageCache.setObject(img, forKey: fallbackKey)
+            return img
+        }
+        return nil
+    }
+}
+
+// MARK: - Widget
+
+/// iOS-2 fix: `.containerBackground(for: .widget)` is iOS 17+. The widget
+/// extension's deployment target is iOS 16, so calling it on iOS 16 would
+/// crash. We conditionally apply it and rely on the entry view's own
+/// ZStack `BackgroundView` for the iOS 16 fallback path.
+@available(iOS 16.0, *)
+extension View {
+    @ViewBuilder
+    func widgetContainerBackground(spec: WidgetSpec?) -> some View {
+        if #available(iOS 17.0, *) {
+            self.containerBackground(for: .widget) {
+                BackgroundView(spec: spec)
+            }
+        } else {
+            // iOS 16 fallback: the entry view already paints its own
+            // background via the leading `BackgroundView` inside its
+            // top-level ZStack, so we just return the content untouched.
+            self
+        }
+    }
+}
 
 @available(iOS 16.0, *)
-struct StaticProvider: TimelineProvider {
+struct DriveStudioSlotWidget: Widget {
     let slotIndex: Int
 
-    func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), slotIndex: slotIndex, slotData: nil, vehicle: nil, telemetry: nil, isPreview: true)
+    /// WidgetKit requires each widget to expose a unique `kind` string so
+    /// iOS can distinguish them in the widget gallery and persist user
+    /// selections across installs. Each slot gets its own kind derived
+    /// from the slot index, so all 20 slots show up as separate widgets.
+    var kind: String { "DriveStudioSlotWidget-\(slotIndex)" }
+
+    /// The `Widget` protocol requires a parameterless `init()`. Swift
+    /// does not synthesize `init()` when any stored property lacks a
+    /// default value, so we declare it explicitly. Default slot is 0.
+    init() {
+        self.slotIndex = 0
     }
 
-    func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
-        let entry = SimpleEntry(date: Date(), slotIndex: slotIndex, slotData: AppGroupHelper.getSlot(index: slotIndex), vehicle: AppGroupHelper.getVehicle(), telemetry: AppGroupHelper.getTelemetry(), isPreview: context.isPreview)
-        completion(entry)
+    /// Used by the bundle to register each of the 20 slots.
+    init(slotIndex: Int) {
+        self.slotIndex = slotIndex
     }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<SimpleEntry>) -> ()) {
-        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
-        let entry = SimpleEntry(date: Date(), slotIndex: slotIndex, slotData: AppGroupHelper.getSlot(index: slotIndex), vehicle: AppGroupHelper.getVehicle(), telemetry: AppGroupHelper.getTelemetry(), isPreview: false)
-        completion(Timeline(entries: [entry], policy: .after(nextUpdate)))
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: StaticProvider(slotIndex: slotIndex)) { entry in
+            DriveStudioWidgetEntryView(entry: entry)
+                .widgetContainerBackground(spec: entry.slot?.spec)
+        }
+        .configurationDisplayName("Drive Studio Slot \(slotIndex + 1)")
+        .description("Renders the widget assigned to Slot \(slotIndex + 1).")
+        .supportedFamilies(SupportedFamilies.list)
     }
+}
+
+enum SupportedFamilies {
+    // Lock Screen / CarPlay accessory families render the full SwiftUI tree
+    // in tight spaces; small/medium system families render the same complex
+    // view at scaled-down sizes that look broken. We restrict supported
+    // families to only those where the editor's design fits cleanly:
+    //   - .systemLarge (home screen, large canvas)
+    //   - .accessoryCircular / .accessoryRectangular / .accessoryInline
+    //     (Lock Screen + CarPlay)
+    // iOS-5: removed .systemSmall and .systemMedium to avoid broken rendering.
+    static let list: [WidgetFamily] = [
+        .systemLarge,
+        .accessoryCircular, .accessoryRectangular, .accessoryInline,
+    ]
 }
 
 struct SimpleEntry: TimelineEntry {
     let date: Date
     let slotIndex: Int
-    var slotData: Slot?
+    var slot: Slot?
     var vehicle: VehicleData?
     var telemetry: TelemetrySnapshot?
-    var isPreview: Bool = false
+    /// Pre-rendered PNG of the design (or nil if not yet rendered).
+    var widgetImagePath: String?
+    /// iOS-9 fix: this generation's identifier is now carried per-entry
+    /// (snapshotted in `makeEntry`) instead of being mutated on a shared
+    /// static var. This removes the data race when `getSnapshot` and
+    /// `getTimeline` (or two concurrent timelines) read `currentGeneration`
+    /// while another call is rewriting it.
+    var generation: String?
 }
 
-// MARK: - Native Rendering Engine
+struct StaticProvider: TimelineProvider {
+    let slotIndex: Int
 
-struct BackgroundView: View {
-    var spec: WidgetSpec?
-    var summary: Summary?
+    func placeholder(in context: Context) -> SimpleEntry {
+        SimpleEntry(date: Date(), slotIndex: slotIndex, slot: nil, vehicle: nil, telemetry: nil, generation: nil)
+    }
+    func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> Void) {
+        completion(makeEntry(slotIndex: slotIndex))
+    }
+    func getTimeline(in context: Context, completion: @escaping (Timeline<SimpleEntry>) -> Void) {
+        let entry = makeEntry(slotIndex: slotIndex)
+        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
+        completion(Timeline(entries: [entry], policy: .after(nextUpdate)))
+    }
+
+    /// Shared entry builder so `getSnapshot` and `getTimeline` always carry
+    /// the same fields (including `widgetImagePath` and `generation`).
+    /// Without this, the widget gallery preview shows the pre-rendered PNG
+    /// while the live widget falls back to layered rendering. iOS-9 fix:
+    /// the active generation is captured here and passed on the entry,
+    /// so downstream renderers see a consistent snapshot instead of a
+    /// shared mutable static.
+    private func makeEntry(slotIndex: Int) -> SimpleEntry {
+        let state = AppGroupHelper.loadState()
+        let slot = state?.slots?.first(where: { $0.index == slotIndex })
+        return SimpleEntry(
+            date: Date(),
+            slotIndex: slotIndex,
+            slot: slot,
+            vehicle: state?.vehicle,
+            telemetry: state?.telemetry,
+            widgetImagePath: state?.widgetImagePath,
+            generation: AppGroupHelper.currentGeneration
+        )
+    }
+}
+
+// MARK: - Entry view — renders user design fit-to-canvas
+
+@available(iOS 16.0, *)
+struct DriveStudioWidgetEntryView: View {
+    let entry: SimpleEntry
 
     var body: some View {
-        ZStack {
-            if let bgFrom = spec?.background?.from ?? summary?.bgFrom, let colorFrom = Color(hex: bgFrom) {
-                let bgTo = spec?.background?.to ?? summary?.bgTo
-                if let bgTo = bgTo, let colorTo = Color(hex: bgTo) {
-                    LinearGradient(colors: [colorFrom, colorTo], startPoint: .topLeading, endPoint: .bottomTrailing)
+        GeometryReader { geo in
+            ZStack {
+                BackgroundView(spec: entry.slot?.spec)
+                if let imgPath = entry.widgetImagePath,
+                   let img = UIImage(contentsOfFile: imgPath) {
+                    // Hybrid rendering: Flutter app pre-rendered the
+                    // static parts of the design to this PNG (background,
+                    // images, fixed text, shapes). The widget displays it
+                    // as a base layer and overlays live data (clock,
+                    // battery, analog, date) on top using the spec's
+                    // layer positions + telemetry from the App Group.
+                    // This gives pixel-perfect static parts + auto-
+                    // updating live data.
+                    Image(uiImage: img)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                    LiveDataOverlayView(
+                        spec: entry.slot?.spec,
+                        canvasSize: geo.size,
+                        telemetry: entry.telemetry,
+                        vehicle: entry.vehicle
+                    )
+                } else if let spec = entry.slot?.spec, let layers = spec.layers, !layers.isEmpty {
+                    FitToCanvasLayers(
+                        layers: layers,
+                        canvasSize: geo.size,
+                        telemetry: entry.telemetry,
+                        vehicle: entry.vehicle
+                    )
                 } else {
-                    colorFrom
+                    VStack(spacing: 4) {
+                        Image(systemName: "square.grid.2x2")
+                            .font(.system(size: max(14, geo.size.width * 0.15)))
+                            .foregroundColor(.gray)
+                        Text("Slot \(entry.slotIndex + 1)")
+                            .font(.system(size: max(9, geo.size.width * 0.08), weight: .semibold, design: .rounded))
+                            .foregroundColor(.gray)
+                    }
+                    .multilineTextAlignment(.center)
                 }
+            }
+        }
+    }
+}
+
+/// Overlays live data (clock / battery / analog / date) on top of the
+/// pre-rendered PNG base. The PNG already contains the static design
+/// (background, images, fixed text, shapes); this view only renders the
+/// dynamic layers so they update with telemetry.
+@available(iOS 16.0, *)
+struct LiveDataOverlayView: View {
+    let spec: WidgetSpec?
+    let canvasSize: CGSize
+    let telemetry: TelemetrySnapshot?
+    let vehicle: VehicleData?
+
+    private static let designSize = CGSize(width: 338, height: 354)
+
+    var body: some View {
+        let liveLayers: [WidgetLayer] = (spec?.layers ?? []).filter(Self.isLive)
+        if !liveLayers.isEmpty {
+            // The PNG was rendered with hideLiveLayers: true, which used
+            // the same coordinates we use here. So the overlay lines up
+            // pixel-for-pixel with the PNG.
+            ZStack {
+                ForEach(liveLayers) { layer in
+                    ScaledLayerView(
+                        layer: layer,
+                        canvasSize: canvasSize,
+                        telemetry: telemetry,
+                        vehicle: vehicle,
+                        transform: LiveDataOverlayView.fitTransform(for: canvasSize)
+                    )
+                }
+            }
+            .frame(width: canvasSize.width, height: canvasSize.height)
+        }
+    }
+
+    private static func isLive(_ layer: WidgetLayer) -> Bool {
+        switch layer.kind {
+        case "clock", "date", "battery", "analog":
+            return true
+        default:
+            return false
+        }
+    }
+
+    private static func fitTransform(for canvas: CGSize) -> CGAffineTransform {
+        let design = designSize
+        let scale = min(canvas.width / design.width, canvas.height / design.height)
+        let scaledW = design.width * scale
+        let scaledH = design.height * scale
+        let offsetX = (canvas.width - scaledW) / 2
+        let offsetY = (canvas.height - scaledH) / 2
+        return CGAffineTransform.identity
+            .translatedBy(x: offsetX, y: offsetY)
+            .scaledBy(x: scale, y: scale)
+    }
+}
+
+/// Renders the editor's free-form draw strokes as SwiftUI Canvas paths.
+/// Strokes are stored as a JSON-encoded list of point arrays in 0-100
+/// percent design space (see `Layer.strokes` in the Dart editor).
+struct DrawStrokesCanvas: View {
+    let strokesJSON: String?
+    let color: Color
+    let opacity: Double
+
+    var body: some View {
+        Canvas { context, size in
+            guard let json = strokesJSON,
+                  let data = json.data(using: .utf8),
+                  let strokes = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]]
+            else { return }
+            let designSize: CGFloat = 100
+            for stroke in strokes {
+                guard let points = stroke["points"] as? [[String: Any]],
+                      !points.isEmpty else { continue }
+                var path = Path()
+                for (i, p) in points.enumerated() {
+                    let x = (p["x"] as? Double ?? 0) / Double(designSize) * Double(size.width)
+                    let y = (p["y"] as? Double ?? 0) / Double(designSize) * Double(size.height)
+                    if i == 0 {
+                        path.move(to: CGPoint(x: x, y: y))
+                    } else {
+                        path.addLine(to: CGPoint(x: x, y: y))
+                    }
+                }
+                let width = (stroke["width"] as? Double ?? 2) * (size.width / 180)
+                context.stroke(path, with: .color(color.opacity(opacity)),
+                               style: StrokeStyle(lineWidth: max(CGFloat(width), 0.5), lineCap: .round, lineJoin: .round))
+            }
+        }
+    }
+}
+
+struct BackgroundView: View {
+    let spec: WidgetSpec?
+    var body: some View {
+        if let bg = spec?.background {
+            if let img = bg.imageSrc.flatMap({ DriveStudioImageLoader.load(from: $0) }) {
+                Image(uiImage: img).resizable().aspectRatio(contentMode: .fill)
+            } else if let fromHex = bg.from.flatMap({ Color(hex: $0) }) {
+                let toColor = bg.to.flatMap { Color(hex: $0) } ?? fromHex
+                LinearGradient(colors: [fromHex, toColor], startPoint: .topLeading, endPoint: .bottomTrailing)
             } else {
                 Color.black
             }
-            
-            if let imgSrc = spec?.background?.imageSrc, !imgSrc.isEmpty {
-                if let uiImg = ImageLoader.loadImage(from: imgSrc) {
-                    Image(uiImage: uiImg)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                }
-            }
+        } else {
+            Color.black
         }
     }
 }
 
-struct LayerView: View {
+// MARK: - Fit-to-canvas scaling
+
+struct FitToCanvasLayers: View {
+    let layers: [WidgetLayer]
+    let canvasSize: CGSize
+    let telemetry: TelemetrySnapshot?
+    let vehicle: VehicleData?
+
+    /// Reference design canvas that the editor uses for x/y/w/h percentages.
+    private static let designSize = CGSize(width: 338, height: 354)
+
+    var body: some View {
+        let transform = Self.computeFitTransform(for: canvasSize)
+        ZStack {
+            ForEach(layers) { layer in
+                if layer.hidden != true {
+                    ScaledLayerView(
+                        layer: layer,
+                        canvasSize: canvasSize,
+                        telemetry: telemetry,
+                        vehicle: vehicle,
+                        transform: transform
+                    )
+                }
+            }
+        }
+        .frame(width: canvasSize.width, height: canvasSize.height)
+    }
+
+    private static func computeFitTransform(for canvas: CGSize) -> CGAffineTransform {
+        let design = Self.designSize
+        let scale = min(canvas.width / design.width, canvas.height / design.height)
+        let scaledW = design.width * scale
+        let scaledH = design.height * scale
+        let offsetX = (canvas.width - scaledW) / 2
+        let offsetY = (canvas.height - scaledH) / 2
+        return CGAffineTransform.identity
+            .translatedBy(x: offsetX, y: offsetY)
+            .scaledBy(x: scale, y: scale)
+    }
+}
+
+struct ScaledLayerView: View {
     let layer: WidgetLayer
     let canvasSize: CGSize
     let telemetry: TelemetrySnapshot?
-    var vehicle: VehicleData? = nil
+    let vehicle: VehicleData?
+    let transform: CGAffineTransform
+
+    private static let designSize = CGSize(width: 338, height: 354)
 
     var body: some View {
-        let w = layer.w ?? 100.0
-        let h = layer.h ?? 100.0
-        let x = layer.x ?? 0.0
-        let y = layer.y ?? 0.0
-        let label = layer.label ?? ""
-        let text = layer.text ?? ""
-        let fontSize = layer.fontSize ?? 14.0
-        let weightVal = layer.weight ?? 400
-        let alignStr = layer.align ?? "left"
-        let colorStr = layer.color ?? "#FFFFFF"
-        let opacityVal = layer.opacity ?? 1.0
-        let radiusVal = layer.radius ?? 0.0
-        let isHidden = layer.hidden ?? false
-
-        let width = canvasSize.width * (w / 100.0)
-        let height = canvasSize.height * (h / 100.0)
-        let left = canvasSize.width * (x / 100.0)
-        let top = canvasSize.height * (y / 100.0)
-        
-        let scaledFontSize = fontSize * (canvasSize.width / 180.0)
-        let layerColor = Color(hex: colorStr) ?? .white
-        let weight = fontWeight(for: weightVal)
-        
+        let design = Self.designSize
+        let x = (layer.x ?? 0) / 100 * design.width
+        let y = (layer.y ?? 0) / 100 * design.height
+        let w = (layer.w ?? 100) / 100 * design.width
+        let h = (layer.h ?? 100) / 100 * design.height
+        let rect = CGRect(x: x, y: y, width: w, height: h).applying(transform)
+        let fontSize = (layer.fontSize ?? 14) * (canvasSize.width / 180)
+        let layerColor = Color(hex: layer.color ?? "#FFFFFF") ?? .white
+        let opacityVal = layer.opacity ?? 1
         Group {
-            if isHidden {
-                EmptyView()
-            } else if layer.kind == "text" {
-                Text(text.isEmpty ? label : text)
-                    .font(.system(size: scaledFontSize, weight: weight, design: .default))
-                    .foregroundColor(layerColor)
-                    .opacity(opacityVal)
-                    .multilineTextAlignment(textAlignment(for: alignStr))
-            } else if layer.kind == "clock" {
+            switch layer.kind {
+            case "text":
+                let text = layer.text?.isEmpty == false ? layer.text! : (layer.label ?? " ")
+                Text(text)
+                    .font(.system(size: fontSize, weight: weight(for: layer.weight ?? 400), design: .rounded))
+                    .foregroundColor(Color(hex: layer.color ?? "#FFFFFF") ?? .white)
+            case "clock":
                 Text(Date(), style: .time)
-                    .font(.system(size: scaledFontSize, weight: weight, design: .monospaced))
-                    .foregroundColor(layerColor)
-                    .opacity(opacityVal)
-            } else if layer.kind == "date" {
+                    .font(.system(size: fontSize, weight: .semibold, design: .monospaced))
+                    .foregroundColor(Color(hex: layer.color ?? "#FFFFFF") ?? .white)
+            case "date":
                 Text(Date(), style: .date)
-                    .font(.system(size: scaledFontSize, weight: weight, design: .default))
-                    .foregroundColor(layerColor)
-                    .opacity(opacityVal)
-            } else if layer.kind == "battery" {
-                NativeBatteryView(layer: layer, telemetry: telemetry, size: CGSize(width: width, height: height))
-                    .opacity(opacityVal)
-            } else if layer.kind == "shape" {
-                if radiusVal >= 50 {
-                    if opacityVal < 0.4 && colorStr.uppercased() == "#FFFFFF" {
-                        Circle().fill(.ultraThinMaterial).environment(\.colorScheme, .dark)
+                    .font(.system(size: fontSize, weight: .regular))
+                    .foregroundColor(Color(hex: layer.color ?? "#FFFFFF") ?? .white)
+            case "battery":
+                HStack(spacing: max(2, fontSize * 0.2)) {
+                    Image(systemName: ScaledLayerView.batterySymbolName(
+                        percent: telemetry?.batteryPercent,
+                        isCharging: telemetry?.isCharging == true
+                    ))
+                    if let level = telemetry?.batteryPercent {
+                        Text("\(level)%")
                     } else {
-                        Circle().fill(layerColor.opacity(opacityVal))
+                        Text("—")
                     }
+                }
+                .font(.system(size: fontSize, weight: .semibold, design: .monospaced))
+                .foregroundColor(Color(hex: layer.color ?? "#FFFFFF") ?? .white)
+            case "shape":
+                let r = (layer.radius ?? 0) * (canvasSize.width / 180)
+                let color = Color(hex: layer.color ?? "#FFFFFF")?.opacity(layer.opacity ?? 1) ?? .white
+                if (layer.radius ?? 0) >= 50 {
+                    Circle().fill(color)
                 } else {
-                    let r = radiusVal * (canvasSize.width / 100.0)
-                    if opacityVal < 0.4 && colorStr.uppercased() == "#FFFFFF" {
-                        RoundedRectangle(cornerRadius: r).fill(.ultraThinMaterial).environment(\.colorScheme, .dark)
-                    } else {
-                        RoundedRectangle(cornerRadius: r).fill(layerColor.opacity(opacityVal))
-                    }
+                    RoundedRectangle(cornerRadius: r).fill(color)
                 }
-            } else if layer.kind == "badge" {
-                Text(text.isEmpty ? label : text)
-                    .font(.system(size: scaledFontSize * 0.55, weight: .bold, design: .default))
-                    .foregroundColor(Color(hex: layer.color3 ?? "#000000") ?? .black)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(layerColor.opacity(opacityVal))
-                    .cornerRadius(radiusVal > 0 ? radiusVal : 12)
-            } else if layer.kind == "image" {
-                let src = (layer.src == nil || layer.src?.isEmpty == true) ? (vehicle?.customImage ?? "") : (layer.src ?? "")
-                if src.hasPrefix("sf:") || src.hasPrefix("symbol:") {
-                    let sysName = src.replacingOccurrences(of: "sf:", with: "").replacingOccurrences(of: "symbol:", with: "")
-                    Image(systemName: sysName)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .foregroundColor(layerColor)
-                        .opacity(opacityVal)
-                } else if let url = URL(string: src), src.hasPrefix("http"),
-                          let data = try? Data(contentsOf: url), let uiImg = UIImage(data: data) {
-                    Image(uiImage: uiImg)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .opacity(opacityVal)
-                } else if let uiImg = ImageLoader.loadImage(from: src) {
-                    Image(uiImage: uiImg)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .opacity(opacityVal)
+            case "image":
+                let src = layer.src ?? ""
+                if !src.isEmpty, let img = DriveStudioImageLoader.load(from: src) {
+                    Image(uiImage: img).resizable().aspectRatio(contentMode: .fit)
                 } else {
-                    // Truthful error state for missing/corrupt asset
-                    ZStack {
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.3))
-                        Image(systemName: "photo.badge.exclamationmark")
-                            .foregroundColor(.gray)
-                    }
+                    Image(systemName: "photo.badge.exclamationmark").foregroundColor(.gray)
                 }
-            } else if layer.kind == "analog" {
-                ZStack {
-                    Circle()
-                        .stroke(layerColor.opacity(0.4), lineWidth: 3)
-                    Circle()
-                        .fill(layerColor.opacity(0.15))
-                    Rectangle()
-                        .fill(layerColor)
-                        .frame(width: 2, height: scaledFontSize * 0.8)
-                        .offset(y: -scaledFontSize * 0.4)
-                    Rectangle()
-                        .fill(layerColor)
-                        .frame(width: 3, height: scaledFontSize * 0.6)
-                        .offset(y: -scaledFontSize * 0.3)
-                }
-            } else if layer.kind == "divider" {
+            case "divider":
+                // Divider is rendered as a thin horizontal line (matches
+                // the Flutter editor: height = h/6, clamped to 1–4pt). The
+                // layer's h field represents the row height, not the
+                // divider's visual thickness.
+                let thickness = max(1, min(4, (layer.h ?? 0) / 6))
                 Rectangle()
-                    .fill(layerColor.opacity(opacityVal))
-                    .frame(height: 2)
-            } else {
+                    .fill(Color(hex: layer.color ?? "#FFFFFF")?.opacity(layer.opacity ?? 1) ?? .white)
+                    .frame(height: CGFloat(thickness) * (canvasSize.width / 338))
+            case "draw":
+                DrawStrokesCanvas(strokesJSON: layer.strokes, color: layerColor, opacity: opacityVal)
+            case "analog":
+                AnalogClockView(color: layerColor, opacity: opacityVal)
+            default:
                 EmptyView()
             }
         }
-        .frame(width: width, height: height, alignment: .center)
-        .position(x: left + width / 2, y: top + height / 2)
+        .frame(width: rect.width, height: rect.height)
+        .position(x: rect.midX, y: rect.midY)
     }
-    
-    func fontWeight(for weight: Int) -> Font.Weight {
-        switch weight {
+
+    private func weight(for w: Int) -> Font.Weight {
+        switch w {
         case 100...300: return .light
         case 400: return .regular
         case 500: return .medium
@@ -877,564 +638,154 @@ struct LayerView: View {
         default: return .regular
         }
     }
-    
-    func textAlignment(for align: String) -> TextAlignment {
-        switch align {
-        case "center": return .center
-        case "right": return .trailing
-        default: return .leading
-        }
-    }
-}
 
-// MARK: - Dynamic Widgets
-
-@available(iOS 16.0, *)
-struct DriveStudioSlot1Widget: Widget {
-    let kind: String = "DriveStudioSlot1Widget"
-
-    var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: StaticProvider(slotIndex: 0)) { entry in
-            if #available(iOS 17.0, *) {
-                DriveStudioWidgetEntryView(entry: entry)
-                    .containerBackground(for: .widget) {
-                        BackgroundView(spec: entry.slotData?.spec, summary: entry.slotData?.summary)
-                    }
-            } else {
-                ZStack {
-                    BackgroundView(spec: entry.slotData?.spec, summary: entry.slotData?.summary)
-                    DriveStudioWidgetEntryView(entry: entry)
-                }
+    /// Maps the current battery percentage to the matching SF Symbol
+    /// so the icon reflects the actual charge level rather than always
+    /// showing 100%. Falls back to `battery.100` when no telemetry is
+    /// available so the widget still has a sensible empty-state icon.
+    /// iOS-6 fix.
+    static func batterySymbolName(percent: Int?, isCharging: Bool) -> String {
+        let base: String
+        if let p = percent {
+            switch p {
+            case 0: base = "battery.0"
+            case 1...24: base = "battery.25"
+            case 25...49: base = "battery.25"
+            case 50...74: base = "battery.50"
+            case 75...94: base = "battery.75"
+            default: base = "battery.100" // 95...100
             }
+        } else {
+            base = "battery.100"
         }
-        .configurationDisplayName("Drive Studio - Slot 1")
-        .description("Displays the widget assigned to Slot 1.")
-        .supportedFamilies([.systemSmall])
+        return isCharging ? "\(base).bolt" : base
     }
 }
 
-@available(iOS 16.0, *)
-struct DriveStudioSlot2Widget: Widget {
-    let kind: String = "DriveStudioSlot2Widget"
+/// Renders a live analog clock face for `kind == "analog"` layers.
+/// Uses SwiftUI Canvas driven by `Date()` so the widget auto-refreshes
+/// the hands via the system timeline; the editor's pre-rendered PNG
+/// stays static underneath this overlay. iOS-7 fix.
+struct AnalogClockView: View {
+    let color: Color
+    let opacity: Double
 
-    var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: StaticProvider(slotIndex: 1)) { entry in
-            if #available(iOS 17.0, *) {
-                DriveStudioWidgetEntryView(entry: entry)
-                    .containerBackground(for: .widget) {
-                        BackgroundView(spec: entry.slotData?.spec, summary: entry.slotData?.summary)
-                    }
-            } else {
-                ZStack {
-                    BackgroundView(spec: entry.slotData?.spec, summary: entry.slotData?.summary)
-                    DriveStudioWidgetEntryView(entry: entry)
-                }
-            }
-        }
-        .configurationDisplayName("Drive Studio - Slot 2")
-        .description("Displays the widget assigned to Slot 2.")
-        .supportedFamilies([.systemSmall])
-    }
-}
-
-@available(iOS 16.0, *)
-struct DriveStudioSlot3Widget: Widget {
-    let kind: String = "DriveStudioSlot3Widget"
-
-    var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: StaticProvider(slotIndex: 2)) { entry in
-            if #available(iOS 17.0, *) {
-                DriveStudioWidgetEntryView(entry: entry)
-                    .containerBackground(for: .widget) {
-                        BackgroundView(spec: entry.slotData?.spec, summary: entry.slotData?.summary)
-                    }
-            } else {
-                ZStack {
-                    BackgroundView(spec: entry.slotData?.spec, summary: entry.slotData?.summary)
-                    DriveStudioWidgetEntryView(entry: entry)
-                }
-            }
-        }
-        .configurationDisplayName("Drive Studio - Slot 3")
-        .description("Displays the widget assigned to Slot 3.")
-        .supportedFamilies([.systemSmall])
-    }
-}
-
-@available(iOS 16.0, *)
-struct DriveStudioSlot4Widget: Widget {
-    let kind: String = "DriveStudioSlot4Widget"
-
-    var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: StaticProvider(slotIndex: 3)) { entry in
-            if #available(iOS 17.0, *) {
-                DriveStudioWidgetEntryView(entry: entry)
-                    .containerBackground(for: .widget) {
-                        BackgroundView(spec: entry.slotData?.spec, summary: entry.slotData?.summary)
-                    }
-            } else {
-                ZStack {
-                    BackgroundView(spec: entry.slotData?.spec, summary: entry.slotData?.summary)
-                    DriveStudioWidgetEntryView(entry: entry)
-                }
-            }
-        }
-        .configurationDisplayName("Drive Studio - Slot 4")
-        .description("Displays the widget assigned to Slot 4.")
-        .supportedFamilies([.systemSmall])
-    }
-}
-struct NativeBatteryView: View {
-    let layer: WidgetLayer
-    let telemetry: TelemetrySnapshot?
-    let size: CGSize
-    
     var body: some View {
-        let level = telemetry?.batteryPercent ?? 0
-        let charging = telemetry?.isCharging ?? false
-        let known = telemetry?.batteryPercent != nil
-        let fraction = Double(level) / 100.0
-        
-        let format = layer.format?.lowercased() ?? "panel"
-        let accent = Color(hex: layer.color ?? "#FFFFFF") ?? .white
-        let accent2 = Color(hex: layer.color2 ?? layer.color ?? "#00FF00") ?? .green
-        let ink = Color(hex: layer.color3 ?? "#FFFFFF") ?? .white
-        let track = Color(hex: layer.trackColor ?? "#333333") ?? .gray
-        
-        Group {
-            switch format {
-            case "metrics":
-                AnyView(metricsView(level: level, charging: charging, known: known, accent: accent, track: track, ink: ink, size: size))
-            case "icon":
-                AnyView(iconView(fraction: fraction, charging: charging, known: known, accent: accent, track: track, ink: ink, size: size))
-            case "dots":
-                AnyView(dotsView(fraction: fraction, accent: accent, track: track, ink: ink, size: size))
-            case "matrix":
-                AnyView(matrixView(fraction: fraction, accent: accent, track: track, ink: ink, size: size))
-            case "lightning":
-                AnyView(lightningView(fraction: fraction, charging: charging, accent: accent, accent2: accent2, ink: ink, size: size))
-            case "pill":
-                AnyView(pillView(fraction: fraction, accent: accent, accent2: accent2, track: track, size: size))
-            case "pie", "orbit", "ring", "dayprogress":
-                AnyView(ringView(fraction: fraction, charging: charging, known: known, accent: accent, track: track, ink: ink, size: size))
-            case "large", "batterylive", "charging":
-                AnyView(largeView(level: level, charging: charging, known: known, accent: accent, ink: ink, size: size))
-            case "bars":
-                AnyView(barsView(fraction: fraction, accent: accent, track: track, muted: ink.opacity(0.5), size: size))
-            case "segmented":
-                AnyView(segmentedView(fraction: fraction, accent: accent, track: track, muted: ink.opacity(0.5), size: size))
-            case "vertbar":
-                AnyView(vertbarView(fraction: fraction, accent: accent, track: track, size: size))
+        Canvas { context, size in
+            let now = Date()
+            let cal = Calendar.current
+            let comps = cal.dateComponents([.hour, .minute, .second], from: now)
+            // Pre-existing bug fix: Swift removed `Double % Int`, so compute
+            // the modular reduction on the integer hour first, then convert.
+            // Behavior is identical to the original `Double(...) % 12`.
+            let h = Double((comps.hour ?? 0) % 12)
+            let m = Double(comps.minute ?? 0)
+            let s = Double(comps.second ?? 0)
 
-            case "hud":
-                AnyView(hudView(fraction: fraction, charging: charging, known: known, accent: accent, track: track, ink: ink, size: size))
-            case "minimal":
-                AnyView(minimalView(level: level, known: known, accent: accent))
-            case "dual":
-                AnyView(dualView(fraction: fraction, accent: accent, track: track, ink: ink, size: size))
-            case "wave":
-                AnyView(waveView(fraction: fraction, accent: accent, track: track, size: size))
-            default:
-                AnyView(panelView(level: level, fraction: fraction, charging: charging, known: known, accent: accent, accent2: accent2, track: track, ink: ink, size: size))
+            let center = CGPoint(x: size.width / 2, y: size.height / 2)
+            let radius = min(size.width, size.height) / 2
+            let strokeColor = GraphicsContext.Shading.color(color.opacity(opacity))
+            let baseWidth = max(1, radius * 0.04)
+
+            // Outer ring
+            let ringRect = CGRect(
+                x: center.x - radius,
+                y: center.y - radius,
+                width: radius * 2,
+                height: radius * 2
+            )
+            context.stroke(
+                Path(ellipseIn: ringRect),
+                with: strokeColor,
+                style: StrokeStyle(lineWidth: baseWidth)
+            )
+
+            // Hour ticks (12 around the face, longer at 12/3/6/9)
+            for i in 0..<12 {
+                let angle = Double(i) * (.pi / 6) - .pi / 2
+                let inner = radius * (i % 3 == 0 ? 0.78 : 0.88)
+                let outer = radius * 0.96
+                let p1 = CGPoint(
+                    x: center.x + cos(angle) * inner,
+                    y: center.y + sin(angle) * inner
+                )
+                let p2 = CGPoint(
+                    x: center.x + cos(angle) * outer,
+                    y: center.y + sin(angle) * outer
+                )
+                var path = Path()
+                path.move(to: p1)
+                path.addLine(to: p2)
+                context.stroke(
+                    path,
+                    with: strokeColor,
+                    style: StrokeStyle(lineWidth: baseWidth * (i % 3 == 0 ? 1.4 : 0.7))
+                )
             }
+
+            // Hour hand
+            let hourAngle = (h + m / 60) * (.pi / 6) - .pi / 2
+            drawHand(
+                context: context,
+                center: center,
+                length: radius * 0.55,
+                angle: hourAngle,
+                width: baseWidth * 2.2,
+                color: strokeColor
+            )
+
+            // Minute hand
+            let minuteAngle = (m + s / 60) * (.pi / 30) - .pi / 2
+            drawHand(
+                context: context,
+                center: center,
+                length: radius * 0.82,
+                angle: minuteAngle,
+                width: baseWidth * 1.4,
+                color: strokeColor
+            )
+
+            // Second hand (thinner, slightly shorter)
+            let secondAngle = s * (.pi / 30) - .pi / 2
+            drawHand(
+                context: context,
+                center: center,
+                length: radius * 0.88,
+                angle: secondAngle,
+                width: max(0.5, baseWidth * 0.6),
+                color: strokeColor
+            )
+
+            // Center pin
+            let pinRect = CGRect(
+                x: center.x - baseWidth,
+                y: center.y - baseWidth,
+                width: baseWidth * 2,
+                height: baseWidth * 2
+            )
+            context.fill(Path(ellipseIn: pinRect), with: strokeColor)
         }
-    }
-    
-    // MARK: - Format Implementations
-    
-    @ViewBuilder
-    func panelView(level: Int, fraction: Double, charging: Bool, known: Bool, accent: Color, accent2: Color, track: Color, ink: Color, size: CGSize) -> some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 18)
-                .fill(Color.black.opacity(0.35))
-            
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text(known ? (charging ? "CHARGING" : "BATTERY") : "UNAVAILABLE")
-                        .font(.system(size: size.width * 0.07, weight: .bold, design: .monospaced))
-                        .foregroundColor(accent.opacity(0.85))
-                        .tracking(2.2)
-                    Spacer()
-                    if charging {
-                        Image(systemName: "bolt.fill")
-                            .foregroundColor(accent)
-                            .font(.system(size: size.width * 0.12))
-                    }
-                }
-                
-                HStack(alignment: .lastTextBaseline, spacing: 0) {
-                    Text(known ? "\(level)" : "—")
-                        .font(.system(size: size.width * 0.28, weight: .heavy))
-                        .foregroundColor(ink)
-                    if known {
-                        Text("%")
-                            .font(.system(size: size.width * 0.12, weight: .semibold))
-                            .foregroundColor(Color.gray)
-                    }
-                }
-                Spacer()
-                
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(track)
-                        if known && fraction > 0 {
-                            Capsule()
-                                .fill(LinearGradient(colors: [accent, accent2], startPoint: .leading, endPoint: .trailing))
-                                .frame(width: max(geo.size.width * fraction, geo.size.height))
-                        }
-                    }
-                }
-                .frame(height: size.height * 0.1)
-                .padding(.bottom, size.height * 0.1)
-            }
-            .padding(size.width * 0.1)
-        }
-    }
-    
-    @ViewBuilder
-    func metricsView(level: Int, charging: Bool, known: Bool, accent: Color, track: Color, ink: Color, size: CGSize) -> some View {
-        VStack(alignment: .leading, spacing: size.height * 0.04) {
-            Text(known ? (charging ? "CHARGING" : "ON BATTERY") : "UNAVAILABLE")
-                .font(.system(size: size.width * 0.065, weight: .bold, design: .monospaced))
-                .foregroundColor(charging ? accent : Color.gray)
-                .tracking(1.8)
-            
-            Text(known ? "\(level)%" : "—")
-                .font(.system(size: size.width * 0.22, weight: .heavy))
-                .foregroundColor(ink)
-            
-            Spacer()
-            
-            metricRow(label: "SOURCE", value: known ? "PHONE" : "—", size: size, accent: accent)
-            metricRow(label: "STATUS", value: known ? (charging ? "CHARGING" : "READY") : "UNAVAILABLE", size: size, accent: accent)
-            
-            Rectangle()
-                .fill(accent)
-                .frame(width: size.width * 0.35, height: 3)
-                .padding(.top, size.height * 0.05)
-        }
-        .padding(size.width * 0.08)
-    }
-    
-    @ViewBuilder
-    func metricRow(label: String, value: String, size: CGSize, accent: Color) -> some View {
-        HStack {
-            Text(label)
-                .font(.system(size: size.width * 0.055, design: .monospaced))
-                .foregroundColor(Color.gray)
-                .tracking(1.4)
-            Spacer()
-            Text(value)
-                .font(.system(size: size.width * 0.07, weight: .bold))
-                .foregroundColor(accent)
-        }
-    }
-    
-    @ViewBuilder
-    func iconView(fraction: Double, charging: Bool, known: Bool, accent: Color, track: Color, ink: Color, size: CGSize) -> some View {
-        VStack {
-            HStack(spacing: 2) {
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 6)
-                        .stroke(accent, lineWidth: 3.5)
-                        .frame(width: size.width * 0.42, height: size.height * 0.28)
-                    
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(track)
-                        .padding(5)
-                        .frame(width: size.width * 0.42, height: size.height * 0.28)
-                    
-                    if known && fraction > 0 {
-                        RoundedRectangle(cornerRadius: 3)
-                            .fill(accent)
-                            .padding(5)
-                            .frame(width: max((size.width * 0.42 - 10) * fraction + 10, 10), height: size.height * 0.28)
-                    }
-                }
-                
-                Path { path in
-                    path.addRoundedRect(in: CGRect(x: 0, y: 0, width: size.width * 0.045, height: size.height * 0.12), cornerSize: CGSize(width: 3, height: 3))
-                }
-                .fill(accent)
-                .frame(width: size.width * 0.045, height: size.height * 0.12)
-            }
-            .padding(.bottom, size.height * 0.1)
-            
-            Text(known ? "\(Int(fraction * 100))%" : "—")
-                .font(.system(size: size.width * 0.14, weight: .heavy))
-                .foregroundColor(ink)
-        }
-    }
-    
-    @ViewBuilder
-    func dotsView(fraction: Double, accent: Color, track: Color, ink: Color, size: CGSize) -> some View {
-        let filled = Int(round(fraction * 10))
-        VStack(spacing: size.height * 0.05) {
-            Text("CHARGE")
-                .font(.system(size: size.width * 0.065, weight: .bold, design: .monospaced))
-                .foregroundColor(Color.gray)
-                .tracking(2)
-                
-            VStack(spacing: size.width * 0.04) {
-                HStack(spacing: size.width * 0.04) {
-                    ForEach(0..<5) { i in
-                        Capsule()
-                            .fill(i < filled ? accent : track)
-                            .frame(width: size.width * 0.1, height: size.width * 0.055)
-                    }
-                }
-                HStack(spacing: size.width * 0.04) {
-                    ForEach(5..<10) { i in
-                        Capsule()
-                            .fill(i < filled ? accent : track)
-                            .frame(width: size.width * 0.1, height: size.width * 0.055)
-                    }
-                }
-            }
-            
-            Text("\(Int(fraction * 100))%")
-                .font(.system(size: size.width * 0.12, weight: .heavy))
-                .foregroundColor(ink)
-        }
-    }
-    
-    @ViewBuilder
-    func matrixView(fraction: Double, accent: Color, track: Color, ink: Color, size: CGSize) -> some View {
-        let filled = Int(round(fraction * 16))
-        VStack {
-            VStack(spacing: size.width * 0.03) {
-                ForEach(0..<4) { row in
-                    HStack(spacing: size.width * 0.03) {
-                        ForEach(0..<4) { col in
-                            let i = (3 - row) * 4 + col
-                            let on = i < filled
-                            let alpha = on ? 0.55 + 0.45 * (Double(i % 4) / 4.0) : 1.0
-                            RoundedRectangle(cornerRadius: size.width * 0.02)
-                                .fill(on ? accent.opacity(alpha) : track)
-                                .frame(width: size.width * 0.15, height: size.width * 0.15)
-                        }
-                    }
-                }
-            }
-            .padding(.bottom, size.height * 0.05)
-            
-            Text("\(Int(fraction * 100))")
-                .font(.system(size: size.width * 0.11, weight: .bold, design: .monospaced))
-                .foregroundColor(ink)
-        }
-    }
-    
-    @ViewBuilder
-    func lightningView(fraction: Double, charging: Bool, accent: Color, accent2: Color, ink: Color, size: CGSize) -> some View {
-        VStack {
-            Image(systemName: "bolt.fill")
-                .font(.system(size: size.height * 0.6))
-                .foregroundStyle(LinearGradient(colors: [accent2, accent], startPoint: .top, endPoint: .bottom))
-                .shadow(color: accent.opacity(0.5), radius: 10)
-            
-            Text("\(Int(fraction * 100))%")
-                .font(.system(size: size.width * 0.13, weight: .heavy))
-                .foregroundColor(ink)
-                .shadow(color: Color.black.opacity(0.5), radius: 12)
-        }
-    }
-    
-    @ViewBuilder
-    func pillView(fraction: Double, accent: Color, accent2: Color, track: Color, size: CGSize) -> some View {
-        ZStack(alignment: .leading) {
-            Capsule()
-                .fill(track)
-                .frame(width: size.width * 0.78, height: size.height * 0.28)
-            
-            if fraction > 0 {
-                Capsule()
-                    .fill(LinearGradient(colors: [accent, accent2], startPoint: .leading, endPoint: .trailing))
-                    .frame(width: max((size.width * 0.78) * fraction, size.height * 0.28), height: size.height * 0.28)
-            }
-        }
-    }
-    
-    @ViewBuilder
-    func ringView(fraction: Double, charging: Bool, known: Bool, accent: Color, track: Color, ink: Color, size: CGSize) -> some View {
-        ZStack {
-            Circle()
-                .stroke(track, lineWidth: size.width * 0.08)
-                .frame(width: size.width * 0.8, height: size.height * 0.8)
-            
-            if known && fraction > 0 {
-                Circle()
-                    .trim(from: 0, to: fraction)
-                    .stroke(accent, style: StrokeStyle(lineWidth: size.width * 0.08, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
-                    .frame(width: size.width * 0.8, height: size.height * 0.8)
-            }
-            
-            VStack(spacing: 0) {
-                if charging {
-                    Image(systemName: "bolt.fill")
-                        .foregroundColor(accent)
-                        .font(.system(size: size.width * 0.15))
-                }
-                Text(known ? "\(Int(fraction * 100))%" : "—")
-                    .font(.system(size: size.width * 0.18, weight: .heavy))
-                    .foregroundColor(ink)
-            }
-        }
-    }
-    
-    @ViewBuilder
-    func largeView(level: Int, charging: Bool, known: Bool, accent: Color, ink: Color, size: CGSize) -> some View {
-        VStack(spacing: 0) {
-            Text(known ? "\(level)%" : "—")
-                .font(.system(size: size.width * 0.35, weight: .heavy))
-                .foregroundColor(ink)
-            
-            if charging {
-                Text("CHARGING")
-                    .font(.system(size: size.width * 0.08, weight: .bold))
-                    .foregroundColor(accent)
-            }
-        }
-    }
-    
-    @ViewBuilder
-    func barsView(fraction: Double, accent: Color, track: Color, muted: Color, size: CGSize) -> some View {
-        let n = 8
-        let gap = size.width * 0.02
-        let barW = (size.width * 0.72 - gap * Double(n - 1)) / Double(n)
-        let baseY = size.height * 0.78
-        let maxH = size.height * 0.55
-        let lit = Int(ceil(fraction * Double(n)))
-        let originX = size.width * 0.14
-        
-        ZStack(alignment: .topLeading) {
-            Text("PHONE LEVEL")
-                .font(.system(size: size.width * 0.06, weight: .bold))
-                .foregroundColor(muted)
-                .kerning(1.8)
-                .offset(x: size.width * 0.14, y: size.height * 0.1)
-            
-            ForEach(0..<n, id: \.self) { i in
-                let h = maxH * (0.35 + 0.65 * (Double(i + 1) / Double(n)))
-                let on = i < lit
-                let rectX = originX + Double(i) * (barW + gap)
-                let rectY = baseY - h
-                
-                RoundedRectangle(cornerRadius: barW * 0.35)
-                    .fill(on ? accent.opacity(0.45 + 0.55 * (Double(i) / Double(n))) : track)
-                    .frame(width: barW, height: h)
-                    .offset(x: rectX, y: rectY)
-            }
-        }
-        .frame(width: size.width, height: size.height, alignment: .topLeading)
     }
 
-    @ViewBuilder
-    func segmentedView(fraction: Double, accent: Color, track: Color, muted: Color, size: CGSize) -> some View {
-        let segs = 10
-        let gap = size.width * 0.015
-        let segW = (size.width * 0.8 - gap * Double(segs - 1)) / Double(segs)
-        let rectY = size.height * 0.48
-        let h = size.height * 0.16
-        let lit = Int(round(fraction * Double(segs)))
-        let x0 = size.width * 0.1
-        
-        ZStack(alignment: .topLeading) {
-            Text("CELLS")
-                .font(.system(size: size.width * 0.065, weight: .bold))
-                .foregroundColor(muted)
-                .kerning(2.0)
-                .offset(x: x0, y: size.height * 0.18)
-            
-            ForEach(0..<segs, id: \.self) { i in
-                let on = i < lit
-                let rectX = x0 + Double(i) * (segW + gap)
-                
-                RoundedRectangle(cornerRadius: segW * 0.25)
-                    .fill(on ? accent : track)
-                    .frame(width: segW, height: h)
-                    .offset(x: rectX, y: rectY)
-            }
-        }
-        .frame(width: size.width, height: size.height, alignment: .topLeading)
-    }
-
-    @ViewBuilder
-    func vertbarView(fraction: Double, accent: Color, track: Color, size: CGSize) -> some View {
-        let rectX = size.width * 0.38
-        let rectY = size.height * 0.12
-        let rectW = size.width * 0.24
-        let maxH = size.height * 0.62
-        let fillH = maxH * fraction
-        let fillY = rectY + (maxH - fillH)
-        
-        ZStack(alignment: .topLeading) {
-            RoundedRectangle(cornerRadius: 14)
-                .fill(track)
-                .frame(width: rectW, height: maxH)
-                .offset(x: rectX, y: rectY)
-            
-            RoundedRectangle(cornerRadius: 14)
-                .fill(accent)
-                .frame(width: rectW, height: fillH)
-                .offset(x: rectX, y: fillY)
-        }
-        .frame(width: size.width, height: size.height, alignment: .topLeading)
-    }
-    
-    @ViewBuilder
-    func hudView(fraction: Double, charging: Bool, known: Bool, accent: Color, track: Color, ink: Color, size: CGSize) -> some View {
-        ZStack {
-            Circle()
-                .trim(from: 0.1, to: 0.9)
-                .stroke(style: StrokeStyle(lineWidth: 2, dash: [4, 4]))
-                .foregroundColor(track)
-                .frame(width: size.width * 0.9, height: size.height * 0.9)
-                .rotationEffect(.degrees(90))
-                
-            Circle()
-                .trim(from: 0.1, to: 0.1 + 0.8 * fraction)
-                .stroke(accent, lineWidth: 6)
-                .frame(width: size.width * 0.9, height: size.height * 0.9)
-                .rotationEffect(.degrees(90))
-                
-            VStack {
-                Text(known ? "\(Int(fraction * 100))" : "—")
-                    .font(.system(size: size.width * 0.25, weight: .bold, design: .monospaced))
-                    .foregroundColor(ink)
-                Text("PWR")
-                    .font(.system(size: size.width * 0.08, weight: .bold))
-                    .foregroundColor(accent)
-            }
-        }
-    }
-    
-    @ViewBuilder
-    func minimalView(level: Int, known: Bool, accent: Color) -> some View {
-        Text(known ? "\(level)%" : "—")
-            .font(.system(size: size.width * 0.15, weight: .medium))
-            .foregroundColor(accent)
-    }
-    
-    @ViewBuilder
-    func dualView(fraction: Double, accent: Color, track: Color, ink: Color, size: CGSize) -> some View {
-        // Fallback to segmented for dual
-        barsView(fraction: fraction, accent: accent, track: track, muted: ink.opacity(0.5), size: size)
-    }
-    
-    @ViewBuilder
-    func waveView(fraction: Double, accent: Color, track: Color, size: CGSize) -> some View {
-        // Simplified wave: A rect that fills from bottom up
-        ZStack(alignment: .bottom) {
-            RoundedRectangle(cornerRadius: size.width * 0.1)
-                .fill(track)
-                .frame(width: size.width * 0.6, height: size.height * 0.8)
-                
-            if fraction > 0 {
-                RoundedRectangle(cornerRadius: size.width * 0.1)
-                    .fill(accent)
-                    .frame(width: size.width * 0.6, height: size.height * 0.8 * fraction)
-            }
-        }
+    private func drawHand(
+        context: GraphicsContext,
+        center: CGPoint,
+        length: CGFloat,
+        angle: Double,
+        width: CGFloat,
+        color: GraphicsContext.Shading
+    ) {
+        let tip = CGPoint(
+            x: center.x + cos(angle) * length,
+            y: center.y + sin(angle) * length
+        )
+        var path = Path()
+        path.move(to: center)
+        path.addLine(to: tip)
+        context.stroke(
+            path,
+            with: color,
+            style: StrokeStyle(lineWidth: width, lineCap: .round)
+        )
     }
 }

@@ -15,7 +15,10 @@ enum CarExclusionKind {
 
 /// Result of evaluating one make+model (and optional metadata).
 class CarFilterDecision {
-  const CarFilterDecision.allow() : allowed = true, kind = null, reason = null;
+  const CarFilterDecision.allow()
+      : allowed = true,
+        kind = null,
+        reason = null;
 
   const CarFilterDecision.deny(this.kind, this.reason) : allowed = false;
 
@@ -96,13 +99,14 @@ abstract final class CarOnlyFilter {
     String? category,
     String? displayName,
     String? modelFamily,
-  }) => evaluate(
-    make: make,
-    model: model,
-    category: category,
-    displayName: displayName,
-    modelFamily: modelFamily,
-  ).allowed;
+  }) =>
+      evaluate(
+        make: make,
+        model: model,
+        category: category,
+        displayName: displayName,
+        modelFamily: modelFamily,
+      ).allowed;
 
   static CarFilterDecision evaluate({
     required String make,
@@ -142,8 +146,7 @@ abstract final class CarOnlyFilter {
       );
     }
 
-    final blob =
-        '$modelKey ${display.isEmpty ? '' : display} '
+    final blob = '$modelKey ${display.isEmpty ? '' : display} '
         '${family.isEmpty ? '' : family}';
 
     // General commercial / non-car phrases (before brand rules).
@@ -178,7 +181,11 @@ abstract final class CarOnlyFilter {
     String? Function(String model)? categoryFor,
   }) {
     for (final m in models) {
-      if (isAllowedCar(make: make, model: m, category: categoryFor?.call(m))) {
+      if (isAllowedCar(
+        make: make,
+        model: m,
+        category: categoryFor?.call(m),
+      )) {
         return true;
       }
     }
@@ -288,9 +295,21 @@ abstract final class CarOnlyFilter {
         CarExclusionKind.bike,
         'Powersports',
       ),
-      (RegExp(r'\batv\b', caseSensitive: false), CarExclusionKind.bike, 'ATV'),
-      (RegExp(r'\butv\b', caseSensitive: false), CarExclusionKind.bike, 'UTV'),
-      (RegExp(r'\bbus\b', caseSensitive: false), CarExclusionKind.other, 'Bus'),
+      (
+        RegExp(r'\batv\b', caseSensitive: false),
+        CarExclusionKind.bike,
+        'ATV',
+      ),
+      (
+        RegExp(r'\butv\b', caseSensitive: false),
+        CarExclusionKind.bike,
+        'UTV',
+      ),
+      (
+        RegExp(r'\bbus\b', caseSensitive: false),
+        CarExclusionKind.other,
+        'Bus',
+      ),
       (
         RegExp(r'\btrailer\b', caseSensitive: false),
         CarExclusionKind.other,
@@ -320,7 +339,10 @@ abstract final class CarOnlyFilter {
 
     // Any remaining "… Chassis" commercial platform (not car body styles).
     if (RegExp(r'\bchassis\b', caseSensitive: false).hasMatch(blob)) {
-      return const CarFilterDecision.deny(CarExclusionKind.other, 'Chassis');
+      return const CarFilterDecision.deny(
+        CarExclusionKind.other,
+        'Chassis',
+      );
     }
 
     return null;
@@ -417,7 +439,10 @@ abstract final class CarOnlyFilter {
 
     // M 1000 R / RR / XR.
     if (RegExp(r'\bm\s*1000\b').hasMatch(blob)) {
-      return const CarFilterDecision.deny(CarExclusionKind.bike, 'BMW M 1000');
+      return const CarFilterDecision.deny(
+        CarExclusionKind.bike,
+        'BMW M 1000',
+      );
     }
 
     // R motorcycle series (R 100…, R 12, R nineT, etc.).
@@ -436,7 +461,10 @@ abstract final class CarOnlyFilter {
 
     // S 1000 R / RR / XR.
     if (RegExp(r'\bs\s*1000\b').hasMatch(blob)) {
-      return const CarFilterDecision.deny(CarExclusionKind.bike, 'BMW S 1000');
+      return const CarFilterDecision.deny(
+        CarExclusionKind.bike,
+        'BMW S 1000',
+      );
     }
 
     return null;
@@ -454,7 +482,11 @@ abstract final class CarOnlyFilter {
       return null;
     }
 
-    const phrases = <String>['africa twin', 'gold wing', 'goldwing'];
+    const phrases = <String>[
+      'africa twin',
+      'gold wing',
+      'goldwing',
+    ];
     for (final p in phrases) {
       if (blob.contains(p)) {
         return CarFilterDecision.deny(CarExclusionKind.bike, 'Honda $p');
@@ -468,9 +500,8 @@ abstract final class CarOnlyFilter {
       return const CarFilterDecision.deny(CarExclusionKind.bike, 'Honda CBR');
     }
     // CB bike family — must not match Civic.
-    if (RegExp(
-      r'\bcb(?:f|x|r)?[\s-]?\d|\bcb-\d|\bcb\s*\d|\bcbx\b|\bcbf\b|\bcbf\d',
-    ).hasMatch(blob)) {
+    if (RegExp(r'\bcb(?:f|x|r)?[\s-]?\d|\bcb-\d|\bcb\s*\d|\bcbx\b|\bcbf\b|\bcbf\d')
+        .hasMatch(blob)) {
       return const CarFilterDecision.deny(CarExclusionKind.bike, 'Honda CB');
     }
     if (RegExp(r'\bcrf\b|\bcrf\d').hasMatch(blob)) {

@@ -134,7 +134,8 @@ class NhtsaMakesService {
 
     try {
       final uri = Uri.parse('$modelsUrl/${make.id}?format=json');
-      final res = await http.get(uri).timeout(const Duration(seconds: 20));
+      final res =
+          await http.get(uri).timeout(const Duration(seconds: 20));
       if (res.statusCode == 200) {
         final models = gate(_parseModels(res.body));
         if (models.isNotEmpty) {
@@ -166,7 +167,9 @@ class NhtsaMakesService {
       if (trimmed.isEmpty) continue;
       out.add(NhtsaMake(id: id.toInt(), name: trimmed));
     }
-    out.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    out.sort(
+      (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+    );
     return out;
   }
 

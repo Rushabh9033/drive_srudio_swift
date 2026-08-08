@@ -248,9 +248,8 @@ class _BgTile extends StatelessWidget {
                   top: 6,
                   left: 6,
                   child: Text(
-                    BackgroundLibrary.categoryLabel(
-                      preset.category,
-                    ).toUpperCase(),
+                    BackgroundLibrary.categoryLabel(preset.category)
+                        .toUpperCase(),
                     style: driveMono(
                       size: 9,
                       color: Colors.white.withValues(alpha: 0.85),
@@ -292,7 +291,10 @@ class _BgTile extends StatelessWidget {
           DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [_hex(bg.from), _hex(bg.to ?? bg.from)],
+                colors: [
+                  _hex(bg.from),
+                  _hex(bg.to ?? bg.from),
+                ],
               ),
             ),
           ),
@@ -305,7 +307,10 @@ class _BgTile extends StatelessWidget {
         gradient: LinearGradient(
           begin: const Alignment(-0.6, -1),
           end: const Alignment(0.8, 1),
-          colors: [_hex(bg.from), _hex(bg.to ?? bg.from)],
+          colors: [
+            _hex(bg.from),
+            _hex(bg.to ?? bg.from),
+          ],
         ),
       ),
     );

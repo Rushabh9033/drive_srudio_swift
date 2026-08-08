@@ -33,7 +33,11 @@ class PurchaseEvent {
 }
 
 class PurchaseResult {
-  const PurchaseResult({required this.ok, this.message, this.pending = false});
+  const PurchaseResult({
+    required this.ok,
+    this.message,
+    this.pending = false,
+  });
   final bool ok;
   final String? message;
   final bool pending;

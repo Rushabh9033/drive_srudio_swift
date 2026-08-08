@@ -98,8 +98,8 @@ class _LayerSettingsBodyState extends State<_LayerSettingsBody> {
         if (_draft.kind == LayerKind.analog) ..._analogControls(),
         if (_draft.kind == LayerKind.clock) ..._clockControls(),
         if (_draft.kind == LayerKind.date) ..._dateControls(),
-        if (_draft.kind == LayerKind.text || _draft.kind == LayerKind.badge)
-          ..._textControls(),
+        if (_draft.kind == LayerKind.text ||
+            _draft.kind == LayerKind.badge) ..._textControls(),
         if (_draft.kind == LayerKind.image) ..._imageControls(),
         if (_draft.kind == LayerKind.shape) ..._shapeControls(),
         ..._colorControls(),
@@ -254,10 +254,8 @@ class _LayerSettingsBodyState extends State<_LayerSettingsBody> {
 
   List<Widget> _analogControls() {
     return [
-      Text(
-        'Face style',
-        style: GoogleFonts.manrope(fontWeight: FontWeight.w700),
-      ),
+      Text('Face style',
+          style: GoogleFonts.manrope(fontWeight: FontWeight.w700)),
       const SizedBox(height: 8),
       Wrap(
         spacing: 6,
@@ -274,10 +272,8 @@ class _LayerSettingsBodyState extends State<_LayerSettingsBody> {
       ),
       SwitchListTile.adaptive(
         contentPadding: EdgeInsets.zero,
-        title: Text(
-          'Show seconds',
-          style: GoogleFonts.manrope(fontWeight: FontWeight.w600),
-        ),
+        title: Text('Show seconds',
+            style: GoogleFonts.manrope(fontWeight: FontWeight.w600)),
         value: _draft.showSeconds,
         onChanged: (v) => _patch((l) => l.copyWith(showSeconds: v)),
       ),
@@ -308,10 +304,8 @@ class _LayerSettingsBodyState extends State<_LayerSettingsBody> {
       ),
       SwitchListTile.adaptive(
         contentPadding: EdgeInsets.zero,
-        title: Text(
-          'Show seconds',
-          style: GoogleFonts.manrope(fontWeight: FontWeight.w600),
-        ),
+        title: Text('Show seconds',
+            style: GoogleFonts.manrope(fontWeight: FontWeight.w600)),
         subtitle: Text(
           'HH:mm:ss live field',
           style: GoogleFonts.manrope(
@@ -324,10 +318,8 @@ class _LayerSettingsBodyState extends State<_LayerSettingsBody> {
       ),
       SwitchListTile.adaptive(
         contentPadding: EdgeInsets.zero,
-        title: Text(
-          'Shadow',
-          style: GoogleFonts.manrope(fontWeight: FontWeight.w600),
-        ),
+        title: Text('Shadow',
+            style: GoogleFonts.manrope(fontWeight: FontWeight.w600)),
         value: _draft.shadow,
         onChanged: (v) => _patch((l) => l.copyWith(shadow: v)),
       ),
@@ -358,10 +350,8 @@ class _LayerSettingsBodyState extends State<_LayerSettingsBody> {
       ),
       SwitchListTile.adaptive(
         contentPadding: EdgeInsets.zero,
-        title: Text(
-          'Shadow',
-          style: GoogleFonts.manrope(fontWeight: FontWeight.w600),
-        ),
+        title: Text('Shadow',
+            style: GoogleFonts.manrope(fontWeight: FontWeight.w600)),
         value: _draft.shadow,
         onChanged: (v) => _patch((l) => l.copyWith(shadow: v)),
       ),
@@ -389,17 +379,13 @@ class _LayerSettingsBodyState extends State<_LayerSettingsBody> {
       ),
       SwitchListTile.adaptive(
         contentPadding: EdgeInsets.zero,
-        title: Text(
-          'Shadow',
-          style: GoogleFonts.manrope(fontWeight: FontWeight.w600),
-        ),
+        title: Text('Shadow',
+            style: GoogleFonts.manrope(fontWeight: FontWeight.w600)),
         value: _draft.shadow,
         onChanged: (v) => _patch((l) => l.copyWith(shadow: v)),
       ),
-      Text(
-        'Font size',
-        style: GoogleFonts.manrope(fontWeight: FontWeight.w700),
-      ),
+      Text('Font size',
+          style: GoogleFonts.manrope(fontWeight: FontWeight.w700)),
       Slider(
         value: _draft.fontSize.clamp(8, 64),
         min: 8,
@@ -411,10 +397,8 @@ class _LayerSettingsBodyState extends State<_LayerSettingsBody> {
 
   List<Widget> _shapeControls() {
     return [
-      Text(
-        'Corner radius',
-        style: GoogleFonts.manrope(fontWeight: FontWeight.w700),
-      ),
+      Text('Corner radius',
+          style: GoogleFonts.manrope(fontWeight: FontWeight.w700)),
       Slider(
         value: _draft.radius.clamp(0, 48),
         min: 0,
@@ -436,7 +420,12 @@ class _LayerSettingsBodyState extends State<_LayerSettingsBody> {
         max: 100,
         onChanged: (v) {
           final scale = v / _draft.w;
-          _patch((l) => l.copyWith(w: v, h: (l.h * scale).clamp(8, 100)));
+          _patch(
+            (l) => l.copyWith(
+              w: v,
+              h: (l.h * scale).clamp(8, 100),
+            ),
+          );
         },
       ),
       Text(
@@ -500,15 +489,10 @@ class _LayerSettingsBodyState extends State<_LayerSettingsBody> {
       const Divider(height: 28),
       SwitchListTile.adaptive(
         contentPadding: EdgeInsets.zero,
-        secondary: const Icon(
-          CupertinoIcons.sparkles,
-          color: DriveColors.primary,
-          size: 20,
-        ),
-        title: Text(
-          'Animate',
-          style: GoogleFonts.manrope(fontWeight: FontWeight.w700),
-        ),
+        secondary: const Icon(CupertinoIcons.sparkles,
+            color: DriveColors.primary, size: 20),
+        title: Text('Animate',
+            style: GoogleFonts.manrope(fontWeight: FontWeight.w700)),
         subtitle: Text(
           'LIVE · ${AnimStyles.labelFor(_draft.resolvedAnimStyle)}',
           style: GoogleFonts.manrope(
@@ -527,10 +511,8 @@ class _LayerSettingsBodyState extends State<_LayerSettingsBody> {
         ),
       ),
       if (_draft.animate) ...[
-        Text(
-          'Motion style',
-          style: GoogleFonts.manrope(fontWeight: FontWeight.w700),
-        ),
+        Text('Motion style',
+            style: GoogleFonts.manrope(fontWeight: FontWeight.w700)),
         const SizedBox(height: 8),
         Wrap(
           spacing: 6,
@@ -539,7 +521,8 @@ class _LayerSettingsBodyState extends State<_LayerSettingsBody> {
             for (final s in AnimStyles.choices)
               ChoiceChip(
                 label: Text(s.$2),
-                selected: current == s.$1 || (current.isEmpty && s.$1.isEmpty),
+                selected: current == s.$1 ||
+                    (current.isEmpty && s.$1.isEmpty),
                 onSelected: (_) => _patch((l) => l.copyWith(animStyle: s.$1)),
               ),
           ],

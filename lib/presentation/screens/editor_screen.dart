@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -21,15 +23,10 @@ import '../../data/models/models.dart';
 import '../../data/store/app_store.dart';
 import '../widgets/drive_ui.dart';
 import '../widgets/layer_editor_overlay.dart';
-import '../widgets/layer_preset_sheet.dart';
-import '../widgets/surfaces.dart';
 import '../widgets/widget_canvas.dart';
 import 'background_picker_sheet.dart';
 import 'layer_settings_sheets.dart';
 import 'studio_creation_sheets.dart';
-import '../widgets/editor_dock.dart';
-import '../widgets/widget_library_sheet.dart';
-import '../widgets/background_sheet.dart';
 
 enum _EditorTab { car, text, widget, draw, background }
 
@@ -61,6 +58,17 @@ class _EditorScreenState extends State<EditorScreen> {
 
   /// Keeps [LayerEditorOverlay] State mounted across editor rebuilds.
   final GlobalKey _layerEditorKey = GlobalKey();
+
+  /// Wraps the [WidgetCanvas] in a [RepaintBoundary] for capturing
+  /// the design as a single image (used by the iOS widget extension).
+  final GlobalKey _canvasCaptureKey = GlobalKey();
+
+  /// Hidden canvas for capturing the static (non-live) design. The visible
+  /// canvas continues to show live data; the hidden one has
+  /// `hideLiveLayers: true` so clock/battery/analog layers are NOT baked
+  /// into the PNG. The widget extension overlays its own live values on
+  /// top of the static PNG.
+  final GlobalKey _staticCaptureKey = GlobalKey();
 
   /// Live geometry / clock paint signal — updates canvas paint WITHOUT
   /// [setState], so the overlay GestureDetectors are never remounted mid-drag.
@@ -106,10 +114,7 @@ class _EditorScreenState extends State<EditorScreen> {
       final cloned = draft.spec.clone();
       _spec = WidgetSpec(
         background: cloned.background,
-        layers: [
-          for (final l in cloned.layers)
-            if (!l.isEmptyDraw) l,
-        ],
+        layers: [for (final l in cloned.layers) if (!l.isEmptyDraw) l],
       );
       _name = TextEditingController(text: draft.name);
     }
@@ -181,8 +186,7 @@ class _EditorScreenState extends State<EditorScreen> {
           break;
         }
       }
-      final changed =
-          prior == null ||
+      final changed = prior == null ||
           prior.x != x ||
           prior.y != y ||
           prior.w != w ||
@@ -225,16 +229,87 @@ class _EditorScreenState extends State<EditorScreen> {
     });
   }
 
-  void _save() {
-    context.read<AppStore>().saveDraft(
+  Future<void> _save() async {
+    // 1. Capture the static design as a PNG (live layers excluded) for
+    //    the iOS widget extension. The widget displays the PNG as a base
+    //    and overlays live data (clock/battery/analog) on top using the
+    //    spec's live layers + telemetry.
+    String? widgetImagePath;
+    try {
+      widgetImagePath = await _captureWidgetImage();
+    } catch (e) {
+      widgetImagePath = null;
+    }
+    if (!mounted) return;
+
+    // 2. Save the draft with the widget image path attached in a single
+    //    commit (Flutter-2). The previous flow called saveDraft() then
+    //    setWidgetImagePath() which triggered two _commit()→_persist()
+    //    cycles, doubling App Group writes. saveDraft already accepts
+    //    widgetImagePath, so we pass it through directly.
+    if (!mounted) return;
+    final store = context.read<AppStore>();
+    store.saveDraft(
       widget.id,
       name: _name.text.trim().isEmpty ? 'Untitled widget' : _name.text.trim(),
       spec: _spec,
+      widgetImagePath: widgetImagePath,
     );
-    setState(() => _dirty = false);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Draft saved')));
+
+    if (mounted) {
+      setState(() => _dirty = false);
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Draft saved')),
+    );
+  }
+
+  /// Captures the WidgetCanvas inside [RepaintBoundary] as a PNG and
+  /// saves it to a known path the iOS widget can resolve. Returns the
+  /// absolute path or null on failure.
+  Future<String?> _captureWidgetImage() async {
+    try {
+      await WidgetsBinding.instance.endOfFrame;
+      // Flutter-8: State may be unmounted by the time endOfFrame fires
+      // (e.g. user navigated back during save). Bail before touching the
+      // RepaintBoundary or writing to disk.
+      if (!mounted) return null;
+      // Use the static capture key (the hidden canvas with hideLiveLayers: true).
+      final ctx = _staticCaptureKey.currentContext;
+      if (ctx == null) return null;
+      // Use dynamic to avoid importing flutter/rendering (which collides
+      // with our data-model `Layer` class name).
+      final boundary = ctx.findRenderObject() as dynamic;
+      if (boundary == null) return null;
+
+      final image = await boundary.toImage(pixelRatio: 3.0) as ui.Image;
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      image.dispose();
+      if (byteData == null) return null;
+      final pngBytes = byteData.buffer.asUint8List();
+
+      // Flutter-8: re-check mounted after the async toImage/toByteData
+      // hops — the State may have been disposed mid-capture.
+      if (!mounted) return null;
+
+      // Deterministic file name based on draft id — the native V2 writer
+      // (AppGroupChannel.swift) looks up `documents/drive_studio_images/<filename>`
+      // (where <filename> is exactly `widget_<draftId>.png`) and copies
+      // the bytes into the App Group's SharedImages generation folder for
+      // the widget extension to display. Do NOT change this filename
+      // shape without updating the Swift lookup in AppGroupChannel.swift.
+      final dir = await getApplicationDocumentsDirectory();
+      final imagesDir = Directory('${dir.path}/drive_studio_images');
+      if (!await imagesDir.exists()) {
+        await imagesDir.create(recursive: true);
+      }
+      final file = File('${imagesDir.path}/widget_${widget.id}.png');
+      await file.writeAsBytes(pngBytes, flush: true);
+      return file.path;
+    } catch (e) {
+      return null;
+    }
   }
 
   Future<void> _exit() async {
@@ -265,7 +340,8 @@ class _EditorScreenState extends State<EditorScreen> {
     );
     if (!mounted) return;
     if (action == 'save') {
-      _save();
+      await _save();
+      if (!mounted) return;
       context.go('/studio');
     } else if (action == 'discard') {
       context.go('/studio');
@@ -377,77 +453,91 @@ class _EditorScreenState extends State<EditorScreen> {
 
     final cutting = mode != null;
 
-    await _withProcessing(() async {
-      var bytes = await file.readAsBytes();
-      var label = source == ImageSource.camera ? 'Camera' : 'Gallery';
-      const role = 'gallery';
+    await _withProcessing(
+      () async {
+        var bytes = await file.readAsBytes();
+        var label = source == ImageSource.camera ? 'Camera' : 'Gallery';
+        const role = 'gallery';
 
-      if (mode != null) {
-        final result = await BgCutoutService().cutout(bytes, mode: mode);
-        if (!result.ok || result.pngBytes == null) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(result.error ?? 'Background removal failed'),
-              ),
-            );
+        if (mode != null) {
+          final result = await BgCutoutService().cutout(
+            bytes,
+            mode: mode,
+          );
+          if (!result.ok || result.pngBytes == null) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    result.error ?? 'Background removal failed',
+                  ),
+                ),
+              );
+            }
+            return;
           }
-          return;
-        }
-        bytes = result.pngBytes!;
-        label = 'Cutout';
-        final path = await persistPickedPng(bytes, maxEdge: 1024);
-        if (!mounted || path == null) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Could not save cutout')),
-            );
+          bytes = result.pngBytes!;
+          label = 'Cutout';
+          final path = await persistPickedPng(bytes, maxEdge: 1024);
+          if (!mounted || path == null) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Could not save cutout')),
+              );
+            }
+            return;
           }
-          return;
-        }
-        final layer = baseLayer(
-          LayerKind.image,
-          overrides: {
+          final layer = baseLayer(LayerKind.image, overrides: {
             'label': label,
             'x': 0.0,
             'y': 0.0,
             'w': 100.0,
             'h': 100.0,
-          },
-        ).copyWith(role: role, src: path, fit: BoxFit.cover, radius: 0);
-        _commit(
-          WidgetSpec(
+          }).copyWith(
+            role: role,
+            src: path,
+            fit: BoxFit.cover,
+            radius: 0,
+          );
+          _commit(WidgetSpec(
             background: _spec.background,
             layers: [..._spec.layers, layer],
-          ),
-        );
-        setState(() => _selectedId = layer.id);
-        DriveHaptics.light();
-        return;
-      }
-
-      final path = await persistPickedImage(bytes, maxEdge: 1024);
-      if (!mounted || path == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not process image')),
-          );
+          ));
+          setState(() => _selectedId = layer.id);
+          DriveHaptics.light();
+          return;
         }
-        return;
-      }
-      final layer = baseLayer(
-        LayerKind.image,
-        overrides: {'label': label, 'x': 0.0, 'y': 0.0, 'w': 100.0, 'h': 100.0},
-      ).copyWith(role: role, src: path, fit: BoxFit.cover, radius: 0);
-      _commit(
-        WidgetSpec(
+
+        final path = await persistPickedImage(bytes, maxEdge: 1024);
+        if (!mounted || path == null) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Could not process image')),
+            );
+          }
+          return;
+        }
+        final layer = baseLayer(LayerKind.image, overrides: {
+          'label': label,
+          'x': 0.0,
+          'y': 0.0,
+          'w': 100.0,
+          'h': 100.0,
+        }).copyWith(
+          role: role,
+          src: path,
+          fit: BoxFit.cover,
+          radius: 0,
+        );
+        _commit(WidgetSpec(
           background: _spec.background,
           layers: [..._spec.layers, layer],
-        ),
-      );
-      setState(() => _selectedId = layer.id);
-      DriveHaptics.light();
-    }, label: cutting ? 'Remove BG…' : 'Processing image…');
+        ));
+        setState(() => _selectedId = layer.id);
+        DriveHaptics.light();
+      },
+      label: cutting ? 'Remove BG…' : 'Processing image…',
+    );
     if (mounted) await _maybeHowTo();
   }
 
@@ -495,49 +585,52 @@ class _EditorScreenState extends State<EditorScreen> {
       return;
     }
 
-    await _withProcessing(() async {
-      final bytes = await loadImageBytes(sel.src);
-      if (bytes == null || bytes.isEmpty) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Could not load image')));
+    await _withProcessing(
+      () async {
+        final bytes = await loadImageBytes(sel.src);
+        if (bytes == null || bytes.isEmpty) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Could not load image')),
+            );
+          }
+          return;
         }
-        return;
-      }
-      final result = await BgCutoutService().cutout(
-        bytes,
-        mode: BgCutoutMode.onDevice,
-      );
-      if (!result.ok || result.pngBytes == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(result.error ?? 'Background removal failed'),
-            ),
-          );
+        final result = await BgCutoutService().cutout(
+          bytes,
+          mode: BgCutoutMode.onDevice,
+        );
+        if (!result.ok || result.pngBytes == null) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(result.error ?? 'Background removal failed'),
+              ),
+            );
+          }
+          return;
         }
-        return;
-      }
-      final path = await persistPickedPng(result.pngBytes!, maxEdge: 1024);
-      if (!mounted || path == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not save cutout')),
-          );
+        final path = await persistPickedPng(result.pngBytes!, maxEdge: 1024);
+        if (!mounted || path == null) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Could not save cutout')),
+            );
+          }
+          return;
         }
-        return;
-      }
-      _patchLayer(
-        sel.id,
-        (l) => l.copyWith(
-          src: path,
-          label: 'Cutout',
-          fit: BoxFit.contain,
-          radius: 0,
-        ),
-      );
-    }, label: 'Remove BG…');
+        _patchLayer(
+          sel.id,
+          (l) => l.copyWith(
+            src: path,
+            label: 'Cutout',
+            fit: BoxFit.contain,
+            radius: 0,
+          ),
+        );
+      },
+      label: 'Remove BG…',
+    );
   }
 
   Future<void> _onTextTab() async {
@@ -552,43 +645,183 @@ class _EditorScreenState extends State<EditorScreen> {
     if (!mounted || result == null) return;
     final text = (result['text'] as String?)?.trim() ?? '';
     if (text.isEmpty) return;
-    final layer =
-        baseLayer(
-          LayerKind.text,
-          overrides: {
-            'text': text,
-            'x': 12.0,
-            'y': 40.0,
-            'fontSize': 18.0,
-            'weight': result['weight'] as int? ?? 700,
-            'color': result['color'] as String? ?? '#F2F5FA',
-          },
-        ).copyWith(
-          shadow: result['shadow'] as bool? ?? false,
-          radius: (result['radius'] as num?)?.toDouble() ?? 0,
-          color2: result['color2'] as String?,
-          shadowColor: result['shadowColor'] as String?,
-        );
-    _commit(
-      WidgetSpec(
-        background: _spec.background,
-        layers: [..._spec.layers, layer],
-      ),
+    final layer = baseLayer(LayerKind.text, overrides: {
+      'text': text,
+      'x': 12.0,
+      'y': 40.0,
+      'fontSize': 18.0,
+      'weight': result['weight'] as int? ?? 700,
+      'color': result['color'] as String? ?? '#F2F5FA',
+    }).copyWith(
+      shadow: result['shadow'] as bool? ?? false,
+      radius: (result['radius'] as num?)?.toDouble() ?? 0,
+      color2: result['color2'] as String?,
+      shadowColor: result['shadowColor'] as String?,
     );
+    _commit(WidgetSpec(
+      background: _spec.background,
+      layers: [..._spec.layers, layer],
+    ));
     setState(() => _selectedId = layer.id);
   }
 
   Future<void> _onWidgetTab() async {
-    final layers = await WidgetLibrarySheet.show(context);
-    if (!mounted || layers == null || layers.isEmpty) return;
-    _commit(
-      WidgetSpec(
-        background: _spec.background,
-        layers: [..._spec.layers, ...layers],
+    await DriveSheet.show<void>(
+      context: context,
+      builder: (ctx) => DriveSheet(
+        title: 'Add widget',
+        child: ListView(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Text(
+                'Drop layers onto a blank canvas — select, drag, and resize freely. Add as many as you want.',
+                style: GoogleFonts.manrope(
+                  fontSize: 12,
+                  height: 1.35,
+                  color: DriveColors.mutedForeground,
+                ),
+              ),
+            ),
+            _WidgetAddTile(
+              title: 'Add photo',
+              subtitle: 'Your gallery or camera',
+              icon: CupertinoIcons.photo_on_rectangle,
+              onTap: () async {
+                Navigator.pop(ctx);
+                await _onCarTab();
+              },
+            ),
+            _WidgetAddTile(
+              title: 'Digital clock',
+              subtitle: 'Live time layer — drag & resize',
+              icon: CupertinoIcons.clock,
+              onTap: () {
+                Navigator.pop(ctx);
+                _addDigitalClockLayer();
+              },
+            ),
+            _WidgetAddTile(
+              title: 'Analog clock',
+              subtitle: 'Round dial layer',
+              icon: CupertinoIcons.circle,
+              onTap: () {
+                Navigator.pop(ctx);
+                _addAnalogClockLayer();
+              },
+            ),
+            _WidgetAddTile(
+              title: 'Date',
+              subtitle: 'Calendar text layer',
+              icon: CupertinoIcons.calendar,
+              onTap: () {
+                Navigator.pop(ctx);
+                _addDateLayer();
+              },
+            ),
+            _WidgetAddTile(
+              title: 'Speedometer',
+              subtitle: 'Compose free or drop a premium preset',
+              icon: CupertinoIcons.speedometer,
+              onTap: () {
+                Navigator.pop(ctx);
+                _showSpeedometerAddPicker();
+              },
+            ),
+            _WidgetAddTile(
+              title: 'Badge',
+              subtitle: 'Status chip',
+              icon: CupertinoIcons.tag,
+              onTap: () {
+                Navigator.pop(ctx);
+                _addSimple(LayerKind.badge);
+              },
+            ),
+            _WidgetAddTile(
+              title: 'Shape',
+              subtitle: 'Rounded block',
+              icon: CupertinoIcons.square_fill,
+              onTap: () {
+                Navigator.pop(ctx);
+                _addSimple(LayerKind.shape);
+              },
+            ),
+            _WidgetAddTile(
+              title: 'Divider',
+              subtitle: 'Accent line',
+              icon: CupertinoIcons.minus,
+              onTap: () {
+                Navigator.pop(ctx);
+                _addSimple(LayerKind.divider);
+              },
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Optional · Start from template',
+              style: GoogleFonts.manrope(
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Stock layouts are starting points — you still compose by adding more layers.',
+              style: GoogleFonts.manrope(
+                fontSize: 11,
+                height: 1.35,
+                color: DriveColors.mutedForeground,
+              ),
+            ),
+            const SizedBox(height: 6),
+            _WidgetAddTile(
+              title: 'Speedometer widgets',
+              subtitle: 'Studio → Speedometer',
+              icon: CupertinoIcons.speedometer,
+              onTap: () {
+                Navigator.pop(ctx);
+                StudioBrowse.goToCategory(context, 'Speedometer');
+              },
+            ),
+            _WidgetAddTile(
+              title: 'Digital clocks',
+              subtitle: 'Studio → Digital Clock',
+              icon: CupertinoIcons.clock_fill,
+              onTap: () {
+                Navigator.pop(ctx);
+                StudioBrowse.goToCategory(context, 'Digital Clock');
+              },
+            ),
+            _WidgetAddTile(
+              title: 'Analog clocks',
+              subtitle: 'Studio → Analog Clock',
+              icon: CupertinoIcons.circle,
+              onTap: () {
+                Navigator.pop(ctx);
+                StudioBrowse.goToCategory(context, 'Analog Clock');
+              },
+            ),
+            _WidgetAddTile(
+              title: 'Date & calendar',
+              subtitle: 'Studio → Calendar',
+              icon: CupertinoIcons.calendar_today,
+              onTap: () {
+                Navigator.pop(ctx);
+                StudioBrowse.goToCategory(context, 'Calendar');
+              },
+            ),
+            _WidgetAddTile(
+              title: 'Drive HUDs',
+              subtitle: 'Studio → Drive',
+              icon: CupertinoIcons.car_fill,
+              onTap: () {
+                Navigator.pop(ctx);
+                StudioBrowse.goToCategory(context, 'Drive');
+              },
+            ),
+          ],
+        ),
       ),
     );
-    setState(() => _selectedId = layers.last.id);
-    DriveHaptics.light();
   }
 
   Future<void> _showSpeedometerAddPicker() async {
@@ -654,15 +887,11 @@ class _EditorScreenState extends State<EditorScreen> {
   void _addSpeedometerLayer() {
     final nest = countSpeedometerClusters(_spec.layers);
     final cluster = composeSpeedometerLayers(nestIndex: nest);
-    final digits = cluster.firstWhere(
-      (l) => l.format == 'gpsspeed' && l.kind == LayerKind.text,
-    );
-    _commit(
-      WidgetSpec(
-        background: _spec.background,
-        layers: [..._spec.layers, ...cluster],
-      ),
-    );
+    final digits = cluster.firstWhere((l) => l.format == 'gpsspeed' && l.kind == LayerKind.text);
+    _commit(WidgetSpec(
+      background: _spec.background,
+      layers: [..._spec.layers, ...cluster],
+    ));
     setState(() => _selectedId = digits.id);
   }
 
@@ -684,7 +913,8 @@ class _EditorScreenState extends State<EditorScreen> {
     final dy = (nest % 4) * 8.0;
     final cloned = match.spec.clone(remintLayerIds: true);
     final dropped = [
-      for (final l in cloned.layers) l.copyWith(x: l.x + dx, y: l.y + dy),
+      for (final l in cloned.layers)
+        l.copyWith(x: l.x + dx, y: l.y + dy),
     ];
     Layer? digits;
     for (final l in dropped) {
@@ -693,114 +923,68 @@ class _EditorScreenState extends State<EditorScreen> {
         break;
       }
     }
-    _commit(
-      WidgetSpec(
-        background: _spec.background,
-        layers: [..._spec.layers, ...dropped],
-      ),
-    );
+    _commit(WidgetSpec(
+      background: _spec.background,
+      layers: [..._spec.layers, ...dropped],
+    ));
     setState(() => _selectedId = digits?.id ?? dropped.last.id);
   }
 
   void _addSimple(LayerKind kind) {
-    final layer = baseLayer(
-      kind,
-      overrides: {'y': 20.0 + _spec.layers.length * 4},
-    );
-    _commit(
-      WidgetSpec(
-        background: _spec.background,
-        layers: [..._spec.layers, layer],
-      ),
-    );
+    final layer = baseLayer(kind, overrides: {
+      'y': 20.0 + _spec.layers.length * 4,
+    });
+    _commit(WidgetSpec(
+      background: _spec.background,
+      layers: [..._spec.layers, layer],
+    ));
     setState(() => _selectedId = layer.id);
   }
 
   double _composeNestY() => 20.0 + (_spec.layers.length % 6) * 6.0;
 
-  void _showLayerPresetSheet(LayerKind kind) {
-    DriveSheet.show(
-      context: context,
-      builder: (ctx) => LayerPresetSheet(
-        kind: kind,
-        onSelect: (presetLayer) {
-          final layer = presetLayer.copyWith(
-            id: const Uuid().v4(),
-            x: 12.0 + (_spec.layers.length % 4) * 4.0,
-            y: 38.0 + (_spec.layers.length % 5) * 4.0,
-          );
-          _commit(
-            WidgetSpec(
-              background: _spec.background,
-              layers: [..._spec.layers, layer],
-            ),
-          );
-          setState(() {
-            _selectedId = layer.id;
-          });
-        },
-      ),
-    );
-  }
-
   void _addDigitalClockLayer() {
-    final layer = baseLayer(
-      LayerKind.clock,
-      overrides: {
-        'x': 12.0 + (_spec.layers.length % 4) * 4.0,
-        'y': 38.0 + (_spec.layers.length % 5) * 4.0,
-        'fontSize': 32.0,
-        'weight': 800,
-        'format': '24',
-      },
-    );
-    _commit(
-      WidgetSpec(
-        background: _spec.background,
-        layers: [..._spec.layers, layer],
-      ),
-    );
+    final layer = baseLayer(LayerKind.clock, overrides: {
+      'x': 12.0 + (_spec.layers.length % 4) * 4.0,
+      'y': 38.0 + (_spec.layers.length % 5) * 4.0,
+      'fontSize': 32.0,
+      'weight': 800,
+      'format': '24',
+    });
+    _commit(WidgetSpec(
+      background: _spec.background,
+      layers: [..._spec.layers, layer],
+    ));
     setState(() => _selectedId = layer.id);
   }
 
   void _addAnalogClockLayer() {
-    final nest =
-        (_spec.layers.where((l) => l.kind == LayerKind.analog).length % 3);
-    final layer = baseLayer(
-      LayerKind.analog,
-      overrides: {
-        'x': 18.0 + nest * 8.0,
-        'y': 14.0 + nest * 6.0,
-        'w': 52.0,
-        'h': 52.0,
-      },
-    );
-    _commit(
-      WidgetSpec(
-        background: _spec.background,
-        layers: [..._spec.layers, layer],
-      ),
-    );
+    final nest = (_spec.layers.where((l) => l.kind == LayerKind.analog).length % 3);
+    final layer = baseLayer(LayerKind.analog, overrides: {
+      'x': 18.0 + nest * 8.0,
+      'y': 14.0 + nest * 6.0,
+      'w': 52.0,
+      'h': 52.0,
+    });
+    _commit(WidgetSpec(
+      background: _spec.background,
+      layers: [..._spec.layers, layer],
+    ));
     setState(() => _selectedId = layer.id);
   }
 
   void _addDateLayer() {
-    final layer = baseLayer(
-      LayerKind.date,
-      overrides: {
-        'x': 12.0,
-        'y': _composeNestY(),
-        'fontSize': 14.0,
-        'format': 'abbrev',
-        'color': '#A8B6CC',
-      },
-    );
-    _commit(
-      WidgetSpec(
-        background: _spec.background,
-        layers: [..._spec.layers, layer],
-      ),
-    );
+    final layer = baseLayer(LayerKind.date, overrides: {
+      'x': 12.0,
+      'y': _composeNestY(),
+      'fontSize': 14.0,
+      'format': 'abbrev',
+      'color': '#A8B6CC',
+    });
+    _commit(WidgetSpec(
+      background: _spec.background,
+      layers: [..._spec.layers, layer],
+    ));
     setState(() => _selectedId = layer.id);
   }
 
@@ -827,18 +1011,15 @@ class _EditorScreenState extends State<EditorScreen> {
       if (draw != null) {
         _selectedId = draw.id;
         try {
-          final raw =
-              jsonDecode(draw.strokes.isEmpty ? '[]' : draw.strokes) as List;
+          final raw = jsonDecode(
+            draw.strokes.isEmpty ? '[]' : draw.strokes,
+          ) as List;
           _activeStrokes = raw
-              .map(
-                (s) => (s as List)
-                    .map(
-                      (p) => (p as List)
-                          .map((n) => (n as num).toDouble())
-                          .toList(),
-                    )
-                    .toList(),
-              )
+              .map((s) => (s as List)
+                  .map((p) => (p as List)
+                      .map((n) => (n as num).toDouble())
+                      .toList())
+                  .toList())
               .toList();
         } catch (_) {
           _activeStrokes = [];
@@ -890,25 +1071,30 @@ class _EditorScreenState extends State<EditorScreen> {
       }
     }
     if (draw == null) {
-      final layer = baseLayer(
-        LayerKind.draw,
-      ).copyWith(strokes: jsonEncode(_activeStrokes));
-      _commit(
-        WidgetSpec(
-          background: _spec.background,
-          layers: [..._spec.layers, layer],
-        ),
+      final layer = baseLayer(LayerKind.draw).copyWith(
+        strokes: jsonEncode(_activeStrokes),
       );
+      _commit(WidgetSpec(
+        background: _spec.background,
+        layers: [..._spec.layers, layer],
+      ));
       setState(() => _selectedId = layer.id);
       return;
     }
-    _patchLayer(id!, (l) => l.copyWith(strokes: jsonEncode(_activeStrokes)));
+    _patchLayer(
+      id!,
+      (l) => l.copyWith(strokes: jsonEncode(_activeStrokes)),
+    );
   }
 
   Future<void> _onBackgroundTab() async {
-    await BackgroundSheet.show(context, _spec, (WidgetSpec newSpec) {
-      _commit(newSpec);
-    }, _pickBackgroundImage);
+    final next = await showBackgroundPickerSheet(
+      context,
+      current: _spec.background,
+      onPickGallery: _pickBackgroundImage,
+    );
+    if (!mounted || next == null) return;
+    _commit(WidgetSpec(background: next, layers: _spec.layers));
   }
 
   Future<WidgetBackground?> _pickBackgroundImage() async {
@@ -999,7 +1185,10 @@ class _EditorScreenState extends State<EditorScreen> {
       return;
     }
 
-    _patchLayer(id, (l) => l.copyWith(w: next, h: nh, x: x, y: y));
+    _patchLayer(
+      id,
+      (l) => l.copyWith(w: next, h: nh, x: x, y: y),
+    );
     setState(() => _selectedId = id);
   }
 
@@ -1023,12 +1212,10 @@ class _EditorScreenState extends State<EditorScreen> {
 
   void _deleteLayerById(String id) {
     DriveHaptics.medium();
-    _commit(
-      WidgetSpec(
-        background: _spec.background,
-        layers: _spec.layers.where((l) => l.id != id).toList(),
-      ),
-    );
+    _commit(WidgetSpec(
+      background: _spec.background,
+      layers: _spec.layers.where((l) => l.id != id).toList(),
+    ));
     if (_selectedId == id) {
       setState(() => _selectedId = null);
     }
@@ -1050,9 +1237,10 @@ class _EditorScreenState extends State<EditorScreen> {
       y: (src.y + 4).clamp(-100.0, 200.0).toDouble(),
       label: '${src.label} copy',
     );
-    _commit(
-      WidgetSpec(background: _spec.background, layers: [..._spec.layers, copy]),
-    );
+    _commit(WidgetSpec(
+      background: _spec.background,
+      layers: [..._spec.layers, copy],
+    ));
     setState(() => _selectedId = copy.id);
   }
 
@@ -1214,9 +1402,9 @@ class _EditorScreenState extends State<EditorScreen> {
   void _openWidgetSettings() {
     final sel = _selected;
     if (sel == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Select a widget first')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Select a widget first')),
+      );
       _sheetLayers();
       return;
     }
@@ -1230,9 +1418,7 @@ class _EditorScreenState extends State<EditorScreen> {
       sel.id,
       (l) => l.copyWith(
         animate: value,
-        animStyle: value && l.animStyle.isEmpty
-            ? l.resolvedAnimStyle
-            : l.animStyle,
+        animStyle: value && l.animStyle.isEmpty ? l.resolvedAnimStyle : l.animStyle,
       ),
     );
   }
@@ -1262,7 +1448,7 @@ class _EditorScreenState extends State<EditorScreen> {
                         _onCarTab();
                       },
                       icon: const Icon(CupertinoIcons.car_fill, size: 16),
-                      label: const Text('Add photo'),
+                        label: const Text('Add photo'),
                     ),
                   ],
                 ),
@@ -1409,11 +1595,8 @@ class _EditorScreenState extends State<EditorScreen> {
       bindings: {
         const SingleActivator(LogicalKeyboardKey.keyZ, control: true): _undo,
         const SingleActivator(LogicalKeyboardKey.keyZ, meta: true): _undo,
-        const SingleActivator(
-          LogicalKeyboardKey.keyZ,
-          control: true,
-          shift: true,
-        ): _redo,
+        const SingleActivator(LogicalKeyboardKey.keyZ,
+            control: true, shift: true): _redo,
         const SingleActivator(LogicalKeyboardKey.keyZ, meta: true, shift: true):
             _redo,
         const SingleActivator(LogicalKeyboardKey.keyY, control: true): _redo,
@@ -1462,10 +1645,8 @@ class _EditorScreenState extends State<EditorScreen> {
                       IconButton(
                         tooltip: 'Undo',
                         onPressed: _past.isEmpty ? null : _undo,
-                        icon: const Icon(
-                          CupertinoIcons.arrow_uturn_left,
-                          size: 20,
-                        ),
+                        icon: const Icon(CupertinoIcons.arrow_uturn_left,
+                            size: 20),
                       ),
                       IconButton(
                         tooltip: 'Save',
@@ -1476,40 +1657,85 @@ class _EditorScreenState extends State<EditorScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _name,
-                          onChanged: (_) => setState(() => _dirty = true),
-                          style: GoogleFonts.manrope(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
-                            color: DriveColors.mutedForeground,
+                      // Top tools row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Tools',
+                            style: GoogleFonts.manrope(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: DriveColors.mutedForeground,
+                            ),
                           ),
-                          decoration: const InputDecoration(
-                            isDense: true,
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            filled: false,
-                            hintText: 'Widget name',
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _GhostTool(
+                                icon: CupertinoIcons.layers_alt,
+                                label: 'Layers',
+                                onTap: _sheetLayers,
+                              ),
+                              const SizedBox(width: 8),
+                              _GhostTool(
+                                icon: CupertinoIcons.slider_horizontal_3,
+                                label: 'Inspect',
+                                onTap: _sheetInspect,
+                              ),
+                            ],
                           ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      // Add tools row
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _AddCarPill(onTap: _onCarTab),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _AddWidgetPill(onTap: _onWidgetTab),
+                          ),
+                        ],
+                      ),
+                      if (_spec.layers.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _RemoveWidgetPill(onTap: _deleteSelected),
+                            ),
+                          ],
                         ),
-                      ),
-                      _GhostTool(
-                        icon: CupertinoIcons.layers_alt,
-                        label: 'Layers',
-                        onTap: _sheetLayers,
-                      ),
-                      const SizedBox(width: 8),
-                      _GhostTool(
-                        icon: CupertinoIcons.slider_horizontal_3,
-                        label: 'Inspect',
-                        onTap: _sheetInspect,
-                      ),
+                      ],
                     ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: TextField(
+                    controller: _name,
+                    onChanged: (_) => setState(() => _dirty = true),
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.manrope(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      color: DriveColors.mutedForeground,
+                    ),
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      filled: false,
+                      hintText: 'Widget name',
+                    ),
                   ),
                 ),
                 Expanded(
@@ -1522,44 +1748,40 @@ class _EditorScreenState extends State<EditorScreen> {
                           alignment: Alignment.center,
                           clipBehavior: Clip.none,
                           children: [
-                            WidgetCanvas(
-                              spec: _spec,
-                              tickSeconds: 30,
-                              paintListenable: _paintTick,
+                            RepaintBoundary(
+                              key: _canvasCaptureKey,
+                              child: WidgetCanvas(
+                                spec: _spec,
+                                tickSeconds: 30,
+                                paintListenable: _paintTick,
                               child: _drawMode
                                   ? LayoutBuilder(
                                       builder: (context, constraints) {
                                         return GestureDetector(
                                           behavior: HitTestBehavior.opaque,
                                           onPanStart: (d) {
-                                            final x =
-                                                (d.localPosition.dx /
+                                            final x = (d.localPosition.dx /
                                                     constraints.maxWidth) *
                                                 100;
-                                            final y =
-                                                (d.localPosition.dy /
+                                            final y = (d.localPosition.dy /
                                                     constraints.maxHeight) *
                                                 100;
                                             setState(() {
                                               _currentStroke = [
-                                                [x, y],
+                                                [x, y]
                                               ];
                                             });
                                           },
                                           onPanUpdate: (d) {
-                                            final x =
-                                                (d.localPosition.dx /
+                                            final x = (d.localPosition.dx /
                                                     constraints.maxWidth) *
                                                 100;
-                                            final y =
-                                                (d.localPosition.dy /
+                                            final y = (d.localPosition.dy /
                                                     constraints.maxHeight) *
                                                 100;
                                             setState(() {
-                                              _currentStroke = [
-                                                ...?_currentStroke,
-                                                [x, y],
-                                              ];
+                                              _currentStroke =
+                                                  [...?_currentStroke, [x, y]];
                                             });
                                           },
                                           onPanEnd: (_) {
@@ -1573,8 +1795,7 @@ class _EditorScreenState extends State<EditorScreen> {
                                               _persistStrokes();
                                             } else {
                                               setState(
-                                                () => _currentStroke = null,
-                                              );
+                                                  () => _currentStroke = null);
                                             }
                                           },
                                         );
@@ -1589,6 +1810,7 @@ class _EditorScreenState extends State<EditorScreen> {
                                       onGeometryPreview: _previewGeometry,
                                       onGeometryCommit: _commitGeometry,
                                     ),
+                            ),
                             ),
                             if (_spec.layers.isEmpty &&
                                 !_drawMode &&
@@ -1648,8 +1870,7 @@ class _EditorScreenState extends State<EditorScreen> {
                                         ),
                                         const SizedBox(height: 16),
                                         Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                          mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
                                             ElevatedButton.icon(
                                               onPressed: _onCarTab,
@@ -1674,16 +1895,15 @@ class _EditorScreenState extends State<EditorScreen> {
                                         TextButton(
                                           onPressed: () =>
                                               StudioBrowse.goToCategory(
-                                                context,
-                                                'Speedometer',
-                                              ),
+                                            context,
+                                            'Speedometer',
+                                          ),
                                           child: Text(
                                             'Start from template',
                                             style: GoogleFonts.manrope(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w600,
-                                              color:
-                                                  DriveColors.mutedForeground,
+                                              color: DriveColors.mutedForeground,
                                             ),
                                           ),
                                         ),
@@ -1697,9 +1917,8 @@ class _EditorScreenState extends State<EditorScreen> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     color: const Color(0x99080808),
-                                    borderRadius: BorderRadius.circular(
-                                      DriveRadii.xxxl,
-                                    ),
+                                    borderRadius:
+                                        BorderRadius.circular(DriveRadii.xxxl),
                                   ),
                                   alignment: Alignment.center,
                                   child: Column(
@@ -1717,6 +1936,34 @@ class _EditorScreenState extends State<EditorScreen> {
                                   ),
                                 ),
                               ),
+                              // Hidden canvas for capturing the static
+                              // design (no live layers). The widget extension
+                              // displays this PNG as a base and overlays its
+                              // own live values (clock/battery/analog) on top.
+                              // NOTE (Flutter-3): Offstage skips painting, which
+                              // would yield an empty PNG from toImage. Use
+                              // Visibility with maintainState/Size/Animation so
+                              // the widget stays in the tree and paints.
+                              Visibility(
+                                visible: false,
+                                maintainState: true,
+                                maintainSize: true,
+                                maintainAnimation: true,
+                                child: SizedBox(
+                                  width: 338,
+                                  height: 354,
+                                  child: RepaintBoundary(
+                                    key: _staticCaptureKey,
+                                    child: WidgetCanvas(
+                                      spec: _spec,
+                                      scale: 1.0,
+                                      previewMode: true,
+                                      hideLiveLayers: true,
+                                      aspectRatio: 338 / 354,
+                                    ),
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
                       ),
@@ -1728,7 +1975,8 @@ class _EditorScreenState extends State<EditorScreen> {
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 6),
                     child: Row(
                       children: [
-                        if (_selected != null && _selected!.supportsAnimation)
+                        if (_selected != null &&
+                            _selected!.supportsAnimation)
                           Expanded(
                             child: Row(
                               children: [
@@ -1772,10 +2020,13 @@ class _EditorScreenState extends State<EditorScreen> {
                     child: _SizeChrome(
                       label: sizeLabel,
                       value: sizeValue.toDouble(),
-                      onChanged: (v) => _setImageSize(v, commit: false),
-                      onChangeEnd: (v) => _setImageSize(v, commit: true),
+                      onChanged: (v) =>
+                          _setImageSize(v, commit: false),
+                      onChangeEnd: (v) =>
+                          _setImageSize(v, commit: true),
                       onNudge: _nudgeSize,
-                      onDelete: _selected == null ? null : _deleteSelected,
+                      onDelete:
+                          _selected == null ? null : _deleteSelected,
                     ),
                   )
                 else if (_drawMode)
@@ -1793,15 +2044,77 @@ class _EditorScreenState extends State<EditorScreen> {
                       ),
                     ),
                   ),
-                EditorDock(
-                  drawMode: _drawMode,
-                  onImage: () => _handleTab(_EditorTab.car),
-                  onText: () => _handleTab(_EditorTab.text),
-                  onWidget: () => _handleTab(_EditorTab.widget),
-                  onDraw: () => _handleTab(_EditorTab.draw),
-                  onBackground: () => _handleTab(_EditorTab.background),
+                ClipRect(
+                  child: BackdropFilter(
+                    filter: ui.ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(10, 8, 10, 14),
+                      decoration: BoxDecoration(
+                        color: DriveColors.obsidian.withValues(alpha: 0.65),
+                        border: Border(
+                          top: BorderSide(
+                            color: DriveColors.border.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.35),
+                            blurRadius: 24,
+                            offset: const Offset(0, -10),
+                          ),
+                        ],
+                      ),
+                  child: Row(
+                    children: [
+                      for (final item in [
+                        (
+                          _EditorTab.car,
+                          CupertinoIcons.car_fill,
+                          'Car',
+                          true
+                        ),
+                        (
+                          _EditorTab.text,
+                          CupertinoIcons.textformat,
+                          'Text',
+                          false
+                        ),
+                        (
+                          _EditorTab.widget,
+                          CupertinoIcons.square_grid_2x2,
+                          'Widget',
+                          false
+                        ),
+                        (
+                          _EditorTab.draw,
+                          CupertinoIcons.pencil_outline,
+                          'Draw',
+                          false
+                        ),
+                        (
+                          _EditorTab.background,
+                          CupertinoIcons.paintbrush,
+                          'BG',
+                          false
+                        ),
+                      ])
+                        Expanded(
+                          child: _TabTool(
+                            icon: item.$2,
+                            label: item.$3,
+                            selected: item.$1 == _EditorTab.draw
+                                ? _drawMode
+                                : _tab == item.$1,
+                            emphasize: item.$4,
+                            onTap: () => _handleTab(item.$1),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-              ],
+              ),
+            ),
+          ],
             ),
           ),
         ),
@@ -1841,7 +2154,9 @@ class _SizeChrome extends StatelessWidget {
             DriveColors.graphite.withValues(alpha: 0.72),
           ],
         ),
-        border: Border.all(color: DriveColors.primary.withValues(alpha: 0.18)),
+        border: Border.all(
+          color: DriveColors.primary.withValues(alpha: 0.18),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.28),
@@ -1878,9 +2193,15 @@ class _SizeChrome extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              _MiniStep(icon: CupertinoIcons.minus, onTap: () => onNudge(-5)),
+              _MiniStep(
+                icon: CupertinoIcons.minus,
+                onTap: () => onNudge(-5),
+              ),
               const SizedBox(width: 4),
-              _MiniStep(icon: CupertinoIcons.plus, onTap: () => onNudge(5)),
+              _MiniStep(
+                icon: CupertinoIcons.plus,
+                onTap: () => onNudge(5),
+              ),
               if (onDelete != null) ...[
                 const SizedBox(width: 6),
                 _MiniStep(
@@ -1964,8 +2285,8 @@ class _TabTool extends StatelessWidget {
     final c = selected
         ? DriveColors.primary
         : emphasize
-        ? DriveColors.primaryGlow.withValues(alpha: 0.85)
-        : DriveColors.mutedForeground;
+            ? DriveColors.primaryGlow.withValues(alpha: 0.85)
+            : DriveColors.mutedForeground;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: InkWell(
@@ -2416,11 +2737,8 @@ class _WidgetAddTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(
-                  CupertinoIcons.chevron_forward,
-                  size: 16,
-                  color: DriveColors.mutedForeground,
-                ),
+                const Icon(CupertinoIcons.chevron_forward,
+                    size: 16, color: DriveColors.mutedForeground),
               ],
             ),
           ),

@@ -32,9 +32,9 @@ class DeviceTelemetry extends ChangeNotifier {
     Battery? battery,
     Connectivity? connectivity,
     TonePlayer? tonePlayer,
-  }) : _battery = battery ?? Battery(),
-       _connectivity = connectivity ?? Connectivity(),
-       _tonePlayerOverride = tonePlayer;
+  })  : _battery = battery ?? Battery(),
+        _connectivity = connectivity ?? Connectivity(),
+        _tonePlayerOverride = tonePlayer;
 
   final Battery _battery;
   final Connectivity _connectivity;
@@ -65,7 +65,8 @@ class DeviceTelemetry extends ChangeNotifier {
           defaultTargetPlatform == TargetPlatform.android);
 
   /// True on the end-user iPhone (not web, not Android, not desktop).
-  bool get isIphone => !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+  bool get isIphone =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
 
   /// `connectivity_plus` reports [ConnectivityResult.bluetooth] on Android
   /// (and Linux), **not** on iOS. iPhone car-link relies on the manual toggle.
@@ -88,8 +89,7 @@ class DeviceTelemetry extends ChangeNotifier {
   TelemetrySnapshot get snapshot {
     final store = _store;
     // Live phone sensors only on iOS/Android — never pretend on web/desktop.
-    final live =
-        supportsLiveHardware &&
+    final live = supportsLiveHardware &&
         (store?.useLiveDeviceData ?? supportsLiveHardware);
     final manual = store?.manualCarConnected ?? false;
 
@@ -229,7 +229,8 @@ class DeviceTelemetry extends ChangeNotifier {
   }
 
   void _applyBatteryState(BatteryState state) {
-    _isCharging = state == BatteryState.charging || state == BatteryState.full;
+    _isCharging =
+        state == BatteryState.charging || state == BatteryState.full;
   }
 
   Future<void> _refreshConnectivity() async {
@@ -243,8 +244,7 @@ class DeviceTelemetry extends ChangeNotifier {
 
   void _applyConnectivity(List<ConnectivityResult> results) {
     // On iOS this stays false forever (plugin never emits bluetooth) — expected.
-    _btProxyConnected =
-        bluetoothProxySupported &&
+    _btProxyConnected = bluetoothProxySupported &&
         results.contains(ConnectivityResult.bluetooth);
     _networkOnline = results.any(
       (r) =>
@@ -387,7 +387,10 @@ class DeviceTelemetry extends ChangeNotifier {
   }
 
   @visibleForTesting
-  void debugSetConnectivity({required bool bluetooth, required bool online}) {
+  void debugSetConnectivity({
+    required bool bluetooth,
+    required bool online,
+  }) {
     _btProxyConnected = bluetooth;
     _networkOnline = online;
     _emit();

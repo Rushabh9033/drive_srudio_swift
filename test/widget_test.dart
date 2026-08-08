@@ -144,7 +144,7 @@ void main() {
     await store.hydrate();
     final id = store.createDraft('Test', Catalog.templates.first.spec);
     store.assignSlot(0, id);
-    final payload = store.buildAppGroupPayload();
+    final payload = await store.buildAppGroupPayload();
     expect(validateAppGroupPayload(payload), isTrue);
     expect(payload['schemaVersion'], appGroupSchemaVersion);
     expect((payload['slots'] as List).length, 4);
@@ -225,7 +225,7 @@ void main() {
       ),
     );
     store.assignSlot(0, id);
-    final payload = store.buildAppGroupPayload();
+    final payload = await store.buildAppGroupPayload();
     expect(validateAppGroupPayload(payload), isTrue);
     final slot0 = (payload['slots'] as List).first as Map;
     final spec = slot0['spec'] as Map;
@@ -297,11 +297,11 @@ void main() {
   });
 
   test('Catalog has 12+ templates and 14+ sounds with premium mix', () {
-    expect(Catalog.templates.length, greaterThanOrEqualTo(10));
+    expect(Catalog.templates.length, greaterThanOrEqualTo(80));
     expect(Catalog.sounds.length, greaterThanOrEqualTo(14));
     expect(
-      Catalog.templates.expand((t) => t.spec.layers).length,
-      greaterThanOrEqualTo(20),
+      Catalog.templates.where((t) => t.premium).length,
+      greaterThanOrEqualTo(4),
     );
     expect(
       Catalog.templates.where((t) => !t.premium).length,
@@ -314,10 +314,18 @@ void main() {
       containsAll({'aurelio', 'velora', 'northstar', 'kinetic'}),
     );
     final cats = Catalog.templates.map((t) => t.category).toSet();
-    expect(cats, containsAll({'Digital Clock', 'Calendar', 'Battery'}));
-    expect(Catalog.categories, containsAll({'Clock', 'Date', 'Battery'}));
-    expect(Catalog.categories, isNot(contains('Weather')));
-    expect(cats, isNot(contains('Weather')));
+    expect(
+      cats,
+      containsAll({
+        'Battery',
+        'Digital Clock',
+        'Analog Clock',
+        'Calendar',
+        'Drive',
+        'Weather',
+      }),
+    );
+    expect(Catalog.categories, containsAll(['Calendar', 'Drive', 'Weather']));
   });
 
   test('Stock templates have unique layout signatures', () {
@@ -427,10 +435,12 @@ void main() {
     expect(baseLayer(LayerKind.analog).showSeconds, isTrue);
     // Stock digital clocks with large type must not embed HH:mm:ss.
     for (final id in [
-      'clock-split',
-      'clock-vertical',
-      'clock-bold',
-      'clock-minimal',
+      'clock-digital',
+      'clock-hhmm',
+      'clock-pill',
+      'clock-halo',
+      'clock-neon-strip',
+      'live-clock-hud',
     ]) {
       final t = Catalog.templates.firstWhere((e) => e.id == id);
       final main = t.spec.layers.firstWhere(
@@ -473,51 +483,46 @@ void main() {
     expect(tex.background.imageSrc, startsWith('assets/backgrounds/'));
   });
 
-  test(
-    'Live templates include clocks and batteries, with strict no-weather scope',
-    () {
-      expect(
-        Catalog.templates.where((t) => templateHasLiveMotion(t.spec)).length,
-        greaterThan(1),
-      );
-      final analog = Catalog.templates.firstWhere(
-        (t) => t.id == 'clock-precision',
-      );
-      expect(analog.spec.layers.first.animate, isTrue);
-      expect(analog.spec.layers.first.resolvedAnimStyle, 'blink-colon');
-
-      expect(Catalog.categories.contains('Weather'), isFalse);
-      expect(Catalog.templates.any((t) => t.category == 'Weather'), isFalse);
-      expect(
-        Catalog.templates.any((t) {
-          final raw = '${t.id} ${t.name}'.toLowerCase();
-          final layers = t.spec.layers
-              .map((l) => '${l.label} ${l.text}')
-              .join(' ')
-              .toLowerCase();
-          return raw.contains('weather') ||
-              raw.contains('temperature') ||
-              layers.contains('weather') ||
-              layers.contains('temperature') ||
-              layers.contains('°');
-        }),
-        isFalse,
-      );
-      final liveHud = Catalog.templates.firstWhere(
-        (t) => t.id == 'battery-lightning',
-      );
-      expect(templateHasLiveMotion(liveHud.spec), isTrue);
-      expect(templatePrimaryAnimLabel(liveHud.spec), isNotNull);
-      final day = Catalog.templates.firstWhere((t) => t.id == 'battery-bars');
-      expect(day.spec.layers.any((l) => l.animate == true), isTrue);
-      final styles = Catalog.templates
-          .expand((t) => t.spec.layers)
-          .where((l) => l.animate && l.animStyle.isNotEmpty)
-          .map((l) => l.animStyle)
-          .toSet();
-      expect(styles.length, greaterThanOrEqualTo(3));
-    },
-  );
+  test('Live templates include clocks batteries and weather breathe', () {
+    expect(
+      Catalog.templates.where((t) => templateHasLiveMotion(t.spec)).length,
+      greaterThan(10),
+    );
+    final analog = Catalog.templates.firstWhere(
+      (t) => t.id == 'analog-classic',
+    );
+    expect(analog.spec.layers.first.animate, isTrue);
+    expect(analog.spec.layers.first.resolvedAnimStyle, 'hand-smooth');
+    final wx = Catalog.templates.firstWhere((t) => t.id == 'wx-outside-card');
+    // Weather templates are clock/date art only — no fake °C; motion optional.
+    expect(
+      wx.spec.layers.any(
+        (l) => l.kind == LayerKind.clock || l.kind == LayerKind.date,
+      ),
+      isTrue,
+    );
+    expect(
+      wx.spec.layers.any(
+        (l) =>
+            l.kind == LayerKind.text &&
+            (l.text.contains('°') || RegExp(r'^\d+$').hasMatch(l.text.trim())),
+      ),
+      isFalse,
+    );
+    final liveHud = Catalog.templates.firstWhere(
+      (t) => t.id == 'live-clock-hud',
+    );
+    expect(templateHasLiveMotion(liveHud.spec), isTrue);
+    expect(templatePrimaryAnimLabel(liveHud.spec), isNotNull);
+    final day = Catalog.templates.firstWhere((t) => t.id == 'day-progress');
+    expect(day.spec.layers.any((l) => l.format == 'dayprogress'), isTrue);
+    final styles = Catalog.templates
+        .expand((t) => t.spec.layers)
+        .where((l) => l.animate && l.animStyle.isNotEmpty)
+        .map((l) => l.animStyle)
+        .toSet();
+    expect(styles.length, greaterThanOrEqualTo(6));
+  });
 
   testWidgets('Editor overlay survives clock paint ticks', (tester) async {
     final paintTick = ValueNotifier<int>(0);
@@ -735,22 +740,5 @@ void main() {
       isNull,
     );
     expect(tester.takeException(), isNull);
-  });
-
-  test('Battery formats serialize correctly to JSON', () {
-    final layer = baseLayer(
-      LayerKind.battery,
-      overrides: {
-        'format': 'segmented',
-        'color2': '#00FF00',
-        'color3': '#FFFFFF',
-        'trackColor': '#333333',
-      },
-    );
-    final json = layer.toJson();
-    expect(json['format'], 'segmented');
-    expect(json['color2'], '#00FF00');
-    expect(json['color3'], '#FFFFFF');
-    expect(json['trackColor'], '#333333');
   });
 }

@@ -85,7 +85,9 @@ class ColorField extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: has ? parseStudioHex(hex) : DriveColors.graphite,
+                  color: has
+                      ? parseStudioHex(hex)
+                      : DriveColors.graphite,
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: DriveColors.primary.withValues(alpha: 0.65),
@@ -186,13 +188,11 @@ class ColorField extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    Text(
-                      'Hue',
-                      style: GoogleFonts.manrope(
-                        fontSize: 12,
-                        color: DriveColors.mutedForeground,
-                      ),
-                    ),
+                    Text('Hue',
+                        style: GoogleFonts.manrope(
+                          fontSize: 12,
+                          color: DriveColors.mutedForeground,
+                        )),
                     SliderTheme(
                       data: SliderTheme.of(context).copyWith(
                         trackHeight: 8,
@@ -208,26 +208,22 @@ class ColorField extends StatelessWidget {
                         }),
                       ),
                     ),
-                    Text(
-                      'Saturation',
-                      style: GoogleFonts.manrope(
-                        fontSize: 12,
-                        color: DriveColors.mutedForeground,
-                      ),
-                    ),
+                    Text('Saturation',
+                        style: GoogleFonts.manrope(
+                          fontSize: 12,
+                          color: DriveColors.mutedForeground,
+                        )),
                     Slider(
                       value: hsv.saturation,
                       onChanged: (v) => setLocal(() {
                         draft = hsv.withSaturation(v).toColor();
                       }),
                     ),
-                    Text(
-                      'Brightness',
-                      style: GoogleFonts.manrope(
-                        fontSize: 12,
-                        color: DriveColors.mutedForeground,
-                      ),
-                    ),
+                    Text('Brightness',
+                        style: GoogleFonts.manrope(
+                          fontSize: 12,
+                          color: DriveColors.mutedForeground,
+                        )),
                     Slider(
                       value: hsv.value,
                       onChanged: (v) => setLocal(() {

@@ -16,7 +16,10 @@ import '../nav/deep_links.dart';
 
 /// Instant tab / shell swaps — no route fade to fight with heavy first paint.
 Page<void> _plainPage(GoRouterState state, Widget child) {
-  return NoTransitionPage<void>(key: state.pageKey, child: child);
+  return NoTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+  );
 }
 
 GoRouter createRouter() {
@@ -34,9 +37,18 @@ GoRouter createRouter() {
     routes: [
       GoRoute(path: '/', builder: (_, __) => const BootstrapScreen()),
       GoRoute(path: '/intro', builder: (_, __) => const IntroScreen()),
-      GoRoute(path: '/deeplink/sounds', redirect: (_, __) => '/sounds'),
-      GoRoute(path: '/deeplink/setup', redirect: (_, __) => '/setup'),
-      GoRoute(path: '/deeplink/home', redirect: (_, __) => '/home'),
+      GoRoute(
+        path: '/deeplink/sounds',
+        redirect: (_, __) => '/sounds',
+      ),
+      GoRoute(
+        path: '/deeplink/setup',
+        redirect: (_, __) => '/setup',
+      ),
+      GoRoute(
+        path: '/deeplink/home',
+        redirect: (_, __) => '/home',
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             AppShell(navigationShell: navigationShell),
@@ -134,11 +146,7 @@ GoRouter createRouter() {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.map_outlined,
-                  size: 40,
-                  color: Color(0xFF9A9BA8),
-                ),
+                const Icon(Icons.map_outlined, size: 40, color: Color(0xFF9A9BA8)),
                 const SizedBox(height: 16),
                 const Text(
                   'Page not found',
@@ -152,10 +160,7 @@ GoRouter createRouter() {
                 Text(
                   state.uri.toString(),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Color(0xFF9A9BA8),
-                    fontSize: 13,
-                  ),
+                  style: const TextStyle(color: Color(0xFF9A9BA8), fontSize: 13),
                 ),
                 const SizedBox(height: 20),
                 FilledButton(

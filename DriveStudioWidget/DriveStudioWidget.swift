@@ -356,7 +356,8 @@ struct DriveStudioWidgetEntryView: View {
                             layers: layers,
                             canvasSize: geo.size,
                             telemetry: entry.telemetry,
-                            vehicle: entry.vehicle
+                            vehicle: entry.vehicle,
+                            entryDate: entry.date
                         )
                     } else {
                         VStack(spacing: 4) {
@@ -435,6 +436,7 @@ struct LiveDataOverlayView: View {
     let canvasSize: CGSize
     let telemetry: TelemetrySnapshot?
     let vehicle: VehicleData?
+    var entryDate: Date = Date()
 
     private static let designSize = CGSize(width: 338, height: 354)
 
@@ -451,7 +453,8 @@ struct LiveDataOverlayView: View {
                         canvasSize: canvasSize,
                         telemetry: telemetry,
                         vehicle: vehicle,
-                        transform: LiveDataOverlayView.fitTransform(for: canvasSize)
+                        transform: LiveDataOverlayView.fitTransform(for: canvasSize),
+                        entryDate: entryDate
                     )
                 }
             }
@@ -542,6 +545,7 @@ struct FitToCanvasLayers: View {
     let canvasSize: CGSize
     let telemetry: TelemetrySnapshot?
     let vehicle: VehicleData?
+    var entryDate: Date = Date()
 
     /// Reference design canvas (340x340 square 1:1 ratio matching Editor canvas).
     private static let designSize = CGSize(width: 340, height: 340)
@@ -556,7 +560,8 @@ struct FitToCanvasLayers: View {
                         canvasSize: canvasSize,
                         telemetry: telemetry,
                         vehicle: vehicle,
-                        transform: transform
+                        transform: transform,
+                        entryDate: entryDate
                     )
                 }
             }
@@ -578,6 +583,7 @@ struct ScaledLayerView: View {
     let telemetry: TelemetrySnapshot?
     let vehicle: VehicleData?
     let transform: CGAffineTransform
+    var entryDate: Date = Date()
 
     private static let designSize = CGSize(width: 340, height: 340)
 
@@ -601,13 +607,13 @@ struct ScaledLayerView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.3)
             case "clock":
-                Text(ScaledLayerView.formatDate(Date(), format: layer.format, isClock: true))
+                Text(entryDate, style: .time)
                     .font(.system(size: fontSize, weight: .semibold, design: .monospaced))
                     .foregroundColor(layerColor)
                     .lineLimit(1)
                     .minimumScaleFactor(0.3)
             case "date":
-                Text(ScaledLayerView.formatDate(Date(), format: layer.format, isClock: false))
+                Text(entryDate, style: .date)
                     .font(.system(size: fontSize, weight: .regular))
                     .foregroundColor(layerColor)
                     .lineLimit(1)

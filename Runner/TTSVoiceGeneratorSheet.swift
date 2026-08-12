@@ -52,7 +52,7 @@ struct TTSVoiceGeneratorSheet: View {
                     .disabled(voiceText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isGenerating)
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 8)
+                .padding(.top, 28)
                 .padding(.bottom, 12)
 
                 // ── Input Fields ────────────────────────────────────────

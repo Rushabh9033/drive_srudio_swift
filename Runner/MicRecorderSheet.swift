@@ -53,12 +53,11 @@ struct MicRecorderSheet: View {
                     .disabled(!isRecorded)
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 24)
-                .padding(.bottom, 20)
+                .padding(.top, 8)
+                .padding(.bottom, 12)
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
-                        Spacer().frame(height: 6)
 
                         // ── Title Input Field ───────────────────────────────────
                         VStack(alignment: .leading, spacing: 6) {

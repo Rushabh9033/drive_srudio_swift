@@ -467,7 +467,7 @@ struct SoundsScreenView: View {
                 customSounds.append(newSound)
                 assignSound(voiceName)
             }
-            .presentationDetents([.height(420)])
+            .presentationDetents([.fraction(0.85), .large])
             .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showMicRecorderSheet) {
@@ -479,7 +479,7 @@ struct SoundsScreenView: View {
                 customSounds.append(newSound)
                 assignSound(recName)
             }
-            .presentationDetents([.height(460)])
+            .presentationDetents([.fraction(0.85), .large])
             .presentationDragIndicator(.visible)
         }
         .confirmationDialog("Assign Sound", isPresented: $showAssignActionSheet, titleVisibility: .visible) {

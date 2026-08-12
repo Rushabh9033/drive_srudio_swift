@@ -26,7 +26,7 @@ struct MicRecorderSheet: View {
         ZStack {
             DriveColors.background.ignoresSafeArea()
 
-            VStack(spacing: 24) {
+            VStack(spacing: 0) {
                 // ── Top Bar ─────────────────────────────────────────────
                 HStack {
                     Button("Cancel") {
@@ -56,107 +56,114 @@ struct MicRecorderSheet: View {
                     .disabled(!isRecorded)
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 16)
+                .padding(.top, 24)
+                .padding(.bottom, 16)
 
-                // ── Title Input Field ───────────────────────────────────
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("SOUND NAME")
-                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                        .foregroundColor(DriveColors.mutedFg)
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 24) {
+                        // ── Title Input Field ───────────────────────────────────
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("SOUND NAME")
+                                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                                .foregroundColor(DriveColors.mutedFg)
 
-                    TextField("e.g. My Vehicle Welcome", text: $soundTitle)
-                        .font(.system(size: 15))
-                        .foregroundColor(DriveColors.foreground)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .background(DriveColors.carbon)
-                        .cornerRadius(12)
-                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(DriveColors.border, lineWidth: 1))
-                }
-                .padding(.horizontal, 20)
-
-                Spacer()
-
-                // ── Microphone Waveform & Timer Display ────────────────
-                VStack(spacing: 16) {
-                    ZStack {
-                        Circle()
-                            .fill(isRecording ? Color.red.opacity(0.15) : DriveColors.primary.opacity(0.12))
-                            .frame(width: 140, height: 140)
-                            .scaleEffect(isRecording ? 1.1 : 1.0)
-                            .animation(isRecording ? Animation.easeInOut(duration: 0.8).repeatForever(autoreverses: true) : .default, value: isRecording)
-
-                        Circle()
-                            .stroke(isRecording ? Color.red.opacity(0.6) : DriveColors.primary.opacity(0.4), lineWidth: 2)
-                            .frame(width: 140, height: 140)
-
-                        Image(systemName: isRecording ? "mic.fill" : "mic")
-                            .font(.system(size: 48))
-                            .foregroundColor(isRecording ? Color.red : DriveColors.primary)
-                    }
-
-                    Text(isRecording ? "Recording Voice..." : (isRecorded ? "Recording Complete (\(formattedTime))" : "Tap Mic to Start Recording"))
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(isRecording ? Color.red : DriveColors.foreground)
-
-                    Text(formattedTime)
-                        .font(.system(size: 32, weight: .bold, design: .monospaced))
-                        .foregroundColor(DriveColors.foreground)
-                }
-
-                Spacer()
-
-                // ── Recording Controls ──────────────────────────────────
-                VStack(spacing: 12) {
-                    if !isRecording {
-                        Button(action: startRecording) {
-                            HStack(spacing: 10) {
-                                Image(systemName: "circle.fill")
-                                    .font(.system(size: 14))
-                                    .foregroundColor(.red)
-                                Text(isRecorded ? "Record Again" : "Start Recording")
-                                    .font(.system(size: 16, weight: .bold))
-                            }
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(Color.red.opacity(0.85))
-                            .cornerRadius(16)
+                            TextField("e.g. My Vehicle Welcome", text: $soundTitle)
+                                .font(.system(size: 15))
+                                .foregroundColor(DriveColors.foreground)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                                .background(DriveColors.carbon)
+                                .cornerRadius(12)
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(DriveColors.border, lineWidth: 1))
                         }
-                    } else {
-                        Button(action: stopRecording) {
-                            HStack(spacing: 10) {
-                                Image(systemName: "square.fill")
-                                    .font(.system(size: 14))
-                                Text("Stop Recording")
-                                    .font(.system(size: 16, weight: .bold))
-                            }
-                            .foregroundColor(.black)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(DriveColors.primary)
-                            .cornerRadius(16)
-                        }
-                    }
+                        .padding(.horizontal, 20)
 
-                    if isRecorded && !isRecording {
-                        Button(action: togglePlayPreview) {
-                            HStack(spacing: 8) {
-                                Image(systemName: isPlayingPreview ? "pause.fill" : "play.fill")
-                                Text(isPlayingPreview ? "Pause Preview" : "Play Recording Preview")
-                                    .font(.system(size: 14, weight: .semibold))
+                        // ── Microphone Waveform & Timer Display ────────────────
+                        VStack(spacing: 16) {
+                            ZStack {
+                                Circle()
+                                    .fill(isRecording ? Color.red.opacity(0.15) : DriveColors.primary.opacity(0.12))
+                                    .frame(width: 120, height: 120)
+                                    .scaleEffect(isRecording ? 1.1 : 1.0)
+                                    .animation(isRecording ? Animation.easeInOut(duration: 0.8).repeatForever(autoreverses: true) : .default, value: isRecording)
+
+                                Circle()
+                                    .stroke(isRecording ? Color.red.opacity(0.6) : DriveColors.primary.opacity(0.4), lineWidth: 2)
+                                    .frame(width: 120, height: 120)
+
+                                Image(systemName: isRecording ? "mic.fill" : "mic")
+                                    .font(.system(size: 44))
+                                    .foregroundColor(isRecording ? Color.red : DriveColors.primary)
                             }
-                            .foregroundColor(DriveColors.primary)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(DriveColors.primary.opacity(0.12))
-                            .cornerRadius(12)
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(DriveColors.primary.opacity(0.3), lineWidth: 1))
+                            .onTapGesture {
+                                if !isRecording {
+                                    startRecording()
+                                }
+                            }
+
+                            Text(isRecording ? "Recording Voice..." : (isRecorded ? "Recording Complete (\(formattedTime))" : "Tap Mic to Start Recording"))
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(isRecording ? Color.red : DriveColors.foreground)
+
+                            Text(formattedTime)
+                                .font(.system(size: 28, weight: .bold, design: .monospaced))
+                                .foregroundColor(DriveColors.foreground)
                         }
+                        .padding(.vertical, 8)
+
+                        // ── Recording Controls ──────────────────────────────────
+                        VStack(spacing: 12) {
+                            if !isRecording {
+                                Button(action: startRecording) {
+                                    HStack(spacing: 10) {
+                                        Image(systemName: "circle.fill")
+                                            .font(.system(size: 14))
+                                            .foregroundColor(.red)
+                                        Text(isRecorded ? "Record Again" : "Start Recording")
+                                            .font(.system(size: 16, weight: .bold))
+                                    }
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 14)
+                                    .background(Color.red.opacity(0.85))
+                                    .cornerRadius(16)
+                                }
+                            } else {
+                                Button(action: stopRecording) {
+                                    HStack(spacing: 10) {
+                                        Image(systemName: "square.fill")
+                                            .font(.system(size: 14))
+                                        Text("Stop Recording")
+                                            .font(.system(size: 16, weight: .bold))
+                                    }
+                                    .foregroundColor(.black)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 14)
+                                    .background(DriveColors.primary)
+                                    .cornerRadius(16)
+                                }
+                            }
+
+                            if isRecorded && !isRecording {
+                                Button(action: togglePlayPreview) {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: isPlayingPreview ? "pause.fill" : "play.fill")
+                                        Text(isPlayingPreview ? "Pause Preview" : "Play Recording Preview")
+                                            .font(.system(size: 14, weight: .semibold))
+                                    }
+                                    .foregroundColor(DriveColors.primary)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 14)
+                                    .background(DriveColors.primary.opacity(0.12))
+                                    .cornerRadius(12)
+                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(DriveColors.primary.opacity(0.3), lineWidth: 1))
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 32)
                     }
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 24)
             }
         }
         .preferredColorScheme(.dark)

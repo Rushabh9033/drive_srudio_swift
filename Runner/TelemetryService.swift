@@ -8,7 +8,7 @@ import AVFoundation
     static let shared = TelemetryService()
     
     private let locationManager = CLLocationManager()
-    private var currentSpeed: CLLocationSpeed = 0
+    var currentSpeed: CLLocationSpeed = 0
     private var timer: Timer?
     private var audioPlayer: AVAudioPlayer?
     

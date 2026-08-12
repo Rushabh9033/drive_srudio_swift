@@ -17,6 +17,8 @@ struct WidgetCanvas: View {
 
     // Actual natural (content) sizes reported by text layers
     @State private var naturalTextSizes: [Int: CGSize] = [:]
+    @State private var currentDate = Date()
+    private let timer = Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()
 
     /// Spec with ALL legacy hardcoded placeholder layers auto-upgraded to live kinds.
     /// Applied at render time — gallery, detail sheet, editor, library all get live data
@@ -135,6 +137,9 @@ struct WidgetCanvas: View {
             .onPreferenceChange(TextNaturalSizeKey.self) { sizes in
                 naturalTextSizes = sizes
             }
+            .onReceive(timer) { input in
+                currentDate = input
+            }
         }
     }
 
@@ -145,10 +150,26 @@ struct WidgetCanvas: View {
 
     private func resolvedText(for layer: WidgetLayer) -> String {
         switch layer.kind {
-        case "speed":        return "124"
-        case "vehicle_name": return "Cyber Sedan"
-        case "clock":        return "12:00"
-        default:             return layer.text ?? ""
+        case "clock":
+            let formatter = DateFormatter()
+            formatter.dateFormat = (layer.format?.isEmpty == false) ? layer.format! : "h:mm"
+            return formatter.string(from: currentDate)
+        case "date":
+            let formatter = DateFormatter()
+            formatter.dateFormat = (layer.format?.isEmpty == false) ? layer.format! : "EEE, MMM d"
+            return formatter.string(from: currentDate)
+        case "speed":
+            let spd = Int(TelemetryService.shared.currentSpeed)
+            return spd > 0 ? "\(spd)" : "0"
+        case "vehicle_name":
+            return "Cyber Sedan"
+        case "battery", "battery_text":
+            UIDevice.current.isBatteryMonitoringEnabled = true
+            let level = UIDevice.current.batteryLevel
+            let pct = level >= 0 ? Int(level * 100) : 88
+            return "\(pct)%"
+        default:
+            return layer.text ?? ""
         }
     }
 

@@ -32,30 +32,28 @@ struct TTSVoiceGeneratorSheet: View {
 
                     Spacer()
 
-                    Text("Text-to-Speech Voice Studio")
-                        .font(.system(size: 17, weight: .bold))
+                    Text("Text-to-Speech Studio")
+                        .font(.system(size: 16, weight: .bold))
                         .foregroundColor(DriveColors.foreground)
+                        .lineLimit(1)
 
                     Spacer()
 
                     Button(action: generateAndSave) {
                         if isGenerating {
                             ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .black))
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
                         } else {
-                            Text("Save Voice")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(.black)
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 6)
-                                .background(DriveColors.primary)
-                                .cornerRadius(999)
+                            Text("Save")
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundColor(voiceText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? DriveColors.mutedFg.opacity(0.5) : DriveColors.primary)
                         }
                     }
                     .disabled(voiceText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isGenerating)
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 16)
+                .padding(.top, 24)
+                .padding(.bottom, 20)
 
                 // ── Input Fields ────────────────────────────────────────
                 VStack(alignment: .leading, spacing: 14) {
@@ -159,13 +157,18 @@ struct TTSVoiceGeneratorSheet: View {
 
         isGenerating = true
         let name = voiceTitle.isEmpty ? String(text.prefix(18)) : voiceTitle
+        let cleanName = name.trimmingCharacters(in: .punctuationCharacters)
 
-        let filename = "tts_\(UUID().uuidString.prefix(8)).wav"
+        let filename = "tts_\(cleanName.replacingOccurrences(of: " ", with: "_"))_\(UUID().uuidString.prefix(4)).wav"
         let fm = FileManager.default
         let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first!
         let outputURL = docs.appendingPathComponent(filename)
 
-        var audioFile: AVAudioFile?
+        if fm.fileExists(atPath: outputURL.path) {
+            try? fm.removeItem(at: outputURL)
+        }
+
+        var audioFile: AVAudioFile? = nil
         let synth = AVSpeechSynthesizer()
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
@@ -178,22 +181,26 @@ struct TTSVoiceGeneratorSheet: View {
                     do {
                         audioFile = try AVAudioFile(
                             forWriting: outputURL,
-                            settings: pcmBuffer.format.settings,
-                            commonFormat: .pcmFormatFloat32,
-                            interleaved: false
+                            settings: pcmBuffer.format.settings
                         )
                     } catch {
-                        print("Error creating AVAudioFile: \(error)")
+                        print("[TTS] Error creating AVAudioFile: \(error)")
                     }
                 }
-                try? audioFile?.write(from: pcmBuffer)
+                do {
+                    try audioFile?.write(from: pcmBuffer)
+                } catch {
+                    print("[TTS] Error writing buffer: \(error)")
+                }
             }
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-            isGenerating = false
-            onVoiceGenerated(name, outputURL)
-            dismiss()
+        // Wait 1.5s for synthesis buffer completion, then close audioFile & flush WAV header cleanly
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            audioFile = nil // Flushes and closes WAV header cleanly
+            self.isGenerating = false
+            self.onVoiceGenerated(name, outputURL)
+            self.dismiss()
         }
     }
 }

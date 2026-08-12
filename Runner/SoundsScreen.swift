@@ -464,9 +464,7 @@ struct SoundsScreenView: View {
         }
         .sheet(isPresented: $showTTSGeneratorSheet) {
             TTSVoiceGeneratorSheet { voiceName, voiceURL in
-                let asset = AVURLAsset(url: voiceURL)
-                let durationSeconds = CMTimeGetSeconds(asset.duration)
-                let durationString = durationSeconds.isNaN ? "0:02" : String(format: "%d:%02d", Int(durationSeconds) / 60, Int(durationSeconds) % 60)
+                let durationString = getAudioDurationString(url: voiceURL)
                 let newSound = (name: voiceName, duration: durationString, url: voiceURL)
                 customSounds.append(newSound)
                 assignSound(voiceName)
@@ -476,9 +474,7 @@ struct SoundsScreenView: View {
         }
         .sheet(isPresented: $showMicRecorderSheet) {
             MicRecorderSheet { recName, recURL in
-                let asset = AVURLAsset(url: recURL)
-                let durationSeconds = CMTimeGetSeconds(asset.duration)
-                let durationString = durationSeconds.isNaN ? "0:02" : String(format: "%d:%02d", Int(durationSeconds) / 60, Int(durationSeconds) % 60)
+                let durationString = getAudioDurationString(url: recURL)
                 let newSound = (name: recName, duration: durationString, url: recURL)
                 customSounds.append(newSound)
                 assignSound(recName)
@@ -512,6 +508,20 @@ struct SoundsScreenView: View {
         }
     }
 
+    private func getAudioDurationString(url: URL) -> String {
+        if let player = try? AVAudioPlayer(contentsOf: url), player.duration > 0 {
+            let secs = Int(player.duration)
+            return String(format: "%d:%02d", secs / 60, max(1, secs % 60))
+        }
+        let asset = AVURLAsset(url: url)
+        let durationSeconds = CMTimeGetSeconds(asset.duration)
+        if !durationSeconds.isNaN && durationSeconds > 0 {
+            let secs = Int(durationSeconds)
+            return String(format: "%d:%02d", secs / 60, max(1, secs % 60))
+        }
+        return "0:02"
+    }
+
     private func loadCustomSounds() {
         let fm = FileManager.default
         guard let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
@@ -521,9 +531,7 @@ struct SoundsScreenView: View {
             var loaded: [(String, String, URL)] = []
             for file in files {
                 if ["mp3", "wav", "m4a", "caf"].contains(file.pathExtension.lowercased()) {
-                    let asset = AVURLAsset(url: file)
-                    let durationSeconds = CMTimeGetSeconds(asset.duration)
-                    let durationString = durationSeconds.isNaN ? "0:00" : String(format: "%d:%02d", Int(durationSeconds) / 60, Int(durationSeconds) % 60)
+                    let durationString = getAudioDurationString(url: file)
                     loaded.append((file.deletingPathExtension().lastPathComponent, durationString, file))
                 }
             }

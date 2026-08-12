@@ -54,7 +54,7 @@ struct MicRecorderSheet: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 28)
-                .padding(.bottom, 12)
+                .padding(.bottom, 16)
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 16) {

@@ -1,0 +1,112 @@
+{
+  "source": "/Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidget/DriveStudioWidget.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Drive Studio Slot 1",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 184
+        }
+      },
+      {
+        "comment": "",
+        "key": "Renders the widget assigned to Slot 1.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 185
+        }
+      },
+      {
+        "comment": "",
+        "key": "Drive Studio Slot 2",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 196
+        }
+      },
+      {
+        "comment": "",
+        "key": "Renders the widget assigned to Slot 2.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 197
+        }
+      },
+      {
+        "comment": "",
+        "key": "Drive Studio Slot 3",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 208
+        }
+      },
+      {
+        "comment": "",
+        "key": "Renders the widget assigned to Slot 3.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 209
+        }
+      },
+      {
+        "comment": "",
+        "key": "Drive Studio Slot 4",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 220
+        }
+      },
+      {
+        "comment": "",
+        "key": "Renders the widget assigned to Slot 4.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 221
+        }
+      },
+      {
+        "comment": "",
+        "key": "Slot %lld",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 336
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 559
+        }
+      },
+      {
+        "comment": "",
+        "key": "--",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 565
+        }
+      },
+      {
+        "comment": "",
+        "key": "—",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 549
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld%%",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 547
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -1,0 +1,4 @@
+Target dependency graph (2 targets)
+Target 'Runner' in project 'Runner'
+➜ Explicit dependency on target 'DriveStudioWidgetExtension' in project 'Runner'
+Target 'DriveStudioWidgetExtension' in project 'Runner' (no dependencies)

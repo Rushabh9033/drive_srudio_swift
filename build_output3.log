@@ -1,0 +1,82 @@
+Command line invocation:
+    /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Debug build
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  path_provider_foundation: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/path_provider_foundation-2.5.1 @ local
+  flutter_onnxruntime: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/flutter_onnxruntime-1.8.3 @ local
+  image_picker_ios: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/image_picker_ios-0.8.13+3 @ local
+  permission_handler_apple: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/permission_handler_apple-9.5.0 @ local
+  in_app_purchase_storekit: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/in_app_purchase_storekit-0.4.8+1 @ local
+  FlutterFramework: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/FlutterFramework @ local
+  FlutterGeneratedPluginSwiftPackage: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage
+  audioplayers_darwin: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/audioplayers_darwin-6.4.0 @ local
+  geolocator_apple: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/geolocator_apple-2.3.14 @ local
+  shared_preferences_foundation: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/shared_preferences_foundation-2.5.6 @ local
+  onnxruntime: https://github.com/masicai/onnxruntime-swift-package-manager @ 1.23.1
+  connectivity_plus: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/connectivity_plus-7.3.1 @ local
+  battery_plus: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/battery_plus-7.1.1 @ local
+
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:macOS, arch:arm64, variant:Designed for [iPad,iPhone], id:00008132-001C04240E45401C, name:My Mac }
+{ platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device }
+{ platform:iOS Simulator, id:dvtdevice-DVTiOSDeviceSimulatorPlaceholder-iphonesimulator:placeholder, name:Any iOS Simulator Device }
+{ platform:iOS Simulator, arch:arm64, id:DE5E04C7-618F-46A6-ABA8-019F2AED063C, OS:26.5, name:iPad (A16) }
+{ platform:iOS Simulator, arch:arm64, id:9FB1B3EF-3133-4CB3-904C-20F9ED0E2557, OS:26.5, name:iPad Air 11-inch (M4) }
+{ platform:iOS Simulator, arch:arm64, id:610F420B-9C3B-4294-9F9A-01BC50939439, OS:26.5, name:iPad Air 13-inch (M4) }
+{ platform:iOS Simulator, arch:arm64, id:634AD51F-216B-4BAE-BDE4-866F978D1733, OS:26.5, name:iPad Pro 11-inch (M5) }
+{ platform:iOS Simulator, arch:arm64, id:CB132386-479D-41FA-97DB-F533AFE311A1, OS:26.5, name:iPad Pro 13-inch (M5) }
+{ platform:iOS Simulator, arch:arm64, id:A7435D7D-EC72-415C-9A2A-EFEC4701F98D, OS:26.5, name:iPad mini (A17 Pro) }
+{ platform:iOS Simulator, arch:arm64, id:9A14D684-859F-454B-AB21-2C207E6B63C2, OS:26.5, name:iPhone 17 }
+{ platform:iOS Simulator, arch:arm64, id:BF710C0A-B9B2-49AD-B70C-646A438A203B, OS:26.5, name:iPhone 17 Pro }
+{ platform:iOS Simulator, arch:arm64, id:BF851AEB-9642-4DFE-863C-079F12D0D1F5, OS:26.5, name:iPhone 17 Pro Max }
+{ platform:iOS Simulator, arch:arm64, id:2AFFDFAC-3FB6-4B18-B56D-854B2D954D2B, OS:26.5, name:iPhone 17e }
+{ platform:iOS Simulator, arch:arm64, id:FFF041BD-A33A-4F10-9AD8-061815FF9B7B, OS:26.5, name:iPhone Air }
+{ platform:iOS, arch:arm64, id:00008110-001C60423CB8401E, name:iPhone }
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (2 targets)
+    Target 'Runner' in project 'Runner'
+        ➜ Explicit dependency on target 'DriveStudioWidgetExtension' in project 'Runner'
+    Target 'DriveStudioWidgetExtension' in project 'Runner' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/actool --version --output-format xml1
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/ibtool --version --output-format xml1
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/actool --print-asset-tag-combinations --output-format xml1 /Users/radhikamac/backup2/drivestudio_swift/Runner/Assets.xcassets
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+Build description signature: 70f86ee11ee0101a8df96c9305e1a295
+Build description path: /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/XCBuildData/70f86ee11ee0101a8df96c9305e1a295.xcbuilddata
+/Users/radhikamac/backup2/drivestudio_swift/Runner.xcodeproj: error: Provisioning profile "iOS Team Provisioning Profile: com.drivestudio.app.driveStudio.DriveStudioWidget" doesn't include the currently selected device "Radhika’s Mac mini" (identifier 00008132-001C04240E45401C). (in target 'DriveStudioWidgetExtension' from project 'Runner')
+/Users/radhikamac/backup2/drivestudio_swift/Runner.xcodeproj: error: Provisioning profile "iOS Team Provisioning Profile: com.drivestudio.app.driveStudio" doesn't include the currently selected device "Radhika’s Mac mini" (identifier 00008132-001C04240E45401C). (in target 'Runner' from project 'Runner')
+** BUILD FAILED **
+
+
+The following build commands failed:
+	Building workspace Runner with scheme Runner and configuration Debug
+(1 failure)

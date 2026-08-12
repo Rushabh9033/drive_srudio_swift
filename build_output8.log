@@ -1,0 +1,136 @@
+Command line invocation:
+    /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Debug -destination id=E4F3D12D-0918-53BB-93C3-35FB2E0505A4 build
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  audioplayers_darwin: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/audioplayers_darwin-6.4.0 @ local
+  onnxruntime: https://github.com/masicai/onnxruntime-swift-package-manager @ 1.23.1
+  geolocator_apple: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/geolocator_apple-2.3.14 @ local
+  FlutterFramework: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/FlutterFramework @ local
+  shared_preferences_foundation: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/shared_preferences_foundation-2.5.6 @ local
+  FlutterGeneratedPluginSwiftPackage: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage
+  connectivity_plus: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/connectivity_plus-7.3.1 @ local
+  in_app_purchase_storekit: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/in_app_purchase_storekit-0.4.8+1 @ local
+  battery_plus: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/battery_plus-7.1.1 @ local
+  permission_handler_apple: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/permission_handler_apple-9.5.0 @ local
+  flutter_onnxruntime: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/flutter_onnxruntime-1.8.3 @ local
+  path_provider_foundation: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/path_provider_foundation-2.5.1 @ local
+  image_picker_ios: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/image_picker_ios-0.8.13+3 @ local
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (2 targets)
+    Target 'Runner' in project 'Runner'
+        ➜ Explicit dependency on target 'DriveStudioWidgetExtension' in project 'Runner'
+    Target 'DriveStudioWidgetExtension' in project 'Runner' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/actool --version --output-format xml1
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/ibtool --version --output-format xml1
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/actool --print-asset-tag-combinations --output-format xml1 /Users/radhikamac/backup2/drivestudio_swift/Runner/Assets.xcassets
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+Build description signature: c03627c772313613c6025d9256e49e47
+Build description path: /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/XCBuildData/c03627c772313613c6025d9256e49e47.xcbuilddata
+ClangStatCache /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk /Users/radhikamac/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphoneos26.5-23F81a-a26f4d78abf0372adea0fe2e23ad9bcd.sdkstatcache
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphoneos26.5-23F81a-a26f4d78abf0372adea0fe2e23ad9bcd.sdkstatcache
+
+ProcessInfoPlistFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/Info.plist /Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidget/Info.plist (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-infoPlistUtility /Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidget/Info.plist -producttype com.apple.product-type.app-extension -expandbuildsettings -format binary -platform iphoneos -additionalcontentfile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/assetcatalog_generated_info.plist -requiredArchitecture arm64 -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/Info.plist
+
+SwiftDriver Runner normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-SwiftDriver -- /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Runner -Onone @/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.SwiftFileList -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -target arm64-apple-ios16.0 -g -module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -F /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphoneos26.5-23F81a-a26f4d78abf0372adea0fe2e23ad9bcd.sdkstatcache -output-file-map /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_const_extract_protocols.json -Xcc -iquote -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-generated-files.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-own-target-headers.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-all-target-headers.hmap -Xcc -iquote -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-project-headers.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/include -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources-normal/arm64 -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/arm64 -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner-Swift.h -import-objc-header /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner-Bridging-Header.h -working-directory /Users/radhikamac/backup2/drivestudio_swift -experimental-emit-module-separately -disable-cmo
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/29_connect_subaru_wrx.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/29_connect_subaru_wrx.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/29_connect_subaru_wrx.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+error: The file “29_connect_subaru_wrx.wav” couldn’t be opened because there is no such file. (in target 'Runner' from project 'Runner')
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/30_connect_volvo_xc90.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/30_connect_volvo_xc90.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/30_connect_volvo_xc90.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+error: The file “30_connect_volvo_xc90.wav” couldn’t be opened because there is no such file. (in target 'Runner' from project 'Runner')
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/43_brands_connect_master.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/43_brands_connect_master.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/43_brands_connect_master.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+error: The file “43_brands_connect_master.wav” couldn’t be opened because there is no such file. (in target 'Runner' from project 'Runner')
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/28_connect_range_rover_sport.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/28_connect_range_rover_sport.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/28_connect_range_rover_sport.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+error: The file “28_connect_range_rover_sport.wav” couldn’t be opened because there is no such file. (in target 'Runner' from project 'Runner')
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/27_connect_peugeot_508.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/27_connect_peugeot_508.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/27_connect_peugeot_508.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+error: The file “27_connect_peugeot_508.wav” couldn’t be opened because there is no such file. (in target 'Runner' from project 'Runner')
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/26_connect_nissan_gtr.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/26_connect_nissan_gtr.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/26_connect_nissan_gtr.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+error: The file “26_connect_nissan_gtr.wav” couldn’t be opened because there is no such file. (in target 'Runner' from project 'Runner')
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/25_connect_mini_cooper.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/25_connect_mini_cooper.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/25_connect_mini_cooper.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+error: The file “25_connect_mini_cooper.wav” couldn’t be opened because there is no such file. (in target 'Runner' from project 'Runner')
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/24_connect_mclaren_750s.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/24_connect_mclaren_750s.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/24_connect_mclaren_750s.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+error: The file “24_connect_mclaren_750s.wav” couldn’t be opened because there is no such file. (in target 'Runner' from project 'Runner')
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/23_connect_mazda_mx5.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/23_connect_mazda_mx5.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/23_connect_mazda_mx5.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+error: The file “23_connect_mazda_mx5.wav” couldn’t be opened because there is no such file. (in target 'Runner' from project 'Runner')
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/22_connect_maserati_granturismo.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/22_connect_maserati_granturismo.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/22_connect_maserati_granturismo.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+error: The file “22_connect_maserati_granturismo.wav” couldn’t be opened because there is no such file. (in target 'Runner' from project 'Runner')
+
+** BUILD FAILED **
+
+
+The following build commands failed:
+	CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/29_connect_subaru_wrx.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/29_connect_subaru_wrx.wav (in target 'Runner' from project 'Runner')
+	CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/30_connect_volvo_xc90.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/30_connect_volvo_xc90.wav (in target 'Runner' from project 'Runner')
+	CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/43_brands_connect_master.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/43_brands_connect_master.wav (in target 'Runner' from project 'Runner')
+	CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/28_connect_range_rover_sport.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/28_connect_range_rover_sport.wav (in target 'Runner' from project 'Runner')
+	CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/27_connect_peugeot_508.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/27_connect_peugeot_508.wav (in target 'Runner' from project 'Runner')
+	CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/26_connect_nissan_gtr.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/26_connect_nissan_gtr.wav (in target 'Runner' from project 'Runner')
+	CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/25_connect_mini_cooper.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/25_connect_mini_cooper.wav (in target 'Runner' from project 'Runner')
+	CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/24_connect_mclaren_750s.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/24_connect_mclaren_750s.wav (in target 'Runner' from project 'Runner')
+	CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/23_connect_mazda_mx5.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/23_connect_mazda_mx5.wav (in target 'Runner' from project 'Runner')
+	CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/22_connect_maserati_granturismo.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/22_connect_maserati_granturismo.wav (in target 'Runner' from project 'Runner')
+	Building workspace Runner with scheme Runner and configuration Debug
+(11 failures)

@@ -1,0 +1,23 @@
+{
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/AppStore.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppStore.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppStore.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppStore.dia",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppStore.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppStore.swiftdeps"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/GalleryScreen.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/GalleryScreen.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/GalleryScreen.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/GalleryScreen.dia",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/GalleryScreen.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/GalleryScreen.swiftdeps"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/HomeScreen.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/HomeScreen.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/HomeScreen.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/HomeScreen.dia",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/HomeScreen.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/HomeScreen.swiftdeps"
+  }
+}

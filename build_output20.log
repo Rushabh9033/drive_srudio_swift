@@ -1,0 +1,869 @@
+Command line invocation:
+    /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Debug -destination id=E4F3D12D-0918-53BB-93C3-35FB2E0505A4 clean build
+
+Resolve Package Graph
+
+Fetching from https://github.com/masicai/onnxruntime-swift-package-manager (cached)
+
+Creating working copy of package ‘onnxruntime-swift-package-manager’
+
+Checking out 1.23.1 of package ‘onnxruntime-swift-package-manager’
+
+
+Resolved source packages:
+  shared_preferences_foundation: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/shared_preferences_foundation-2.5.6 @ local
+  path_provider_foundation: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/path_provider_foundation-2.5.1 @ local
+  FlutterGeneratedPluginSwiftPackage: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage
+  geolocator_apple: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/geolocator_apple-2.3.14 @ local
+  battery_plus: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/battery_plus-7.1.1 @ local
+  in_app_purchase_storekit: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/in_app_purchase_storekit-0.4.8+1 @ local
+  FlutterFramework: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/FlutterFramework @ local
+  audioplayers_darwin: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/audioplayers_darwin-6.4.0 @ local
+  image_picker_ios: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/image_picker_ios-0.8.13+3 @ local
+  connectivity_plus: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/connectivity_plus-7.3.1 @ local
+  permission_handler_apple: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/permission_handler_apple-9.5.0 @ local
+  onnxruntime: https://github.com/masicai/onnxruntime-swift-package-manager @ 1.23.1
+  flutter_onnxruntime: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/flutter_onnxruntime-1.8.3 @ local
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+** CLEAN SUCCEEDED **
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (2 targets)
+    Target 'Runner' in project 'Runner'
+        ➜ Explicit dependency on target 'DriveStudioWidgetExtension' in project 'Runner'
+    Target 'DriveStudioWidgetExtension' in project 'Runner' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/actool --version --output-format xml1
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/ibtool --version --output-format xml1
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/actool --print-asset-tag-combinations --output-format xml1 /Users/radhikamac/backup2/drivestudio_swift/Runner/Assets.xcassets
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+Build description signature: e5f638d2a360e34f57927a17df826c32
+Build description path: /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/XCBuildData/e5f638d2a360e34f57927a17df826c32.xcbuilddata
+ClangStatCache /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk /Users/radhikamac/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphoneos26.5-23F81a-a26f4d78abf0372adea0fe2e23ad9bcd.sdkstatcache
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphoneos26.5-23F81a-a26f4d78abf0372adea0fe2e23ad9bcd.sdkstatcache
+
+CreateBuildDirectory /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-create-build-directory /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products
+
+CreateBuildDirectory /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-create-build-directory /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex
+
+CreateBuildDirectory /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-create-build-directory /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+CreateBuildDirectory /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/ExplicitPrecompiledModules
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-create-build-directory /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+CreateBuildDirectory /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-create-build-directory /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner-18c1723432283e0cc55f10a6dcfd9e02-VFS-iphoneos/all-product-headers.yaml
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner-18c1723432283e0cc55f10a6dcfd9e02-VFS-iphoneos/all-product-headers.yaml
+
+CreateBuildDirectory /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphoneos
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-create-build-directory /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphoneos
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner.hmap (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner.hmap
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-own-target-headers.hmap (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-own-target-headers.hmap
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-generated-files.hmap (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-generated-files.hmap
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-project-headers.hmap (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-project-headers.hmap
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner.DependencyStaticMetadataFileList (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner.DependencyStaticMetadataFileList
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-all-target-headers.hmap (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-all-target-headers.hmap
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner.DependencyMetadataFileList (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner.DependencyMetadataFileList
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-all-non-framework-target-headers.hmap (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-all-non-framework-target-headers.hmap
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-DebugDylibPath-normal-arm64.txt (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-DebugDylibPath-normal-arm64.txt
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-DebugDylibInstallName-normal-arm64.txt (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-DebugDylibInstallName-normal-arm64.txt
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_const_extract_protocols.json (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_const_extract_protocols.json
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.SwiftFileList (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.SwiftFileList
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.SwiftConstValuesFileList (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.LinkFileList (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.LinkFileList
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner-OutputFileMap.json (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner-OutputFileMap.json
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/7187679823f38a2a940e0043cdf9d637-common-args.resp (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/7187679823f38a2a940e0043cdf9d637-common-args.resp
+'-std=gnu99' -fmodules -gmodules '-fmodules-cache-path=/Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex' -fpascal-strings -O0 -fno-common '-DDEBUG=1' -g -iquote /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-generated-files.hmap -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-own-target-headers.hmap -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-all-target-headers.hmap -iquote /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-project-headers.hmap -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/include -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources-normal/arm64 -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/arm64 -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources -F/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/Entitlements.plist (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/Entitlements.plist
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/Runner_vers.c (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/Runner_vers.c
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension_const_extract_protocols.json (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension_const_extract_protocols.json
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.SwiftFileList (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.SwiftFileList
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.SwiftConstValuesFileList (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.LinkFileList (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.LinkFileList
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension-OutputFileMap.json (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension-OutputFileMap.json
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension.hmap (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension.hmap
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension.DependencyStaticMetadataFileList (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension.DependencyStaticMetadataFileList
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension.DependencyMetadataFileList (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension.DependencyMetadataFileList
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-project-headers.hmap (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-project-headers.hmap
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-own-target-headers.hmap (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-own-target-headers.hmap
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-generated-files.hmap (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-generated-files.hmap
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-all-target-headers.hmap (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-all-target-headers.hmap
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-all-non-framework-target-headers.hmap (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-all-non-framework-target-headers.hmap
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-DebugEntryPoint-normal-arm64.txt (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-DebugEntryPoint-normal-arm64.txt
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-DebugDylibPath-normal-arm64.txt (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-DebugDylibPath-normal-arm64.txt
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-DebugDylibInstallName-normal-arm64.txt (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-DebugDylibInstallName-normal-arm64.txt
+
+WriteAuxiliaryFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DerivedSources/Entitlements.plist (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    write-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DerivedSources/Entitlements.plist
+
+MkDir /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/PlugIns (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /bin/mkdir -p /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/PlugIns
+
+MkDir /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /bin/mkdir -p /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+MkDir /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /bin/mkdir -p /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex
+
+ProcessProductPackaging /Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidgetExtension.entitlements /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension.appex.xcent (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+    Entitlements:
+    
+    {
+    "application-identifier" = "YZ6GW884AL.com.drivestudio.app.driveStudio.DriveStudioWidget";
+    "com.apple.developer.team-identifier" = YZ6GW884AL;
+    "com.apple.security.application-groups" =     (
+        "group.com.drivestudio.shared"
+    );
+    "get-task-allow" = 1;
+}
+    
+    builtin-productPackagingUtility /Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidgetExtension.entitlements -entitlements -format xml -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension.appex.xcent
+
+ProcessProductPackaging /Users/radhikamac/Library/Developer/Xcode/UserData/Provisioning\ Profiles/01aebac4-305f-4b90-b4aa-9dd87e3e7e00.mobileprovision /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/embedded.mobileprovision (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-productPackagingUtility /Users/radhikamac/Library/Developer/Xcode/UserData/Provisioning\ Profiles/01aebac4-305f-4b90-b4aa-9dd87e3e7e00.mobileprovision -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/embedded.mobileprovision
+
+ProcessProductPackagingDER /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension.appex.xcent /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension.appex.xcent.der (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /usr/bin/derq query -f xml -i /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension.appex.xcent -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension.appex.xcent.der --raw
+
+Ld /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/__preview.dylib normal (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios16.0 -dynamiclib -isysroot /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -O0 -L/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -F/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -install_name @rpath/DriveStudioWidgetExtension.debug.dylib -Xlinker -dead_strip -rdynamic -Xlinker -no_deduplicate -Xlinker -dependency_info -Xlinker /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension_dependency_info.dat -Xlinker -no_adhoc_codesign -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/__preview.dylib
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/PrivacyInfo.xcprivacy /Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidget/PrivacyInfo.xcprivacy (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidget/PrivacyInfo.xcprivacy /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex
+
+GenerateAssetSymbols /Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidget/Assets.xcassets (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/actool /Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidget/Assets.xcassets --compile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex --output-format human-readable-text --notices --warnings --export-dependency-info /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/assetcatalog_dependencies --output-partial-info-plist /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/assetcatalog_generated_info.plist --app-icon AppIcon --accent-color AccentColor --widget-background-color WidgetBackground --compress-pngs --enable-on-demand-resources NO --standalone-icon-behavior all --development-region en --target-device iphone --target-device ipad --minimum-deployment-target 16.0 --platform iphoneos --bundle-identifier com.drivestudio.app.driveStudio.DriveStudioWidget --generate-swift-asset-symbols /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DerivedSources/GeneratedAssetSymbols.swift --generate-objc-asset-symbols /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DerivedSources/GeneratedAssetSymbols.h --generate-asset-symbol-index /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/* com.apple.actool.compilation-results */
+/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DerivedSources/GeneratedAssetSymbols.h
+/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DerivedSources/GeneratedAssetSymbols.swift
+
+
+MkDir /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/assetcatalog_output/unthinned (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /bin/mkdir -p /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/assetcatalog_output/unthinned
+
+MkDir /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/assetcatalog_output/thinned (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /bin/mkdir -p /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/assetcatalog_output/thinned
+
+CompileAssetCatalogVariant thinned /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex /Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidget/Assets.xcassets (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/actool /Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidget/Assets.xcassets --compile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/assetcatalog_output/thinned --output-format human-readable-text --notices --warnings --export-dependency-info /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/assetcatalog_dependencies_thinned --output-partial-info-plist /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/assetcatalog_generated_info.plist_thinned --app-icon AppIcon --accent-color AccentColor --widget-background-color WidgetBackground --compress-pngs --enable-on-demand-resources NO --standalone-icon-behavior all --filter-for-thinning-device-configuration iPhone14,5 --filter-for-device-os-version 26.5 --development-region en --target-device iphone --target-device ipad --minimum-deployment-target 16.0 --platform iphoneos
+/* com.apple.actool.compilation-results */
+/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/assetcatalog_generated_info.plist_thinned
+/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/assetcatalog_output/thinned/Assets.car
+
+
+SwiftDriver DriveStudioWidgetExtension normal arm64 com.apple.xcode.tools.swift.compiler (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-SwiftDriver -- /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name DriveStudioWidgetExtension -Onone @/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -target arm64-apple-ios16.0 -g -module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -application-extension -enable-testing -index-store-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -F /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -emit-localized-strings -emit-localized-strings-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64 -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphoneos26.5-23F81a-a26f4d78abf0372adea0fe2e23ad9bcd.sdkstatcache -output-file-map /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension_const_extract_protocols.json -Xcc -iquote -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-generated-files.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-own-target-headers.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-all-target-headers.hmap -Xcc -iquote -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-project-headers.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/include -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DerivedSources-normal/arm64 -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DerivedSources/arm64 -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension-Swift.h -working-directory /Users/radhikamac/backup2/drivestudio_swift -experimental-emit-module-separately -disable-cmo
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_AvailabilityInternal-E7ASPWT1DE4VFKQAFSE29JGC3.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_float-4SMCCSROT86LO5SR38J0JTV4Y.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stddef-F0WDCHYHRJBOAI2MBZPYRIYCQ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/DeveloperToolsSupport-9KWSURC61ZQWBOJ3TQT1V1OZR.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stdarg-CIZJA1132F44GQB2F1PY2KOZN.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ptrauth-CHHSL30Q5DY138GMN4EE2VXSC.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_SwiftConcurrencyShims-6XYZMXX5NYAJIN6JOYVDTDB3Q.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ptrcheck-2P2JP97DPWXZN9JN20WPE59L8.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/SwiftShims-1CXLIPD55HV9ZWRB83742G371.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stdbool-2MAAOGCOFS8QTO3X20F2M7SQX.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ActivityKit-7H25CIWMAU5L2RQAC0B710OFO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_DarwinFoundation1-C4PTDU89K9Z4KC1S48NJQN5S1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_limits-43ZK1LF1JDRHSYHAECXHLM4L.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ExtensionFoundation-58BNNZ3NQY0FXFNX42CFK5KG.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_DarwinFoundation2-DOLRH62Y7XRLELM8MZA1SHY89.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/sys_types-65MZZWG4CVOKWX0GKH4Z45TQP.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_tgmath-9LEWLHP3UG9Y42J5SLISNVS6L.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stdint-C7I7R5M3ZUZ330CR4MPPWOF27.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_DarwinFoundation3-EGU3I7UG27OCKZI5KV9UH1LJP.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_intrinsics-1FOCKYMDMMZCOKK7G5R5STK3Z.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stdatomic-6E68P1HZ3LTW82971CQIJDH2B.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_inttypes-2K50BT4ZQ78RFM2VOE6XAZM52.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Darwin-DULAQCRXFZBD8N2WE0YGP0TS9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/simd-97GMHGP7DXJ4RFMG67PFKTQIK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ObjectiveC-ALS7ED6IMYVR8TPK8WNR6BV9S.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/MachO-CDO8ZSG52WIQTG23E3G0O4KPZ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/os_object-6N2T3XMVHC0OOULFK3EDR21QU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/os_workgroup-5K7JSS0ONRPJID4658QF4U0PG.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Spatial-AO2SLKDWWO7X8KYGS50I84GCS.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Dispatch-6D7QW6Y3F211JG5NARHJPQKAL.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/dnssd-CR1R9QBAYS9EAO9DJ1NV6S0I1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/XPC-77ZT0VG59HYFFEF8WMTE5Y2J9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreFoundation-6OOBHXZL6HTKOLDES8HOC96QM.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/os-8EBCD6XRT2DHUPBASOPQC4T9I.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CFNetwork-4QOUIQJSX30V2NOUT7B3G2P38.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Security-7R4WJEQZFAHVP6GWXN50D39XN.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreGraphics-DWR4OYQQIGDFQ9CDP71RXFFT7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Foundation-72ELWI48JDEVNX9ICX6KJQX5R.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ImageIO-5MUZKEWYMAHQ9TRGYQ8YSMVFY.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreText-3PLY0AB03UTE474MFM0ZKN6QG.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/DataDetection-9EEDEXFJ7Y3VFSSFQUUE7BN7R.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/UniformTypeIdentifiers-239XS55DTETHTGBYNQPI0ZTY8.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/AppIntents-8UJ17N5VK9IVOM36XIG0ZRBQ8.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/FileProvider-9RW2SMJYH2R8N7WYDK9N70CO6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Symbols-P98KNQ617L4VFJEQ5AMJP4LT.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Network-B52D5ZQPBSTWZDASOD9TV4C8J.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_LocationEssentials-EPGKVWPLW4B40808L72UV972G.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/OSLog-D0SUBWKQ8ZJ2ZGT83LR8OLG44.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Accessibility-ALB2LOWMNZFWSZWXYZAGVOND9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/LocalAuthentication-68VG8YYCROL8OH26Y1AI89KSN.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/IOSurface-C94JWYDLYBMQLIE06503EVKY6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreTransferable-BJ1FWTWD05TVFRL3S170APVZ2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreData-EJSJEOOJJXXVUQB5UA2W9U109.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreLocation-42Y6L0F3FKT83GBEM1EXSGFMJ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/RelevanceKit-EXXQFA1M5WFDGJ0SVJVXD3FPG.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/UserNotifications-1SM7JN4T9EAHF7CZ910CVZOMU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/WidgetKit-5T7ZGGSHTFCU4MW6FOW0YCA22.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreSpotlight-8SRI9LXGE8WP4IYWH3Q9USK98.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/UIUtilities-BLRV011FUAOJ6L8RLHLUAVQWR.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/OpenGLES-9Z7ZOUY01BE2M320WG51GYB6D.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Metal-DRH9N1L7GJ24EVS03U0BKANPD.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Intents-90MYHMN0AYMQRXC22GRXXHZEE.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreVideo-55NFE2Y0LJRATWEMS4NQT0C3J.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/QuartzCore-BW2LO3ICXZXBC016Z4TVK0HD0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreImage-4S02X8MR9E4FFXY8X6N47ZCID.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/SwiftUICore-8TGPICBEI3P66BOEMWO6YNONQ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/UIKit-CDFQUZL557R3F9F5AD43VGVO2.pcm
+
+LinkAssetCatalog /Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidget/Assets.xcassets (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-linkAssetCatalog --thinned /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/assetcatalog_output/thinned --thinned-dependencies /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/assetcatalog_dependencies_thinned --thinned-info-plist-content /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/assetcatalog_generated_info.plist_thinned --unthinned /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/assetcatalog_output/unthinned --unthinned-dependencies /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/assetcatalog_dependencies_unthinned --unthinned-info-plist-content /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/assetcatalog_generated_info.plist_unthinned --output /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex --plist-output /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/assetcatalog_generated_info.plist
+note: Emplaced /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/Assets.car (in target 'DriveStudioWidgetExtension' from project 'Runner')
+
+ProcessInfoPlistFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/Info.plist /Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidget/Info.plist (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-infoPlistUtility /Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidget/Info.plist -producttype com.apple.product-type.app-extension -expandbuildsettings -format binary -platform iphoneos -additionalcontentfile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/assetcatalog_generated_info.plist -requiredArchitecture arm64 -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/Info.plist
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/SwiftUI-D21JMUD7MEKD82W9YHHWEIA93.pcm
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ DriveStudioWidgetExtension (in target 'DriveStudioWidgetExtension' from project 'Runner')
+
+EmitSwiftModule normal arm64 (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+SwiftCompile normal arm64 Compiling\ GeneratedAssetSymbols.swift /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'DriveStudioWidgetExtension' from project 'Runner')
+SwiftCompile normal arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+SwiftCompile normal arm64 Compiling\ WidgetModels.swift /Users/radhikamac/backup2/drivestudio_swift/Runner/WidgetModels.swift (in target 'DriveStudioWidgetExtension' from project 'Runner')
+
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/Runner/WidgetModels.swift (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+SwiftCompile normal arm64 Compiling\ DriveStudioWidget.swift /Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidget/DriveStudioWidget.swift (in target 'DriveStudioWidgetExtension' from project 'Runner')
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidget/DriveStudioWidget.swift (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+/Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidget/DriveStudioWidget.swift:529:69: warning: call to main actor-isolated static method 'isLive' in a synchronous nonisolated context
+        let liveLayers: [WidgetLayer] = (spec?.layers ?? []).filter(Self.isLive)
+                                                                    ^
+/Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidget/DriveStudioWidget.swift:549:25: note: calls to static method 'isLive' from outside of its actor context are implicitly asynchronous
+    private static func isLive(_ layer: WidgetLayer) -> Bool {
+                        ^
+/Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidget/DriveStudioWidget.swift:549:25: note: main actor isolation inferred from conformance to protocol 'View'
+    private static func isLive(_ layer: WidgetLayer) -> Bool {
+                        ^
+
+SwiftCompile normal arm64 Compiling\ DriveStudioWidgetBundle.swift /Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidget/DriveStudioWidgetBundle.swift (in target 'DriveStudioWidgetExtension' from project 'Runner')
+
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidget/DriveStudioWidgetBundle.swift (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for DriveStudioWidgetExtension (in target 'DriveStudioWidgetExtension' from project 'Runner')
+
+SwiftDriver\ Compilation\ Requirements DriveStudioWidgetExtension normal arm64 com.apple.xcode.tools.swift.compiler (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-Swift-Compilation-Requirements -- /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name DriveStudioWidgetExtension -Onone @/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -target arm64-apple-ios16.0 -g -module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -application-extension -enable-testing -index-store-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -F /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -emit-localized-strings -emit-localized-strings-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64 -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphoneos26.5-23F81a-a26f4d78abf0372adea0fe2e23ad9bcd.sdkstatcache -output-file-map /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension_const_extract_protocols.json -Xcc -iquote -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-generated-files.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-own-target-headers.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-all-target-headers.hmap -Xcc -iquote -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-project-headers.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/include -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DerivedSources-normal/arm64 -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DerivedSources/arm64 -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension-Swift.h -working-directory /Users/radhikamac/backup2/drivestudio_swift -experimental-emit-module-separately -disable-cmo
+
+SwiftMergeGeneratedHeaders /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DerivedSources/DriveStudioWidgetExtension-Swift.h /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension-Swift.h (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-swiftHeaderTool -arch arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension-Swift.h -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DerivedSources/DriveStudioWidgetExtension-Swift.h
+
+Copy /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.swiftmodule/arm64-apple-ios.swiftdoc /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.swiftdoc (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.swiftdoc /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.swiftmodule/arm64-apple-ios.swiftdoc
+
+Copy /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.swiftmodule/arm64-apple-ios.abi.json /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.abi.json (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.abi.json /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.swiftmodule/arm64-apple-ios.abi.json
+
+Copy /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.swiftmodule/arm64-apple-ios.swiftmodule /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.swiftmodule (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.swiftmodule /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.swiftmodule/arm64-apple-ios.swiftmodule
+
+Copy /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.swiftmodule/Project/arm64-apple-ios.swiftsourceinfo /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.swiftsourceinfo (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.swiftsourceinfo /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.swiftmodule/Project/arm64-apple-ios.swiftsourceinfo
+
+ProcessProductPackaging /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner.entitlements /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner.app.xcent (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+    Entitlements:
+    
+    {
+    "application-identifier" = "YZ6GW884AL.com.drivestudio.app.driveStudio";
+    "com.apple.developer.team-identifier" = YZ6GW884AL;
+    "com.apple.security.application-groups" =     (
+        "group.com.drivestudio.shared"
+    );
+    "get-task-allow" = 1;
+}
+    
+    builtin-productPackagingUtility /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner.entitlements -entitlements -format xml -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner.app.xcent
+
+ProcessProductPackaging /Users/radhikamac/Library/Developer/Xcode/UserData/Provisioning\ Profiles/e5bddd19-1c1c-4d06-9323-9e99745d203f.mobileprovision /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/embedded.mobileprovision (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-productPackagingUtility /Users/radhikamac/Library/Developer/Xcode/UserData/Provisioning\ Profiles/e5bddd19-1c1c-4d06-9323-9e99745d203f.mobileprovision -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/embedded.mobileprovision
+
+ProcessProductPackagingDER /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner.app.xcent /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner.app.xcent.der (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /usr/bin/derq query -f xml -i /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner.app.xcent -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner.app.xcent.der --raw
+
+GenerateAssetSymbols /Users/radhikamac/backup2/drivestudio_swift/Runner/Assets.xcassets (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/actool /Users/radhikamac/backup2/drivestudio_swift/Runner/Assets.xcassets --compile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app --output-format human-readable-text --notices --warnings --export-dependency-info /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_dependencies --output-partial-info-plist /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_generated_info.plist --app-icon AppIcon --compress-pngs --enable-on-demand-resources YES --development-region en --target-device iphone --target-device ipad --minimum-deployment-target 16.0 --platform iphoneos --bundle-identifier com.drivestudio.app.driveStudio --generate-swift-asset-symbols /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/GeneratedAssetSymbols.swift --generate-objc-asset-symbols /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/GeneratedAssetSymbols.h --generate-asset-symbol-index /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/* com.apple.actool.compilation-results */
+/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/GeneratedAssetSymbols.h
+/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/GeneratedAssetSymbols.swift
+
+
+MkDir /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_output/thinned (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /bin/mkdir -p /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_output/thinned
+
+MkDir /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_output/unthinned (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /bin/mkdir -p /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_output/unthinned
+
+CompileAssetCatalogVariant thinned /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app /Users/radhikamac/backup2/drivestudio_swift/Runner/Assets.xcassets (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/actool /Users/radhikamac/backup2/drivestudio_swift/Runner/Assets.xcassets --compile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_output/thinned --output-format human-readable-text --notices --warnings --export-dependency-info /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_dependencies_thinned --output-partial-info-plist /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_generated_info.plist_thinned --app-icon AppIcon --compress-pngs --enable-on-demand-resources YES --filter-for-thinning-device-configuration iPhone14,5 --filter-for-device-os-version 26.5 --development-region en --target-device iphone --target-device ipad --minimum-deployment-target 16.0 --platform iphoneos
+/* com.apple.actool.document.notices */
+/Users/radhikamac/backup2/drivestudio_swift/Runner/Assets.xcassets:./AppIcon.appiconset/[][ipad][76x76][][][1x][][][][]: notice: 76x76@1x app icons only apply to iPad apps targeting releases of iOS prior to 10.0.
+/* com.apple.actool.compilation-results */
+/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_generated_info.plist_thinned
+/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_output/thinned/AppIcon60x60@2x.png
+/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_output/thinned/AppIcon76x76@2x~ipad.png
+/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_output/thinned/Assets.car
+
+
+SwiftDriver Runner normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-SwiftDriver -- /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Runner -Onone @/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.SwiftFileList -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -target arm64-apple-ios16.0 -g -module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -F /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphoneos26.5-23F81a-a26f4d78abf0372adea0fe2e23ad9bcd.sdkstatcache -output-file-map /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_const_extract_protocols.json -Xcc -iquote -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-generated-files.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-own-target-headers.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-all-target-headers.hmap -Xcc -iquote -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-project-headers.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/include -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources-normal/arm64 -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/arm64 -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner-Swift.h -import-objc-header /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner-Bridging-Header.h -working-directory /Users/radhikamac/backup2/drivestudio_swift -experimental-emit-module-separately -disable-cmo
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stdarg-A1YD6ETYVM006XJ8AZ14G7SRR.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/SwiftShims-85TFV8L97863HMPNG1OLR7M2B.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_SwiftConcurrencyShims-9TFOUVZMNBNK86YXML0SO7G3W.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ptrcheck-75CMSA37LF1FM7W3385CL6UV2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ActivityKit-BI6H925FIEHSHGBZBXKD49FBG.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stddef-ESG6U91MHCL3ALXHBQY1CCDBU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stdbool-A13NI09IM3IPS8FH375F0VMKE.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_float-18V46TTPEOPYMTX04VHLD41LH.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ptrauth-I8N0FVPM5ISFRGRZBG3KXPLV.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/DeveloperToolsSupport-68DRV4N3U2MX1V63T0U1AUHB3.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_AvailabilityInternal-BGGWWEEA9ZTZX6F38R535VYQX.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_DarwinFoundation1-9B0KF1KAJZEH6XB04HOMRF0AC.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_DarwinFoundation2-4T7LHB1ULOHY0OTYQDF8XI4H4.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_limits-4VVA939GRTMMBNO7UXE78UB74.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ExtensionFoundation-CFGWJJOJFE9J546BCK2EHHW44.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_tgmath-8CQFEZYOL8LUF8ZTBM3FQJWY.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stdint-DAA1RAH1QK2PIKBSWJSUMD2UR.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/sys_types-43PQPGJIHQPYZUO6Y5YN129AK.pcm
+
+SwiftDriverJobDiscovery normal arm64 Compiling WidgetModels.swift (in target 'DriveStudioWidgetExtension' from project 'Runner')
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stdatomic-E33D9DT865TD9PYG3UQUIXX68.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_intrinsics-LJDADALRHZGC5V4RW4XMX72C.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_DarwinFoundation3-3IWXDC86M5G5SGP1VHTDR52WM.pcm
+
+LinkAssetCatalog /Users/radhikamac/backup2/drivestudio_swift/Runner/Assets.xcassets (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-linkAssetCatalog --thinned /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_output/thinned --thinned-dependencies /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_dependencies_thinned --thinned-info-plist-content /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_generated_info.plist_thinned --unthinned /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_output/unthinned --unthinned-dependencies /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_dependencies_unthinned --unthinned-info-plist-content /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_generated_info.plist_unthinned --output /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app --plist-output /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_generated_info.plist
+note: Emplaced /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/AppIcon76x76@2x~ipad.png (in target 'Runner' from project 'Runner')
+note: Emplaced /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/AppIcon60x60@2x.png (in target 'Runner' from project 'Runner')
+note: Emplaced /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/Assets.car (in target 'Runner' from project 'Runner')
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_inttypes-F4PRE41ZBUBYH72V2AE385OMB.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Darwin-4MZA149BBTGRA2ACRQTSN30U7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/simd-9Z8033O4ZP870TTTUKU0RG5TO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/MachO-AT1Z3OCUWT5EADODHV3MF5YZ1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ObjectiveC-D5JFIGNHYZP5II6879C2S0PBI.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/os_object-ACVQ275NYLIGNA3QI6NPEJ3FA.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/os_workgroup-EL8L19LLNQ6HKD8BV7UXO0ID9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Spatial-2E7KVUUZU61DQ6Q7D94EWEJGA.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Dispatch-4RXNL789X2R7RNHYL72NM3CCH.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/dnssd-557CGTFE0O18WFJPVWMG9JOTM.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/XPC-79CLEILZ43EJE2J5EJJKL8346.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreFoundation-7TNA9VMSG2IKB9LDQX6ZOLXAN.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/os-9L5ZW70S0AO8DPRNMFVHM8X6P.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreGraphics-XKXKQNOPMO72QVVYBFNS8E8D.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreAudioTypes-D85ITE6WG6PUUSIG4ARFZA1S2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CFNetwork-2A8VTI3T8P24BDBWJ92C72BUS.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Security-955JYQQTCE9STIKYBAAJ6L1LO.pcm
+
+SwiftDriverJobDiscovery normal arm64 Compiling DriveStudioWidgetBundle.swift (in target 'DriveStudioWidgetExtension' from project 'Runner')
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreAudio-B84UP6O2VA35UUB6C8F0C78U2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Foundation-47RKHOP1X9ZNSDXJFE92S4QPK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ImageIO-BWIOBZX777LMSR84EQNBLXV6W.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreText-5YWXPOQYRNS5GN869FY4QNYX1.pcm
+
+SwiftDriverJobDiscovery normal arm64 Compiling GeneratedAssetSymbols.swift (in target 'DriveStudioWidgetExtension' from project 'Runner')
+
+SwiftDriverJobDiscovery normal arm64 Compiling DriveStudioWidget.swift (in target 'DriveStudioWidgetExtension' from project 'Runner')
+
+SwiftDriver\ Compilation DriveStudioWidgetExtension normal arm64 com.apple.xcode.tools.swift.compiler (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-Swift-Compilation -- /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name DriveStudioWidgetExtension -Onone @/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -target arm64-apple-ios16.0 -g -module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -application-extension -enable-testing -index-store-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -F /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -emit-localized-strings -emit-localized-strings-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64 -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphoneos26.5-23F81a-a26f4d78abf0372adea0fe2e23ad9bcd.sdkstatcache -output-file-map /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension_const_extract_protocols.json -Xcc -iquote -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-generated-files.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-own-target-headers.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-all-target-headers.hmap -Xcc -iquote -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-project-headers.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/include -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DerivedSources-normal/arm64 -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DerivedSources/arm64 -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension-Swift.h -working-directory /Users/radhikamac/backup2/drivestudio_swift -experimental-emit-module-separately -disable-cmo
+
+Ld /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/DriveStudioWidgetExtension.debug.dylib normal (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios16.0 -dynamiclib -isysroot /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -O0 -L/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphoneos -L/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -F/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphoneos -F/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -filelist /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.LinkFileList -install_name @rpath/DriveStudioWidgetExtension.debug.dylib -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -rpath -Xlinker @executable_path/Frameworks -Xlinker -rpath -Xlinker @executable_path/../../Frameworks -Xlinker -dead_strip -Xlinker -object_path_lto -Xlinker /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -dependency_info -Xlinker /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension_dependency_info.dat -fapplication-extension -fobjc-link-runtime -L/Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.swiftmodule @/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension-linker-args.resp -Xlinker -alias -Xlinker _NSExtensionMain -Xlinker ___debug_main_executable_dylib_entry_point -framework SwiftUI -framework WidgetKit -framework CarPlay -Xlinker -no_adhoc_codesign -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/DriveStudioWidgetExtension.debug.dylib
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Accessibility-1LQNCFZ21CLI1MR4JDXZAC2M4.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/UserNotifications-AXZ1ZDY2UF0NDF52GC83CH1J0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/FileProvider-7TWH4XAPKSUZZGGFMYCC1D51E.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_LocationEssentials-58SL2LYHZOGKRCULUDFG896J8.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/LocalAuthentication-50WKDHPIW6COGOPMWAJNICB01.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/OSLog-BXUMMXESLB3X8BQ9GWE5193NZ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/DataDetection-D2RBRKQC66CHPTV5T0F3A4XO0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/IOSurface-B9DDU3RXFB6M758Q0RDI6QB01.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/AppIntents-CVVHRW6AYSQC46W5MKGZPRF49.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Symbols-80H6TE5SUPUG0JFZ6Q3VK13E7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreData-E45M8GDU9FZ847FGBEUER6VL8.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/WidgetKit-34TS0SXH3FGZG31HBKJB5L6ZJ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreMIDI-BK3YNUXQF0ZOXIXA7KG864AGA.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreTransferable-1BOD7CWNV0X83AX7O06E9GH04.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/OpenGLES-2JTO4W1TCBOV8MKXGVZ7CLMEZ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Metal-6X9C2RLGEJ1JBLXZ5AXRPD5RD.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/UIUtilities-5R68LWIEEM47QB62Y20IJH76V.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Network-DBYFP4PMIH7SP72L2HE17VNB8.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreLocation-6XD3H8JT6CQZQZ4SGDEJHM65Q.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/RelevanceKit-DV95QIMIOTVYFQL3EC8M3QM7X.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/UniformTypeIdentifiers-74S3VOOY2G0HNKKM6ZANVTTR5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/AVRouting-3AC0E0TI44T72A93JAQCS7UB7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/AudioToolbox-8CC5QBGN2H1Y0EF4H8I9RKQ5P.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Intents-99J4CZCH2VPOG7SI2BF5N5K56.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreSpotlight-EBO912A1D5V8RRMCSPGLZYI3P.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreVideo-85JU7TEYSODDLW1VUBHBBZ1W3.pcm
+
+ConstructStubExecutorLinkFileList /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-ExecutorLinkFileList-normal-arm64.txt (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    construct-stub-executor-link-file-list /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/DriveStudioWidgetExtension.debug.dylib /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/libPreviewsJITStubExecutor_no_swift_entry_point.a /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/libPreviewsJITStubExecutor.a --output /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-ExecutorLinkFileList-normal-arm64.txt
+note: Using stub executor library with Swift entry point. (in target 'DriveStudioWidgetExtension' from project 'Runner')
+
+Ld /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/DriveStudioWidgetExtension normal (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios16.0 -isysroot /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -O0 -L/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -F/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -Xlinker -rpath -Xlinker @executable_path -Xlinker -rpath -Xlinker @executable_path/Frameworks -Xlinker -rpath -Xlinker @executable_path/../../Frameworks -rdynamic -Xlinker -no_deduplicate -e ___debug_blank_executor_main -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_dylib -Xlinker /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-DebugDylibPath-normal-arm64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_entry -Xlinker /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-DebugEntryPoint-normal-arm64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_instlnm -Xlinker /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-DebugDylibInstallName-normal-arm64.txt -Xlinker -filelist -Xlinker /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension-ExecutorLinkFileList-normal-arm64.txt /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/DriveStudioWidgetExtension.debug.dylib -Xlinker -no_adhoc_codesign -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/DriveStudioWidgetExtension
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Accelerate-5KMXNAJ80QPNZ52GCW0KVNZHK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/QuartzCore-902TFX6VZH52CB03LKHUB1B76.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreML-BCABE7SNF18L5N5H2I4PTJMO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreImage-8N0ZBMFE5P6LBP6ZT2YZOJLMX.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreMedia-C2BKLJP6LDBAT5QBGR72YMU5H.pcm
+
+ExtractAppIntentsMetadata (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name DriveStudioWidgetExtension --sdk-root /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk --xcode-version 17F113 --platform-family iOS --deployment-target 16.0 --bundle-identifier com.drivestudio.app.driveStudio.DriveStudioWidget --output /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex --target-triple arm64-apple-ios16.0 --binary-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/DriveStudioWidgetExtension --dependency-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension_dependency_info.dat --stringsdata-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.SwiftFileList --metadata-file-list /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension.DependencyMetadataFileList --static-metadata-file-list /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension.DependencyStaticMetadataFileList --swift-const-vals-list /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/Objects-normal/arm64/DriveStudioWidgetExtension.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --validate-assistant-intents --no-app-shortcuts-localization
+2026-08-11 14:41:31.089 appintentsmetadataprocessor[28899:317986] Starting appintentsmetadataprocessor export
+2026-08-11 14:41:31.100 appintentsmetadataprocessor[28899:317986] Extracted no relevant App Intents symbols, skipping writing output
+
+AppIntentsSSUTraining (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsnltrainingprocessor --infoplist-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/Info.plist --temp-dir-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/ssu --bundle-id com.drivestudio.app.driveStudio.DriveStudioWidget --product-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex --extracted-metadata-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/Metadata.appintents --metadata-file-list /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension.DependencyMetadataFileList --source-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/Info.plist --archive-ssu-assets
+2026-08-11 14:41:31.120 appintentsnltrainingprocessor[28900:317990] Parsing options for appintentsnltrainingprocessor
+2026-08-11 14:41:31.120 appintentsnltrainingprocessor[28900:317990] Starting AppIntents SSU YAML Generation
+2026-08-11 14:41:31.120 appintentsnltrainingprocessor[28900:317990] No AppShortcuts found - Skipping.
+
+CodeSign /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/DriveStudioWidgetExtension.debug.dylib (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+    Signing Identity:     "Apple Development: rushabhmavani01@gmail.com (4MVD5N34AG)"
+    Provisioning Profile: "iOS Team Provisioning Profile: com.drivestudio.app.driveStudio.DriveStudioWidget"
+                          (01aebac4-305f-4b90-b4aa-9dd87e3e7e00)
+    
+    /usr/bin/codesign --force --sign 2E2BAB994411CF6E194FF3FE4262B22339B6FE7A --timestamp\=none --generate-entitlement-der /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/DriveStudioWidgetExtension.debug.dylib
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/SwiftUICore-E63XTF6I2ZSE4EK5FG87D4FPE.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/MediaToolbox-D5S0MHNURLKXL9AZ18YFRWG4S.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Vision-F3ATJYYZR0YM7WVP4TF8N0R8C.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/AVFAudio-8FQ0Z9X99GB5J52X274T3UL9J.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/UIKit-5ZQR7UC4GP20HNK0ITJCZQG11.pcm
+
+CodeSign /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/__preview.dylib (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+    Signing Identity:     "Apple Development: rushabhmavani01@gmail.com (4MVD5N34AG)"
+    Provisioning Profile: "iOS Team Provisioning Profile: com.drivestudio.app.driveStudio.DriveStudioWidget"
+                          (01aebac4-305f-4b90-b4aa-9dd87e3e7e00)
+    
+    /usr/bin/codesign --force --sign 2E2BAB994411CF6E194FF3FE4262B22339B6FE7A --timestamp\=none --generate-entitlement-der /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/__preview.dylib
+
+CodeSign /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+    Signing Identity:     "Apple Development: rushabhmavani01@gmail.com (4MVD5N34AG)"
+    Provisioning Profile: "iOS Team Provisioning Profile: com.drivestudio.app.driveStudio.DriveStudioWidget"
+                          (01aebac4-305f-4b90-b4aa-9dd87e3e7e00)
+    
+    /usr/bin/codesign --force --sign 2E2BAB994411CF6E194FF3FE4262B22339B6FE7A --entitlements /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/DriveStudioWidgetExtension.appex.xcent --timestamp\=none --generate-entitlement-der /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex
+
+RegisterExecutionPolicyException /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-RegisterExecutionPolicyException /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/AVFoundation-3UE7Y17MC8Q1IRGNKXTF9VXJ6.pcm
+
+Touch /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /usr/bin/touch -c /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/summit-ping.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner/Sounds/summit-ping.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner/Sounds/summit-ping.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+error: The file “summit-ping.wav” couldn’t be opened because there is no such file. (in target 'Runner' from project 'Runner')
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/soft-exit.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner/Sounds/soft-exit.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner/Sounds/soft-exit.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+error: The file “soft-exit.wav” couldn’t be opened because there is no such file. (in target 'Runner' from project 'Runner')
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/spark-line.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner/Sounds/spark-line.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner/Sounds/spark-line.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+error: The file “spark-line.wav” couldn’t be opened because there is no such file. (in target 'Runner' from project 'Runner')
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/rise.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner/Sounds/rise.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner/Sounds/rise.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+error: The file “rise.wav” couldn’t be opened because there is no such file. (in target 'Runner' from project 'Runner')
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/soft-chime.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner/Sounds/soft-chime.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner/Sounds/soft-chime.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+error: The file “soft-chime.wav” couldn’t be opened because there is no such file. (in target 'Runner' from project 'Runner')
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/power-down.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner/Sounds/power-down.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner/Sounds/power-down.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+error: The file “power-down.wav” couldn’t be opened because there is no such file. (in target 'Runner' from project 'Runner')
+
+Ld /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/__preview.dylib normal (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios16.0 -dynamiclib -isysroot /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -O0 -L/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -F/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -install_name @rpath/Runner.debug.dylib -Xlinker -dead_strip -rdynamic -Xlinker -no_deduplicate -Xlinker -dependency_info -Xlinker /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_dependency_info.dat -Xlinker -no_adhoc_codesign -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/__preview.dylib
+Command Ld failed with a nonzero exit code
+
+** BUILD FAILED **
+
+
+The following build commands failed:
+	CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/summit-ping.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner/Sounds/summit-ping.wav (in target 'Runner' from project 'Runner')
+	CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/soft-exit.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner/Sounds/soft-exit.wav (in target 'Runner' from project 'Runner')
+	CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/spark-line.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner/Sounds/spark-line.wav (in target 'Runner' from project 'Runner')
+	CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/rise.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner/Sounds/rise.wav (in target 'Runner' from project 'Runner')
+	CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/soft-chime.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner/Sounds/soft-chime.wav (in target 'Runner' from project 'Runner')
+	CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/power-down.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner/Sounds/power-down.wav (in target 'Runner' from project 'Runner')
+	Ld /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/__preview.dylib normal (in target 'Runner' from project 'Runner')
+	Building workspace Runner with scheme Runner and configuration Debug
+(8 failures)

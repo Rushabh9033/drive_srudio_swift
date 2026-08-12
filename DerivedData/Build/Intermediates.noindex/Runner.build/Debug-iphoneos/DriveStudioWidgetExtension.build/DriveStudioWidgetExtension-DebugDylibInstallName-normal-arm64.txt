@@ -1,0 +1,1 @@
+@rpath/DriveStudioWidgetExtension.debug.dylib

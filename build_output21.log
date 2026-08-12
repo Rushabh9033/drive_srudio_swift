@@ -1,0 +1,653 @@
+Command line invocation:
+    /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Debug -destination id=E4F3D12D-0918-53BB-93C3-35FB2E0505A4 build
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  permission_handler_apple: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/permission_handler_apple-9.5.0 @ local
+  FlutterFramework: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/FlutterFramework @ local
+  FlutterGeneratedPluginSwiftPackage: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage
+  connectivity_plus: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/connectivity_plus-7.3.1 @ local
+  in_app_purchase_storekit: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/in_app_purchase_storekit-0.4.8+1 @ local
+  path_provider_foundation: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/path_provider_foundation-2.5.1 @ local
+  audioplayers_darwin: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/audioplayers_darwin-6.4.0 @ local
+  flutter_onnxruntime: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/flutter_onnxruntime-1.8.3 @ local
+  geolocator_apple: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/geolocator_apple-2.3.14 @ local
+  shared_preferences_foundation: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/shared_preferences_foundation-2.5.6 @ local
+  onnxruntime: https://github.com/masicai/onnxruntime-swift-package-manager @ 1.23.1
+  image_picker_ios: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/image_picker_ios-0.8.13+3 @ local
+  battery_plus: /Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/battery_plus-7.1.1 @ local
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (2 targets)
+    Target 'Runner' in project 'Runner'
+        ➜ Explicit dependency on target 'DriveStudioWidgetExtension' in project 'Runner'
+    Target 'DriveStudioWidgetExtension' in project 'Runner' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/actool --version --output-format xml1
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/ibtool --version --output-format xml1
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/actool --print-asset-tag-combinations --output-format xml1 /Users/radhikamac/backup2/drivestudio_swift/Runner/Assets.xcassets
+
+ExecuteExternalTool /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+Build description signature: d3396038db2459d383025817f556859d
+Build description path: /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/XCBuildData/d3396038db2459d383025817f556859d.xcbuilddata
+ClangStatCache /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk /Users/radhikamac/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphoneos26.5-23F81a-a26f4d78abf0372adea0fe2e23ad9bcd.sdkstatcache
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphoneos26.5-23F81a-a26f4d78abf0372adea0fe2e23ad9bcd.sdkstatcache
+
+ProcessInfoPlistFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/Info.plist /Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidget/Info.plist (in target 'DriveStudioWidgetExtension' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-infoPlistUtility /Users/radhikamac/backup2/drivestudio_swift/DriveStudioWidget/Info.plist -producttype com.apple.product-type.app-extension -expandbuildsettings -format binary -platform iphoneos -additionalcontentfile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/DriveStudioWidgetExtension.build/assetcatalog_generated_info.plist -requiredArchitecture arm64 -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex/Info.plist
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/summit-ping.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/summit-ping.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/summit-ping.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/soft-chime.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/soft-chime.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/soft-chime.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/soft-exit.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/soft-exit.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/soft-exit.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/spark-line.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/spark-line.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/spark-line.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/rise.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/rise.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/rise.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/power-down.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/power-down.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/power-down.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/marker.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/marker.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/marker.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/night-close.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/night-close.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/night-close.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/low-pulse.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/low-pulse.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/low-pulse.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+Ld /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/__preview.dylib normal (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios16.0 -dynamiclib -isysroot /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -O0 -L/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -F/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -install_name @rpath/Runner.debug.dylib -Xlinker -dead_strip -rdynamic -Xlinker -no_deduplicate -Xlinker -dependency_info -Xlinker /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_dependency_info.dat -Xlinker -no_adhoc_codesign -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/__preview.dylib
+
+SwiftDriver Runner normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-SwiftDriver -- /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Runner -Onone @/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.SwiftFileList -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -target arm64-apple-ios16.0 -g -module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -F /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphoneos26.5-23F81a-a26f4d78abf0372adea0fe2e23ad9bcd.sdkstatcache -output-file-map /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_const_extract_protocols.json -Xcc -iquote -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-generated-files.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-own-target-headers.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-all-target-headers.hmap -Xcc -iquote -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-project-headers.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/include -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources-normal/arm64 -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/arm64 -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner-Swift.h -import-objc-header /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner-Bridging-Header.h -working-directory /Users/radhikamac/backup2/drivestudio_swift -experimental-emit-module-separately -disable-cmo
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/lane-nudge.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/lane-nudge.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/lane-nudge.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/ignition.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/ignition.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/ignition.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/harbor-bell.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/harbor-bell.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/harbor-bell.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/glass-tap.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/glass-tap.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/glass-tap.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/gentle-ping.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/gentle-ping.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/gentle-ping.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/end-route.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/end-route.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/end-route.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/double-beat.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/double-beat.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/double-beat.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/coast-wind.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/coast-wind.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/coast-wind.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/PrivacyInfo.xcprivacy /Users/radhikamac/backup2/drivestudio_swift/Runner/PrivacyInfo.xcprivacy (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/PrivacyInfo.xcprivacy /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/43_brands_connect_master.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/43_brands_connect_master.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/43_brands_connect_master.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/30_connect_volvo_xc90.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/30_connect_volvo_xc90.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/30_connect_volvo_xc90.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/29_connect_subaru_wrx.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/29_connect_subaru_wrx.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/29_connect_subaru_wrx.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/28_connect_range_rover_sport.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/28_connect_range_rover_sport.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/28_connect_range_rover_sport.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/27_connect_peugeot_508.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/27_connect_peugeot_508.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/27_connect_peugeot_508.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/26_connect_nissan_gtr.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/26_connect_nissan_gtr.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/26_connect_nissan_gtr.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/25_connect_mini_cooper.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/25_connect_mini_cooper.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/25_connect_mini_cooper.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/24_connect_mclaren_750s.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/24_connect_mclaren_750s.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/24_connect_mclaren_750s.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/23_connect_mazda_mx5.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/23_connect_mazda_mx5.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/23_connect_mazda_mx5.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/22_connect_maserati_granturismo.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/22_connect_maserati_granturismo.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/22_connect_maserati_granturismo.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/21_connect_lucid_air.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/21_connect_lucid_air.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/21_connect_lucid_air.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/20_connect_lexus_lc_500.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/20_connect_lexus_lc_500.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/20_connect_lexus_lc_500.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/19_connect_land_rover_defender.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/19_connect_land_rover_defender.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/19_connect_land_rover_defender.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/18_connect_lamborghini_huracan.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/18_connect_lamborghini_huracan.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/18_connect_lamborghini_huracan.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/17_connect_kia_ev6.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/17_connect_kia_ev6.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/17_connect_kia_ev6.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/16_connect_jeep_wrangler.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/16_connect_jeep_wrangler.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/16_connect_jeep_wrangler.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/15_connect_jaguar_f_type.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/15_connect_jaguar_f_type.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/15_connect_jaguar_f_type.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/14_connect_hyundai_ioniq_5.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/14_connect_hyundai_ioniq_5.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/14_connect_hyundai_ioniq_5.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/13_connect_gmc_hummer_ev.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/13_connect_gmc_hummer_ev.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/13_connect_gmc_hummer_ev.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/12_connect_genesis_g80.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/12_connect_genesis_g80.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/12_connect_genesis_g80.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/11_connect_ferrari_296.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/11_connect_ferrari_296.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/11_connect_ferrari_296.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/10_disconnect_vehicle_secured.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/10_disconnect_vehicle_secured.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/10_disconnect_vehicle_secured.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/10_connect_drive_mode.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/10_connect_drive_mode.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/10_connect_drive_mode.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/10_connect_citroen_c5_aircross.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/10_connect_citroen_c5_aircross.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/10_connect_citroen_c5_aircross.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/09_disconnect_until_next_time.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/09_disconnect_until_next_time.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/09_disconnect_until_next_time.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/09_connect_connection_successful.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/09_connect_connection_successful.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/09_connect_connection_successful.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/09_connect_chrysler_300.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/09_connect_chrysler_300.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/09_connect_chrysler_300.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/08_disconnect_check_back_seat.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/08_disconnect_check_back_seat.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/08_disconnect_check_back_seat.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/08_connect_welcome_aboard.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/08_connect_welcome_aboard.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/08_connect_welcome_aboard.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/08_connect_chery_tiggo_8.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/08_connect_chery_tiggo_8.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/08_connect_chery_tiggo_8.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/07_disconnect_nice_parking.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/07_disconnect_nice_parking.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/07_disconnect_nice_parking.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/07_connect_cadillac_escalade.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/07_connect_cadillac_escalade.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/07_connect_cadillac_escalade.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/06_disconnect_goodbye.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/06_disconnect_goodbye.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/06_disconnect_goodbye.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/07_connect_adventure_begins.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/07_connect_adventure_begins.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/07_connect_adventure_begins.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/06_connect_byd_seal.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/06_connect_byd_seal.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/06_connect_byd_seal.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/06_connect_buckle_up.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/06_connect_buckle_up.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/06_connect_buckle_up.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/05_disconnect_safe_arrival.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/05_disconnect_safe_arrival.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/05_disconnect_safe_arrival.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/05_connect_dashboard_ready.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/05_connect_dashboard_ready.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/05_connect_dashboard_ready.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/05_connect_bentley_continental.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/05_connect_bentley_continental.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/05_connect_bentley_continental.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/04_disconnect_check_windows.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/04_disconnect_check_windows.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/04_disconnect_check_windows.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/04_connect_system_online.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/04_connect_system_online.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/04_connect_system_online.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/04_connect_audi_rs7.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/04_connect_audi_rs7.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/04_connect_audi_rs7.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/03_connect_everything_ready.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/03_connect_everything_ready.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/03_connect_everything_ready.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/03_disconnect_lock_vehicle.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/03_disconnect_lock_vehicle.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/03_disconnect_lock_vehicle.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/03_connect_aston_martin_db12.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/03_connect_aston_martin_db12.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/03_connect_aston_martin_db12.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/02_disconnect_phone_keys_wallet.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/02_disconnect_phone_keys_wallet.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/02_disconnect_phone_keys_wallet.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/02_connect_vehicle_connected.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/02_connect_vehicle_connected.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/02_connect_vehicle_connected.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/02_connect_alfa_romeo_giulia.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/02_connect_alfa_romeo_giulia.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/02_connect_alfa_romeo_giulia.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/01_disconnect_phone_reminder.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/01_disconnect_phone_reminder.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/01_disconnect_phone_reminder.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/01_connect_welcome_back.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/01_connect_welcome_back.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/01_connect_welcome_back.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CpResource /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/01_connect_acura_nsx.wav /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/01_connect_acura_nsx.wav (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/radhikamac/backup2/drivestudio_swift/Runner/Sounds/01_connect_acura_nsx.wav /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+CopyPlistFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/AppFrameworkInfo.plist /Users/radhikamac/backup2/drivestudio_swift/Flutter/AppFrameworkInfo.plist (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copyPlist --convert binary1 --outdir /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app -- /Users/radhikamac/backup2/drivestudio_swift/Flutter/AppFrameworkInfo.plist
+
+CompileStoryboard /Users/radhikamac/backup2/drivestudio_swift/Runner/Base.lproj/LaunchScreen.storyboard (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/ibtool --errors --warnings --notices --module Runner --output-partial-info-plist /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Base.lproj/LaunchScreen-SBPartialInfo.plist --auto-activate-custom-fonts --target-device iphone --target-device ipad --minimum-deployment-target 16.0 --output-format human-readable-text /Users/radhikamac/backup2/drivestudio_swift/Runner/Base.lproj/LaunchScreen.storyboard --compilation-directory /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Base.lproj
+
+CompileStoryboard /Users/radhikamac/backup2/drivestudio_swift/Runner/Base.lproj/Main.storyboard (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/ibtool --errors --warnings --notices --module Runner --output-partial-info-plist /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Base.lproj/Main-SBPartialInfo.plist --auto-activate-custom-fonts --target-device iphone --target-device ipad --minimum-deployment-target 16.0 --output-format human-readable-text /Users/radhikamac/backup2/drivestudio_swift/Runner/Base.lproj/Main.storyboard --compilation-directory /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Base.lproj
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Accelerate-5KMXNAJ80QPNZ52GCW0KVNZHK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/UIKit-5ZQR7UC4GP20HNK0ITJCZQG11.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/AVFoundation-3UE7Y17MC8Q1IRGNKXTF9VXJ6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Photos-AC7658XHP4PVHTMQVYFQ37SH.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/PhotosUI-4K9E050F1WGPTGJ63UJ391RWW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/SwiftUI-3TXLPG9S82Y37BTGPOM84I9KW.pcm
+
+SwiftGeneratePch normal arm64 Compiling\ bridging\ header (in target 'Runner' from project 'Runner')
+
+SwiftDriverJobDiscovery normal arm64 Compiling bridging header (in target 'Runner' from project 'Runner')
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ Runner (in target 'Runner' from project 'Runner')
+EmitSwiftModule normal arm64 (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+/Users/radhikamac/backup2/drivestudio_swift/Runner/SlotManagerScreen.swift:49:1: warning: extension declares a conformance of imported type 'Int' to imported protocol 'Identifiable'; this will not behave correctly if the owners of 'Swift' introduce this conformance in the future
+extension Int: Identifiable {
+^
+/Users/radhikamac/backup2/drivestudio_swift/Runner/SlotManagerScreen.swift:49:1: note: add '@retroactive' to silence this warning
+extension Int: Identifiable {
+^              ~~~~~~~~~~~~
+               @retroactive Identifiable
+
+SwiftCompile normal arm64 Compiling\ LayerEditorOverlay.swift,\ GeneratedAssetSymbols.swift /Users/radhikamac/backup2/drivestudio_swift/Runner/LayerEditorOverlay.swift /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'Runner' from project 'Runner')
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/Runner/LayerEditorOverlay.swift (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+SwiftCompile normal arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+SwiftCompile normal arm64 Compiling\ LayerSettingsSheet.swift,\ WidgetLibrarySheet.swift /Users/radhikamac/backup2/drivestudio_swift/Runner/LayerSettingsSheet.swift /Users/radhikamac/backup2/drivestudio_swift/Runner/WidgetLibrarySheet.swift (in target 'Runner' from project 'Runner')
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/Runner/LayerSettingsSheet.swift (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/Runner/WidgetLibrarySheet.swift (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+SwiftCompile normal arm64 Compiling\ BgCutoutService.swift,\ WidgetCanvas.swift /Users/radhikamac/backup2/drivestudio_swift/Runner/BgCutoutService.swift /Users/radhikamac/backup2/drivestudio_swift/Runner/WidgetCanvas.swift (in target 'Runner' from project 'Runner')
+
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/Runner/BgCutoutService.swift (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/Runner/WidgetCanvas.swift (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+SwiftCompile normal arm64 Compiling\ AppGroupChannel.swift,\ AppStore.swift /Users/radhikamac/backup2/drivestudio_swift/Runner/AppGroupChannel.swift /Users/radhikamac/backup2/drivestudio_swift/Runner/AppStore.swift (in target 'Runner' from project 'Runner')
+
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/Runner/AppGroupChannel.swift (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/Runner/AppStore.swift (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+SwiftCompile normal arm64 Compiling\ BackgroundSheet.swift,\ SlotManagerScreen.swift /Users/radhikamac/backup2/drivestudio_swift/Runner/BackgroundSheet.swift /Users/radhikamac/backup2/drivestudio_swift/Runner/SlotManagerScreen.swift (in target 'Runner' from project 'Runner')
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/Runner/BackgroundSheet.swift (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/Runner/SlotManagerScreen.swift (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+/Users/radhikamac/backup2/drivestudio_swift/Runner/SlotManagerScreen.swift:49:1: warning: extension declares a conformance of imported type 'Int' to imported protocol 'Identifiable'; this will not behave correctly if the owners of 'Swift' introduce this conformance in the future
+extension Int: Identifiable {
+^
+/Users/radhikamac/backup2/drivestudio_swift/Runner/SlotManagerScreen.swift:49:1: note: add '@retroactive' to silence this warning
+extension Int: Identifiable {
+^              ~~~~~~~~~~~~
+               @retroactive Identifiable
+
+SwiftCompile normal arm64 Compiling\ DriveComponents.swift,\ DashboardView.swift /Users/radhikamac/backup2/drivestudio_swift/Runner/DriveComponents.swift /Users/radhikamac/backup2/drivestudio_swift/Runner/DashboardView.swift (in target 'Runner' from project 'Runner')
+
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/Runner/DriveComponents.swift (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/Runner/DashboardView.swift (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+SwiftCompile normal arm64 Compiling\ AppDelegate.swift,\ AppGroupContract.swift /Users/radhikamac/backup2/drivestudio_swift/Runner/AppDelegate.swift /Users/radhikamac/backup2/drivestudio_swift/Runner/AppGroupContract.swift (in target 'Runner' from project 'Runner')
+
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/Runner/AppDelegate.swift (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/Runner/AppGroupContract.swift (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+SwiftCompile normal arm64 Compiling\ HomeScreen.swift,\ GalleryScreen.swift /Users/radhikamac/backup2/drivestudio_swift/Runner/HomeScreen.swift /Users/radhikamac/backup2/drivestudio_swift/Runner/GalleryScreen.swift (in target 'Runner' from project 'Runner')
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/Runner/HomeScreen.swift (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/Runner/GalleryScreen.swift (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+SwiftCompile normal arm64 Compiling\ EditorScreen.swift,\ WidgetModels.swift /Users/radhikamac/backup2/drivestudio_swift/Runner/EditorScreen.swift /Users/radhikamac/backup2/drivestudio_swift/Runner/WidgetModels.swift (in target 'Runner' from project 'Runner')
+
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/Runner/EditorScreen.swift (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/Runner/WidgetModels.swift (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+LinkStoryboards (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/ibtool --errors --warnings --notices --module Runner --target-device iphone --target-device ipad --minimum-deployment-target 16.0 --output-format human-readable-text --link /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Base.lproj/LaunchScreen.storyboardc /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Base.lproj/Main.storyboardc
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for Runner (in target 'Runner' from project 'Runner')
+
+SwiftDriver\ Compilation\ Requirements Runner normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-Swift-Compilation-Requirements -- /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Runner -Onone @/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.SwiftFileList -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -target arm64-apple-ios16.0 -g -module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -F /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphoneos26.5-23F81a-a26f4d78abf0372adea0fe2e23ad9bcd.sdkstatcache -output-file-map /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_const_extract_protocols.json -Xcc -iquote -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-generated-files.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-own-target-headers.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-all-target-headers.hmap -Xcc -iquote -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-project-headers.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/include -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources-normal/arm64 -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/arm64 -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner-Swift.h -import-objc-header /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner-Bridging-Header.h -working-directory /Users/radhikamac/backup2/drivestudio_swift -experimental-emit-module-separately -disable-cmo
+
+SwiftCompile normal arm64 Compiling\ SoundsScreen.swift,\ SettingsScreen.swift /Users/radhikamac/backup2/drivestudio_swift/Runner/SoundsScreen.swift /Users/radhikamac/backup2/drivestudio_swift/Runner/SettingsScreen.swift (in target 'Runner' from project 'Runner')
+
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/Runner/SoundsScreen.swift (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+/Users/radhikamac/backup2/drivestudio_swift/Runner/SoundsScreen.swift:308:66: warning: 'duration' was deprecated in iOS 16.0: Use load(.duration) instead
+                    let durationSeconds = CMTimeGetSeconds(asset.duration)
+                                                                 ^
+/Users/radhikamac/backup2/drivestudio_swift/Runner/SoundsScreen.swift:333:66: warning: 'duration' was deprecated in iOS 16.0: Use load(.duration) instead
+                    let durationSeconds = CMTimeGetSeconds(asset.duration)
+                                                                 ^
+/Users/radhikamac/backup2/drivestudio_swift/Runner/SoundsScreen.swift:361:91: warning: conditional cast from '[String]' to '[String]' always succeeds
+            if let paths = Bundle.main.paths(forResourcesOfType: "wav", inDirectory: nil) as? [String] {
+                                                                                          ^
+
+SwiftCompile normal arm64 /Users/radhikamac/backup2/drivestudio_swift/Runner/SettingsScreen.swift (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+
+SwiftMergeGeneratedHeaders /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/Runner-Swift.h /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner-Swift.h (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-swiftHeaderTool -arch arm64 /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner-Swift.h -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/Runner-Swift.h
+
+SwiftDriverJobDiscovery normal arm64 Compiling AppDelegate.swift, AppGroupContract.swift (in target 'Runner' from project 'Runner')
+
+Copy /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.swiftmodule/arm64-apple-ios.swiftmodule /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.swiftmodule (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.swiftmodule /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.swiftmodule/arm64-apple-ios.swiftmodule
+
+Copy /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.swiftmodule/arm64-apple-ios.swiftdoc /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.swiftdoc (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.swiftdoc /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.swiftmodule/arm64-apple-ios.swiftdoc
+
+Copy /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.swiftmodule/arm64-apple-ios.abi.json /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.abi.json (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.abi.json /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.swiftmodule/arm64-apple-ios.abi.json
+
+Copy /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.swiftmodule/Project/arm64-apple-ios.swiftsourceinfo /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.swiftsourceinfo (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.swiftsourceinfo /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.swiftmodule/Project/arm64-apple-ios.swiftsourceinfo
+
+ScanDependencies /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_vers.o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/Runner_vers.c normal arm64 c com.apple.compilers.llvm.clang.1_0.compiler (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+    Using response file: /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/7187679823f38a2a940e0043cdf9d637-common-args.resp
+    
+    builtin-ScanDependencies -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_vers.o.scan -- /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -x c -ivfsstatcache /Users/radhikamac/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphoneos26.5-23F81a-a26f4d78abf0372adea0fe2e23ad9bcd.sdkstatcache -target arm64-apple-ios16.0 -fmessage-length\=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit\=0 -fno-color-diagnostics -fmodules-prune-interval\=86400 -fmodules-prune-after\=345600 -fbuild-session-file\=/Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -fmodules-validate-once-per-build-session -Wnon-modular-include-in-framework-module -Werror\=non-modular-include-in-framework-module -Wno-trigraphs -Wno-missing-field-initializers -Wno-missing-prototypes -Werror\=return-type -Wunreachable-code -Werror\=deprecated-objc-isa-usage -Werror\=objc-root-class -Wno-missing-braces -Wparentheses -Wswitch -Wunused-function -Wno-unused-label -Wno-unused-parameter -Wunused-variable -Wunused-value -Wempty-body -Wuninitialized -Wconditional-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wconstant-conversion -Wint-conversion -Wbool-conversion -Wenum-conversion -Wno-float-conversion -Wnon-literal-null-conversion -Wobjc-literal-conversion -Wshorten-64-to-32 -Wpointer-sign -Wno-newline-eof -Wno-implicit-fallthrough -isysroot /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -fstrict-aliasing -Wdeprecated-declarations -Wno-sign-conversion -Winfinite-recursion -Wcomma -Wblock-capture-autoreleasing -Wstrict-prototypes -Wno-semicolon-before-method-body -index-store-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Index.noindex/DataStore @/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/7187679823f38a2a940e0043cdf9d637-common-args.resp -MMD -MT dependencies -MF /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_vers.d --serialize-diagnostics /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_vers.dia -c /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/Runner_vers.c -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_vers.o -index-unit-output-path /Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_vers.o
+
+CompileC /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_vers.o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/Runner_vers.c normal arm64 c com.apple.compilers.llvm.clang.1_0.compiler (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+    Using response file: /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/7187679823f38a2a940e0043cdf9d637-common-args.resp
+    
+    /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -x c -ivfsstatcache /Users/radhikamac/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphoneos26.5-23F81a-a26f4d78abf0372adea0fe2e23ad9bcd.sdkstatcache -target arm64-apple-ios16.0 -fmessage-length\=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit\=0 -fno-color-diagnostics -fmodules-prune-interval\=86400 -fmodules-prune-after\=345600 -fbuild-session-file\=/Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -fmodules-validate-once-per-build-session -Wnon-modular-include-in-framework-module -Werror\=non-modular-include-in-framework-module -Wno-trigraphs -Wno-missing-field-initializers -Wno-missing-prototypes -Werror\=return-type -Wunreachable-code -Werror\=deprecated-objc-isa-usage -Werror\=objc-root-class -Wno-missing-braces -Wparentheses -Wswitch -Wunused-function -Wno-unused-label -Wno-unused-parameter -Wunused-variable -Wunused-value -Wempty-body -Wuninitialized -Wconditional-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wconstant-conversion -Wint-conversion -Wbool-conversion -Wenum-conversion -Wno-float-conversion -Wnon-literal-null-conversion -Wobjc-literal-conversion -Wshorten-64-to-32 -Wpointer-sign -Wno-newline-eof -Wno-implicit-fallthrough -isysroot /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -fstrict-aliasing -Wdeprecated-declarations -Wno-sign-conversion -Winfinite-recursion -Wcomma -Wblock-capture-autoreleasing -Wstrict-prototypes -Wno-semicolon-before-method-body -index-store-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Index.noindex/DataStore @/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/7187679823f38a2a940e0043cdf9d637-common-args.resp -MMD -MT dependencies -MF /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_vers.d --serialize-diagnostics /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_vers.dia -c /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/Runner_vers.c -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_vers.o -index-unit-output-path /Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_vers.o
+
+SwiftDriverJobDiscovery normal arm64 Compiling BgCutoutService.swift, WidgetCanvas.swift (in target 'Runner' from project 'Runner')
+
+SwiftDriverJobDiscovery normal arm64 Compiling AppGroupChannel.swift, AppStore.swift (in target 'Runner' from project 'Runner')
+
+SwiftDriverJobDiscovery normal arm64 Compiling LayerEditorOverlay.swift, GeneratedAssetSymbols.swift (in target 'Runner' from project 'Runner')
+
+SwiftDriverJobDiscovery normal arm64 Compiling LayerSettingsSheet.swift, WidgetLibrarySheet.swift (in target 'Runner' from project 'Runner')
+
+SwiftDriverJobDiscovery normal arm64 Compiling DriveComponents.swift, DashboardView.swift (in target 'Runner' from project 'Runner')
+
+SwiftDriverJobDiscovery normal arm64 Compiling BackgroundSheet.swift, SlotManagerScreen.swift (in target 'Runner' from project 'Runner')
+
+SwiftDriverJobDiscovery normal arm64 Compiling SoundsScreen.swift, SettingsScreen.swift (in target 'Runner' from project 'Runner')
+
+SwiftDriverJobDiscovery normal arm64 Compiling EditorScreen.swift, WidgetModels.swift (in target 'Runner' from project 'Runner')
+
+SwiftDriverJobDiscovery normal arm64 Compiling HomeScreen.swift, GalleryScreen.swift (in target 'Runner' from project 'Runner')
+
+SwiftDriver\ Compilation Runner normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-Swift-Compilation -- /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Runner -Onone @/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.SwiftFileList -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -target arm64-apple-ios16.0 -g -module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -F /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphoneos26.5-23F81a-a26f4d78abf0372adea0fe2e23ad9bcd.sdkstatcache -output-file-map /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_const_extract_protocols.json -Xcc -iquote -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-generated-files.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-own-target-headers.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-all-target-headers.hmap -Xcc -iquote -Xcc /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-project-headers.hmap -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/include -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources-normal/arm64 -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/arm64 -Xcc -I/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner-Swift.h -import-objc-header /Users/radhikamac/backup2/drivestudio_swift/Runner/Runner-Bridging-Header.h -working-directory /Users/radhikamac/backup2/drivestudio_swift -experimental-emit-module-separately -disable-cmo
+
+Ld /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/Runner.debug.dylib normal (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios16.0 -dynamiclib -isysroot /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -O0 -L/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphoneos -L/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -F/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphoneos -F/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -filelist /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.LinkFileList -install_name @rpath/Runner.debug.dylib -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -rpath -Xlinker @executable_path/Frameworks -Xlinker -dead_strip -Xlinker -object_path_lto -Xlinker /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -dependency_info -Xlinker /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_dependency_info.dat -fobjc-link-runtime -L/Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.swiftmodule @/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner-linker-args.resp -Xlinker -alias -Xlinker _main -Xlinker ___debug_main_executable_dylib_entry_point -framework CarPlay -Xlinker -no_adhoc_codesign -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/Runner.debug.dylib
+
+ConstructStubExecutorLinkFileList /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-ExecutorLinkFileList-normal-arm64.txt (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    construct-stub-executor-link-file-list /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/Runner.debug.dylib /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/libPreviewsJITStubExecutor_no_swift_entry_point.a /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/libPreviewsJITStubExecutor.a --output /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-ExecutorLinkFileList-normal-arm64.txt
+note: Using stub executor library with Swift entry point. (in target 'Runner' from project 'Runner')
+
+Ld /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/Runner normal (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios16.0 -isysroot /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -O0 -L/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -F/Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos -Xlinker -rpath -Xlinker @executable_path -Xlinker -rpath -Xlinker @executable_path/Frameworks -rdynamic -Xlinker -no_deduplicate -e ___debug_blank_executor_main -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_dylib -Xlinker /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-DebugDylibPath-normal-arm64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_instlnm -Xlinker /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-DebugDylibInstallName-normal-arm64.txt -Xlinker -filelist -Xlinker /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner-ExecutorLinkFileList-normal-arm64.txt /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/Runner.debug.dylib -Xlinker -no_adhoc_codesign -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/Runner
+
+Copy /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/PlugIns/DriveStudioWidgetExtension.appex /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -exclude Headers -exclude PrivateHeaders -exclude Modules -exclude \*.tbd -resolve-src-symlinks -remove-static-executable /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/DriveStudioWidgetExtension.appex /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/PlugIns
+
+ProcessInfoPlistFile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/Info.plist /Users/radhikamac/backup2/drivestudio_swift/Runner/Info.plist (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-infoPlistUtility /Users/radhikamac/backup2/drivestudio_swift/Runner/Info.plist -producttype com.apple.product-type.application -genpkginfo /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/PkgInfo -expandbuildsettings -format binary -platform iphoneos -additionalcontentfile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Base.lproj/LaunchScreen-SBPartialInfo.plist -additionalcontentfile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Base.lproj/Main-SBPartialInfo.plist -additionalcontentfile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/assetcatalog_generated_info.plist -scanforprivacyfile /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/PlugIns/DriveStudioWidgetExtension.appex -requiredArchitecture arm64 -o /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/Info.plist
+
+ExtractAppIntentsMetadata (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name Runner --sdk-root /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk --xcode-version 17F113 --platform-family iOS --deployment-target 16.0 --bundle-identifier com.drivestudio.app.driveStudio --output /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app --target-triple arm64-apple-ios16.0 --binary-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/Runner --dependency-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner_dependency_info.dat --stringsdata-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.SwiftFileList --metadata-file-list /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner.DependencyMetadataFileList --static-metadata-file-list /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner.DependencyStaticMetadataFileList --swift-const-vals-list /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --validate-assistant-intents --no-app-shortcuts-localization
+2026-08-11 14:43:50.380 appintentsmetadataprocessor[29246:321224] Starting appintentsmetadataprocessor export
+2026-08-11 14:43:50.387 appintentsmetadataprocessor[29246:321224] Extracted no relevant App Intents symbols, skipping writing output
+
+CopySwiftLibs /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-swiftStdLibTool --copy --verbose --sign 2E2BAB994411CF6E194FF3FE4262B22339B6FE7A --scan-executable /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/Runner.debug.dylib --scan-folder /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/Frameworks --scan-folder /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/PlugIns --scan-folder /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/SystemExtensions --scan-folder /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/Extensions --scan-folder /Users/radhikamac/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk/System/Library/Frameworks/CarPlay.framework --platform iphoneos --toolchain /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/Frameworks --strip-bitcode --strip-bitcode-tool /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os
+
+AppIntentsSSUTraining (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsnltrainingprocessor --infoplist-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/Info.plist --temp-dir-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/ssu --bundle-id com.drivestudio.app.driveStudio --product-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app --extracted-metadata-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/Metadata.appintents --metadata-file-list /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner.DependencyMetadataFileList --source-file /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/Info.plist --archive-ssu-assets
+2026-08-11 14:43:50.399 appintentsnltrainingprocessor[29247:321227] Parsing options for appintentsnltrainingprocessor
+2026-08-11 14:43:50.399 appintentsnltrainingprocessor[29247:321227] Starting AppIntents SSU YAML Generation
+2026-08-11 14:43:50.399 appintentsnltrainingprocessor[29247:321227] No AppShortcuts found - Skipping.
+
+CodeSign /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/Runner.debug.dylib (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+    Signing Identity:     "Apple Development: rushabhmavani01@gmail.com (4MVD5N34AG)"
+    Provisioning Profile: "iOS Team Provisioning Profile: com.drivestudio.app.driveStudio"
+                          (e5bddd19-1c1c-4d06-9323-9e99745d203f)
+    
+    /usr/bin/codesign --force --sign 2E2BAB994411CF6E194FF3FE4262B22339B6FE7A --timestamp\=none --generate-entitlement-der /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/Runner.debug.dylib
+
+CodeSign /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/__preview.dylib (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+    Signing Identity:     "Apple Development: rushabhmavani01@gmail.com (4MVD5N34AG)"
+    Provisioning Profile: "iOS Team Provisioning Profile: com.drivestudio.app.driveStudio"
+                          (e5bddd19-1c1c-4d06-9323-9e99745d203f)
+    
+    /usr/bin/codesign --force --sign 2E2BAB994411CF6E194FF3FE4262B22339B6FE7A --timestamp\=none --generate-entitlement-der /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/__preview.dylib
+
+CodeSign /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    
+    Signing Identity:     "Apple Development: rushabhmavani01@gmail.com (4MVD5N34AG)"
+    Provisioning Profile: "iOS Team Provisioning Profile: com.drivestudio.app.driveStudio"
+                          (e5bddd19-1c1c-4d06-9323-9e99745d203f)
+    
+    /usr/bin/codesign --force --sign 2E2BAB994411CF6E194FF3FE4262B22339B6FE7A --entitlements /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Runner.app.xcent --timestamp\=none --generate-entitlement-der /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+ValidateEmbeddedBinary /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/PlugIns/DriveStudioWidgetExtension.appex (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /Users/radhikamac/Xcode.app/Contents/Developer/usr/bin/embeddedBinaryValidationUtility /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/PlugIns/DriveStudioWidgetExtension.appex -signing-cert 2E2BAB994411CF6E194FF3FE4262B22339B6FE7A -info-plist-path /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app/Info.plist
+
+RegisterExecutionPolicyException /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-RegisterExecutionPolicyException /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+Validate /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    builtin-validationUtility /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app -shallow-bundle -infoplist-subpath Info.plist
+
+Touch /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app (in target 'Runner' from project 'Runner')
+    cd /Users/radhikamac/backup2/drivestudio_swift
+    /usr/bin/touch -c /Users/radhikamac/Library/Developer/Xcode/DerivedData/Runner-ejsizhvuksslerfenxncvkfpfxpi/Build/Products/Debug-iphoneos/Runner.app
+
+** BUILD SUCCEEDED **
+

@@ -1,0 +1,223 @@
+{
+  "object" : {
+    "artifacts" : [
+      {
+        "kind" : {
+          "xcframework" : {
+
+          }
+        },
+        "packageRef" : {
+          "identity" : "onnxruntime-swift-package-manager",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/masicai/onnxruntime-swift-package-manager",
+          "name" : "onnxruntime"
+        },
+        "path" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/SourcePackages/artifacts/onnxruntime-swift-package-manager/onnxruntime/onnxruntime.xcframework",
+        "source" : {
+          "checksum" : "4bd86356e2d5aab1b8ece609bb9caa63161a6d79d21244da007f9fda6830ff3b",
+          "type" : "remote",
+          "url" : "https://github.com/masicai/onnxruntime-swift-package-manager/releases/download/1.23.1/onnxruntime-libs-1.23.0.zip"
+        },
+        "targetName" : "onnxruntime"
+      },
+      {
+        "kind" : {
+          "xcframework" : {
+
+          }
+        },
+        "packageRef" : {
+          "identity" : "onnxruntime-swift-package-manager",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/masicai/onnxruntime-swift-package-manager",
+          "name" : "onnxruntime"
+        },
+        "path" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/SourcePackages/artifacts/onnxruntime-swift-package-manager/onnxruntime_extensions/onnxruntime_extensions.xcframework",
+        "source" : {
+          "checksum" : "346522d1171d4c99cb0908fa8e4e9330a4a6aad39cd83ce36eb654437b33e6b5",
+          "type" : "remote",
+          "url" : "https://download.onnxruntime.ai/pod-archive-onnxruntime-extensions-c-0.13.0.zip"
+        },
+        "targetName" : "onnxruntime_extensions"
+      }
+    ],
+    "dependencies" : [
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "audioplayers_darwin-6.4.0",
+          "kind" : "fileSystem",
+          "location" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/audioplayers_darwin-6.4.0",
+          "name" : "audioplayers_darwin"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/audioplayers_darwin-6.4.0"
+        },
+        "subpath" : "audioplayers_darwin-6.4.0"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "battery_plus-7.1.1",
+          "kind" : "fileSystem",
+          "location" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/battery_plus-7.1.1",
+          "name" : "battery_plus"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/battery_plus-7.1.1"
+        },
+        "subpath" : "battery_plus-7.1.1"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "connectivity_plus-7.3.1",
+          "kind" : "fileSystem",
+          "location" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/connectivity_plus-7.3.1",
+          "name" : "connectivity_plus"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/connectivity_plus-7.3.1"
+        },
+        "subpath" : "connectivity_plus-7.3.1"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "flutter_onnxruntime-1.8.3",
+          "kind" : "fileSystem",
+          "location" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/flutter_onnxruntime-1.8.3",
+          "name" : "flutter_onnxruntime"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/flutter_onnxruntime-1.8.3"
+        },
+        "subpath" : "flutter_onnxruntime-1.8.3"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "flutterframework",
+          "kind" : "fileSystem",
+          "location" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/FlutterFramework",
+          "name" : "FlutterFramework"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/FlutterFramework"
+        },
+        "subpath" : "flutterframework"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "geolocator_apple-2.3.14",
+          "kind" : "fileSystem",
+          "location" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/geolocator_apple-2.3.14",
+          "name" : "geolocator_apple"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/geolocator_apple-2.3.14"
+        },
+        "subpath" : "geolocator_apple-2.3.14"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "image_picker_ios-0.8.13+3",
+          "kind" : "fileSystem",
+          "location" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/image_picker_ios-0.8.13+3",
+          "name" : "image_picker_ios"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/image_picker_ios-0.8.13+3"
+        },
+        "subpath" : "image_picker_ios-0.8.13+3"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "in_app_purchase_storekit-0.4.8+1",
+          "kind" : "fileSystem",
+          "location" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/in_app_purchase_storekit-0.4.8+1",
+          "name" : "in_app_purchase_storekit"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/in_app_purchase_storekit-0.4.8+1"
+        },
+        "subpath" : "in_app_purchase_storekit-0.4.8+1"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "onnxruntime-swift-package-manager",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/masicai/onnxruntime-swift-package-manager",
+          "name" : "onnxruntime"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "57f28b1fdd6fe33585370b146a46c597d6750953",
+            "version" : "1.23.1"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "onnxruntime-swift-package-manager"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "path_provider_foundation-2.5.1",
+          "kind" : "fileSystem",
+          "location" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/path_provider_foundation-2.5.1",
+          "name" : "path_provider_foundation"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/path_provider_foundation-2.5.1"
+        },
+        "subpath" : "path_provider_foundation-2.5.1"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "permission_handler_apple-9.5.0",
+          "kind" : "fileSystem",
+          "location" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/permission_handler_apple-9.5.0",
+          "name" : "permission_handler_apple"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/permission_handler_apple-9.5.0"
+        },
+        "subpath" : "permission_handler_apple-9.5.0"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "shared_preferences_foundation-2.5.6",
+          "kind" : "fileSystem",
+          "location" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/shared_preferences_foundation-2.5.6",
+          "name" : "shared_preferences_foundation"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/radhikamac/backup2/drivestudio_swift/Flutter/ephemeral/Packages/.packages/shared_preferences_foundation-2.5.6"
+        },
+        "subpath" : "shared_preferences_foundation-2.5.6"
+      }
+    ],
+    "prebuilts" : [
+
+    ]
+  },
+  "version" : 7
+}

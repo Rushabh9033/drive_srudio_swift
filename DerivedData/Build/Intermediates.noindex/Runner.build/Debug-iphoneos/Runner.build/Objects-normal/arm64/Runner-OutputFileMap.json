@@ -1,0 +1,229 @@
+{
+  "" : {
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner-primary.dia",
+    "emit-module-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner-primary-emit-module.dia",
+    "pch" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/Runner-primary.swiftdeps"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/GeneratedAssetSymbols~partial.swiftmodule"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/AppDelegate.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppDelegate.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppDelegate.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppDelegate.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppDelegate.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppDelegate.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppDelegate.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppDelegate.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppDelegate~partial.swiftmodule"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/AppGroupChannel.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppGroupChannel.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppGroupChannel.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppGroupChannel.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppGroupChannel.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppGroupChannel.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppGroupChannel.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppGroupChannel.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppGroupChannel~partial.swiftmodule"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/AppGroupContract.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppGroupContract.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppGroupContract.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppGroupContract.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppGroupContract.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppGroupContract.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppGroupContract.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppGroupContract.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppGroupContract~partial.swiftmodule"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/AppStore.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppStore.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppStore.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppStore.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppStore.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppStore.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppStore.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppStore.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/AppStore~partial.swiftmodule"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/BackgroundSheet.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/BackgroundSheet.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/BackgroundSheet.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/BackgroundSheet.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/BackgroundSheet.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/BackgroundSheet.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/BackgroundSheet.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/BackgroundSheet.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/BackgroundSheet~partial.swiftmodule"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/BgCutoutService.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/BgCutoutService.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/BgCutoutService.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/BgCutoutService.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/BgCutoutService.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/BgCutoutService.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/BgCutoutService.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/BgCutoutService.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/BgCutoutService~partial.swiftmodule"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/DashboardView.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/DashboardView.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/DashboardView.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/DashboardView.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/DashboardView.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/DashboardView.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/DashboardView.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/DashboardView.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/DashboardView~partial.swiftmodule"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/DriveComponents.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/DriveComponents.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/DriveComponents.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/DriveComponents.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/DriveComponents.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/DriveComponents.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/DriveComponents.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/DriveComponents.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/DriveComponents~partial.swiftmodule"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/EditorScreen.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/EditorScreen.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/EditorScreen.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/EditorScreen.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/EditorScreen.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/EditorScreen.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/EditorScreen.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/EditorScreen.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/EditorScreen~partial.swiftmodule"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/GalleryScreen.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/GalleryScreen.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/GalleryScreen.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/GalleryScreen.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/GalleryScreen.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/GalleryScreen.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/GalleryScreen.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/GalleryScreen.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/GalleryScreen~partial.swiftmodule"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/HomeScreen.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/HomeScreen.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/HomeScreen.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/HomeScreen.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/HomeScreen.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/HomeScreen.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/HomeScreen.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/HomeScreen.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/HomeScreen~partial.swiftmodule"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/LayerEditorOverlay.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/LayerEditorOverlay.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/LayerEditorOverlay.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/LayerEditorOverlay.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/LayerEditorOverlay.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/LayerEditorOverlay.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/LayerEditorOverlay.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/LayerEditorOverlay.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/LayerEditorOverlay~partial.swiftmodule"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/LayerSettingsSheet.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/LayerSettingsSheet.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/LayerSettingsSheet.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/LayerSettingsSheet.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/LayerSettingsSheet.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/LayerSettingsSheet.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/LayerSettingsSheet.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/LayerSettingsSheet.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/LayerSettingsSheet~partial.swiftmodule"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/SettingsScreen.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SettingsScreen.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SettingsScreen.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SettingsScreen.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SettingsScreen.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SettingsScreen.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SettingsScreen.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SettingsScreen.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SettingsScreen~partial.swiftmodule"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/SlotManagerScreen.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SlotManagerScreen.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SlotManagerScreen.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SlotManagerScreen.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SlotManagerScreen.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SlotManagerScreen.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SlotManagerScreen.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SlotManagerScreen.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SlotManagerScreen~partial.swiftmodule"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/SoundsScreen.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SoundsScreen.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SoundsScreen.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SoundsScreen.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SoundsScreen.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SoundsScreen.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SoundsScreen.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SoundsScreen.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/SoundsScreen~partial.swiftmodule"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/StockWidgetArchitecture.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/StockWidgetArchitecture.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/StockWidgetArchitecture.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/StockWidgetArchitecture.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/StockWidgetArchitecture.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/StockWidgetArchitecture.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/StockWidgetArchitecture.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/StockWidgetArchitecture.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/StockWidgetArchitecture~partial.swiftmodule"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/StockWidgetCatalog.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/StockWidgetCatalog.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/StockWidgetCatalog.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/StockWidgetCatalog.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/StockWidgetCatalog.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/StockWidgetCatalog.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/StockWidgetCatalog.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/StockWidgetCatalog.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/StockWidgetCatalog~partial.swiftmodule"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/WidgetCanvas.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetCanvas.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetCanvas.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetCanvas.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetCanvas.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetCanvas.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetCanvas.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetCanvas.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetCanvas~partial.swiftmodule"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/WidgetLibrarySheet.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetLibrarySheet.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetLibrarySheet.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetLibrarySheet.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetLibrarySheet.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetLibrarySheet.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetLibrarySheet.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetLibrarySheet.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetLibrarySheet~partial.swiftmodule"
+  },
+  "/Users/radhikamac/backup2/drivestudio_swift/Runner/WidgetModels.swift" : {
+    "const-values" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetModels.swiftconstvalues",
+    "dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetModels.d",
+    "diagnostics" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetModels.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetModels.o",
+    "llvm-bc" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetModels.bc",
+    "object" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetModels.o",
+    "swift-dependencies" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetModels.swiftdeps",
+    "swiftmodule" : "/Users/radhikamac/backup2/drivestudio_swift/DerivedData/Build/Intermediates.noindex/Runner.build/Debug-iphoneos/Runner.build/Objects-normal/arm64/WidgetModels~partial.swiftmodule"
+  }
+}

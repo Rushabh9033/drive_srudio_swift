@@ -39,28 +39,25 @@ struct MicRecorderSheet: View {
                     Spacer()
 
                     Text("Record Custom Voice")
-                        .font(.system(size: 17, weight: .bold))
+                        .font(.system(size: 16, weight: .bold))
                         .foregroundColor(DriveColors.foreground)
+                        .lineLimit(1)
 
                     Spacer()
 
                     Button(action: saveRecording) {
-                        Text("Save Sound")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.black)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 6)
-                            .background(isRecorded ? DriveColors.primary : DriveColors.primary.opacity(0.4))
-                            .cornerRadius(999)
+                        Text("Save")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(isRecorded ? DriveColors.primary : DriveColors.mutedFg.opacity(0.5))
                     }
                     .disabled(!isRecorded)
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 24)
-                .padding(.bottom, 16)
+                .padding(.top, 16)
+                .padding(.bottom, 12)
 
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 24) {
+                    VStack(spacing: 20) {
                         // ── Title Input Field ───────────────────────────────────
                         VStack(alignment: .leading, spacing: 6) {
                             Text("SOUND NAME")
@@ -79,20 +76,20 @@ struct MicRecorderSheet: View {
                         .padding(.horizontal, 20)
 
                         // ── Microphone Waveform & Timer Display ────────────────
-                        VStack(spacing: 16) {
+                        VStack(spacing: 14) {
                             ZStack {
                                 Circle()
                                     .fill(isRecording ? Color.red.opacity(0.15) : DriveColors.primary.opacity(0.12))
-                                    .frame(width: 120, height: 120)
+                                    .frame(width: 115, height: 115)
                                     .scaleEffect(isRecording ? 1.1 : 1.0)
                                     .animation(isRecording ? Animation.easeInOut(duration: 0.8).repeatForever(autoreverses: true) : .default, value: isRecording)
 
                                 Circle()
                                     .stroke(isRecording ? Color.red.opacity(0.6) : DriveColors.primary.opacity(0.4), lineWidth: 2)
-                                    .frame(width: 120, height: 120)
+                                    .frame(width: 115, height: 115)
 
                                 Image(systemName: isRecording ? "mic.fill" : "mic")
-                                    .font(.system(size: 44))
+                                    .font(.system(size: 42))
                                     .foregroundColor(isRecording ? Color.red : DriveColors.primary)
                             }
                             .onTapGesture {
@@ -109,10 +106,10 @@ struct MicRecorderSheet: View {
                                 .font(.system(size: 28, weight: .bold, design: .monospaced))
                                 .foregroundColor(DriveColors.foreground)
                         }
-                        .padding(.vertical, 8)
+                        .padding(.vertical, 4)
 
                         // ── Recording Controls ──────────────────────────────────
-                        VStack(spacing: 12) {
+                        VStack(spacing: 10) {
                             if !isRecording {
                                 Button(action: startRecording) {
                                     HStack(spacing: 10) {
@@ -161,7 +158,7 @@ struct MicRecorderSheet: View {
                             }
                         }
                         .padding(.horizontal, 20)
-                        .padding(.bottom, 32)
+                        .padding(.bottom, 12)
                     }
                 }
             }
@@ -230,9 +227,22 @@ struct MicRecorderSheet: View {
             isPlayingPreview = false
         } else {
             do {
+                let session = AVAudioSession.sharedInstance()
+                try? session.setCategory(.playback, mode: .default, options: [.duckOthers])
+                try? session.setActive(true)
+
                 audioPlayer = try AVAudioPlayer(contentsOf: url)
+                audioPlayer?.volume = 1.0
+                audioPlayer?.prepareToPlay()
                 audioPlayer?.play()
                 isPlayingPreview = true
+
+                let duration = audioPlayer?.duration ?? 2.0
+                DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+                    if self.isPlayingPreview {
+                        self.isPlayingPreview = false
+                    }
+                }
             } catch {
                 print("Could not play recording preview: \(error)")
             }

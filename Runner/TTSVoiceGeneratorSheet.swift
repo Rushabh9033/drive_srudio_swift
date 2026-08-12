@@ -52,8 +52,8 @@ struct TTSVoiceGeneratorSheet: View {
                     .disabled(voiceText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isGenerating)
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 28)
-                .padding(.bottom, 12)
+                .padding(.top, 18)
+                .padding(.bottom, 4)
 
                 // ── Input Fields ────────────────────────────────────────
                 VStack(alignment: .leading, spacing: 14) {

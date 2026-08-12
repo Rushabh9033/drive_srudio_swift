@@ -180,24 +180,58 @@ struct TTSVoiceGeneratorSheet: View {
             if pcmBuffer.frameLength > 0 {
                 if audioFile == nil {
                     do {
+                        let outputSettings: [String: Any] = [
+                            AVFormatIDKey: Int(kAudioFormatLinearPCM),
+                            AVSampleRateKey: 22050.0,
+                            AVNumberOfChannelsKey: 1,
+                            AVLinearPCMBitDepthKey: 16,
+                            AVLinearPCMIsFloatKey: false,
+                            AVLinearPCMIsBigEndianKey: false,
+                            AVLinearPCMIsNonInterleaved: false
+                        ]
                         audioFile = try AVAudioFile(
                             forWriting: outputURL,
-                            settings: pcmBuffer.format.settings
+                            settings: outputSettings,
+                            commonFormat: .pcmFormatInt16,
+                            interleaved: false
                         )
                     } catch {
                         print("[TTS] Error creating AVAudioFile: \(error)")
                     }
                 }
-                do {
-                    try audioFile?.write(from: pcmBuffer)
-                } catch {
-                    print("[TTS] Error writing buffer: \(error)")
+                
+                if let audioFile = audioFile {
+                    let targetFormat = audioFile.processingFormat
+                    if let converter = AVAudioConverter(from: pcmBuffer.format, to: targetFormat) {
+                        let convertedBuffer = AVAudioPCMBuffer(
+                            pcmFormat: targetFormat,
+                            frameCapacity: pcmBuffer.frameCapacity
+                        )!
+                        var error: NSError? = nil
+                        var hasProvidedData = false
+                        let inputBlock: AVAudioConverterInputBlock = { _, outStatus in
+                            if hasProvidedData {
+                                outStatus.pointee = .noDataNow
+                                return nil
+                            }
+                            hasProvidedData = true
+                            outStatus.pointee = .haveData
+                            return pcmBuffer
+                        }
+                        converter.convert(to: convertedBuffer, error: &error, withInputFrom: inputBlock)
+                        if error == nil && convertedBuffer.frameLength > 0 {
+                            try? audioFile.write(from: convertedBuffer)
+                        } else {
+                            try? audioFile.write(from: pcmBuffer)
+                        }
+                    } else {
+                        try? audioFile.write(from: pcmBuffer)
+                    }
                 }
             }
         }
 
-        // Wait 1.5s for synthesis buffer completion, then close audioFile & flush WAV header cleanly
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
             audioFile = nil // Flushes and closes WAV header cleanly
             self.isGenerating = false
             self.onVoiceGenerated(name, outputURL)

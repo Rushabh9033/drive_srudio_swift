@@ -316,17 +316,19 @@ struct SoundsScreenView: View {
                                                 }
                                                 Spacer()
                                                 
-                                                if triggerAssignments.values.contains(customSounds[i].name) {
-                                                    let trigger = triggerAssignments.first(where: { $0.value == customSounds[i].name })?.key ?? ""
-                                                    Text(trigger.uppercased())
-                                                        .font(.system(size: 9, weight: .semibold, design: .monospaced))
-                                                        .tracking(1.5)
-                                                        .foregroundColor(DriveColors.primary)
-                                                        .padding(.horizontal, 8)
-                                                        .padding(.vertical, 4)
-                                                        .background(DriveColors.primary.opacity(0.1))
-                                                        .cornerRadius(999)
-                                                        .overlay(Capsule().stroke(DriveColors.primary.opacity(0.4), lineWidth: 1))
+                                                HStack(spacing: 4) {
+                                                    let assignedTriggers = triggerAssignments.filter({ $0.value == customSounds[i].name }).map({ $0.key })
+                                                    ForEach(assignedTriggers, id: \.self) { trg in
+                                                        Text(trg.uppercased())
+                                                            .font(.system(size: 9, weight: .semibold, design: .monospaced))
+                                                            .tracking(1.5)
+                                                            .foregroundColor(DriveColors.primary)
+                                                            .padding(.horizontal, 8)
+                                                            .padding(.vertical, 4)
+                                                            .background(DriveColors.primary.opacity(0.1))
+                                                            .cornerRadius(999)
+                                                            .overlay(Capsule().stroke(DriveColors.primary.opacity(0.4), lineWidth: 1))
+                                                    }
                                                 }
                                             }
                                         }
@@ -397,17 +399,19 @@ struct SoundsScreenView: View {
                                             }
                                             Spacer()
                                             
-                                            if triggerAssignments.values.contains(snd.name) {
-                                                let trigger = triggerAssignments.first(where: { $0.value == snd.name })?.key ?? ""
-                                                Text(trigger.uppercased())
-                                                    .font(.system(size: 9, weight: .semibold, design: .monospaced))
-                                                    .tracking(1.5)
-                                                    .foregroundColor(DriveColors.primary)
-                                                    .padding(.horizontal, 8)
-                                                    .padding(.vertical, 4)
-                                                    .background(DriveColors.primary.opacity(0.1))
-                                                    .cornerRadius(999)
-                                                    .overlay(Capsule().stroke(DriveColors.primary.opacity(0.4), lineWidth: 1))
+                                            HStack(spacing: 4) {
+                                                let assignedTriggers = triggerAssignments.filter({ $0.value == snd.name }).map({ $0.key })
+                                                ForEach(assignedTriggers, id: \.self) { trg in
+                                                    Text(trg.uppercased())
+                                                        .font(.system(size: 9, weight: .semibold, design: .monospaced))
+                                                        .tracking(1.5)
+                                                        .foregroundColor(DriveColors.primary)
+                                                        .padding(.horizontal, 8)
+                                                        .padding(.vertical, 4)
+                                                        .background(DriveColors.primary.opacity(0.1))
+                                                        .cornerRadius(999)
+                                                        .overlay(Capsule().stroke(DriveColors.primary.opacity(0.4), lineWidth: 1))
+                                                }
                                             }
                                         }
                                     }
@@ -484,16 +488,20 @@ struct SoundsScreenView: View {
         }
         .confirmationDialog("Assign Sound", isPresented: $showAssignActionSheet, titleVisibility: .visible) {
             if let target = targetAssignSound {
-                Button("⚡ Assign to Connect") {
+                let isConnect = triggerAssignments["Connect"] == target.name
+                let isDisconnect = triggerAssignments["Disconnect"] == target.name
+                let isReminder = triggerAssignments["Reminder"] == target.name
+
+                Button(isConnect ? "✓ Assigned to Connect" : "⚡ Assign to Connect") {
                     assignSoundToTrigger(target.name, trigger: "Connect")
                 }
-                Button("🔌 Assign to Disconnect") {
+                Button(isDisconnect ? "✓ Assigned to Disconnect" : "🔌 Assign to Disconnect") {
                     assignSoundToTrigger(target.name, trigger: "Disconnect")
                 }
-                Button("⏰ Assign to Reminder") {
+                Button(isReminder ? "✓ Assigned to Reminder" : "⏰ Assign to Reminder") {
                     assignSoundToTrigger(target.name, trigger: "Reminder")
                 }
-                Button("▶ Play Sound") {
+                Button("▶ Play Sound Preview") {
                     playSound(name: target.name, url: target.url)
                 }
             }

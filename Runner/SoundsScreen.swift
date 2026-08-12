@@ -534,11 +534,18 @@ struct SoundsScreenView: View {
     }
     
     private func assignSound(_ name: String) {
-        triggerAssignments[selectedTrigger] = name
-        UserDefaults(suiteName: "group.com.drivestudio.shared")?.set(name, forKey: "trigger_\(selectedTrigger)")
+        assignSoundToTrigger(name, trigger: selectedTrigger)
     }
 
     private func assignSoundToTrigger(_ name: String, trigger: String) {
+        // Override logic: Remove this sound from any other trigger first
+        for key in ["Connect", "Disconnect", "Reminder"] {
+            if triggerAssignments[key] == name {
+                triggerAssignments[key] = nil
+                UserDefaults(suiteName: "group.com.drivestudio.shared")?.removeObject(forKey: "trigger_\(key)")
+            }
+        }
+        
         triggerAssignments[trigger] = name
         UserDefaults(suiteName: "group.com.drivestudio.shared")?.set(name, forKey: "trigger_\(trigger)")
     }

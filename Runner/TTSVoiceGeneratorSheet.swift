@@ -9,6 +9,8 @@ struct TTSVoiceGeneratorSheet: View {
     @State private var voiceTitle: String = ""
     @State private var isGenerating: Bool = false
     @State private var previewPlayer: AVSpeechSynthesizer? = nil
+    @State private var speechSynthesizer: AVSpeechSynthesizer? = nil
+    @State private var activeAudioFile: AVAudioFile? = nil
 
     private let samplePhrases = [
         "Welcome back Commander. Systems online.",
@@ -169,8 +171,10 @@ struct TTSVoiceGeneratorSheet: View {
             try? fm.removeItem(at: outputURL)
         }
 
-        var audioFile: AVAudioFile? = nil
+        self.activeAudioFile = nil
         let synth = AVSpeechSynthesizer()
+        self.speechSynthesizer = synth
+
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
         utterance.rate = AVSpeechUtteranceDefaultSpeechRate
@@ -178,7 +182,7 @@ struct TTSVoiceGeneratorSheet: View {
         synth.write(utterance) { buffer in
             guard let pcmBuffer = buffer as? AVAudioPCMBuffer else { return }
             if pcmBuffer.frameLength > 0 {
-                if audioFile == nil {
+                if self.activeAudioFile == nil {
                     do {
                         let outputSettings: [String: Any] = [
                             AVFormatIDKey: Int(kAudioFormatLinearPCM),
@@ -189,7 +193,7 @@ struct TTSVoiceGeneratorSheet: View {
                             AVLinearPCMIsBigEndianKey: false,
                             AVLinearPCMIsNonInterleaved: false
                         ]
-                        audioFile = try AVAudioFile(
+                        self.activeAudioFile = try AVAudioFile(
                             forWriting: outputURL,
                             settings: outputSettings,
                             commonFormat: .pcmFormatInt16,
@@ -200,7 +204,7 @@ struct TTSVoiceGeneratorSheet: View {
                     }
                 }
                 
-                if let audioFile = audioFile {
+                if let audioFile = self.activeAudioFile {
                     let targetFormat = audioFile.processingFormat
                     if let converter = AVAudioConverter(from: pcmBuffer.format, to: targetFormat) {
                         let convertedBuffer = AVAudioPCMBuffer(
@@ -231,8 +235,9 @@ struct TTSVoiceGeneratorSheet: View {
             }
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
-            audioFile = nil // Flushes and closes WAV header cleanly
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            self.activeAudioFile = nil // Flushes and closes WAV header cleanly
+            self.speechSynthesizer = nil
             self.isGenerating = false
             self.onVoiceGenerated(name, outputURL)
             self.dismiss()

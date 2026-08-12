@@ -1,0 +1,1275 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		034E765DCCD5F7C87A8E4517 /* 43_brands_connect_master.wav in Resources */ = {isa = PBXBuildFile; fileRef = A8FBAE056A9BAEA915488C92 /* 43_brands_connect_master.wav */; };
+		07877916C4B61102E979C9C1 /* 05_connect_dashboard_ready.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1BCD4FD946570E83B02DD8EF /* 05_connect_dashboard_ready.wav */; };
+		08CC98BC69C9394E451C0613 /* SoundsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED8750B06530D5B3FCEB20A2 /* SoundsScreen.swift */; };
+F2A3B4C5D67890123456789C /* DriveStudioIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D6789012345688 /* DriveStudioIntents.swift */; };
+F2A3B4C5D67890123456789B /* TelemetryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D6789012345679 /* TelemetryService.swift */; };
+F2A3B4C5D67890123456789A /* MicRecorderSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D6789012345678 /* MicRecorderSheet.swift */; };
+D2E3F4A5B67890123456789A /* TTSVoiceGeneratorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6789012345678 /* TTSVoiceGeneratorSheet.swift */; };
+B2C3D4E5F67890123456789A /* DrawingCanvasSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345678 /* DrawingCanvasSheet.swift */; };
+		0DCC6F015E22082B82F6C2C4 /* 04_connect_system_online.wav in Resources */ = {isa = PBXBuildFile; fileRef = A4FCC65BC425611B49F9D616 /* 04_connect_system_online.wav */; };
+		14E802F773B364CE5BA6CCAB /* 03_disconnect_lock_vehicle.wav in Resources */ = {isa = PBXBuildFile; fileRef = 4565F88065ACFE3671C92C5D /* 03_disconnect_lock_vehicle.wav */; };
+		188B8D83EFBF37FB93FD3F0E /* LayerSettingsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 290DE2509893E8C531F9AF3C /* LayerSettingsSheet.swift */; };
+		1FDBF70CF9533AE420076BE1 /* 21_connect_lucid_air.wav in Resources */ = {isa = PBXBuildFile; fileRef = 84D2DE227136EEB043E609EB /* 21_connect_lucid_air.wav */; };
+		2747AD96D7ED35123305790F /* 06_connect_byd_seal.wav in Resources */ = {isa = PBXBuildFile; fileRef = 96557ECEB57DB9C6EDF485FF /* 06_connect_byd_seal.wav */; };
+		2770C5EB0618301F74B55B78 /* lane-nudge.wav in Resources */ = {isa = PBXBuildFile; fileRef = 0FEB500AFE784962B9CCE530 /* lane-nudge.wav */; };
+		29AD0D5CDDFAF1E8602D7BF6 /* 05_disconnect_safe_arrival.wav in Resources */ = {isa = PBXBuildFile; fileRef = C3CD5C43287352013CC8C822 /* 05_disconnect_safe_arrival.wav */; };
+		2A6D5D3630232AC7000A9968 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A6D5D3530232AC7000A9968 /* WidgetKit.framework */; };
+		2A6D5D3830232AC7000A9968 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A6D5D3730232AC7000A9968 /* SwiftUI.framework */; };
+		2A6D5D4330232AC8000A9968 /* DriveStudioWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2A6D5D3330232AC7000A9968 /* DriveStudioWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		2A6D5D6E30232FD7000A9968 /* AppGroupContract.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6D5D6D30232FD7000A9968 /* AppGroupContract.swift */; };
+		2A6D5D6F30232FD7000A9968 /* AppGroupChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6D5D6C30232FD7000A9968 /* AppGroupChannel.swift */; };
+		31115FBC356497D3461C71D2 /* 16_connect_jeep_wrangler.wav in Resources */ = {isa = PBXBuildFile; fileRef = 607C20615BCC53BC2D3E5503 /* 16_connect_jeep_wrangler.wav */; };
+		31EDB8AB76B09162B830EA6B /* ignition.wav in Resources */ = {isa = PBXBuildFile; fileRef = C72D264E9875D45B1DE765A2 /* ignition.wav */; };
+		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
+		34A3994F5E63B614422625C2 /* 25_connect_mini_cooper.wav in Resources */ = {isa = PBXBuildFile; fileRef = A312CB41E51599596127448C /* 25_connect_mini_cooper.wav */; };
+		34B723281BCBF92CD032FF54 /* 01_connect_acura_nsx.wav in Resources */ = {isa = PBXBuildFile; fileRef = 7AD59C427DC6FE01237AEAD7 /* 01_connect_acura_nsx.wav */; };
+		3C91176C4B5D62DDC3DC28AF /* 03_connect_everything_ready.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC66974444FE5791538DEE01 /* 03_connect_everything_ready.wav */; };
+		3D956EA27CC7322D8DCAE271 /* 23_connect_mazda_mx5.wav in Resources */ = {isa = PBXBuildFile; fileRef = 57FE112B97C5380ADCCF8C2E /* 23_connect_mazda_mx5.wav */; };
+		3E96D106D6DD8EA9DA3B0615 /* low-pulse.wav in Resources */ = {isa = PBXBuildFile; fileRef = D4379FC1864ADB29E64C6EC6 /* low-pulse.wav */; };
+		4566F11689015428968A907D /* 04_disconnect_check_windows.wav in Resources */ = {isa = PBXBuildFile; fileRef = 84CAB95B02A75E2942E8E30A /* 04_disconnect_check_windows.wav */; };
+		45E66D335575F934B8D96943 /* 20_connect_lexus_lc_500.wav in Resources */ = {isa = PBXBuildFile; fileRef = 9E2520233FD423333D4419D5 /* 20_connect_lexus_lc_500.wav */; };
+		49EFD7BD2D297376E7D6EC10 /* 08_connect_chery_tiggo_8.wav in Resources */ = {isa = PBXBuildFile; fileRef = 389D23298602C7D0CCEA964E /* 08_connect_chery_tiggo_8.wav */; };
+		4B3E4560985571ED5A36CC3A /* coast-wind.wav in Resources */ = {isa = PBXBuildFile; fileRef = C5FD6326B9789CECBCFE4E39 /* coast-wind.wav */; };
+		4BA9E29AECBFEBC51C4EF48D /* 10_connect_drive_mode.wav in Resources */ = {isa = PBXBuildFile; fileRef = 121D8155E79E8B716211C431 /* 10_connect_drive_mode.wav */; };
+		4BF63422536E2C87BA2703FD /* StockWidgetCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED175CE871F6C026551BC5E8 /* StockWidgetCatalog.swift */; };
+		4C5A89DD2B7CB5C62AD8698C /* 02_connect_alfa_romeo_giulia.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1E9908EE1FE8F3A921A1FFCF /* 02_connect_alfa_romeo_giulia.wav */; };
+		4E64BEC1FC41CF05F79FA8BA /* 02_connect_vehicle_connected.wav in Resources */ = {isa = PBXBuildFile; fileRef = 789C883347E70E3767EA2E3D /* 02_connect_vehicle_connected.wav */; };
+		51F8FBAE2A471F24A669BF22 /* StockWidgetArchitecture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22BCAAA79114361AF6BA8148 /* StockWidgetArchitecture.swift */; };
+		54AFEA0AD5992E0C14CBD257 /* summit-ping.wav in Resources */ = {isa = PBXBuildFile; fileRef = 68E3083BE29710E5409B7FF7 /* summit-ping.wav */; };
+		5804FD25B12849F033E76D77 /* AppStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B2510EB503202EC285FEB33 /* AppStore.swift */; };
+		58896685F300BA828EB51883 /* end-route.wav in Resources */ = {isa = PBXBuildFile; fileRef = F876D81F0930096A4588A5E6 /* end-route.wav */; };
+		5E09D7425CF81544029C32D7 /* 05_connect_bentley_continental.wav in Resources */ = {isa = PBXBuildFile; fileRef = FCCE6D567F77BD343BB5F799 /* 05_connect_bentley_continental.wav */; };
+		5FB7E78B02088A89FA6F56E7 /* BgCutoutService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AEA473C0D0E54C9B7B362D2 /* BgCutoutService.swift */; };
+		6507A75C8BD8C14E8F495533 /* WidgetCanvas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A5FC961A74AAAA7047097BB /* WidgetCanvas.swift */; };
+		66F077FFB2A7FCB9ACDD478F /* 09_disconnect_until_next_time.wav in Resources */ = {isa = PBXBuildFile; fileRef = A6B82E9C4F1A194E81C2EC03 /* 09_disconnect_until_next_time.wav */; };
+		67D58798E2A0F3269D38EC83 /* 27_connect_peugeot_508.wav in Resources */ = {isa = PBXBuildFile; fileRef = F008E473116CB847B8D0ABD4 /* 27_connect_peugeot_508.wav */; };
+		6A41D771BEF4245AFD1D1CD1 /* 14_connect_hyundai_ioniq_5.wav in Resources */ = {isa = PBXBuildFile; fileRef = 80C441E7075A5BFC4E981B1D /* 14_connect_hyundai_ioniq_5.wav */; };
+		6B290C2896065F3DAA192D79 /* 09_connect_chrysler_300.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3CC62CC284960AC3BB893F50 /* 09_connect_chrysler_300.wav */; };
+		7034E898CC16B69B6E3529B4 /* 19_connect_land_rover_defender.wav in Resources */ = {isa = PBXBuildFile; fileRef = 7AF367E9251005E4907B7919 /* 19_connect_land_rover_defender.wav */; };
+		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
+		76286BB6BDB6F2CB8992C28C /* 01_disconnect_phone_reminder.wav in Resources */ = {isa = PBXBuildFile; fileRef = 7953A87399DF4B4B5130AC65 /* 01_disconnect_phone_reminder.wav */; };
+		78F4AAEE9F855D69FEB56A4F /* 06_connect_buckle_up.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3B1639B3D29553D0B997A070 /* 06_connect_buckle_up.wav */; };
+		7968291D2B10EB9DA88220A8 /* 15_connect_jaguar_f_type.wav in Resources */ = {isa = PBXBuildFile; fileRef = 66C4B475FF4A412F93387BC2 /* 15_connect_jaguar_f_type.wav */; };
+		79D5F243508953FDACA61527 /* 04_connect_audi_rs7.wav in Resources */ = {isa = PBXBuildFile; fileRef = 0C2CA4174B4B5B1959EECE84 /* 04_connect_audi_rs7.wav */; };
+		7B1C1106F4D270BFF51AE189 /* StockWidgetCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED175CE871F6C026551BC5E8 /* StockWidgetCatalog.swift */; };
+		7B78B377CECF5F4C94ADC02B /* 10_connect_citroen_c5_aircross.wav in Resources */ = {isa = PBXBuildFile; fileRef = E4DE90971936A82963142AB3 /* 10_connect_citroen_c5_aircross.wav */; };
+		7BA6F15971EF8C8623C4B4FD /* 12_connect_genesis_g80.wav in Resources */ = {isa = PBXBuildFile; fileRef = CD626EEA1FA9AF403F952A16 /* 12_connect_genesis_g80.wav */; };
+		7D8F48CD8831AB95B27CD86B /* EditorScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B952BA905C4E1525FFD33F8 /* EditorScreen.swift */; };
+		7DFAAB22A3B20216DBF1C5E6 /* double-beat.wav in Resources */ = {isa = PBXBuildFile; fileRef = 7E689E4D0510FE5A96AFB5ED /* double-beat.wav */; };
+		8389D9ED274297DAB86AD57D /* 22_connect_maserati_granturismo.wav in Resources */ = {isa = PBXBuildFile; fileRef = F2873FEFEAC0112F16D623F9 /* 22_connect_maserati_granturismo.wav */; };
+		8418419D3E23A38F725FCD5D /* 08_connect_welcome_aboard.wav in Resources */ = {isa = PBXBuildFile; fileRef = 18018F359742C681D562CD31 /* 08_connect_welcome_aboard.wav */; };
+		85891B6FE5432D7A32FCFE23 /* 17_connect_kia_ev6.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1F24B93C96B96D9F9D29B3FF /* 17_connect_kia_ev6.wav */; };
+		89D6A7721C443BF7340FEA35 /* DriveComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E504478C0B10C1E1AE1C64B8 /* DriveComponents.swift */; };
+		8B51D97ABC01C997C025F462 /* 06_disconnect_goodbye.wav in Resources */ = {isa = PBXBuildFile; fileRef = CEAE715B4761B11491E94E4A /* 06_disconnect_goodbye.wav */; };
+		8DD82D678BC95E076EB4D454 /* 08_disconnect_check_back_seat.wav in Resources */ = {isa = PBXBuildFile; fileRef = 21B0D72DFA826D81CF899A78 /* 08_disconnect_check_back_seat.wav */; };
+		8F4D3F20072B81543869C946 /* 13_connect_gmc_hummer_ev.wav in Resources */ = {isa = PBXBuildFile; fileRef = 95BB96906E9682F461095666 /* 13_connect_gmc_hummer_ev.wav */; };
+		90DD926C477FBE21C9E384EC /* 30_connect_volvo_xc90.wav in Resources */ = {isa = PBXBuildFile; fileRef = 52F165366784E29A50F66ECB /* 30_connect_volvo_xc90.wav */; };
+		93770AD3DDEB14EBFC0CC5A9 /* SlotManagerScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F28C38DC291569E48D49979 /* SlotManagerScreen.swift */; };
+		945C3DD6E80513B77857B53B /* 18_connect_lamborghini_huracan.wav in Resources */ = {isa = PBXBuildFile; fileRef = A14994ED5717889053146BE8 /* 18_connect_lamborghini_huracan.wav */; };
+		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
+		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
+		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		998A71B5EB4E1FA0055BDF57 /* BackgroundSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47AB8B7726719A01CF486FC5 /* BackgroundSheet.swift */; };
+		9FAD0C1E8E1F3DE899EF5DE7 /* 01_connect_welcome_back.wav in Resources */ = {isa = PBXBuildFile; fileRef = 763D3AD8D1573770D41ABFBA /* 01_connect_welcome_back.wav */; };
+		A1B2C3D41E5F6071809A0B01 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D41E5F6071809A0B00 /* PrivacyInfo.xcprivacy */; };
+		A3A581727F05425B9E860E91 /* soft-exit.wav in Resources */ = {isa = PBXBuildFile; fileRef = E2B29AC95B8576F75170E97C /* soft-exit.wav */; };
+		A3D34D4C28429675A7FAAD62 /* 24_connect_mclaren_750s.wav in Resources */ = {isa = PBXBuildFile; fileRef = 9B543EB3B2C3D35EDE893DAD /* 24_connect_mclaren_750s.wav */; };
+		A4F919DBCD37E8F6101D5AFB /* StockWidgetArchitecture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22BCAAA79114361AF6BA8148 /* StockWidgetArchitecture.swift */; };
+		AA7A49967ED906526A22CBD4 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1892411137573292DC3069C3 /* DashboardView.swift */; };
+		ABF2B471E7DC1E27F21AA06D /* 11_connect_ferrari_296.wav in Resources */ = {isa = PBXBuildFile; fileRef = 11BC26423FA970141984F0BE /* 11_connect_ferrari_296.wav */; };
+		AD7130017F3CEF8BCF3A4DD0 /* soft-chime.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1FB9EE6D29D899BFCA96478B /* soft-chime.wav */; };
+		AE69B5C305B9D16278392A0D /* 07_connect_cadillac_escalade.wav in Resources */ = {isa = PBXBuildFile; fileRef = E941ABEAF6DBECEA4B7AF87B /* 07_connect_cadillac_escalade.wav */; };
+		B41FD6CBA49BD94892F55BBD /* WidgetModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D812EB2ED810ACC94AE7431C /* WidgetModels.swift */; };
+		B4B90838EA7E2BD2464B7EBA /* 07_connect_adventure_begins.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1D6A052860F42AEEC4C4EF66 /* 07_connect_adventure_begins.wav */; };
+		BBA349E5D9B9D368674BCACE /* marker.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6A9810096AAF72C6AD5F08FB /* marker.wav */; };
+		C2D994AEC0E2E21B8F928D3E /* power-down.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8E9E62C0E765347DD0E9D153 /* power-down.wav */; };
+		C65963FA3A3757C58BAD79C4 /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79864484595DAE6B646A2E07 /* HomeScreen.swift */; };
+		C6C4A2DC110ECA514983E8D3 /* 09_connect_connection_successful.wav in Resources */ = {isa = PBXBuildFile; fileRef = 95217042F5850DE659B476FE /* 09_connect_connection_successful.wav */; };
+		C769862BFC63AC1934302CAA /* 26_connect_nissan_gtr.wav in Resources */ = {isa = PBXBuildFile; fileRef = 2324481032B66C10077DA831 /* 26_connect_nissan_gtr.wav */; };
+		CA00FACE0000000000000002 /* CarPlay.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA00FACE0000000000000001 /* CarPlay.framework */; };
+		CA00FACE0000000000000003 /* CarPlay.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA00FACE0000000000000001 /* CarPlay.framework */; };
+		CCB6AE93508D99F6A82FC7B0 /* 28_connect_range_rover_sport.wav in Resources */ = {isa = PBXBuildFile; fileRef = C1EA2A284AC9B1F9B8C7D2F1 /* 28_connect_range_rover_sport.wav */; };
+		CF08C0091F320F2DD48F22FC /* 03_connect_aston_martin_db12.wav in Resources */ = {isa = PBXBuildFile; fileRef = BC0B9506611DAA23AF3D4C7E /* 03_connect_aston_martin_db12.wav */; };
+		D05038E33AD1E6F663788289 /* LayerEditorOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A3610995CEE5E9C9427A02F /* LayerEditorOverlay.swift */; };
+		D2A5C06F9F342B0D97AAAAE2 /* 29_connect_subaru_wrx.wav in Resources */ = {isa = PBXBuildFile; fileRef = 7AAE4D217131E53A0F847F9D /* 29_connect_subaru_wrx.wav */; };
+		D2C54551391E88D3FFD39993 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE69FBB06C2457F2C23E1F77 /* SettingsScreen.swift */; };
+		DBC3CB629E3DE7B2E4FB5A83 /* harbor-bell.wav in Resources */ = {isa = PBXBuildFile; fileRef = C0E3B00DE4BFA8BB6FFEA3EF /* harbor-bell.wav */; };
+		DF16FC7391F42EF1BD917A3E /* rise.wav in Resources */ = {isa = PBXBuildFile; fileRef = F6B727283CE128DC46E857EA /* rise.wav */; };
+		DF589848254A1446B34BCDDC /* gentle-ping.wav in Resources */ = {isa = PBXBuildFile; fileRef = DBFC374036CC29F70B8B4273 /* gentle-ping.wav */; };
+		E36967A55D6178B4DD2A08A5 /* 10_disconnect_vehicle_secured.wav in Resources */ = {isa = PBXBuildFile; fileRef = 74677FC852851195498D7484 /* 10_disconnect_vehicle_secured.wav */; };
+		E6668230824663CCAD89B7AB /* GalleryScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5ABD0E5712568291A74A550 /* GalleryScreen.swift */; };
+		E84CB377CB0AC136FA1A721D /* 07_disconnect_nice_parking.wav in Resources */ = {isa = PBXBuildFile; fileRef = 30658C1F197BEC8436AC46F8 /* 07_disconnect_nice_parking.wav */; };
+		EC07B1FFE41ACB3B18007998 /* 02_disconnect_phone_keys_wallet.wav in Resources */ = {isa = PBXBuildFile; fileRef = 767241B6BAA59919F37F2347 /* 02_disconnect_phone_keys_wallet.wav */; };
+		EFA070FEB644C0AACD8AD155 /* glass-tap.wav in Resources */ = {isa = PBXBuildFile; fileRef = DA764439FB91ABEB11A3777C /* glass-tap.wav */; };
+		F2290024A27848D780DDDAAE /* night-close.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3964373A1683411BDE3204D9 /* night-close.wav */; };
+		F39812E486D3886B2C755CBC /* spark-line.wav in Resources */ = {isa = PBXBuildFile; fileRef = C8E767D912BF9CBED5A80339 /* spark-line.wav */; };
+		F776AD3498A308A0CF09F98E /* WidgetLibrarySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60E7D0E67750888581B833AE /* WidgetLibrarySheet.swift */; };
+		FAB6D61D662FC081AEEC0D7F /* WidgetModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D812EB2ED810ACC94AE7431C /* WidgetModels.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2A6D5D4130232AC8000A9968 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2A6D5D3230232AC7000A9968;
+			remoteInfo = DriveStudioWidgetExtension;
+		};
+		331C8085294A63A400263BE5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
+			remoteInfo = Runner;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		2A6D5D4430232AC8000A9968 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				2A6D5D4330232AC8000A9968 /* DriveStudioWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9705A1C41CF9048500538489 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0A5FC961A74AAAA7047097BB /* WidgetCanvas.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetCanvas.swift; sourceTree = "<group>"; };
+		0C2CA4174B4B5B1959EECE84 /* 04_connect_audi_rs7.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 04_connect_audi_rs7.wav; sourceTree = "<group>"; };
+		0FEB500AFE784962B9CCE530 /* lane-nudge.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = "lane-nudge.wav"; sourceTree = "<group>"; };
+		11BC26423FA970141984F0BE /* 11_connect_ferrari_296.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 11_connect_ferrari_296.wav; sourceTree = "<group>"; };
+		121D8155E79E8B716211C431 /* 10_connect_drive_mode.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 10_connect_drive_mode.wav; sourceTree = "<group>"; };
+		18018F359742C681D562CD31 /* 08_connect_welcome_aboard.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 08_connect_welcome_aboard.wav; sourceTree = "<group>"; };
+		1892411137573292DC3069C3 /* DashboardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		1BCD4FD946570E83B02DD8EF /* 05_connect_dashboard_ready.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 05_connect_dashboard_ready.wav; sourceTree = "<group>"; };
+		1D6A052860F42AEEC4C4EF66 /* 07_connect_adventure_begins.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 07_connect_adventure_begins.wav; sourceTree = "<group>"; };
+		1E9908EE1FE8F3A921A1FFCF /* 02_connect_alfa_romeo_giulia.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 02_connect_alfa_romeo_giulia.wav; sourceTree = "<group>"; };
+		1F24B93C96B96D9F9D29B3FF /* 17_connect_kia_ev6.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 17_connect_kia_ev6.wav; sourceTree = "<group>"; };
+		1FB9EE6D29D899BFCA96478B /* soft-chime.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = "soft-chime.wav"; sourceTree = "<group>"; };
+		21B0D72DFA826D81CF899A78 /* 08_disconnect_check_back_seat.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 08_disconnect_check_back_seat.wav; sourceTree = "<group>"; };
+		22BCAAA79114361AF6BA8148 /* StockWidgetArchitecture.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StockWidgetArchitecture.swift; sourceTree = "<group>"; };
+		2324481032B66C10077DA831 /* 26_connect_nissan_gtr.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 26_connect_nissan_gtr.wav; sourceTree = "<group>"; };
+		290DE2509893E8C531F9AF3C /* LayerSettingsSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LayerSettingsSheet.swift; sourceTree = "<group>"; };
+		2A6D5D3330232AC7000A9968 /* DriveStudioWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DriveStudioWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		2A6D5D3530232AC7000A9968 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		2A6D5D3730232AC7000A9968 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		2A6D5D4C30232B55000A9968 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
+		2A6D5D4D30232BE5000A9968 /* DriveStudioWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DriveStudioWidgetExtension.entitlements; sourceTree = "<group>"; };
+		2A6D5D6C30232FD7000A9968 /* AppGroupChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupChannel.swift; sourceTree = "<group>"; };
+		2A6D5D6D30232FD7000A9968 /* AppGroupContract.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupContract.swift; sourceTree = "<group>"; };
+		30658C1F197BEC8436AC46F8 /* 07_disconnect_nice_parking.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 07_disconnect_nice_parking.wav; sourceTree = "<group>"; };
+		331C807B294A618700263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
+		331C8081294A63A400263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		389D23298602C7D0CCEA964E /* 08_connect_chery_tiggo_8.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 08_connect_chery_tiggo_8.wav; sourceTree = "<group>"; };
+		3964373A1683411BDE3204D9 /* night-close.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = "night-close.wav"; sourceTree = "<group>"; };
+		3B1639B3D29553D0B997A070 /* 06_connect_buckle_up.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 06_connect_buckle_up.wav; sourceTree = "<group>"; };
+		3CC62CC284960AC3BB893F50 /* 09_connect_chrysler_300.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 09_connect_chrysler_300.wav; sourceTree = "<group>"; };
+		4565F88065ACFE3671C92C5D /* 03_disconnect_lock_vehicle.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 03_disconnect_lock_vehicle.wav; sourceTree = "<group>"; };
+		47AB8B7726719A01CF486FC5 /* BackgroundSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BackgroundSheet.swift; sourceTree = "<group>"; };
+		4B2510EB503202EC285FEB33 /* AppStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
+		52F165366784E29A50F66ECB /* 30_connect_volvo_xc90.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 30_connect_volvo_xc90.wav; sourceTree = "<group>"; };
+		57FE112B97C5380ADCCF8C2E /* 23_connect_mazda_mx5.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 23_connect_mazda_mx5.wav; sourceTree = "<group>"; };
+		5AEA473C0D0E54C9B7B362D2 /* BgCutoutService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BgCutoutService.swift; sourceTree = "<group>"; };
+		5F28C38DC291569E48D49979 /* SlotManagerScreen.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SlotManagerScreen.swift; sourceTree = "<group>"; };
+		607C20615BCC53BC2D3E5503 /* 16_connect_jeep_wrangler.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 16_connect_jeep_wrangler.wav; sourceTree = "<group>"; };
+		60E7D0E67750888581B833AE /* WidgetLibrarySheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetLibrarySheet.swift; sourceTree = "<group>"; };
+		66C4B475FF4A412F93387BC2 /* 15_connect_jaguar_f_type.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 15_connect_jaguar_f_type.wav; sourceTree = "<group>"; };
+		68E3083BE29710E5409B7FF7 /* summit-ping.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = "summit-ping.wav"; sourceTree = "<group>"; };
+		6A9810096AAF72C6AD5F08FB /* marker.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = marker.wav; sourceTree = "<group>"; };
+		74677FC852851195498D7484 /* 10_disconnect_vehicle_secured.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 10_disconnect_vehicle_secured.wav; sourceTree = "<group>"; };
+		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
+		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		763D3AD8D1573770D41ABFBA /* 01_connect_welcome_back.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 01_connect_welcome_back.wav; sourceTree = "<group>"; };
+		767241B6BAA59919F37F2347 /* 02_disconnect_phone_keys_wallet.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 02_disconnect_phone_keys_wallet.wav; sourceTree = "<group>"; };
+		789C883347E70E3767EA2E3D /* 02_connect_vehicle_connected.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 02_connect_vehicle_connected.wav; sourceTree = "<group>"; };
+		7953A87399DF4B4B5130AC65 /* 01_disconnect_phone_reminder.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 01_disconnect_phone_reminder.wav; sourceTree = "<group>"; };
+		79864484595DAE6B646A2E07 /* HomeScreen.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
+		7AAE4D217131E53A0F847F9D /* 29_connect_subaru_wrx.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 29_connect_subaru_wrx.wav; sourceTree = "<group>"; };
+		7AD59C427DC6FE01237AEAD7 /* 01_connect_acura_nsx.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 01_connect_acura_nsx.wav; sourceTree = "<group>"; };
+		7AF367E9251005E4907B7919 /* 19_connect_land_rover_defender.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 19_connect_land_rover_defender.wav; sourceTree = "<group>"; };
+		7B952BA905C4E1525FFD33F8 /* EditorScreen.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EditorScreen.swift; sourceTree = "<group>"; };
+		7E689E4D0510FE5A96AFB5ED /* double-beat.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = "double-beat.wav"; sourceTree = "<group>"; };
+		80C441E7075A5BFC4E981B1D /* 14_connect_hyundai_ioniq_5.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 14_connect_hyundai_ioniq_5.wav; sourceTree = "<group>"; };
+		84CAB95B02A75E2942E8E30A /* 04_disconnect_check_windows.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 04_disconnect_check_windows.wav; sourceTree = "<group>"; };
+		84D2DE227136EEB043E609EB /* 21_connect_lucid_air.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 21_connect_lucid_air.wav; sourceTree = "<group>"; };
+		8A3610995CEE5E9C9427A02F /* LayerEditorOverlay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LayerEditorOverlay.swift; sourceTree = "<group>"; };
+		8E9E62C0E765347DD0E9D153 /* power-down.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = "power-down.wav"; sourceTree = "<group>"; };
+		95217042F5850DE659B476FE /* 09_connect_connection_successful.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 09_connect_connection_successful.wav; sourceTree = "<group>"; };
+		95BB96906E9682F461095666 /* 13_connect_gmc_hummer_ev.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 13_connect_gmc_hummer_ev.wav; sourceTree = "<group>"; };
+		96557ECEB57DB9C6EDF485FF /* 06_connect_byd_seal.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 06_connect_byd_seal.wav; sourceTree = "<group>"; };
+		97C146EE1CF9000F007C117D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		97C146FB1CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9B543EB3B2C3D35EDE893DAD /* 24_connect_mclaren_750s.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 24_connect_mclaren_750s.wav; sourceTree = "<group>"; };
+		9E2520233FD423333D4419D5 /* 20_connect_lexus_lc_500.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 20_connect_lexus_lc_500.wav; sourceTree = "<group>"; };
+		A14994ED5717889053146BE8 /* 18_connect_lamborghini_huracan.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 18_connect_lamborghini_huracan.wav; sourceTree = "<group>"; };
+		A1B2C3D41E5F6071809A0B00 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		A312CB41E51599596127448C /* 25_connect_mini_cooper.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 25_connect_mini_cooper.wav; sourceTree = "<group>"; };
+		A4FCC65BC425611B49F9D616 /* 04_connect_system_online.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 04_connect_system_online.wav; sourceTree = "<group>"; };
+		A6B82E9C4F1A194E81C2EC03 /* 09_disconnect_until_next_time.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 09_disconnect_until_next_time.wav; sourceTree = "<group>"; };
+		A8FBAE056A9BAEA915488C92 /* 43_brands_connect_master.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 43_brands_connect_master.wav; sourceTree = "<group>"; };
+		BC0B9506611DAA23AF3D4C7E /* 03_connect_aston_martin_db12.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 03_connect_aston_martin_db12.wav; sourceTree = "<group>"; };
+		C0E3B00DE4BFA8BB6FFEA3EF /* harbor-bell.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = "harbor-bell.wav"; sourceTree = "<group>"; };
+		C1EA2A284AC9B1F9B8C7D2F1 /* 28_connect_range_rover_sport.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 28_connect_range_rover_sport.wav; sourceTree = "<group>"; };
+		C3CD5C43287352013CC8C822 /* 05_disconnect_safe_arrival.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 05_disconnect_safe_arrival.wav; sourceTree = "<group>"; };
+		C5ABD0E5712568291A74A550 /* GalleryScreen.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GalleryScreen.swift; sourceTree = "<group>"; };
+		C5FD6326B9789CECBCFE4E39 /* coast-wind.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = "coast-wind.wav"; sourceTree = "<group>"; };
+		C72D264E9875D45B1DE765A2 /* ignition.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = ignition.wav; sourceTree = "<group>"; };
+		C8E767D912BF9CBED5A80339 /* spark-line.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = "spark-line.wav"; sourceTree = "<group>"; };
+		CA00FACE0000000000000001 /* CarPlay.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CarPlay.framework; path = System/Library/Frameworks/CarPlay.framework; sourceTree = SDKROOT; };
+		CD626EEA1FA9AF403F952A16 /* 12_connect_genesis_g80.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 12_connect_genesis_g80.wav; sourceTree = "<group>"; };
+		CE69FBB06C2457F2C23E1F77 /* SettingsScreen.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsScreen.swift; sourceTree = "<group>"; };
+		CEAE715B4761B11491E94E4A /* 06_disconnect_goodbye.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 06_disconnect_goodbye.wav; sourceTree = "<group>"; };
+		D4379FC1864ADB29E64C6EC6 /* low-pulse.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = "low-pulse.wav"; sourceTree = "<group>"; };
+		D812EB2ED810ACC94AE7431C /* WidgetModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetModels.swift; sourceTree = "<group>"; };
+		DA764439FB91ABEB11A3777C /* glass-tap.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = "glass-tap.wav"; sourceTree = "<group>"; };
+		DBFC374036CC29F70B8B4273 /* gentle-ping.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = "gentle-ping.wav"; sourceTree = "<group>"; };
+		DC66974444FE5791538DEE01 /* 03_connect_everything_ready.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 03_connect_everything_ready.wav; sourceTree = "<group>"; };
+		E2B29AC95B8576F75170E97C /* soft-exit.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = "soft-exit.wav"; sourceTree = "<group>"; };
+		E4DE90971936A82963142AB3 /* 10_connect_citroen_c5_aircross.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 10_connect_citroen_c5_aircross.wav; sourceTree = "<group>"; };
+		E504478C0B10C1E1AE1C64B8 /* DriveComponents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DriveComponents.swift; sourceTree = "<group>"; };
+		E941ABEAF6DBECEA4B7AF87B /* 07_connect_cadillac_escalade.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 07_connect_cadillac_escalade.wav; sourceTree = "<group>"; };
+		ED175CE871F6C026551BC5E8 /* StockWidgetCatalog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StockWidgetCatalog.swift; sourceTree = "<group>"; };
+		ED8750B06530D5B3FCEB20A2 /* SoundsScreen.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SoundsScreen.swift; sourceTree = "<group>"; };
+E1F2A3B4C5D6789012345688 /* DriveStudioIntents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DriveStudioIntents.swift; sourceTree = "<group>"; };
+E1F2A3B4C5D6789012345679 /* TelemetryService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TelemetryService.swift; sourceTree = "<group>"; };
+E1F2A3B4C5D6789012345678 /* MicRecorderSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MicRecorderSheet.swift; sourceTree = "<group>"; };
+C1D2E3F4A5B6789012345678 /* TTSVoiceGeneratorSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TTSVoiceGeneratorSheet.swift; sourceTree = "<group>"; };
+A1B2C3D4E5F6789012345678 /* DrawingCanvasSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DrawingCanvasSheet.swift; sourceTree = "<group>"; };
+		F008E473116CB847B8D0ABD4 /* 27_connect_peugeot_508.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 27_connect_peugeot_508.wav; sourceTree = "<group>"; };
+		F2873FEFEAC0112F16D623F9 /* 22_connect_maserati_granturismo.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 22_connect_maserati_granturismo.wav; sourceTree = "<group>"; };
+		F6B727283CE128DC46E857EA /* rise.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = rise.wav; sourceTree = "<group>"; };
+		F876D81F0930096A4588A5E6 /* end-route.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = "end-route.wav"; sourceTree = "<group>"; };
+		FCCE6D567F77BD343BB5F799 /* 05_connect_bentley_continental.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 05_connect_bentley_continental.wav; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		2A6D5D4830232AC8000A9968 /* Exceptions for "DriveStudioWidget" folder in "DriveStudioWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 2A6D5D3230232AC7000A9968 /* DriveStudioWidgetExtension */;
+		};
+		97C146ED1CF9000F007C117E /* Exceptions for "DriveStudioWidget" folder in "Runner" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				PrivacyInfo.xcprivacy,
+				DriveStudioWidgetBundle.swift,
+			);
+			target = 97C146ED1CF9000F007C117D /* Runner */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		2A6D5D3930232AC7000A9968 /* DriveStudioWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				2A6D5D4830232AC8000A9968 /* Exceptions for "DriveStudioWidget" folder in "DriveStudioWidgetExtension" target */,
+				97C146ED1CF9000F007C117E /* Exceptions for "DriveStudioWidget" folder in "Runner" target */,
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = DriveStudioWidget;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		2A6D5D3030232AC7000A9968 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2A6D5D3830232AC7000A9968 /* SwiftUI.framework in Frameworks */,
+				2A6D5D3630232AC7000A9968 /* WidgetKit.framework in Frameworks */,
+				CA00FACE0000000000000002 /* CarPlay.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2D365E277A450D0D419A9B71 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		97C146EB1CF9000F007C117D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA00FACE0000000000000003 /* CarPlay.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0AC98B2E7BEA5729C8274D8A /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		2A6D5D3430232AC7000A9968 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				2A6D5D3530232AC7000A9968 /* WidgetKit.framework */,
+				2A6D5D3730232AC7000A9968 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		2ADD677A3024879F00361DE9 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				CA00FACE0000000000000001 /* CarPlay.framework */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
+		331C8082294A63A400263BE5 /* RunnerTests */ = {
+			isa = PBXGroup;
+			children = (
+				331C807B294A618700263BE5 /* RunnerTests.swift */,
+			);
+			path = RunnerTests;
+			sourceTree = "<group>";
+		};
+		9740EEB11CF90186004384FC /* Flutter */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Flutter;
+			sourceTree = "<group>";
+		};
+		97C146E51CF9000F007C117D = {
+			isa = PBXGroup;
+			children = (
+				2A6D5D4D30232BE5000A9968 /* DriveStudioWidgetExtension.entitlements */,
+				9740EEB11CF90186004384FC /* Flutter */,
+				97C146F01CF9000F007C117D /* Runner */,
+				2A6D5D3930232AC7000A9968 /* DriveStudioWidget */,
+				2A6D5D3430232AC7000A9968 /* Frameworks */,
+				97C146EF1CF9000F007C117D /* Products */,
+				331C8082294A63A400263BE5 /* RunnerTests */,
+				0AC98B2E7BEA5729C8274D8A /* Pods */,
+				2ADD677A3024879F00361DE9 /* Recovered References */,
+			);
+			sourceTree = "<group>";
+		};
+		97C146EF1CF9000F007C117D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				97C146EE1CF9000F007C117D /* Runner.app */,
+				331C8081294A63A400263BE5 /* RunnerTests.xctest */,
+				2A6D5D3330232AC7000A9968 /* DriveStudioWidgetExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		97C146F01CF9000F007C117D /* Runner */ = {
+			isa = PBXGroup;
+			children = (
+				2A6D5D4C30232B55000A9968 /* Runner.entitlements */,
+				2A6D5D6C30232FD7000A9968 /* AppGroupChannel.swift */,
+				2A6D5D6D30232FD7000A9968 /* AppGroupContract.swift */,
+				97C146FA1CF9000F007C117D /* Main.storyboard */,
+				97C146FD1CF9000F007C117D /* Assets.xcassets */,
+				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
+				97C147021CF9000F007C117D /* Info.plist */,
+				A1B2C3D41E5F6071809A0B00 /* PrivacyInfo.xcprivacy */,
+				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
+				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
+				4B2510EB503202EC285FEB33 /* AppStore.swift */,
+				79864484595DAE6B646A2E07 /* HomeScreen.swift */,
+				C5ABD0E5712568291A74A550 /* GalleryScreen.swift */,
+				7B952BA905C4E1525FFD33F8 /* EditorScreen.swift */,
+				D812EB2ED810ACC94AE7431C /* WidgetModels.swift */,
+				E504478C0B10C1E1AE1C64B8 /* DriveComponents.swift */,
+				1892411137573292DC3069C3 /* DashboardView.swift */,
+				ED8750B06530D5B3FCEB20A2 /* SoundsScreen.swift */,
+				E1F2A3B4C5D6789012345688 /* DriveStudioIntents.swift */,
+				E1F2A3B4C5D6789012345679 /* TelemetryService.swift */,
+				E1F2A3B4C5D6789012345678 /* MicRecorderSheet.swift */,
+				C1D2E3F4A5B6789012345678 /* TTSVoiceGeneratorSheet.swift */,
+				A1B2C3D4E5F6789012345678 /* DrawingCanvasSheet.swift */,
+				CE69FBB06C2457F2C23E1F77 /* SettingsScreen.swift */,
+				5AEA473C0D0E54C9B7B362D2 /* BgCutoutService.swift */,
+				0A5FC961A74AAAA7047097BB /* WidgetCanvas.swift */,
+				290DE2509893E8C531F9AF3C /* LayerSettingsSheet.swift */,
+				60E7D0E67750888581B833AE /* WidgetLibrarySheet.swift */,
+				47AB8B7726719A01CF486FC5 /* BackgroundSheet.swift */,
+				5F28C38DC291569E48D49979 /* SlotManagerScreen.swift */,
+				8A3610995CEE5E9C9427A02F /* LayerEditorOverlay.swift */,
+				B05E7041929773B2FC64B6B1 /* Sounds */,
+				22BCAAA79114361AF6BA8148 /* StockWidgetArchitecture.swift */,
+				ED175CE871F6C026551BC5E8 /* StockWidgetCatalog.swift */,
+			);
+			path = Runner;
+			sourceTree = "<group>";
+		};
+		B05E7041929773B2FC64B6B1 /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+				7AD59C427DC6FE01237AEAD7 /* 01_connect_acura_nsx.wav */,
+				763D3AD8D1573770D41ABFBA /* 01_connect_welcome_back.wav */,
+				7953A87399DF4B4B5130AC65 /* 01_disconnect_phone_reminder.wav */,
+				1E9908EE1FE8F3A921A1FFCF /* 02_connect_alfa_romeo_giulia.wav */,
+				789C883347E70E3767EA2E3D /* 02_connect_vehicle_connected.wav */,
+				767241B6BAA59919F37F2347 /* 02_disconnect_phone_keys_wallet.wav */,
+				BC0B9506611DAA23AF3D4C7E /* 03_connect_aston_martin_db12.wav */,
+				DC66974444FE5791538DEE01 /* 03_connect_everything_ready.wav */,
+				4565F88065ACFE3671C92C5D /* 03_disconnect_lock_vehicle.wav */,
+				0C2CA4174B4B5B1959EECE84 /* 04_connect_audi_rs7.wav */,
+				A4FCC65BC425611B49F9D616 /* 04_connect_system_online.wav */,
+				84CAB95B02A75E2942E8E30A /* 04_disconnect_check_windows.wav */,
+				FCCE6D567F77BD343BB5F799 /* 05_connect_bentley_continental.wav */,
+				1BCD4FD946570E83B02DD8EF /* 05_connect_dashboard_ready.wav */,
+				C3CD5C43287352013CC8C822 /* 05_disconnect_safe_arrival.wav */,
+				3B1639B3D29553D0B997A070 /* 06_connect_buckle_up.wav */,
+				96557ECEB57DB9C6EDF485FF /* 06_connect_byd_seal.wav */,
+				CEAE715B4761B11491E94E4A /* 06_disconnect_goodbye.wav */,
+				1D6A052860F42AEEC4C4EF66 /* 07_connect_adventure_begins.wav */,
+				E941ABEAF6DBECEA4B7AF87B /* 07_connect_cadillac_escalade.wav */,
+				30658C1F197BEC8436AC46F8 /* 07_disconnect_nice_parking.wav */,
+				389D23298602C7D0CCEA964E /* 08_connect_chery_tiggo_8.wav */,
+				18018F359742C681D562CD31 /* 08_connect_welcome_aboard.wav */,
+				21B0D72DFA826D81CF899A78 /* 08_disconnect_check_back_seat.wav */,
+				3CC62CC284960AC3BB893F50 /* 09_connect_chrysler_300.wav */,
+				95217042F5850DE659B476FE /* 09_connect_connection_successful.wav */,
+				A6B82E9C4F1A194E81C2EC03 /* 09_disconnect_until_next_time.wav */,
+				E4DE90971936A82963142AB3 /* 10_connect_citroen_c5_aircross.wav */,
+				121D8155E79E8B716211C431 /* 10_connect_drive_mode.wav */,
+				74677FC852851195498D7484 /* 10_disconnect_vehicle_secured.wav */,
+				11BC26423FA970141984F0BE /* 11_connect_ferrari_296.wav */,
+				CD626EEA1FA9AF403F952A16 /* 12_connect_genesis_g80.wav */,
+				95BB96906E9682F461095666 /* 13_connect_gmc_hummer_ev.wav */,
+				80C441E7075A5BFC4E981B1D /* 14_connect_hyundai_ioniq_5.wav */,
+				66C4B475FF4A412F93387BC2 /* 15_connect_jaguar_f_type.wav */,
+				607C20615BCC53BC2D3E5503 /* 16_connect_jeep_wrangler.wav */,
+				1F24B93C96B96D9F9D29B3FF /* 17_connect_kia_ev6.wav */,
+				A14994ED5717889053146BE8 /* 18_connect_lamborghini_huracan.wav */,
+				7AF367E9251005E4907B7919 /* 19_connect_land_rover_defender.wav */,
+				9E2520233FD423333D4419D5 /* 20_connect_lexus_lc_500.wav */,
+				84D2DE227136EEB043E609EB /* 21_connect_lucid_air.wav */,
+				F2873FEFEAC0112F16D623F9 /* 22_connect_maserati_granturismo.wav */,
+				57FE112B97C5380ADCCF8C2E /* 23_connect_mazda_mx5.wav */,
+				9B543EB3B2C3D35EDE893DAD /* 24_connect_mclaren_750s.wav */,
+				A312CB41E51599596127448C /* 25_connect_mini_cooper.wav */,
+				2324481032B66C10077DA831 /* 26_connect_nissan_gtr.wav */,
+				F008E473116CB847B8D0ABD4 /* 27_connect_peugeot_508.wav */,
+				C1EA2A284AC9B1F9B8C7D2F1 /* 28_connect_range_rover_sport.wav */,
+				7AAE4D217131E53A0F847F9D /* 29_connect_subaru_wrx.wav */,
+				52F165366784E29A50F66ECB /* 30_connect_volvo_xc90.wav */,
+				A8FBAE056A9BAEA915488C92 /* 43_brands_connect_master.wav */,
+				C5FD6326B9789CECBCFE4E39 /* coast-wind.wav */,
+				7E689E4D0510FE5A96AFB5ED /* double-beat.wav */,
+				F876D81F0930096A4588A5E6 /* end-route.wav */,
+				DBFC374036CC29F70B8B4273 /* gentle-ping.wav */,
+				DA764439FB91ABEB11A3777C /* glass-tap.wav */,
+				C0E3B00DE4BFA8BB6FFEA3EF /* harbor-bell.wav */,
+				C72D264E9875D45B1DE765A2 /* ignition.wav */,
+				0FEB500AFE784962B9CCE530 /* lane-nudge.wav */,
+				D4379FC1864ADB29E64C6EC6 /* low-pulse.wav */,
+				6A9810096AAF72C6AD5F08FB /* marker.wav */,
+				3964373A1683411BDE3204D9 /* night-close.wav */,
+				8E9E62C0E765347DD0E9D153 /* power-down.wav */,
+				F6B727283CE128DC46E857EA /* rise.wav */,
+				1FB9EE6D29D899BFCA96478B /* soft-chime.wav */,
+				E2B29AC95B8576F75170E97C /* soft-exit.wav */,
+				C8E767D912BF9CBED5A80339 /* spark-line.wav */,
+				68E3083BE29710E5409B7FF7 /* summit-ping.wav */,
+			);
+			name = Sounds;
+			path = Sounds;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		2A6D5D3230232AC7000A9968 /* DriveStudioWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2A6D5D4930232AC8000A9968 /* Build configuration list for PBXNativeTarget "DriveStudioWidgetExtension" */;
+			buildPhases = (
+				2A6D5D2F30232AC7000A9968 /* Sources */,
+				2A6D5D3030232AC7000A9968 /* Frameworks */,
+				2A6D5D3130232AC7000A9968 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				2A6D5D3930232AC7000A9968 /* DriveStudioWidget */,
+			);
+			name = DriveStudioWidgetExtension;
+			productName = DriveStudioWidgetExtension;
+			productReference = 2A6D5D3330232AC7000A9968 /* DriveStudioWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		331C8080294A63A400263BE5 /* RunnerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 331C8087294A63A400263BE5 /* Build configuration list for PBXNativeTarget "RunnerTests" */;
+			buildPhases = (
+				331C807D294A63A400263BE5 /* Sources */,
+				331C807F294A63A400263BE5 /* Resources */,
+				2D365E277A450D0D419A9B71 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				331C8086294A63A400263BE5 /* PBXTargetDependency */,
+			);
+			name = RunnerTests;
+			productName = RunnerTests;
+			productReference = 331C8081294A63A400263BE5 /* RunnerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		97C146ED1CF9000F007C117D /* Runner */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;
+			buildPhases = (
+				97C146EA1CF9000F007C117D /* Sources */,
+				97C146EB1CF9000F007C117D /* Frameworks */,
+				97C146EC1CF9000F007C117D /* Resources */,
+				9705A1C41CF9048500538489 /* Embed Frameworks */,
+				2A6D5D4430232AC8000A9968 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2A6D5D4230232AC8000A9968 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				2A6D5D3930232AC7000A9968 /* DriveStudioWidget */,
+			);
+			name = Runner;
+			productName = Runner;
+			productReference = 97C146EE1CF9000F007C117D /* Runner.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		97C146E61CF9000F007C117D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastSwiftUpdateCheck = 2660;
+				LastUpgradeCheck = 1510;
+				ORGANIZATIONNAME = "";
+				TargetAttributes = {
+					2A6D5D3230232AC7000A9968 = {
+						CreatedOnToolsVersion = 26.6;
+					};
+					331C8080294A63A400263BE5 = {
+						CreatedOnToolsVersion = 14.0;
+						TestTargetID = 97C146ED1CF9000F007C117D;
+					};
+					97C146ED1CF9000F007C117D = {
+						CreatedOnToolsVersion = 7.3.1;
+						LastSwiftMigration = 1100;
+					};
+				};
+			};
+			buildConfigurationList = 97C146E91CF9000F007C117D /* Build configuration list for PBXProject "Runner" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 97C146E51CF9000F007C117D;
+			productRefGroup = 97C146EF1CF9000F007C117D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				97C146ED1CF9000F007C117D /* Runner */,
+				331C8080294A63A400263BE5 /* RunnerTests */,
+				2A6D5D3230232AC7000A9968 /* DriveStudioWidgetExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		2A6D5D3130232AC7000A9968 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		331C807F294A63A400263BE5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		97C146EC1CF9000F007C117D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */,
+				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
+				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
+				A1B2C3D41E5F6071809A0B01 /* PrivacyInfo.xcprivacy in Resources */,
+				34B723281BCBF92CD032FF54 /* 01_connect_acura_nsx.wav in Resources */,
+				9FAD0C1E8E1F3DE899EF5DE7 /* 01_connect_welcome_back.wav in Resources */,
+				76286BB6BDB6F2CB8992C28C /* 01_disconnect_phone_reminder.wav in Resources */,
+				4C5A89DD2B7CB5C62AD8698C /* 02_connect_alfa_romeo_giulia.wav in Resources */,
+				4E64BEC1FC41CF05F79FA8BA /* 02_connect_vehicle_connected.wav in Resources */,
+				EC07B1FFE41ACB3B18007998 /* 02_disconnect_phone_keys_wallet.wav in Resources */,
+				CF08C0091F320F2DD48F22FC /* 03_connect_aston_martin_db12.wav in Resources */,
+				3C91176C4B5D62DDC3DC28AF /* 03_connect_everything_ready.wav in Resources */,
+				14E802F773B364CE5BA6CCAB /* 03_disconnect_lock_vehicle.wav in Resources */,
+				79D5F243508953FDACA61527 /* 04_connect_audi_rs7.wav in Resources */,
+				0DCC6F015E22082B82F6C2C4 /* 04_connect_system_online.wav in Resources */,
+				4566F11689015428968A907D /* 04_disconnect_check_windows.wav in Resources */,
+				5E09D7425CF81544029C32D7 /* 05_connect_bentley_continental.wav in Resources */,
+				07877916C4B61102E979C9C1 /* 05_connect_dashboard_ready.wav in Resources */,
+				29AD0D5CDDFAF1E8602D7BF6 /* 05_disconnect_safe_arrival.wav in Resources */,
+				78F4AAEE9F855D69FEB56A4F /* 06_connect_buckle_up.wav in Resources */,
+				2747AD96D7ED35123305790F /* 06_connect_byd_seal.wav in Resources */,
+				8B51D97ABC01C997C025F462 /* 06_disconnect_goodbye.wav in Resources */,
+				B4B90838EA7E2BD2464B7EBA /* 07_connect_adventure_begins.wav in Resources */,
+				AE69B5C305B9D16278392A0D /* 07_connect_cadillac_escalade.wav in Resources */,
+				E84CB377CB0AC136FA1A721D /* 07_disconnect_nice_parking.wav in Resources */,
+				49EFD7BD2D297376E7D6EC10 /* 08_connect_chery_tiggo_8.wav in Resources */,
+				8418419D3E23A38F725FCD5D /* 08_connect_welcome_aboard.wav in Resources */,
+				8DD82D678BC95E076EB4D454 /* 08_disconnect_check_back_seat.wav in Resources */,
+				6B290C2896065F3DAA192D79 /* 09_connect_chrysler_300.wav in Resources */,
+				C6C4A2DC110ECA514983E8D3 /* 09_connect_connection_successful.wav in Resources */,
+				66F077FFB2A7FCB9ACDD478F /* 09_disconnect_until_next_time.wav in Resources */,
+				7B78B377CECF5F4C94ADC02B /* 10_connect_citroen_c5_aircross.wav in Resources */,
+				4BA9E29AECBFEBC51C4EF48D /* 10_connect_drive_mode.wav in Resources */,
+				E36967A55D6178B4DD2A08A5 /* 10_disconnect_vehicle_secured.wav in Resources */,
+				ABF2B471E7DC1E27F21AA06D /* 11_connect_ferrari_296.wav in Resources */,
+				7BA6F15971EF8C8623C4B4FD /* 12_connect_genesis_g80.wav in Resources */,
+				8F4D3F20072B81543869C946 /* 13_connect_gmc_hummer_ev.wav in Resources */,
+				6A41D771BEF4245AFD1D1CD1 /* 14_connect_hyundai_ioniq_5.wav in Resources */,
+				7968291D2B10EB9DA88220A8 /* 15_connect_jaguar_f_type.wav in Resources */,
+				31115FBC356497D3461C71D2 /* 16_connect_jeep_wrangler.wav in Resources */,
+				85891B6FE5432D7A32FCFE23 /* 17_connect_kia_ev6.wav in Resources */,
+				945C3DD6E80513B77857B53B /* 18_connect_lamborghini_huracan.wav in Resources */,
+				7034E898CC16B69B6E3529B4 /* 19_connect_land_rover_defender.wav in Resources */,
+				45E66D335575F934B8D96943 /* 20_connect_lexus_lc_500.wav in Resources */,
+				1FDBF70CF9533AE420076BE1 /* 21_connect_lucid_air.wav in Resources */,
+				8389D9ED274297DAB86AD57D /* 22_connect_maserati_granturismo.wav in Resources */,
+				3D956EA27CC7322D8DCAE271 /* 23_connect_mazda_mx5.wav in Resources */,
+				A3D34D4C28429675A7FAAD62 /* 24_connect_mclaren_750s.wav in Resources */,
+				34A3994F5E63B614422625C2 /* 25_connect_mini_cooper.wav in Resources */,
+				C769862BFC63AC1934302CAA /* 26_connect_nissan_gtr.wav in Resources */,
+				67D58798E2A0F3269D38EC83 /* 27_connect_peugeot_508.wav in Resources */,
+				CCB6AE93508D99F6A82FC7B0 /* 28_connect_range_rover_sport.wav in Resources */,
+				D2A5C06F9F342B0D97AAAAE2 /* 29_connect_subaru_wrx.wav in Resources */,
+				90DD926C477FBE21C9E384EC /* 30_connect_volvo_xc90.wav in Resources */,
+				034E765DCCD5F7C87A8E4517 /* 43_brands_connect_master.wav in Resources */,
+				4B3E4560985571ED5A36CC3A /* coast-wind.wav in Resources */,
+				7DFAAB22A3B20216DBF1C5E6 /* double-beat.wav in Resources */,
+				58896685F300BA828EB51883 /* end-route.wav in Resources */,
+				DF589848254A1446B34BCDDC /* gentle-ping.wav in Resources */,
+				EFA070FEB644C0AACD8AD155 /* glass-tap.wav in Resources */,
+				DBC3CB629E3DE7B2E4FB5A83 /* harbor-bell.wav in Resources */,
+				31EDB8AB76B09162B830EA6B /* ignition.wav in Resources */,
+				2770C5EB0618301F74B55B78 /* lane-nudge.wav in Resources */,
+				3E96D106D6DD8EA9DA3B0615 /* low-pulse.wav in Resources */,
+				BBA349E5D9B9D368674BCACE /* marker.wav in Resources */,
+				F2290024A27848D780DDDAAE /* night-close.wav in Resources */,
+				C2D994AEC0E2E21B8F928D3E /* power-down.wav in Resources */,
+				DF16FC7391F42EF1BD917A3E /* rise.wav in Resources */,
+				AD7130017F3CEF8BCF3A4DD0 /* soft-chime.wav in Resources */,
+				A3A581727F05425B9E860E91 /* soft-exit.wav in Resources */,
+				F39812E486D3886B2C755CBC /* spark-line.wav in Resources */,
+				54AFEA0AD5992E0C14CBD257 /* summit-ping.wav in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2A6D5D2F30232AC7000A9968 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B41FD6CBA49BD94892F55BBD /* WidgetModels.swift in Sources */,
+				A4F919DBCD37E8F6101D5AFB /* StockWidgetArchitecture.swift in Sources */,
+				7B1C1106F4D270BFF51AE189 /* StockWidgetCatalog.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		331C807D294A63A400263BE5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		97C146EA1CF9000F007C117D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
+				2A6D5D6E30232FD7000A9968 /* AppGroupContract.swift in Sources */,
+				2A6D5D6F30232FD7000A9968 /* AppGroupChannel.swift in Sources */,
+				5804FD25B12849F033E76D77 /* AppStore.swift in Sources */,
+				C65963FA3A3757C58BAD79C4 /* HomeScreen.swift in Sources */,
+				E6668230824663CCAD89B7AB /* GalleryScreen.swift in Sources */,
+				7D8F48CD8831AB95B27CD86B /* EditorScreen.swift in Sources */,
+				FAB6D61D662FC081AEEC0D7F /* WidgetModels.swift in Sources */,
+				89D6A7721C443BF7340FEA35 /* DriveComponents.swift in Sources */,
+				AA7A49967ED906526A22CBD4 /* DashboardView.swift in Sources */,
+				08CC98BC69C9394E451C0613 /* SoundsScreen.swift in Sources */,
+				F2A3B4C5D67890123456789C /* DriveStudioIntents.swift in Sources */,
+				F2A3B4C5D67890123456789B /* TelemetryService.swift in Sources */,
+				F2A3B4C5D67890123456789A /* MicRecorderSheet.swift in Sources */,
+				D2E3F4A5B67890123456789A /* TTSVoiceGeneratorSheet.swift in Sources */,
+				B2C3D4E5F67890123456789A /* DrawingCanvasSheet.swift in Sources */,
+				D2C54551391E88D3FFD39993 /* SettingsScreen.swift in Sources */,
+				5FB7E78B02088A89FA6F56E7 /* BgCutoutService.swift in Sources */,
+				6507A75C8BD8C14E8F495533 /* WidgetCanvas.swift in Sources */,
+				188B8D83EFBF37FB93FD3F0E /* LayerSettingsSheet.swift in Sources */,
+				F776AD3498A308A0CF09F98E /* WidgetLibrarySheet.swift in Sources */,
+				998A71B5EB4E1FA0055BDF57 /* BackgroundSheet.swift in Sources */,
+				93770AD3DDEB14EBFC0CC5A9 /* SlotManagerScreen.swift in Sources */,
+				D05038E33AD1E6F663788289 /* LayerEditorOverlay.swift in Sources */,
+				51F8FBAE2A471F24A669BF22 /* StockWidgetArchitecture.swift in Sources */,
+				4BF63422536E2C87BA2703FD /* StockWidgetCatalog.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		2A6D5D4230232AC8000A9968 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2A6D5D3230232AC7000A9968 /* DriveStudioWidgetExtension */;
+			targetProxy = 2A6D5D4130232AC8000A9968 /* PBXContainerItemProxy */;
+		};
+		331C8086294A63A400263BE5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 97C146ED1CF9000F007C117D /* Runner */;
+			targetProxy = 331C8085294A63A400263BE5 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		97C146FA1CF9000F007C117D /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				97C146FB1CF9000F007C117D /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				97C147001CF9000F007C117D /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		249021D3217E4FDB00AE95B9 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Profile;
+		};
+		249021D4217E4FDB00AE95B9 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YZ6GW884AL;
+				ENABLE_BITCODE = NO;
+				INFOPLIST_FILE = Runner/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.drivestudio.app.driveStudio;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Profile;
+		};
+		2A6D5D4530232AC8000A9968 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = DriveStudioWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YZ6GW884AL;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DriveStudioWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DriveStudioWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.drivestudio.app.driveStudio.DriveStudioWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		2A6D5D4630232AC8000A9968 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = DriveStudioWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YZ6GW884AL;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DriveStudioWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DriveStudioWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.drivestudio.app.driveStudio.DriveStudioWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		2A6D5D4730232AC8000A9968 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = DriveStudioWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YZ6GW884AL;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DriveStudioWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DriveStudioWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.drivestudio.app.driveStudio.DriveStudioWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Profile;
+		};
+		331C8088294A63A400263BE5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YZ6GW884AL;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.drivestudio.app.driveStudio.RunnerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner";
+			};
+			name = Debug;
+		};
+		331C8089294A63A400263BE5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YZ6GW884AL;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.drivestudio.app.driveStudio.RunnerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner";
+			};
+			name = Release;
+		};
+		331C808A294A63A400263BE5 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YZ6GW884AL;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.drivestudio.app.driveStudio.RunnerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner";
+			};
+			name = Profile;
+		};
+		97C147031CF9000F007C117D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		97C147041CF9000F007C117D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		97C147061CF9000F007C117D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YZ6GW884AL;
+				ENABLE_BITCODE = NO;
+				INFOPLIST_FILE = Runner/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.drivestudio.app.driveStudio;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Debug;
+		};
+		97C147071CF9000F007C117D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YZ6GW884AL;
+				ENABLE_BITCODE = NO;
+				INFOPLIST_FILE = Runner/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.drivestudio.app.driveStudio;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2A6D5D4930232AC8000A9968 /* Build configuration list for PBXNativeTarget "DriveStudioWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2A6D5D4530232AC8000A9968 /* Debug */,
+				2A6D5D4630232AC8000A9968 /* Release */,
+				2A6D5D4730232AC8000A9968 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		331C8087294A63A400263BE5 /* Build configuration list for PBXNativeTarget "RunnerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				331C8088294A63A400263BE5 /* Debug */,
+				331C8089294A63A400263BE5 /* Release */,
+				331C808A294A63A400263BE5 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		97C146E91CF9000F007C117D /* Build configuration list for PBXProject "Runner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				97C147031CF9000F007C117D /* Debug */,
+				97C147041CF9000F007C117D /* Release */,
+				249021D3217E4FDB00AE95B9 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				97C147061CF9000F007C117D /* Debug */,
+				97C147071CF9000F007C117D /* Release */,
+				249021D4217E4FDB00AE95B9 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 97C146E61CF9000F007C117D /* Project object */;
+}

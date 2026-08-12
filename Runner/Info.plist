@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Drive Studio</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>drive_studio</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+		<string>fetch</string>
+	</array>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Drive Studio needs access to your microphone to record custom vehicle audio prompts and cues.</string>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<!-- Live sensors: battery_plus (UIDevice) + connectivity_plus (NWPathMonitor).
+	     No CoreBluetooth scanning — do NOT add NSBluetoothAlwaysUsageDescription
+	     unless a future build starts BT LE scan. Car link on iPhone = manual toggle. -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Drive Studio uses your photo library for custom vehicle images and widget layer artwork.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Drive Studio may save edited widget previews to your library when you export.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Drive Studio uses the camera so you can photograph your car for widget artwork.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Drive Studio uses your location while the app is open to show live GPS speed on speedometer widgets. Speed is never invented when GPS is unavailable.</string>
+	<!-- Flutter / go_router deep links for drivestudio:// -->
+	<key>FlutterDeepLinkingEnabled</key>
+	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.drivestudio.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>drivestudio</string>
+			</array>
+		</dict>
+	</array>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>MinimumOSVersion</key>
+	<string>16.0</string>
+</dict>
+</plist>

@@ -21,7 +21,10 @@ import AVFoundation
         
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
-        locationManager.requestWhenInUseAuthorization()
+        locationManager.activityType = .automotiveNavigation
+        locationManager.distanceFilter = kCLDistanceFilterNone
+        locationManager.pausesLocationUpdatesAutomatically = false
+        locationManager.requestAlwaysAuthorization()
     }
     
     func startMonitoring() {

@@ -32,7 +32,7 @@ struct DashboardView: View {
                     }
                     Spacer()
                     Button(action: {
-                        if let url = URL(string: "https://www.icloud.com/shortcuts/0c111a625ad34db185cfe6556fe87323") {
+                        if let url = URL(string: "https://www.icloud.com/shortcuts/eca5e9434e324ffeb0a77b16445f4d1b") {
                             UIApplication.shared.open(url)
                         }
                     }) {

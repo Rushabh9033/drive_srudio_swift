@@ -112,6 +112,60 @@ struct SettingsScreenView: View {
                 }
                 .padding(.horizontal, 20)
 
+                // Card 3.5: One-Click Shortcuts & Automations Helper
+                SurfaceCard {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            MonoLabel(text: "iOS Shortcuts Automations")
+                            Spacer()
+                            DrivePill(label: "Quick Setup")
+                        }
+
+                        Text("Set up 3-second continuous widget & telemetry auto-refresh while driving.")
+                            .font(.system(size: 12))
+                            .lineSpacing(4)
+                            .foregroundColor(DriveColors.mutedFg)
+
+                        HStack(spacing: 12) {
+                            Button(action: {
+                                if let url = URL(string: "shortcuts://create-shortcut") {
+                                    UIApplication.shared.open(url)
+                                }
+                            }) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "plus.circle.fill")
+                                    Text("New Shortcut")
+                                }
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(DriveColors.primaryFg)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(DriveColors.primary)
+                                .cornerRadius(10)
+                            }
+
+                            Button(action: {
+                                if let url = URL(string: "shortcuts://") {
+                                    UIApplication.shared.open(url)
+                                }
+                            }) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "slider.horizontal.3")
+                                    Text("Open Shortcuts App")
+                                }
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(DriveColors.foreground)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(DriveColors.secondary)
+                                .cornerRadius(10)
+                                .overlay(RoundedRectangle(cornerRadius: 10).stroke(DriveColors.border, lineWidth: 1))
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+
                 // Card 4: Local Data
                 SurfaceCard {
                     VStack(alignment: .leading, spacing: 0) {

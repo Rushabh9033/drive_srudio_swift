@@ -172,21 +172,28 @@ struct MicRecorderSheet: View {
 
     private func startRecording() {
         let session = AVAudioSession.sharedInstance()
-        session.requestRecordPermission { granted in
-            guard granted else { return }
+        let recordBlock = {
             DispatchQueue.main.async {
                 do {
-                    try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
+                    try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
                     try session.setActive(true)
 
                     let fm = FileManager.default
                     let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first!
-                    let url = docs.appendingPathComponent("rec_\(UUID().uuidString.prefix(8)).wav")
+                    
+                    let title = self.soundTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+                    let safeTitle = title.isEmpty ? "Voice_Recording_\(Int(Date().timeIntervalSince1970))" : title.replacingOccurrences(of: " ", with: "_")
+                    let filename = "\(safeTitle).wav"
+                    let url = docs.appendingPathComponent(filename)
+                    
+                    if fm.fileExists(atPath: url.path) {
+                        try? fm.removeItem(at: url)
+                    }
                     self.recordedFileURL = url
 
                     let settings: [String: Any] = [
                         AVFormatIDKey: Int(kAudioFormatLinearPCM),
-                        AVSampleRateKey: 44100.0,
+                        AVSampleRateKey: 22050.0,
                         AVNumberOfChannelsKey: 1,
                         AVLinearPCMBitDepthKey: 16,
                         AVLinearPCMIsBigEndianKey: false,
@@ -194,17 +201,30 @@ struct MicRecorderSheet: View {
                     ]
 
                     self.audioRecorder = try AVAudioRecorder(url: url, settings: settings)
+                    self.audioRecorder?.isMeteringEnabled = true
+                    self.audioRecorder?.prepareToRecord()
                     self.audioRecorder?.record()
 
                     self.isRecording = true
                     self.isRecorded = false
                     self.recordingTimer = 0
+                    self.timer?.invalidate()
                     self.timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
                         self.recordingTimer += 1
                     }
                 } catch {
                     print("Could not start recording: \(error)")
                 }
+            }
+        }
+
+        if #available(iOS 17.0, *) {
+            AVAudioApplication.requestRecordPermission { granted in
+                if granted { recordBlock() }
+            }
+        } else {
+            session.requestRecordPermission { granted in
+                if granted { recordBlock() }
             }
         }
     }
@@ -229,7 +249,7 @@ struct MicRecorderSheet: View {
         } else {
             do {
                 let session = AVAudioSession.sharedInstance()
-                try? session.setCategory(.playback, mode: .default, options: [.duckOthers])
+                try? session.setCategory(.playback, mode: .default, options: [.defaultToSpeaker])
                 try? session.setActive(true)
 
                 audioPlayer = try AVAudioPlayer(contentsOf: url)
@@ -251,16 +271,31 @@ struct MicRecorderSheet: View {
     }
 
     private func saveRecording() {
-        guard let url = recordedFileURL else { return }
         stopRecording()
+        guard let oldURL = recordedFileURL else { return }
+
         let fm = FileManager.default
-        if let sharedDir = fm.containerURL(forSecurityApplicationGroupIdentifier: "group.com.drivestudio.shared") {
-            let sharedURL = sharedDir.appendingPathComponent(url.lastPathComponent)
-            try? fm.removeItem(at: sharedURL)
-            try? fm.copyItem(at: url, to: sharedURL)
+        let rawTitle = soundTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        let displayTitle = rawTitle.isEmpty ? "Voice Recording" : rawTitle
+        let cleanName = displayTitle.replacingOccurrences(of: " ", with: "_").replacingOccurrences(of: "/", with: "_")
+        let finalFilename = "\(cleanName).wav"
+
+        let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let finalDocsURL = docs.appendingPathComponent(finalFilename)
+
+        if oldURL.path != finalDocsURL.path {
+            try? fm.removeItem(at: finalDocsURL)
+            try? fm.moveItem(at: oldURL, to: finalDocsURL)
         }
-        let name = soundTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Voice Recording" : soundTitle
-        onRecordingFinished(name, url)
+
+        // Copy to App Group Shared Container for background triggers
+        if let sharedDir = fm.containerURL(forSecurityApplicationGroupIdentifier: "group.com.drivestudio.shared") {
+            let sharedURL = sharedDir.appendingPathComponent(finalFilename)
+            try? fm.removeItem(at: sharedURL)
+            try? fm.copyItem(at: finalDocsURL, to: sharedURL)
+        }
+
+        onRecordingFinished(displayTitle, finalDocsURL)
         dismiss()
     }
 }

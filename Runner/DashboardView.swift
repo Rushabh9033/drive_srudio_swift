@@ -22,12 +22,32 @@ struct DashboardView: View {
             VStack(alignment: .leading, spacing: 0) {
 
                 // ── Header ───────────────────────────────────────────
-                VStack(alignment: .leading, spacing: 4) {
-                    MonoLabel(text: "Instrument cluster")
-                    Text("Drive Studio")
-                        .font(.system(size: 32, weight: .bold))
-                        .tracking(-1)
-                        .foregroundColor(DriveColors.foreground)
+                HStack(alignment: .center) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        MonoLabel(text: "Instrument cluster")
+                        Text("Drive Studio")
+                            .font(.system(size: 32, weight: .bold))
+                            .tracking(-1)
+                            .foregroundColor(DriveColors.foreground)
+                    }
+                    Spacer()
+                    Button(action: {
+                        if let url = URL(string: "https://www.icloud.com/shortcuts/0c111a625ad34db185cfe6556fe87323") {
+                            UIApplication.shared.open(url)
+                        }
+                    }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "bolt.shield.fill")
+                                .font(.system(size: 12))
+                            Text("⚡ Shortcut")
+                                .font(.system(size: 13, weight: .bold))
+                        }
+                        .foregroundColor(DriveColors.primaryFg)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                        .background(DriveColors.primary)
+                        .cornerRadius(999)
+                    }
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 20)
@@ -44,7 +64,13 @@ struct DashboardView: View {
                                     .foregroundColor(DriveColors.foreground)
                             }
                             Spacer()
-                            DrivePill(label: "Synced")
+                            Button(action: {
+                                if let url = URL(string: "https://www.icloud.com/shortcuts/0c111a625ad34db185cfe6556fe87323") {
+                                    UIApplication.shared.open(url)
+                                }
+                            }) {
+                                DrivePill(label: "⚡ Install Shortcut", selected: true)
+                            }
                         }
 
                         Text("Battery \(store.batteryPercent)% · \(store.isCharging ? "charging · " : "")car linked · GPS speed available")

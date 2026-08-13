@@ -8,6 +8,7 @@ struct SettingsScreenView: View {
     @State private var playSoundsOnCarLink = true
     @State private var playbackOutput = "iPhone"
     @State private var showClearConfirm = false
+    @State private var showAutomationGuide = false
 
     private let playbackOptions = ["iPhone", "Car Audio", "Both"]
 
@@ -146,13 +147,11 @@ struct SettingsScreenView: View {
 
                         HStack(spacing: 12) {
                             Button(action: {
-                                if let url = URL(string: "https://www.icloud.com/shortcuts/eca5e9434e324ffeb0a77b16445f4d1b") {
-                                    UIApplication.shared.open(url)
-                                }
+                                showAutomationGuide = true
                             }) {
                                 HStack(spacing: 6) {
-                                    Image(systemName: "square.and.arrow.down.fill")
-                                    Text("Re-Import Shortcut")
+                                    Image(systemName: "book.fill")
+                                    Text("Setup Guide")
                                 }
                                 .font(.system(size: 12, weight: .bold))
                                 .foregroundColor(DriveColors.foreground)
@@ -291,6 +290,9 @@ struct SettingsScreenView: View {
         .alert("Clear all drafts?", isPresented: $showClearConfirm) {
             Button("Cancel", role: .cancel) {}
             Button("Clear", role: .destructive) {}
+        }
+        .sheet(isPresented: $showAutomationGuide) {
+            AutomationGuideSheet()
         }
     }
 }

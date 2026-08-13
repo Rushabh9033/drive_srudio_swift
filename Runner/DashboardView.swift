@@ -16,6 +16,7 @@ struct DashboardView: View {
     @State private var selectedItem: PhotosPickerItem? = nil
     @State private var activeSlotForMenu: Int? = nil
     @State private var showSlotActionSheet = false
+    @State private var showAutomationGuide = false
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -32,14 +33,12 @@ struct DashboardView: View {
                     }
                     Spacer()
                     Button(action: {
-                        if let url = URL(string: "https://www.icloud.com/shortcuts/eca5e9434e324ffeb0a77b16445f4d1b") {
-                            UIApplication.shared.open(url)
-                        }
+                        showAutomationGuide = true
                     }) {
                         HStack(spacing: 6) {
-                            Image(systemName: "square.and.arrow.down.fill")
+                            Image(systemName: "bolt.fill")
                                 .font(.system(size: 11))
-                            Text("Install Shortcut")
+                            Text("⚡ Auto Setup")
                                 .font(.system(size: 13, weight: .bold))
                         }
                         .foregroundColor(DriveColors.primaryFg)
@@ -267,6 +266,9 @@ struct DashboardView: View {
         .sheet(item: $targetSlotPicker) { target in
             DraftPickerSheet(slotIndex: target.id)
                 .environmentObject(store)
+        }
+        .sheet(isPresented: $showAutomationGuide) {
+            AutomationGuideSheet()
         }
     }
 }

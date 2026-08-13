@@ -74,6 +74,7 @@
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		998A71B5EB4E1FA0055BDF57 /* BackgroundSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47AB8B7726719A01CF486FC5 /* BackgroundSheet.swift */; };
+		9DA41D3B1925C28B4D990BD0 /* guide_step_4.png in Resources */ = {isa = PBXBuildFile; fileRef = 6A13087F4C864B00188DE2BA /* guide_step_4.png */; };
 		9FAD0C1E8E1F3DE899EF5DE7 /* 01_connect_welcome_back.wav in Resources */ = {isa = PBXBuildFile; fileRef = 763D3AD8D1573770D41ABFBA /* 01_connect_welcome_back.wav */; };
 		A1B2C3D41E5F6071809A0B01 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D41E5F6071809A0B00 /* PrivacyInfo.xcprivacy */; };
 		A3A581727F05425B9E860E91 /* soft-exit.wav in Resources */ = {isa = PBXBuildFile; fileRef = E2B29AC95B8576F75170E97C /* soft-exit.wav */; };
@@ -87,6 +88,7 @@
 		B2C3D4E5F67890123456789A /* DrawingCanvasSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345678 /* DrawingCanvasSheet.swift */; };
 		B41FD6CBA49BD94892F55BBD /* WidgetModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D812EB2ED810ACC94AE7431C /* WidgetModels.swift */; };
 		B4B90838EA7E2BD2464B7EBA /* 07_connect_adventure_begins.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1D6A052860F42AEEC4C4EF66 /* 07_connect_adventure_begins.wav */; };
+		B79F0CD3275435924AF8C16C /* guide_step_3.png in Resources */ = {isa = PBXBuildFile; fileRef = 9A6E4D54E0227CFE192FC27F /* guide_step_3.png */; };
 		BBA349E5D9B9D368674BCACE /* marker.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6A9810096AAF72C6AD5F08FB /* marker.wav */; };
 		C2D994AEC0E2E21B8F928D3E /* power-down.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8E9E62C0E765347DD0E9D153 /* power-down.wav */; };
 		C65963FA3A3757C58BAD79C4 /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79864484595DAE6B646A2E07 /* HomeScreen.swift */; };
@@ -100,6 +102,7 @@
 		D2A5C06F9F342B0D97AAAAE2 /* 29_connect_subaru_wrx.wav in Resources */ = {isa = PBXBuildFile; fileRef = 7AAE4D217131E53A0F847F9D /* 29_connect_subaru_wrx.wav */; };
 		D2C54551391E88D3FFD39993 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE69FBB06C2457F2C23E1F77 /* SettingsScreen.swift */; };
 		D2E3F4A5B67890123456789A /* TTSVoiceGeneratorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6789012345678 /* TTSVoiceGeneratorSheet.swift */; };
+		D6F44E077B95D25BAA1550E8 /* guide_step_2.png in Resources */ = {isa = PBXBuildFile; fileRef = A0811F0B73FD38DB550CF69F /* guide_step_2.png */; };
 		DBC3CB629E3DE7B2E4FB5A83 /* harbor-bell.wav in Resources */ = {isa = PBXBuildFile; fileRef = C0E3B00DE4BFA8BB6FFEA3EF /* harbor-bell.wav */; };
 		DF16FC7391F42EF1BD917A3E /* rise.wav in Resources */ = {isa = PBXBuildFile; fileRef = F6B727283CE128DC46E857EA /* rise.wav */; };
 		DF589848254A1446B34BCDDC /* gentle-ping.wav in Resources */ = {isa = PBXBuildFile; fileRef = DBFC374036CC29F70B8B4273 /* gentle-ping.wav */; };
@@ -107,6 +110,7 @@
 		E6668230824663CCAD89B7AB /* GalleryScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5ABD0E5712568291A74A550 /* GalleryScreen.swift */; };
 		E84CB377CB0AC136FA1A721D /* 07_disconnect_nice_parking.wav in Resources */ = {isa = PBXBuildFile; fileRef = 30658C1F197BEC8436AC46F8 /* 07_disconnect_nice_parking.wav */; };
 		EC07B1FFE41ACB3B18007998 /* 02_disconnect_phone_keys_wallet.wav in Resources */ = {isa = PBXBuildFile; fileRef = 767241B6BAA59919F37F2347 /* 02_disconnect_phone_keys_wallet.wav */; };
+		EDF14000F492122BC308CA33 /* guide_step_1.png in Resources */ = {isa = PBXBuildFile; fileRef = 2880B0FE2C88E92390F23A02 /* guide_step_1.png */; };
 		EFA070FEB644C0AACD8AD155 /* glass-tap.wav in Resources */ = {isa = PBXBuildFile; fileRef = DA764439FB91ABEB11A3777C /* glass-tap.wav */; };
 		F2290024A27848D780DDDAAE /* night-close.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3964373A1683411BDE3204D9 /* night-close.wav */; };
 		F2A3B4C5D67890123456789A /* MicRecorderSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D6789012345678 /* MicRecorderSheet.swift */; };
@@ -174,6 +178,7 @@
 		21B0D72DFA826D81CF899A78 /* 08_disconnect_check_back_seat.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 08_disconnect_check_back_seat.wav; sourceTree = "<group>"; };
 		22BCAAA79114361AF6BA8148 /* StockWidgetArchitecture.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StockWidgetArchitecture.swift; sourceTree = "<group>"; };
 		2324481032B66C10077DA831 /* 26_connect_nissan_gtr.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 26_connect_nissan_gtr.wav; sourceTree = "<group>"; };
+		2880B0FE2C88E92390F23A02 /* guide_step_1.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = guide_step_1.png; sourceTree = "<group>"; };
 		290DE2509893E8C531F9AF3C /* LayerSettingsSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LayerSettingsSheet.swift; sourceTree = "<group>"; };
 		2A6D5D3330232AC7000A9968 /* DriveStudioWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DriveStudioWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A6D5D3530232AC7000A9968 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -200,6 +205,7 @@
 		60E7D0E67750888581B833AE /* WidgetLibrarySheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetLibrarySheet.swift; sourceTree = "<group>"; };
 		66C4B475FF4A412F93387BC2 /* 15_connect_jaguar_f_type.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 15_connect_jaguar_f_type.wav; sourceTree = "<group>"; };
 		68E3083BE29710E5409B7FF7 /* summit-ping.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = "summit-ping.wav"; sourceTree = "<group>"; };
+		6A13087F4C864B00188DE2BA /* guide_step_4.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = guide_step_4.png; sourceTree = "<group>"; };
 		6A9810096AAF72C6AD5F08FB /* marker.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = marker.wav; sourceTree = "<group>"; };
 		74677FC852851195498D7484 /* 10_disconnect_vehicle_secured.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 10_disconnect_vehicle_secured.wav; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -227,8 +233,10 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9A6E4D54E0227CFE192FC27F /* guide_step_3.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = guide_step_3.png; sourceTree = "<group>"; };
 		9B543EB3B2C3D35EDE893DAD /* 24_connect_mclaren_750s.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 24_connect_mclaren_750s.wav; sourceTree = "<group>"; };
 		9E2520233FD423333D4419D5 /* 20_connect_lexus_lc_500.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 20_connect_lexus_lc_500.wav; sourceTree = "<group>"; };
+		A0811F0B73FD38DB550CF69F /* guide_step_2.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = guide_step_2.png; sourceTree = "<group>"; };
 		A14994ED5717889053146BE8 /* 18_connect_lamborghini_huracan.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 18_connect_lamborghini_huracan.wav; sourceTree = "<group>"; };
 		A1B2C3D41E5F6071809A0B00 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A1B2C3D4E5F6789012345678 /* DrawingCanvasSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DrawingCanvasSheet.swift; sourceTree = "<group>"; };
@@ -437,6 +445,10 @@
 				22BCAAA79114361AF6BA8148 /* StockWidgetArchitecture.swift */,
 				ED175CE871F6C026551BC5E8 /* StockWidgetCatalog.swift */,
 				AC4DD85EE7E168DA5FD14964 /* AutomationGuideSheet.swift */,
+				2880B0FE2C88E92390F23A02 /* guide_step_1.png */,
+				A0811F0B73FD38DB550CF69F /* guide_step_2.png */,
+				9A6E4D54E0227CFE192FC27F /* guide_step_3.png */,
+				6A13087F4C864B00188DE2BA /* guide_step_4.png */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -716,6 +728,10 @@
 				A3A581727F05425B9E860E91 /* soft-exit.wav in Resources */,
 				F39812E486D3886B2C755CBC /* spark-line.wav in Resources */,
 				54AFEA0AD5992E0C14CBD257 /* summit-ping.wav in Resources */,
+				EDF14000F492122BC308CA33 /* guide_step_1.png in Resources */,
+				D6F44E077B95D25BAA1550E8 /* guide_step_2.png in Resources */,
+				B79F0CD3275435924AF8C16C /* guide_step_3.png in Resources */,
+				9DA41D3B1925C28B4D990BD0 /* guide_step_4.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

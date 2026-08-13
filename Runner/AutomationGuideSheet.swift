@@ -72,7 +72,8 @@ struct AutomationGuideSheet: View {
                             stepNumber: "1",
                             title: "Open Shortcuts -> Automation Tab",
                             description: "Open Shortcuts App on your iPhone and tap the 'Automation' tab at the bottom middle. Tap 'New Automation' (or '+' icon at the top right if you already have existing automations).",
-                            icon: "clock.fill"
+                            icon: "clock.fill",
+                            imageName: "guide_step_1"
                         )
 
                         // Step 2
@@ -80,24 +81,60 @@ struct AutomationGuideSheet: View {
                             stepNumber: "2",
                             title: "Search & Select 'CarPlay'",
                             description: "Search for 'CarPlay' in the search bar and tap 'CarPlay (\"When CarPlay is connected\")'.",
-                            icon: "car.fill"
+                            icon: "car.fill",
+                            imageName: "guide_step_2"
                         )
 
                         // Step 3
                         GuideStepRow(
                             stepNumber: "3",
                             title: "Select 'Is Connected' & 'Run Immediately'",
-                            description: "Select 'Is Connected' for Connect (or 'Is Disconnected' for Disconnect). Select 'Run Immediately' and tap 'Next' at the top right.",
-                            icon: "bolt.fill"
+                            description: "Select 'Is Connected' [1], check 'Run Immediately' [2], and tap 'Next' at the top right [3].",
+                            icon: "bolt.fill",
+                            imageName: "guide_step_3"
                         )
 
                         // Step 4
                         GuideStepRow(
                             stepNumber: "4",
                             title: "Search 'Drive Studio' & Choose Cue",
-                            description: "Search for 'Drive Studio' in the action bar. Choose 'Play Connect Cue' (or 'Status' / 'Refresh Widget') -> Tap Done! (Repeat same steps tapping '+' for Disconnect Cue).",
-                            icon: "speaker.wave.2.fill"
+                            description: "Search for 'Drive Studio' in the action bar [1] and tap 'Play Connect Cue' [2] (or 'Refresh Widget' / 'Status') -> Tap Done!",
+                            icon: "speaker.wave.2.fill",
+                            imageName: "guide_step_4"
                         )
+
+                        Divider().background(DriveColors.border).padding(.vertical, 8)
+
+                        // Disconnect Callout Card
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "power")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(DriveColors.destructive)
+                                Text("Setting Up Disconnect Sound Automation")
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundColor(DriveColors.foreground)
+                            }
+
+                            Text("To set up the Disconnect Sound when you unplug from your vehicle:")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(DriveColors.foreground)
+
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("• Tap '+' in the Automations tab to add a new automation.")
+                                Text("• Search and select 'CarPlay'.")
+                                Text("• In Step 3: UNCHECK 'Is Connected' and CHECK 'Is Disconnected'.")
+                                Text("• Set 'Run Immediately' -> Tap Next.")
+                                Text("• In Step 4: Search 'Drive Studio' and select 'Play Disconnect Cue' -> Tap Done!")
+                            }
+                            .font(.system(size: 12))
+                            .lineSpacing(3)
+                            .foregroundColor(DriveColors.mutedFg)
+                        }
+                        .padding(.all, 14)
+                        .background(DriveColors.carbon)
+                        .cornerRadius(12)
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(DriveColors.border, lineWidth: 1))
 
                         Spacer().frame(height: 10)
 
@@ -134,32 +171,45 @@ struct GuideStepRow: View {
     let title: String
     let description: String
     let icon: String
+    var imageName: String? = nil
 
     var body: some View {
-        HStack(alignment: .top, spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(DriveColors.primary.opacity(0.15))
-                    .frame(width: 36, height: 36)
-                Text(stepNumber)
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(DriveColors.primary)
-            }
-
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
-                    Image(systemName: icon)
-                        .font(.system(size: 13))
-                        .foregroundColor(DriveColors.primary)
-                    Text(title)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 14) {
+                ZStack {
+                    Circle()
+                        .fill(DriveColors.primary.opacity(0.15))
+                        .frame(width: 36, height: 36)
+                    Text(stepNumber)
                         .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(DriveColors.foreground)
+                        .foregroundColor(DriveColors.primary)
                 }
 
-                Text(description)
-                    .font(.system(size: 13))
-                    .lineSpacing(3)
-                    .foregroundColor(DriveColors.mutedFg)
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 6) {
+                        Image(systemName: icon)
+                            .font(.system(size: 13))
+                            .foregroundColor(DriveColors.primary)
+                        Text(title)
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(DriveColors.foreground)
+                    }
+
+                    Text(description)
+                        .font(.system(size: 13))
+                        .lineSpacing(3)
+                        .foregroundColor(DriveColors.mutedFg)
+                }
+            }
+
+            if let imageName = imageName, let uiImage = UIImage(named: imageName) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFit()
+                    .cornerRadius(10)
+                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(DriveColors.border, lineWidth: 1))
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 4)
             }
         }
         .padding(.all, 14)

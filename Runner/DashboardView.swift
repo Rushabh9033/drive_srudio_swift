@@ -37,9 +37,9 @@ struct DashboardView: View {
                         }
                     }) {
                         HStack(spacing: 6) {
-                            Image(systemName: "bolt.shield.fill")
-                                .font(.system(size: 12))
-                            Text("⚡ Shortcut")
+                            Image(systemName: "square.and.arrow.down.fill")
+                                .font(.system(size: 11))
+                            Text("Install Shortcut")
                                 .font(.system(size: 13, weight: .bold))
                         }
                         .foregroundColor(DriveColors.primaryFg)
@@ -64,13 +64,7 @@ struct DashboardView: View {
                                     .foregroundColor(DriveColors.foreground)
                             }
                             Spacer()
-                            Button(action: {
-                                if let url = URL(string: "https://www.icloud.com/shortcuts/0c111a625ad34db185cfe6556fe87323") {
-                                    UIApplication.shared.open(url)
-                                }
-                            }) {
-                                DrivePill(label: "⚡ Install Shortcut", selected: true)
-                            }
+                            DrivePill(label: "Synced")
                         }
 
                         Text("Battery \(store.batteryPercent)% · \(store.isCharging ? "charging · " : "")car linked · GPS speed available")

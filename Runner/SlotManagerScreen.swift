@@ -15,27 +15,39 @@ struct SlotManagerScreen: View {
             ZStack {
                 DriveColors.background.ignoresSafeArea()
                 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 24) {
-                        Text("Manage your 4 active home screen widgets.")
-                            .font(.system(size: 14))
-                            .foregroundColor(DriveColors.mutedFg)
-                            .padding(.horizontal, 20)
-                        
+                VStack(spacing: 0) {
+                    Text("Drag slots to reorder. Position 1 automatically displays on CarPlay.")
+                        .font(.system(size: 13))
+                        .foregroundColor(DriveColors.mutedFg)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 12)
+                        .padding(.bottom, 8)
+                    
+                    List {
                         ForEach(0..<4, id: \.self) { i in
                             SlotManagerRow(
                                 index: i,
                                 draftId: store.slots[i],
                                 onAssign: { targetSlot = SlotPickerTarget(id: i) }
                             )
+                            .listRowBackground(DriveColors.background)
+                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        }
+                        .onMove { indices, newOffset in
+                            store.moveSlots(fromOffsets: indices, toOffset: newOffset)
                         }
                     }
-                    .padding(.vertical, 24)
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
                 }
             }
             .navigationTitle("Manage Slots")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    EditButton()
+                        .foregroundColor(DriveColors.primary)
+                }
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") { dismiss() }
                 }

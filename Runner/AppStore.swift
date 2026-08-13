@@ -182,6 +182,11 @@ class AppStore: ObservableObject {
         slots[index] = draftId
         saveState()
     }
+
+    func moveSlots(fromOffsets: IndexSet, toOffset: Int) {
+        slots.move(fromOffsets: fromOffsets, toOffset: toOffset)
+        saveState()
+    }
     
     func saveDraft(_ draft: Draft) {
         if let index = drafts.firstIndex(where: { $0.id == draft.id }) {

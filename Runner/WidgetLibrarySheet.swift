@@ -66,72 +66,7 @@ struct WidgetLibrarySheet: View {
                         dismiss: dismiss
                     )
                     
-                    // ── 2. Cockpit Telemetry Pods & Modules ──────────────────
-                    SectionView(
-                        title: "Cockpit Telemetry Modules",
-                        subtitle: "Detailed multi-layered stat cards and pods",
-                        items: [
-                            LibraryItem(name: "Glass Battery Pod", layers: [
-                                WidgetLayer(id: UUID().uuidString, kind: "shape", label: "rect", x: 5, y: 25, w: 90, h: 50, color: "FFFFFF", opacity: 0.1, radius: 18),
-                                WidgetLayer(id: UUID().uuidString, kind: "text", text: "SYSTEM BATTERY", x: 10, y: 32, w: 80, h: 8, fontSize: 9, weight: 700, align: "center", color: "A0A0A0"),
-                                WidgetLayer(id: UUID().uuidString, kind: "battery", x: 10, y: 44, w: 80, h: 22, fontSize: 24, weight: 900, align: "center", color: "4DC98A")
-                            ]),
-                            LibraryItem(name: "Speedometer Gauge Pod", layers: [
-                                WidgetLayer(id: UUID().uuidString, kind: "shape", label: "circle", x: 15, y: 10, w: 70, h: 70, color: "181824", opacity: 1.0, radius: 35),
-                                WidgetLayer(id: UUID().uuidString, kind: "shape", label: "ring", x: 18, y: 13, w: 64, h: 64, color: "F59E0B", opacity: 0.9, radius: 32),
-                                WidgetLayer(id: UUID().uuidString, kind: "speed", x: 20, y: 28, w: 60, h: 18, fontSize: 22, weight: 900, align: "center", color: "FFFFFF"),
-                                WidgetLayer(id: UUID().uuidString, kind: "text", text: "KM/H", x: 20, y: 50, w: 60, h: 8, fontSize: 9, weight: 800, align: "center", color: "F59E0B")
-                            ]),
-                            LibraryItem(name: "Cyber Time & Date Bar", layers: [
-                                WidgetLayer(id: UUID().uuidString, kind: "shape", label: "rect", x: 5, y: 30, w: 90, h: 40, color: "0A0A12", opacity: 0.9, radius: 14),
-                                WidgetLayer(id: UUID().uuidString, kind: "clock", x: 10, y: 36, w: 40, h: 16, fontSize: 18, weight: 800, align: "left", color: "FFFFFF"),
-                                WidgetLayer(id: UUID().uuidString, kind: "date", x: 52, y: 40, w: 38, h: 12, fontSize: 10, weight: 600, align: "right", color: "00FFFF")
-                            ]),
-                            LibraryItem(name: "Carbon Drive Badge", layers: [
-                                WidgetLayer(id: UUID().uuidString, kind: "shape", label: "rect", x: 5, y: 15, w: 90, h: 70, color: "1A1A22", opacity: 1.0, radius: 16),
-                                WidgetLayer(id: UUID().uuidString, kind: "text", text: "NIGHT DRIVE", x: 10, y: 20, w: 80, h: 8, fontSize: 9, weight: 800, align: "left", color: "FFB84D"),
-                                WidgetLayer(id: UUID().uuidString, kind: "image", src: "template_car", x: 12, y: 30, w: 76, h: 28),
-                                WidgetLayer(id: UUID().uuidString, kind: "battery", x: 10, y: 62, w: 80, h: 14, fontSize: 14, weight: 700, align: "center", color: "4DC98A")
-                            ]),
-                            LibraryItem(name: "Dual Telemetry Pod", layers: [
-                                WidgetLayer(id: UUID().uuidString, kind: "shape", label: "rect", x: 5, y: 25, w: 90, h: 50, color: "000000", opacity: 0.6, radius: 16),
-                                WidgetLayer(id: UUID().uuidString, kind: "battery", x: 10, y: 38, w: 38, h: 16, fontSize: 16, weight: 800, align: "center", color: "4DC98A"),
-                                WidgetLayer(id: UUID().uuidString, kind: "speed", x: 52, y: 38, w: 38, h: 16, fontSize: 16, weight: 800, align: "center", color: "F59E0B"),
-                                WidgetLayer(id: UUID().uuidString, kind: "text", text: "POWER", x: 10, y: 58, w: 38, h: 6, fontSize: 8, weight: 600, align: "center", color: "888888"),
-                                WidgetLayer(id: UUID().uuidString, kind: "text", text: "SPEED", x: 52, y: 58, w: 38, h: 6, fontSize: 8, weight: 600, align: "center", color: "888888")
-                            ])
-                        ],
-                        onSelect: onSelect,
-                        dismiss: dismiss
-                    )
-                    
-                    // ── 3. Live Indicators & Gauges ──────────────────────────
-                    SectionView(
-                        title: "Live Gauges & Indicators",
-                        subtitle: "Real-time telemetry indicators",
-                        items: [
-                            LibraryItem(name: "Live Battery Ring", layers: [
-                                WidgetLayer(id: UUID().uuidString, kind: "shape", label: "ring", x: 25, y: 15, w: 50, h: 50, color: "4DC98A", radius: 25),
-                                WidgetLayer(id: UUID().uuidString, kind: "battery", x: 25, y: 32, w: 50, h: 16, fontSize: 16, weight: 800, align: "center", color: "FFFFFF"),
-                                WidgetLayer(id: UUID().uuidString, kind: "text", text: "BATTERY", x: 20, y: 70, w: 60, h: 8, fontSize: 9, weight: 700, align: "center", color: "4DC98A")
-                            ]),
-                            LibraryItem(name: "Digital Speedometer Cluster", layers: [
-                                WidgetLayer(id: UUID().uuidString, kind: "speed", x: 10, y: 20, w: 80, h: 32, fontSize: 36, weight: 900, align: "center", color: "F59E0B"),
-                                WidgetLayer(id: UUID().uuidString, kind: "text", text: "CURRENT SPEED (KM/H)", x: 10, y: 58, w: 80, h: 8, fontSize: 8, weight: 700, align: "center", color: "FFFFFF")
-                            ]),
-                            LibraryItem(name: "Digital Time & Date Stack", layers: [
-                                WidgetLayer(id: UUID().uuidString, kind: "clock", x: 10, y: 20, w: 80, h: 28, fontSize: 32, weight: 800, align: "center", color: "FFFFFF"),
-                                WidgetLayer(id: UUID().uuidString, kind: "date", x: 10, y: 52, w: 80, h: 12, fontSize: 12, weight: 600, align: "center", color: "00FFFF")
-                            ]),
-                            LibraryItem(name: "Analog Clock Pod", layers: [
-                                WidgetLayer(id: UUID().uuidString, kind: "analog", x: 20, y: 15, w: 60, h: 60, color: "FFB84D", opacity: 1.0),
-                                WidgetLayer(id: UUID().uuidString, kind: "text", text: "TIME", x: 20, y: 78, w: 60, h: 8, fontSize: 9, weight: 700, align: "center", color: "FFFFFF")
-                            ])
-                        ],
-                        onSelect: onSelect,
-                        dismiss: dismiss
-                    )
-                    
+
 
 
                     // ── 6. Telemetry & Cockpit Dashboard Widgets (18 Widgets) ─
@@ -292,29 +227,7 @@ struct WidgetLibrarySheet: View {
                         dismiss: dismiss
                     )
 
-                    // ── 4. Design Accents & Glass Containers ─────────────────
-                    SectionView(
-                        title: "Design Containers & Accents",
-                        subtitle: "Glass plates, background cards, and dividers",
-                        items: [
-                            LibraryItem(name: "Frosted Glass Plate", layers: [
-                                WidgetLayer(id: UUID().uuidString, kind: "shape", label: "rect", x: 5, y: 15, w: 90, h: 70, color: "FFFFFF", opacity: 0.08, radius: 18)
-                            ]),
-                            LibraryItem(name: "Carbon Background Card", layers: [
-                                WidgetLayer(id: UUID().uuidString, kind: "shape", label: "rect", x: 5, y: 15, w: 90, h: 70, color: "181822", opacity: 0.95, radius: 18)
-                            ]),
-                            LibraryItem(name: "Neon Divider Line", layers: [
-                                WidgetLayer(id: UUID().uuidString, kind: "shape", label: "rect", x: 10, y: 48, w: 80, h: 4, color: "FFB84D", opacity: 0.9, radius: 2)
-                            ]),
-                            LibraryItem(name: "Cyber Tag Badge", layers: [
-                                WidgetLayer(id: UUID().uuidString, kind: "shape", label: "rect", x: 15, y: 35, w: 70, h: 30, color: "FF007F", opacity: 0.2, radius: 15),
-                                WidgetLayer(id: UUID().uuidString, kind: "text", text: "LIVE TELEMETRY", x: 15, y: 44, w: 70, h: 12, fontSize: 9, weight: 800, align: "center", color: "FF007F")
-                            ])
-                        ],
-                        onSelect: onSelect,
-                        dismiss: dismiss
-                    )
-                    
+
                 }
                 .padding(.vertical, 20)
             }

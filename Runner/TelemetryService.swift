@@ -134,7 +134,7 @@ import AVFoundation
     }
     
     // MARK: - Save Telemetry Snapshot
-    private func snapshotAndSave() {
+    func snapshotAndSave() {
         let device = UIDevice.current
         let level = device.batteryLevel
         let batteryPercent = level >= 0 ? Int(level * 100) : nil

@@ -11,22 +11,70 @@ class AppStore: ObservableObject {
     @Published var vehicleImage: UIImage? = nil
     @Published var drafts: [Draft] = []
 
+    @Published var liveBatteryPercent: Int = 100
+    @Published var liveIsCharging: Bool = false
+    @Published var liveTimeString: String = ""
+
     private let suiteName = "group.com.drivestudio.shared"
     private let draftsKey = "drive_studio_drafts"
+    private var refreshTimer: Timer? = nil
 
     private init() {
         UIDevice.current.isBatteryMonitoringEnabled = true
         loadState()
+        setupAutoRefresh()
     }
 
     var batteryPercent: Int {
-        let level = UIDevice.current.batteryLevel
-        return level >= 0 ? Int(level * 100) : 82
+        return liveBatteryPercent
     }
 
     var isCharging: Bool {
+        return liveIsCharging
+    }
+
+    func setupAutoRefresh() {
+        refreshDeviceTelemetry()
+        
+        NotificationCenter.default.addObserver(forName: UIDevice.batteryLevelDidChangeNotification, object: nil, queue: .main) { [weak self] _ in
+            self?.refreshDeviceTelemetry()
+        }
+        NotificationCenter.default.addObserver(forName: UIDevice.batteryStateDidChangeNotification, object: nil, queue: .main) { [weak self] _ in
+            self?.refreshDeviceTelemetry()
+        }
+        NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { [weak self] _ in
+            self?.refreshDeviceTelemetry()
+        }
+
+        refreshTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                self?.refreshDeviceTelemetry()
+            }
+        }
+    }
+
+    func refreshDeviceTelemetry() {
+        UIDevice.current.isBatteryMonitoringEnabled = true
+        let rawLevel = UIDevice.current.batteryLevel
+        let level = rawLevel >= 0 ? Int(round(rawLevel * 100)) : 100
         let state = UIDevice.current.batteryState
-        return state == .charging || state == .full
+        let charging = (state == .charging || state == .full)
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        let currentTime = formatter.string(from: Date())
+
+        if self.liveBatteryPercent != level {
+            self.liveBatteryPercent = level
+        }
+        if self.liveIsCharging != charging {
+            self.liveIsCharging = charging
+        }
+        if self.liveTimeString != currentTime {
+            self.liveTimeString = currentTime
+        }
+
+        TelemetryService.shared.snapshotAndSave()
     }
 
     let validTemplates = ["Apex", "Neon Grid", "Minimal", "Carbon", "Charge Arc", "Bolt Pill", "Power Ring", "Cell Bar", "Apex Gauge", "Dial", "Velocity", "Track"]

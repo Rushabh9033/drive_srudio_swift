@@ -38,7 +38,7 @@ struct DashboardView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
-                                MonoLabel(text: "Device telemetry")
+                                MonoLabel(text: store.liveTimeString.isEmpty ? "Device telemetry" : "LIVE TELEMETRY · \(store.liveTimeString)")
                                 Text("Live from this iPhone")
                                     .font(.system(size: 15, weight: .semibold))
                                     .foregroundColor(DriveColors.foreground)
@@ -53,14 +53,15 @@ struct DashboardView: View {
                             .foregroundColor(DriveColors.mutedFg)
 
                         HStack(spacing: 16) {
-                            MetricBar(icon: "battery.100",
+                            MetricBar(icon: store.isCharging ? "battery.100.bolt" : "battery.100",
                                       label: "Battery",
                                       value: "\(store.batteryPercent)%",
                                       progress: Double(store.batteryPercent) / 100)
+                            let currentSpeed = Int(TelemetryService.shared.currentSpeed)
                             MetricBar(icon: "gauge.with.dots.needle.bottom.50percent",
                                       label: "GPS speed",
-                                      value: "-- km/h",
-                                      progress: 0)
+                                      value: currentSpeed > 0 ? "\(currentSpeed) km/h" : "-- km/h",
+                                      progress: min(Double(currentSpeed) / 240.0, 1.0))
                         }
                     }
                 }

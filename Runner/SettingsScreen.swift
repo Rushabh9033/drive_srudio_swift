@@ -9,6 +9,8 @@ struct SettingsScreenView: View {
     @State private var playbackOutput = "iPhone"
     @State private var showClearConfirm = false
     @State private var showAutomationGuide = false
+    @State private var alertMessage = ""
+    @State private var showAlertMessage = false
 
     private let playbackOptions = ["iPhone", "Car Audio", "Both"]
 
@@ -125,17 +127,72 @@ struct SettingsScreenView: View {
                             .padding(.top, 4)
                             .padding(.bottom, 8)
 
-                        ForEach(["Export drafts to clipboard", "Import drafts from clipboard",
-                                 "Clear custom vehicle image", "Reset introduction"], id: \.self) { action in
-                            Button(action: {}) {
-                                Text(action)
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(DriveColors.foreground)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.vertical, 12)
+                        Button(action: {
+                            if let data = try? JSONEncoder().encode(store.drafts),
+                               let json = String(data: data, encoding: .utf8) {
+                                UIPasteboard.general.string = json
+                                alertMessage = "Exported \(store.drafts.count) draft(s) to clipboard!"
+                                showAlertMessage = true
+                            } else {
+                                alertMessage = "No drafts available to export."
+                                showAlertMessage = true
                             }
-                            Divider().background(DriveColors.border)
+                        }) {
+                            Text("Export drafts to clipboard")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(DriveColors.foreground)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.vertical, 12)
                         }
+                        Divider().background(DriveColors.border)
+
+                        Button(action: {
+                            if let json = UIPasteboard.general.string,
+                               let data = json.data(using: .utf8),
+                               let importedDrafts = try? JSONDecoder().decode([Draft].self, from: data) {
+                                for d in importedDrafts {
+                                    store.saveDraft(d)
+                                }
+                                alertMessage = "Successfully imported \(importedDrafts.count) draft(s)!"
+                                showAlertMessage = true
+                            } else {
+                                alertMessage = "Clipboard does not contain valid draft JSON."
+                                showAlertMessage = true
+                            }
+                        }) {
+                            Text("Import drafts from clipboard")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(DriveColors.foreground)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.vertical, 12)
+                        }
+                        Divider().background(DriveColors.border)
+
+                        Button(action: {
+                            store.clearCustomVehicleImage()
+                            alertMessage = "Custom vehicle image cleared!"
+                            showAlertMessage = true
+                        }) {
+                            Text("Clear custom vehicle image")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(DriveColors.foreground)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.vertical, 12)
+                        }
+                        Divider().background(DriveColors.border)
+
+                        Button(action: {
+                            UserDefaults.standard.set(false, forKey: "has_seen_intro")
+                            alertMessage = "Introduction reset!"
+                            showAlertMessage = true
+                        }) {
+                            Text("Reset introduction")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(DriveColors.foreground)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.vertical, 12)
+                        }
+                        Divider().background(DriveColors.border)
 
                         Button(action: { showClearConfirm = true }) {
                             Text("Clear drafts")
@@ -220,7 +277,16 @@ struct SettingsScreenView: View {
         .background(DriveColors.background)
         .alert("Clear all drafts?", isPresented: $showClearConfirm) {
             Button("Cancel", role: .cancel) {}
-            Button("Clear", role: .destructive) {}
+            Button("Clear", role: .destructive) {
+                store.clearAllDrafts()
+                alertMessage = "All drafts cleared!"
+                showAlertMessage = true
+            }
+        } message: {
+            Text("This will permanently remove all your saved widget drafts.")
+        }
+        .alert(alertMessage, isPresented: $showAlertMessage) {
+            Button("OK", role: .cancel) {}
         }
         .sheet(isPresented: $showAutomationGuide) {
             AutomationGuideSheet()

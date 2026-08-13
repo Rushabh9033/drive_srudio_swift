@@ -207,6 +207,31 @@ class AppStore: ObservableObject {
         saveState()
     }
 
+    func clearAllDrafts() {
+        drafts.removeAll()
+        slots = [nil, nil, nil, nil]
+        saveState()
+    }
+
+    func clearCustomVehicleImage() {
+        self.vehicleImage = nil
+        let filename = "home_vehicle.png"
+
+        if let sharedURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: suiteName) {
+            let sharedImagesURL = sharedURL.appendingPathComponent("SharedImages").appendingPathComponent(filename)
+            try? FileManager.default.removeItem(at: sharedImagesURL)
+            let sharedRootURL = sharedURL.appendingPathComponent(filename)
+            try? FileManager.default.removeItem(at: sharedRootURL)
+        }
+
+        if let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            let fileURL = docs.appendingPathComponent(filename)
+            try? FileManager.default.removeItem(at: fileURL)
+        }
+
+        saveState()
+    }
+
     func saveState() {
         let defaults = UserDefaults(suiteName: suiteName) ?? UserDefaults.standard
         if let data = try? JSONEncoder().encode(drafts) {

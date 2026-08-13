@@ -65,6 +65,48 @@ struct AutomationGuideSheet: View {
                         .cornerRadius(12)
                         .overlay(RoundedRectangle(cornerRadius: 12).stroke(DriveColors.primary.opacity(0.4), lineWidth: 1))
 
+                        // Active Sound Cues Header Summary Card
+                        let connectSound = UserDefaults(suiteName: "group.com.drivestudio.shared")?.string(forKey: "trigger_Connect") ?? "Welcome Back"
+                        let disconnectSound = UserDefaults(suiteName: "group.com.drivestudio.shared")?.string(forKey: "trigger_Disconnect") ?? "Lock Vehicle"
+
+                        VStack(alignment: .leading, spacing: 10) {
+                            MonoLabel(text: "YOUR ACTIVE SOUND CUES")
+
+                            HStack(spacing: 12) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "link.circle.fill")
+                                        .foregroundColor(DriveColors.primary)
+                                    Text("Connect: ")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(DriveColors.foreground)
+                                    Text(connectSound == "none" ? "Not set" : connectSound)
+                                        .font(.system(size: 12, weight: .semibold))
+                                        .foregroundColor(DriveColors.primary)
+                                }
+                                .padding(.all, 8)
+                                .background(DriveColors.secondary)
+                                .cornerRadius(8)
+
+                                HStack(spacing: 6) {
+                                    Image(systemName: "power")
+                                        .foregroundColor(DriveColors.destructive)
+                                    Text("Disconnect: ")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(DriveColors.foreground)
+                                    Text(disconnectSound == "none" ? "Not set" : disconnectSound)
+                                        .font(.system(size: 12, weight: .semibold))
+                                        .foregroundColor(DriveColors.destructive)
+                                }
+                                .padding(.all, 8)
+                                .background(DriveColors.secondary)
+                                .cornerRadius(8)
+                            }
+                        }
+                        .padding(.all, 12)
+                        .background(DriveColors.carbon)
+                        .cornerRadius(12)
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(DriveColors.border, lineWidth: 1))
+
                         Divider().background(DriveColors.border)
 
                         // Step 1

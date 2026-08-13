@@ -116,32 +116,59 @@ struct SoundsScreenView: View {
                 .padding(.top, 20)
                 .padding(.bottom, 24)
 
-                // Triggers Card
+                // Active Sound Cues Card
                 SurfaceCard {
-                    VStack(alignment: .leading, spacing: 12) {
-                        MonoLabel(text: "Triggers")
-
-                        Spacer().frame(height: 0)
+                    VStack(alignment: .leading, spacing: 14) {
+                        HStack {
+                            MonoLabel(text: "Active Sound Cues")
+                            Spacer()
+                            DrivePill(label: "Assigned")
+                        }
 
                         ForEach(triggers, id: \.self) { trigger in
+                            let assignedName = triggerAssignments[trigger] ?? "None"
+                            let iconName = trigger == "Connect" ? "link.circle.fill" : (trigger == "Disconnect" ? "power" : "bell.fill")
+                            let iconColor = trigger == "Connect" ? DriveColors.primary : (trigger == "Disconnect" ? DriveColors.destructive : Color.orange)
+
                             Button(action: {
                                 selectedTrigger = trigger
                                 if trigger == "Connect" { selectedCategory = "Connect" }
                                 else if trigger == "Disconnect" { selectedCategory = "Disconnect" }
                                 else if trigger == "Reminder" { selectedCategory = "Reminders" }
                             }) {
-                                HStack {
-                                    Text(trigger)
-                                        .font(.system(size: 14, weight: .semibold))
-                                        .foregroundColor(DriveColors.foreground)
+                                HStack(spacing: 12) {
+                                    Image(systemName: iconName)
+                                        .font(.system(size: 16, weight: .bold))
+                                        .foregroundColor(iconColor)
+
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("\(trigger) Sound")
+                                            .font(.system(size: 13, weight: .bold))
+                                            .foregroundColor(DriveColors.foreground)
+                                        Text(assignedName == "none" ? "Not set" : assignedName)
+                                            .font(.system(size: 12, weight: .medium))
+                                            .foregroundColor(assignedName == "none" ? DriveColors.mutedFg : DriveColors.primary)
+                                    }
+
                                     Spacer()
-                                    Text(triggerAssignments[trigger] ?? "none")
-                                        .font(.system(size: 11, weight: .medium, design: .monospaced))
-                                        .foregroundColor(DriveColors.mutedFg)
+
+                                    if selectedTrigger == trigger {
+                                        Text("Active")
+                                            .font(.system(size: 11, weight: .bold))
+                                            .foregroundColor(DriveColors.primaryFg)
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 4)
+                                            .background(DriveColors.primary)
+                                            .cornerRadius(6)
+                                    } else {
+                                        Image(systemName: "chevron.right")
+                                            .font(.system(size: 12, weight: .semibold))
+                                            .foregroundColor(DriveColors.mutedFg)
+                                    }
                                 }
-                                .padding(.horizontal, 16)
+                                .padding(.horizontal, 14)
                                 .padding(.vertical, 12)
-                                .background(selectedTrigger == trigger ? DriveColors.primary.opacity(0.1) : DriveColors.secondary.opacity(0.6))
+                                .background(selectedTrigger == trigger ? DriveColors.primary.opacity(0.12) : DriveColors.secondary.opacity(0.6))
                                 .cornerRadius(12)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 12)

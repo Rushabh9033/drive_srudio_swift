@@ -86,17 +86,29 @@ struct WidgetCanvas: View {
 
                         // ── Layer rendering — uses liveSpec so old "85%" text auto-shows real battery
                         if let layers = liveSpec.layers {
-                        ForEach(layers.indices, id: \.self) { i in
-                            let layer = layers[i]
-                            let w = (CGFloat(layer.w ?? 50) / 100.0) * side
-                            let h = (CGFloat(layer.h ?? 30) / 100.0) * side
-                            let x = (CGFloat(layer.x ?? 0) / 100.0) * side
-                            let y = (CGFloat(layer.y ?? 0) / 100.0) * side
+                            ForEach(layers.indices, id: \.self) { i in
+                                let layer = layers[i]
+                                let w = (CGFloat(layer.w ?? 50) / 100.0) * side
+                                let h = (CGFloat(layer.h ?? 30) / 100.0) * side
+                                let rawX = (CGFloat(layer.x ?? 0) / 100.0) * side
+                                let rawY = (CGFloat(layer.y ?? 0) / 100.0) * side
 
-                            LayerView(layer: layer, canvasSide: side)
-                                .frame(width: w, height: h)
-                                .position(x: x + w / 2, y: y + h / 2)
-                                .allowsHitTesting(false)
+                                let alignStr = layer.align?.lowercased() ?? ""
+                                let centerX: CGFloat = {
+                                    if alignStr == "center" {
+                                        return rawX
+                                    } else if alignStr == "right" || alignStr == "trailing" {
+                                        return rawX - w / 2
+                                    } else {
+                                        return rawX + w / 2
+                                    }
+                                }()
+                                let centerY: CGFloat = rawY + h / 2
+
+                                LayerView(layer: layer, canvasSide: side)
+                                    .frame(width: w, height: h)
+                                    .position(x: centerX, y: centerY)
+                                    .allowsHitTesting(false)
 
                             // Hidden natural-size measurement for text layers
                             if isTextKind(layer.kind) {

@@ -70,6 +70,7 @@
 		90DD926C477FBE21C9E384EC /* 30_connect_volvo_xc90.wav in Resources */ = {isa = PBXBuildFile; fileRef = 52F165366784E29A50F66ECB /* 30_connect_volvo_xc90.wav */; };
 		93770AD3DDEB14EBFC0CC5A9 /* SlotManagerScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F28C38DC291569E48D49979 /* SlotManagerScreen.swift */; };
 		945C3DD6E80513B77857B53B /* 18_connect_lamborghini_huracan.wav in Resources */ = {isa = PBXBuildFile; fileRef = A14994ED5717889053146BE8 /* 18_connect_lamborghini_huracan.wav */; };
+		966BA16559399209EC7DB918 /* LegalWebSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A6B04BCA28EAC35AAF855FC /* LegalWebSheet.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
@@ -224,6 +225,7 @@
 		84CAB95B02A75E2942E8E30A /* 04_disconnect_check_windows.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 04_disconnect_check_windows.wav; sourceTree = "<group>"; };
 		84D2DE227136EEB043E609EB /* 21_connect_lucid_air.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 21_connect_lucid_air.wav; sourceTree = "<group>"; };
 		8A3610995CEE5E9C9427A02F /* LayerEditorOverlay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LayerEditorOverlay.swift; sourceTree = "<group>"; };
+		8A6B04BCA28EAC35AAF855FC /* LegalWebSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LegalWebSheet.swift; sourceTree = "<group>"; };
 		8E9E62C0E765347DD0E9D153 /* power-down.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = "power-down.wav"; sourceTree = "<group>"; };
 		95217042F5850DE659B476FE /* 09_connect_connection_successful.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 09_connect_connection_successful.wav; sourceTree = "<group>"; };
 		95BB96906E9682F461095666 /* 13_connect_gmc_hummer_ev.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 13_connect_gmc_hummer_ev.wav; sourceTree = "<group>"; };
@@ -449,6 +451,7 @@
 				A0811F0B73FD38DB550CF69F /* guide_step_2.png */,
 				9A6E4D54E0227CFE192FC27F /* guide_step_3.png */,
 				6A13087F4C864B00188DE2BA /* guide_step_4.png */,
+				8A6B04BCA28EAC35AAF855FC /* LegalWebSheet.swift */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -787,6 +790,7 @@
 				51F8FBAE2A471F24A669BF22 /* StockWidgetArchitecture.swift in Sources */,
 				4BF63422536E2C87BA2703FD /* StockWidgetCatalog.swift in Sources */,
 				A94CA52A1D548C2320C8A711 /* AutomationGuideSheet.swift in Sources */,
+				966BA16559399209EC7DB918 /* LegalWebSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

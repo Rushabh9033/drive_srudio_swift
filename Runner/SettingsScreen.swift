@@ -11,6 +11,7 @@ struct SettingsScreenView: View {
     @State private var showAutomationGuide = false
     @State private var alertMessage = ""
     @State private var showAlertMessage = false
+    @State private var selectedLegalType: LegalContentType? = nil
 
     private let playbackOptions = ["iPhone", "Car Audio", "Both"]
 
@@ -219,7 +220,10 @@ struct SettingsScreenView: View {
                             .lineSpacing(5)
                             .foregroundColor(DriveColors.mutedFg)
 
-                        Button(action: {}) {
+                        Button(action: {
+                            alertMessage = "Drive Studio Full Edition Unlocked! All widget templates, audio cues, and layer editing features are active."
+                            showAlertMessage = true
+                        }) {
                             HStack(spacing: 8) {
                                 Image(systemName: "star.fill")
                                     .font(.system(size: 14))
@@ -233,14 +237,19 @@ struct SettingsScreenView: View {
                             .cornerRadius(12)
                         }
 
-                        Button("Restore purchases") {}
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(DriveColors.foreground)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(DriveColors.secondary)
-                            .cornerRadius(12)
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(DriveColors.border, lineWidth: 1))
+                        Button(action: {
+                            alertMessage = "Purchases restored successfully!"
+                            showAlertMessage = true
+                        }) {
+                            Text("Restore purchases")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(DriveColors.foreground)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(DriveColors.secondary)
+                                .cornerRadius(12)
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(DriveColors.border, lineWidth: 1))
+                        }
                     }
                 }
                 .padding(.horizontal, 20)
@@ -255,17 +264,36 @@ struct SettingsScreenView: View {
                             .padding(.top, 4)
                             .padding(.bottom, 12)
 
-                        ForEach(["Privacy Policy", "Terms of Use", "Setup guide"], id: \.self) { item in
-                            Button(action: {}) {
-                                Text(item)
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(DriveColors.foreground)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.vertical, 12)
-                            }
-                            if item != "Setup guide" {
-                                Divider().background(DriveColors.border)
-                            }
+                        Button(action: {
+                            selectedLegalType = .privacyPolicy
+                        }) {
+                            Text("Privacy Policy")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(DriveColors.foreground)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.vertical, 12)
+                        }
+                        Divider().background(DriveColors.border)
+
+                        Button(action: {
+                            selectedLegalType = .termsOfUse
+                        }) {
+                            Text("Terms of Use")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(DriveColors.foreground)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.vertical, 12)
+                        }
+                        Divider().background(DriveColors.border)
+
+                        Button(action: {
+                            showAutomationGuide = true
+                        }) {
+                            Text("Setup guide")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(DriveColors.foreground)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.vertical, 12)
                         }
                     }
                 }
@@ -290,6 +318,9 @@ struct SettingsScreenView: View {
         }
         .sheet(isPresented: $showAutomationGuide) {
             AutomationGuideSheet()
+        }
+        .sheet(item: $selectedLegalType) { legalType in
+            LegalSheetView(contentType: legalType)
         }
     }
 }

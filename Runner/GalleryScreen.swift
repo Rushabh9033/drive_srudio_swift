@@ -506,6 +506,37 @@ struct StockWidgetDetailSheet: View {
                     .overlay(RoundedRectangle(cornerRadius: 24).stroke(DriveColors.border, lineWidth: 1))
                     .shadow(color: DriveColors.primary.opacity(0.25), radius: 20)
 
+                // Check if layout has dedicated vehicle photo space
+                let hasCarSpace = (widget.document.layers ?? []).contains(where: { $0.kind == "image" || $0.src == "template_car" }) ||
+                                  widget.category == .vehicle ||
+                                  widget.name.localizedCaseInsensitiveContains("night drive") ||
+                                  widget.name.localizedCaseInsensitiveContains("silhouette") ||
+                                  widget.name.localizedCaseInsensitiveContains("cockpit")
+
+                if hasCarSpace {
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "car.side.fill")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(DriveColors.primary)
+                            .padding(.top, 2)
+
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Dedicated Vehicle Photo Space")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(.white)
+                            Text("This specific widget layout features dedicated canvas space to place your background-less vehicle PNG photo! Tap 'Customize in Custom Studio' to place your car here.")
+                                .font(.system(size: 11))
+                                .lineSpacing(3)
+                                .foregroundColor(DriveColors.mutedFg)
+                        }
+                    }
+                    .padding(12)
+                    .background(DriveColors.primary.opacity(0.12))
+                    .cornerRadius(12)
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(DriveColors.primary.opacity(0.4), lineWidth: 1))
+                    .padding(.horizontal, 24)
+                }
+
                 VStack(spacing: 12) {
                     // Assign to Slot
                     Button(action: { showSlotPicker = true }) {

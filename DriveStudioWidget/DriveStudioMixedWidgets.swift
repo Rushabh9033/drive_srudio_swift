@@ -120,32 +120,54 @@ struct CommandCenterView: View {
         
         let content = ZStack {
             bgColor
-            RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color(hex: "0D1A2A")).padding(8)
-            VStack(spacing: 0) {
-                Text(e.date.timeString)
-                    .font(.system(size: 32, weight: .black, design: .rounded))
-                    .foregroundColor(Color(hex: "00E5FF"))
-                
-                Divider().background(Color(hex: "0D2A3A")).padding(.horizontal, 20).padding(.vertical, 6)
-                
-                Text("\(Int(e.speed))")
-                    .font(.system(size: 28, weight: .black, design: .rounded))
-                    .foregroundColor(Color(hex: "FF6B35"))
-                Text("KM/H").font(.system(size: 10, weight: .medium)).foregroundColor((Color(hex: "FF6B35")).opacity(0.5))
-                
-                Spacer()
+            GeometryReader { g in
+                let w = g.size.width
+                let h = g.size.height
+                let s = min(w, h)
                 
                 ZStack {
-                    Circle().trim(from: 0, to: 1)
-                        .stroke(Color(hex: "1A3A1A"), lineWidth: 7)
-                        .frame(width: 36, height: 36)
-                    Circle().trim(from: 0, to: CGFloat(batteryPct))
-                        .stroke(Color(hex: "22C55E"), style: StrokeStyle(lineWidth: 7, lineCap: .round))
-                        .frame(width: 36, height: 36).rotationEffect(.degrees(-90))
-                    Text("\(Int(batteryPct * 100))%")
-                        .font(.system(size: 9, weight: .bold)).foregroundColor(Color(hex: "22C55E"))
-                }.padding(.bottom, 12)
-            }.padding(.top, 14)
+                    RoundedRectangle(cornerRadius: s * 0.08, style: .continuous)
+                        .fill(Color(hex: "0D1A2A"))
+                        .padding(s * 0.04)
+                    
+                    VStack(spacing: s * 0.02) {
+                        Text(e.date.timeString)
+                            .font(.system(size: s * 0.16, weight: .black, design: .rounded))
+                            .foregroundColor(Color(hex: "00E5FF"))
+                        
+                        Rectangle()
+                            .fill(Color(hex: "0D2A3A"))
+                            .frame(height: 1)
+                            .padding(.horizontal, s * 0.1)
+                        
+                        HStack(spacing: s * 0.02) {
+                            Text("\(Int(e.speed))")
+                                .font(.system(size: s * 0.15, weight: .black, design: .rounded))
+                                .foregroundColor(Color(hex: "FF6B35"))
+                            Text("KM/H")
+                                .font(.system(size: s * 0.06, weight: .bold))
+                                .foregroundColor(Color(hex: "FF6B35").opacity(0.7))
+                        }
+                        
+                        Spacer()
+                        
+                        ZStack {
+                            Circle().trim(from: 0, to: 1)
+                                .stroke(Color(hex: "1A3A1A"), lineWidth: s * 0.035)
+                                .frame(width: s * 0.22, height: s * 0.22)
+                            Circle().trim(from: 0, to: CGFloat(batteryPct))
+                                .stroke(Color(hex: "22C55E"), style: StrokeStyle(lineWidth: s * 0.035, lineCap: .round))
+                                .frame(width: s * 0.22, height: s * 0.22)
+                                .rotationEffect(.degrees(-90))
+                            Text("\(Int(batteryPct * 100))%")
+                                .font(.system(size: s * 0.05, weight: .bold))
+                                .foregroundColor(Color(hex: "22C55E"))
+                        }
+                        .padding(.bottom, s * 0.04)
+                    }
+                    .padding(.top, s * 0.06)
+                }
+            }
         }.clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
 
         if #available(iOS 17.0, *) {

@@ -113,76 +113,7 @@ struct SettingsScreenView: View {
                 }
                 .padding(.horizontal, 20)
 
-                // Card 3.5: One-Click Shortcuts & Automations Helper
-                SurfaceCard {
-                    VStack(alignment: .leading, spacing: 14) {
-                        HStack {
-                            MonoLabel(text: "iOS Shortcuts Automations")
-                            Spacer()
-                            DrivePill(label: "1-Click Setup")
-                        }
 
-                        Text("Install your pre-configured 2,500-time auto-refresh (5-second delay) shortcut with 1 tap.")
-                            .font(.system(size: 12))
-                            .lineSpacing(4)
-                            .foregroundColor(DriveColors.mutedFg)
-
-                        Button(action: {
-                            if let url = URL(string: "https://www.icloud.com/shortcuts/eca5e9434e324ffeb0a77b16445f4d1b") {
-                                UIApplication.shared.open(url)
-                            }
-                        }) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "bolt.shield.fill")
-                                    .font(.system(size: 15))
-                                Text("⚡ 1-Click Install Auto-Refresh Shortcut")
-                                    .font(.system(size: 14, weight: .bold))
-                            }
-                            .foregroundColor(DriveColors.primaryFg)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(DriveColors.primary)
-                            .cornerRadius(12)
-                        }
-
-                        HStack(spacing: 12) {
-                            Button(action: {
-                                showAutomationGuide = true
-                            }) {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "book.fill")
-                                    Text("Setup Guide")
-                                }
-                                .font(.system(size: 12, weight: .bold))
-                                .foregroundColor(DriveColors.foreground)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 10)
-                                .background(DriveColors.secondary)
-                                .cornerRadius(10)
-                                .overlay(RoundedRectangle(cornerRadius: 10).stroke(DriveColors.border, lineWidth: 1))
-                            }
-
-                            Button(action: {
-                                if let url = URL(string: "shortcuts://") {
-                                    UIApplication.shared.open(url)
-                                }
-                            }) {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "slider.horizontal.3")
-                                    Text("Open Shortcuts")
-                                }
-                                .font(.system(size: 12, weight: .bold))
-                                .foregroundColor(DriveColors.foreground)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 10)
-                                .background(DriveColors.secondary)
-                                .cornerRadius(10)
-                                .overlay(RoundedRectangle(cornerRadius: 10).stroke(DriveColors.border, lineWidth: 1))
-                            }
-                        }
-                    }
-                }
-                .padding(.horizontal, 20)
 
                 // Card 4: Local Data
                 SurfaceCard {

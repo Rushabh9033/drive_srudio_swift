@@ -251,14 +251,15 @@ struct LayerView: View {
         if kind == "text" || kind == "speed" || kind == "vehicle_name"
             || kind == "battery" || kind == "battery_text"
             || kind == "clock" || kind == "date" {
-            // ── Text / live-data text layers ─────────────────────────────
+            // ── Text / live-data text layers (Line limit 1 + minimum scale to prevent PM cropping) ──
             Text(resolvedText)
                 .font(.system(size: scaledFontSize, weight: parseWeight(layer.weight)))
                 .foregroundColor(Color(hex: layer.color ?? "FFFFFF") ?? .white)
                 .multilineTextAlignment(parseAlignment(layer.align))
+                .lineLimit(1)
+                .minimumScaleFactor(0.2)
                 .frame(maxWidth: .infinity, maxHeight: .infinity,
                        alignment: parseFrameAlignment(layer.align))
-                .minimumScaleFactor(0.3)
         } else if kind == "analog" {
             // ── Analog clock preview ─────────────────────────────────────
             ZStack {
@@ -268,15 +269,26 @@ struct LayerView: View {
                     .foregroundColor(Color(hex: layer.color ?? "FFFFFF") ?? .white)
             }
         } else if kind == "image" {
-            // ── Image ────────────────────────────────────────────────────
+            // ── Image / Vehicle Position Guide ───────────────────────────
             if let src = layer.src, let uiImage = loadImage(path: src) {
                 Image(uiImage: uiImage).resizable().scaledToFit()
-            } else if layer.src != nil {
-                Image(systemName: "car.side.fill")
-                    .resizable().scaledToFit()
-                    .foregroundColor(.white.opacity(0.3))
             } else {
-                Color.clear
+                // Vehicle Position Guide Box
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(style: StrokeStyle(lineWidth: 1.2, dash: [4, 3]))
+                        .foregroundColor(DriveColors.primary.opacity(0.7))
+                    
+                    VStack(spacing: 2) {
+                        Image(systemName: "car.side.fill")
+                            .font(.system(size: max(14, scaledFontSize * 0.7), weight: .bold))
+                            .foregroundColor(DriveColors.primary)
+                        Text("CAR PHOTO")
+                            .font(.system(size: max(7, scaledFontSize * 0.28), weight: .bold))
+                            .foregroundColor(DriveColors.primary)
+                    }
+                }
+                .padding(2)
             }
         } else if kind == "shape" || kind == "draw" || kind == "divider" {
             // ── Shapes ───────────────────────────────────────────────────

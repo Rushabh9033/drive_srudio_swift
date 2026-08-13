@@ -37,8 +37,8 @@ struct DashboardView: View {
                     }) {
                         HStack(spacing: 6) {
                             Image(systemName: "bolt.fill")
-                                .font(.system(size: 11))
-                            Text("⚡ Auto Setup")
+                                .font(.system(size: 12))
+                            Text("Auto Setup")
                                 .font(.system(size: 13, weight: .bold))
                         }
                         .foregroundColor(DriveColors.primaryFg)

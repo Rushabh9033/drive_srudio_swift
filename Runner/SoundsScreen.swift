@@ -451,6 +451,12 @@ struct SoundsScreenView: View {
                     }
                     try fm.copyItem(at: selectedFile, to: destUrl)
                     
+                    if let sharedDir = fm.containerURL(forSecurityApplicationGroupIdentifier: "group.com.drivestudio.shared") {
+                        let sharedURL = sharedDir.appendingPathComponent(selectedFile.lastPathComponent)
+                        try? fm.removeItem(at: sharedURL)
+                        try? fm.copyItem(at: selectedFile, to: sharedURL)
+                    }
+                    
                     let asset = AVURLAsset(url: destUrl)
                     let durationSeconds = CMTimeGetSeconds(asset.duration)
                     let durationString = durationSeconds.isNaN ? "0:00" : String(format: "%d:%02d", Int(durationSeconds) / 60, Int(durationSeconds) % 60)

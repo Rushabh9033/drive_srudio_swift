@@ -239,6 +239,14 @@ struct TTSVoiceGeneratorSheet: View {
             self.activeAudioFile = nil // Flushes and closes WAV header cleanly
             self.speechSynthesizer = nil
             self.isGenerating = false
+
+            // Copy to App Group Shared Container for background Shortcuts playback
+            if let sharedDir = fm.containerURL(forSecurityApplicationGroupIdentifier: "group.com.drivestudio.shared") {
+                let sharedURL = sharedDir.appendingPathComponent(outputURL.lastPathComponent)
+                try? fm.removeItem(at: sharedURL)
+                try? fm.copyItem(at: outputURL, to: sharedURL)
+            }
+
             self.onVoiceGenerated(name, outputURL)
             self.dismiss()
         }

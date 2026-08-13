@@ -253,6 +253,12 @@ struct MicRecorderSheet: View {
     private func saveRecording() {
         guard let url = recordedFileURL else { return }
         stopRecording()
+        let fm = FileManager.default
+        if let sharedDir = fm.containerURL(forSecurityApplicationGroupIdentifier: "group.com.drivestudio.shared") {
+            let sharedURL = sharedDir.appendingPathComponent(url.lastPathComponent)
+            try? fm.removeItem(at: sharedURL)
+            try? fm.copyItem(at: url, to: sharedURL)
+        }
         let name = soundTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Voice Recording" : soundTitle
         onRecordingFinished(name, url)
         dismiss()

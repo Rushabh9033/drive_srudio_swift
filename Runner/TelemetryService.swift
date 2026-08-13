@@ -76,26 +76,41 @@ import AVFoundation
     func playSoundByName(_ name: String) -> Double {
         let fm = FileManager.default
         var targetURL: URL? = nil
+        let targetNameClean = name.lowercased().replacingOccurrences(of: " ", with: "_").replacingOccurrences(of: "-", with: "_")
         
-        // 1. Check App Group / Documents Directory for Custom/Mic/TTS sound
+        var searchDirectories: [URL] = []
+        if let shared = fm.containerURL(forSecurityApplicationGroupIdentifier: suiteName) {
+            searchDirectories.append(shared)
+        }
         if let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first {
-            do {
-                let files = try fm.contentsOfDirectory(at: docs, includingPropertiesForKeys: nil)
+            searchDirectories.append(docs)
+        }
+        
+        // 1. Search App Group & Documents directory for Custom / Mic / TTS sound files
+        for dir in searchDirectories {
+            if let files = try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) {
                 for file in files {
-                    if file.deletingPathExtension().lastPathComponent.lowercased() == name.lowercased() {
+                    let ext = file.pathExtension.lowercased()
+                    guard ["wav", "mp3", "m4a", "caf"].contains(ext) else { continue }
+                    
+                    let fname = file.deletingPathExtension().lastPathComponent.lowercased()
+                    let cleanFname = fname.replacingOccurrences(of: " ", with: "_").replacingOccurrences(of: "-", with: "_")
+                    
+                    if fname == name.lowercased() || cleanFname == targetNameClean || cleanFname.contains(targetNameClean) || targetNameClean.contains(cleanFname) {
                         targetURL = file
                         break
                     }
                 }
-            } catch {}
+            }
+            if targetURL != nil { break }
         }
         
-        // 2. Check Bundle Resources for Stock Sounds
+        // 2. Search Bundle Resources for Stock Sounds
         if targetURL == nil {
-            let searchKey = name.lowercased().replacingOccurrences(of: " ", with: "_")
             if let urls = Bundle.main.urls(forResourcesWithExtension: "wav", subdirectory: nil) {
                 for u in urls {
-                    if u.lastPathComponent.lowercased().contains(searchKey) {
+                    let fname = u.deletingPathExtension().lastPathComponent.lowercased()
+                    if fname == targetNameClean || fname.contains(targetNameClean) || targetNameClean.contains(fname) {
                         targetURL = u
                         break
                     }
@@ -110,19 +125,17 @@ import AVFoundation
         
         do {
             let session = AVAudioSession.sharedInstance()
-            
-            // Category .playback with mixWithOthers (NO ducking) so system volume is NOT decreased on unplug
             try? session.setCategory(.playback, mode: .default, options: [.allowBluetoothA2DP, .mixWithOthers])
             try? session.overrideOutputAudioPort(.none)
             try? session.setActive(true)
             
             let player = try AVAudioPlayer(contentsOf: soundURL)
-            player.volume = 0.8 // Set playback volume to 80%
+            player.volume = 0.85
             player.prepareToPlay()
             player.play()
             audioPlayer = player
             let duration = player.duration
-            print("[TelemetryService] 🔊 Playing sound at 80% volume (\(duration)s): \(soundURL.lastPathComponent)")
+            print("[TelemetryService] 🔊 Playing custom/TTS sound (\(duration)s): \(soundURL.lastPathComponent)")
             return duration
         } catch {
             print("[TelemetryService] ❌ AVAudioPlayer failed (\(error)), falling back to SystemSound")

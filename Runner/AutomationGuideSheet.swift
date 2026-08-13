@@ -70,33 +70,33 @@ struct AutomationGuideSheet: View {
                         // Step 1
                         GuideStepRow(
                             stepNumber: "1",
-                            title: "Open Shortcuts App & Tap Automation",
-                            description: "Open the iOS Shortcuts app on your iPhone and tap the 'Automation' tab at the bottom middle.",
+                            title: "Open Shortcuts -> Automation Tab",
+                            description: "Open Shortcuts App on your iPhone and tap the 'Automation' tab at the bottom middle. Tap 'New Automation' (or '+' icon at the top right if you already have existing automations).",
                             icon: "clock.fill"
                         )
 
                         // Step 2
                         GuideStepRow(
                             stepNumber: "2",
-                            title: "Choose CarPlay or Charger",
-                            description: "Tap '+' (New Automation) -> Select 'CarPlay' or 'Charger' -> Choose 'Is Connected'.",
+                            title: "Search & Select 'CarPlay'",
+                            description: "Search for 'CarPlay' in the search bar and tap 'CarPlay (\"When CarPlay is connected\")'.",
                             icon: "car.fill"
                         )
 
                         // Step 3
                         GuideStepRow(
                             stepNumber: "3",
-                            title: "Set 'Run Immediately'",
-                            description: "Select 'Run Immediately' and turn off 'Ask Before Running' so it triggers 100% automatically in the background.",
+                            title: "Select 'Is Connected' & 'Run Immediately'",
+                            description: "Select 'Is Connected' for Connect (or 'Is Disconnected' for Disconnect). Select 'Run Immediately' and tap 'Next' at the top right.",
                             icon: "bolt.fill"
                         )
 
                         // Step 4
                         GuideStepRow(
                             stepNumber: "4",
-                            title: "Add Drive Studio Action",
-                            description: "Tap Action -> Choose 'Refresh Drive Studio' or 'Play Connect Sound Cue' -> Tap Done!",
-                            icon: "arrow.triangle.2.circlepath"
+                            title: "Search 'Drive Studio' & Choose Cue",
+                            description: "Search for 'Drive Studio' in the action bar. Choose 'Play Connect Cue' (or 'Status' / 'Refresh Widget') -> Tap Done! (Repeat same steps tapping '+' for Disconnect Cue).",
+                            icon: "speaker.wave.2.fill"
                         )
 
                         Spacer().frame(height: 10)

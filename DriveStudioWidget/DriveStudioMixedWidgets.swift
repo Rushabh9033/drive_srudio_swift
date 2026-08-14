@@ -9,7 +9,7 @@ import UIKit
 // number. The non-optional `date` is the only field guaranteed to be
 // present (it is the TimelineEntry contract).
 struct DriveEntry: TimelineEntry {
-    let date: Date
+    var date: Date
     var speed: Double?       // km/h supplied by host. nil = unknown.
     var batteryLevel: Double? // 0.0…1.0. nil = unknown.
     var isCharging: Bool     // Exact charging state; never ORed with stale.
@@ -825,12 +825,16 @@ struct GalaxyView: View {
 struct CommandCenterWidget: Widget {
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: "CommandCenter", provider: DriveProvider()) { e in
-            CommandCenterView(e: e)
+            MinuteClockView(data: e) { displayDate, captured in
+                var liveEntry = captured
+                liveEntry.date = displayDate
+                return CommandCenterView(e: liveEntry)
+            }
         }
         .configurationDisplayName("Command Center")
         .description("Speed · Clock · Battery")
         .supportedFamilies([.systemSmall, .systemMedium])
-        
+
         if #available(iOS 17.0, *) {
             return config.contentMarginsDisabled()
         } else {
@@ -842,12 +846,16 @@ struct CommandCenterWidget: Widget {
 struct VortexDriveWidget: Widget {
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: "VortexDrive", provider: DriveProvider()) { e in
-            VortexDriveView(e: e)
+            MinuteClockView(data: e) { displayDate, captured in
+                var liveEntry = captured
+                liveEntry.date = displayDate
+                return VortexDriveView(e: liveEntry)
+            }
         }
         .configurationDisplayName("Vortex Drive")
         .description("Speed ring · Clock · Minutes ring")
         .supportedFamilies([.systemSmall, .systemMedium])
-        
+
         if #available(iOS 17.0, *) {
             return config.contentMarginsDisabled()
         } else {
@@ -859,12 +867,16 @@ struct VortexDriveWidget: Widget {
 struct GridHUDWidget: Widget {
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: "GridHUD", provider: DriveProvider()) { e in
-            GridHUDView(e: e)
+            MinuteClockView(data: e) { displayDate, captured in
+                var liveEntry = captured
+                liveEntry.date = displayDate
+                return GridHUDView(e: liveEntry)
+            }
         }
         .configurationDisplayName("Grid HUD")
         .description("Speed · Battery · Clock · Date")
         .supportedFamilies([.systemSmall, .systemMedium])
-        
+
         if #available(iOS 17.0, *) {
             return config.contentMarginsDisabled()
         } else {
@@ -876,12 +888,16 @@ struct GridHUDWidget: Widget {
 struct CockpitWidget: Widget {
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: "Cockpit", provider: DriveProvider()) { e in
-            CockpitView(e: e)
+            MinuteClockView(data: e) { displayDate, captured in
+                var liveEntry = captured
+                liveEntry.date = displayDate
+                return CockpitView(e: liveEntry)
+            }
         }
         .configurationDisplayName("Cockpit")
         .description("Analog clock · Speed · Battery")
         .supportedFamilies([.systemSmall, .systemMedium])
-        
+
         if #available(iOS 17.0, *) {
             return config.contentMarginsDisabled()
         } else {
@@ -893,12 +909,16 @@ struct CockpitWidget: Widget {
 struct PhantomWidget: Widget {
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: "Phantom", provider: DriveProvider()) { e in
-            PhantomView(e: e)
+            MinuteClockView(data: e) { displayDate, captured in
+                var liveEntry = captured
+                liveEntry.date = displayDate
+                return PhantomView(e: liveEntry)
+            }
         }
         .configurationDisplayName("Phantom")
         .description("Clock · Vehicle name · Battery")
         .supportedFamilies([.systemSmall, .systemMedium])
-        
+
         if #available(iOS 17.0, *) {
             return config.contentMarginsDisabled()
         } else {
@@ -910,12 +930,16 @@ struct PhantomWidget: Widget {
 struct SplitPanelWidget: Widget {
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: "SplitPanel", provider: DriveProvider()) { e in
-            SplitPanelView(e: e)
+            MinuteClockView(data: e) { displayDate, captured in
+                var liveEntry = captured
+                liveEntry.date = displayDate
+                return SplitPanelView(e: liveEntry)
+            }
         }
         .configurationDisplayName("Split Panel")
         .description("Clock · Speed · Battery bar")
         .supportedFamilies([.systemSmall, .systemMedium])
-        
+
         if #available(iOS 17.0, *) {
             return config.contentMarginsDisabled()
         } else {
@@ -927,12 +951,16 @@ struct SplitPanelWidget: Widget {
 struct SolarDashWidget: Widget {
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: "SolarDash", provider: DriveProvider()) { e in
-            SolarDashView(e: e)
+            MinuteClockView(data: e) { displayDate, captured in
+                var liveEntry = captured
+                liveEntry.date = displayDate
+                return SolarDashView(e: liveEntry)
+            }
         }
         .configurationDisplayName("Solar Dash")
         .description("3 orbit rings · Clock · Date")
         .supportedFamilies([.systemSmall, .systemMedium])
-        
+
         if #available(iOS 17.0, *) {
             return config.contentMarginsDisabled()
         } else {
@@ -944,12 +972,16 @@ struct SolarDashWidget: Widget {
 struct NeonStripWidget: Widget {
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: "NeonStrip", provider: DriveProvider()) { e in
-            NeonStripView(e: e)
+            MinuteClockView(data: e) { displayDate, captured in
+                var liveEntry = captured
+                liveEntry.date = displayDate
+                return NeonStripView(e: liveEntry)
+            }
         }
         .configurationDisplayName("Neon Strip")
         .description("Speed · Clock · Battery neon bars")
         .supportedFamilies([.systemSmall, .systemMedium])
-        
+
         if #available(iOS 17.0, *) {
             return config.contentMarginsDisabled()
         } else {
@@ -961,12 +993,16 @@ struct NeonStripWidget: Widget {
 struct CarbonWidget: Widget {
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: "Carbon", provider: DriveProvider()) { e in
-            CarbonView(e: e)
+            MinuteClockView(data: e) { displayDate, captured in
+                var liveEntry = captured
+                liveEntry.date = displayDate
+                return CarbonView(e: liveEntry)
+            }
         }
         .configurationDisplayName("Carbon")
         .description("Analog · Battery bar · Date")
         .supportedFamilies([.systemSmall, .systemMedium])
-        
+
         if #available(iOS 17.0, *) {
             return config.contentMarginsDisabled()
         } else {
@@ -978,12 +1014,16 @@ struct CarbonWidget: Widget {
 struct RadarWidget: Widget {
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: "Radar", provider: DriveProvider()) { e in
-            RadarView(e: e)
+            MinuteClockView(data: e) { displayDate, captured in
+                var liveEntry = captured
+                liveEntry.date = displayDate
+                return RadarView(e: liveEntry)
+            }
         }
         .configurationDisplayName("Radar")
         .description("Speed arc · Clock · Battery")
         .supportedFamilies([.systemSmall, .systemMedium])
-        
+
         if #available(iOS 17.0, *) {
             return config.contentMarginsDisabled()
         } else {
@@ -995,12 +1035,16 @@ struct RadarWidget: Widget {
 struct TriZoneWidget: Widget {
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: "TriZone", provider: DriveProvider()) { e in
-            TriZoneView(e: e)
+            MinuteClockView(data: e) { displayDate, captured in
+                var liveEntry = captured
+                liveEntry.date = displayDate
+                return TriZoneView(e: liveEntry)
+            }
         }
         .configurationDisplayName("Tri-Zone")
         .description("Clock · Speed · Battery · Date")
         .supportedFamilies([.systemSmall, .systemMedium])
-        
+
         if #available(iOS 17.0, *) {
             return config.contentMarginsDisabled()
         } else {
@@ -1012,7 +1056,11 @@ struct TriZoneWidget: Widget {
 struct GalaxyWidget: Widget {
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: "Galaxy", provider: DriveProvider()) { e in
-            GalaxyView(e: e)
+            MinuteClockView(data: e) { displayDate, captured in
+                var liveEntry = captured
+                liveEntry.date = displayDate
+                return GalaxyView(e: liveEntry)
+            }
         }
         .configurationDisplayName("Galaxy")
         .description("4 orbit rings · Clock · Speed")

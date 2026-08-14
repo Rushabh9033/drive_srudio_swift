@@ -43,7 +43,15 @@ extension Notification.Name {
         locationManager.activityType = .automotiveNavigation
         locationManager.distanceFilter = kCLDistanceFilterNone
         locationManager.pausesLocationUpdatesAutomatically = false
-        locationManager.requestAlwaysAuthorization()
+        // Foreground-only GPS for this milestone. We use
+        // When-In-Use authorization because there is no verified
+        // background-location feature today — background speed
+        // collection would require Always + UIBackgroundModes "location"
+        // and a working background-update path. This milestone keeps
+        // the app foreground-only and lets the user grant the broader
+        // permission later if and when a real background feature
+        // exists.
+        locationManager.requestWhenInUseAuthorization()
     }
 
     func startMonitoring() {
@@ -209,10 +217,30 @@ extension Notification.Name {
 
         if let defaults = UserDefaults(suiteName: suiteName),
            let data = try? JSONEncoder().encode(telemetry) {
+            let prevBattery = defaults.data(forKey: AppGroupContract.liveTelemetryKey)
+            let prevIsCharging = (try? JSONDecoder().decode(Snapshot.self, from: prevBattery ?? Data()))?.isCharging
+            let prevSpeed = (try? JSONDecoder().decode(Snapshot.self, from: prevBattery ?? Data()))?.speed
+
             defaults.set(data, forKey: AppGroupContract.liveTelemetryKey)
             defaults.set(data, forKey: AppGroupContract.legacyTelemetryKey)
+
+            // Decide reload kind based on what actually changed. The
+            // throttle rate-limits speed-driven reloads to once per 5
+            // min; battery / charging / foreground changes request
+            // immediate reloads because they reflect user-meaningful
+            // signal transitions.
+            let kind: WidgetReloadThrottle.ReloadKind
+            if prevIsCharging != isCharging {
+                kind = .chargingStateChange
+            } else if prevBattery == nil || batteryPercent != (try? JSONDecoder().decode(Snapshot.self, from: prevBattery ?? Data()))?.batteryPercent {
+                kind = .batteryLevelChange
+            } else if prevSpeed != currentSpeed {
+                kind = .speedChange
+            } else {
+                kind = .other
+            }
             if #available(iOS 14.0, *) {
-                WidgetCenter.shared.reloadAllTimelines()
+                WidgetReloadThrottle.shared.requestReload(kind: kind)
             }
         }
     }

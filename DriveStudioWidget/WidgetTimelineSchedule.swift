@@ -22,13 +22,20 @@ import WidgetKit
 /// The helper is a pure function. It does not call `Date()` (caller
 /// supplies `start`), `WidgetCenter`, or any side-effecting API, so
 /// tests can pass a fixed start and assert on the exact returned array.
+///
+/// **Per-entry freshness:** when an entry's scheduled date is more
+/// than `WidgetSnapshotFreshness.maxAge` past the captured
+/// snapshot's timestamp, the entry's speed reading is treated as
+/// unavailable (the snapshot is reused via `WidgetSnapshotFreshness.projected`,
+/// so a stale speed auto-expires on future entries even if WidgetKit
+/// has not reloaded the timeline).
 enum WidgetTimelineSchedule {
 
     /// Default number of entries a normal home-screen widget provider
-    /// should ship ahead of time. With a 5-minute cadence this is
-    /// ~5 hours of coverage — enough headroom for WidgetKit batching
-    /// without spending the system timeline budget on entries that
-    /// will never be rendered.
+    /// should ship ahead of time. With a 5-minute cadence and 12
+    /// entries this is ~1 hour of coverage — enough headroom for
+    /// WidgetKit batching without spending the system timeline
+    /// budget on entries that will never be rendered.
     static let defaultProviderEntryCount = 12
 
     /// Maximum number of entries the provider helper will emit, regardless
@@ -96,13 +103,22 @@ enum WidgetTimelineSchedule {
 /// `OrbitDateProvider`) read App Group telemetry through
 /// `WidgetTelemetryReader` here — no provider or renderer is allowed to
 /// read `UIDevice`, call `CLLocation`, or invent fallback values.
+///
+/// Each factory entry applies `WidgetSnapshotFreshness.projected`
+/// for the entry's scheduled `date`. This guarantees that an entry
+/// rendering 5 minutes into the future will not display the
+/// captured speed as if it were current — the policy is the single
+/// source of truth, every entry goes through it, and tests assert
+/// the projected behavior at known dates.
 enum WidgetTelemetryFactory {
 
     /// Build a `DriveEntry` for `DriveProvider`. The entry's telemetry
     /// fields are populated from the App Group snapshot the host wrote;
-    /// `nil` propagates as `nil`.
+    /// `nil` propagates as `nil`. Speed is projected for the entry's
+    /// scheduled date.
     static func driveEntry(at date: Date) -> DriveEntry {
         let snapshot = WidgetTelemetryReader.liveSnapshot()
+            .map { WidgetSnapshotFreshness.projected(snapshot: $0, at: date) }
         return DriveEntry(
             date: date,
             speed: snapshot?.speed,
@@ -117,6 +133,7 @@ enum WidgetTelemetryFactory {
     /// contract as `driveEntry`.
     static func orbitEntry(at date: Date) -> OrbitDateEntry {
         let snapshot = WidgetTelemetryReader.liveSnapshot()
+            .map { WidgetSnapshotFreshness.projected(snapshot: $0, at: date) }
         return OrbitDateEntry(
             date: date,
             batteryLevel: snapshot?.batteryPercent
@@ -129,10 +146,12 @@ enum WidgetTelemetryFactory {
     /// Build a `SimpleEntry` for `StaticProvider`. Reads the slot spec
     /// for `slotIndex` from the App Group state. The widget canvas
     /// applies the spec; telemetry flows through the same reader.
+    /// Speed is projected for the entry's scheduled date.
     static func simpleEntry(slotIndex: Int, at date: Date, isPreview: Bool) -> SimpleEntry {
         let state = AppGroupState.loadState()
         let slot = state?.slots?.first(where: { $0.index == slotIndex })
         let liveTelemetry = WidgetTelemetryReader.liveSnapshot()
+            .map { WidgetSnapshotFreshness.projected(snapshot: $0, at: date) }
         return SimpleEntry(
             date: date,
             slotIndex: slotIndex,

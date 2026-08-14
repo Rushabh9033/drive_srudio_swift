@@ -4,9 +4,20 @@ import SwiftUI
 // reader. It MUST NOT touch UIDevice — the widget extension cannot
 // poll sensors, and the host app is the single owner of telemetry.
 // All fields are optional on purpose: unknown stays unknown.
+//
+// **Display date is injected by the caller.** The renderer never
+// calls `Date()` to "advance" the clock. WidgetKit controls when an
+// entry's `date` advances, and `TimelineView(.everyMinute)` is the
+// mechanism that lets the clock hands/text tick within an entry —
+// that wrapper is the caller's responsibility, not the renderer's.
 struct NativeSpecialRenderer {
     @ViewBuilder
-    static func renderIfSpecial(spec: WidgetSpec, telemetry: TelemetrySnapshot?, vehicle: VehicleData?) -> AnyView? {
+    static func renderIfSpecial(
+        spec: WidgetSpec,
+        telemetry: TelemetrySnapshot?,
+        vehicle: VehicleData?,
+        displayDate: Date
+    ) -> AnyView? {
         let textHints = (spec.layers ?? []).compactMap { $0.text ?? $0.kind }.joined(separator: " ").lowercased()
 
         let realBatt: Double? = telemetry?.batteryPercent
@@ -15,8 +26,23 @@ struct NativeSpecialRenderer {
         let vName: String? = vehicle?.displayName
         let isChg: Bool = telemetry?.isCharging ?? false
 
-        let driveEntry = DriveEntry(date: Date(), speed: spd, batteryLevel: realBatt, isCharging: isChg, vehicleName: vName)
-        let orbitEntry = OrbitDateEntry(date: Date(), batteryLevel: realBatt, isCharging: isChg, vehicleName: vName)
+        // Project the snapshot against the entry's display date so a
+        // stale captured speed is treated as nil even when the host
+        // hasn't written a fresh snapshot recently. This is the same
+        // policy every provider entry uses via WidgetTelemetryFactory.
+        let projected: TelemetrySnapshot? = telemetry.map {
+            WidgetSnapshotFreshness.projected(snapshot: $0, at: displayDate)
+        }
+        let projSpeed: Double? = projected?.speed
+        let projBatt: Double? = projected?.batteryPercent
+            .map { Double(WidgetBatteryMath.clamp($0)) / 100.0 }
+        let projChg: Bool = projected?.isCharging ?? false
+
+        let driveEntry = DriveEntry(date: displayDate, speed: projSpeed,
+                                    batteryLevel: projBatt, isCharging: projChg,
+                                    vehicleName: vName)
+        let orbitEntry = OrbitDateEntry(date: displayDate, batteryLevel: projBatt,
+                                        isCharging: projChg, vehicleName: vName)
 
         if textHints.contains("command center") {
             return AnyView(CommandCenterView(e: driveEntry))

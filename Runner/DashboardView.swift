@@ -305,15 +305,10 @@ private func batteryValueText(for store: AppStore) -> String {
 
 @MainActor
 private func batteryIcon(for store: AppStore) -> String {
-    let charging = store.liveIsCharging
-    guard let pct = store.liveBatteryPercent else { return "battery.0" }
-    switch pct {
-    case ...24: return charging ? "battery.25.bolt" : "battery.25"
-    case 25...49: return charging ? "battery.25.bolt" : "battery.25"
-    case 50...74: return charging ? "battery.50.bolt" : "battery.50"
-    case 75...94: return charging ? "battery.75.bolt" : "battery.75"
-    default: return charging ? "battery.100.bolt" : "battery.100"
-    }
+    return WidgetBatteryIcon.symbolName(
+        percent: store.liveBatteryPercent,
+        isCharging: store.liveIsCharging
+    )
 }
 
 @MainActor

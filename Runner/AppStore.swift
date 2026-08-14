@@ -272,6 +272,6 @@ class AppStore: ObservableObject {
             }
         }
         
-        WidgetCenter.shared.reloadAllTimelines()
+        WidgetReloadThrottle.shared.requestReload(kind: .slotChange)
     }
 }

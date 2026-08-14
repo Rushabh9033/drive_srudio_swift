@@ -249,48 +249,59 @@ struct StaticProvider: TimelineProvider {
 struct DriveStudioWidgetEntryView: View {
     let entry: SimpleEntry
 
-    var body: some View {
-        // Normal WidgetKit rendering: one snapshot per timeline entry.
-        // We do not read `UIDevice` or run timers from inside the view
-        // body; the host app is the single owner of telemetry, and
-        // clock/date text advances when WidgetKit advances the entry.
-        let telemetry = entry.telemetry
-        let entryDate = entry.date
-        let activeSpec = entry.slot?.spec
+    /// Captured at view-build time so the `TimelineView(.everyMinute)`
+    /// closure sees a stable view of the entry's telemetry and spec —
+    /// it MUST NOT re-read telemetry, `UIDevice`, or App Group state
+    /// inside the closure. The closure uses `context.date` only.
+    private struct Captured {
+        let telemetry: TelemetrySnapshot?
+        let vehicle: VehicleData?
+        let spec: WidgetSpec?
+    }
 
-        return GeometryReader { g in
-            ZStack {
-                if let spec = activeSpec,
-                   let specialView = NativeSpecialRenderer.renderIfSpecial(
-                    spec: spec, telemetry: telemetry, vehicle: entry.vehicle
-                   ) {
-                    specialView
-                } else {
-                    BackgroundView(spec: activeSpec)
-                    if let spec = activeSpec, let rawLayers = spec.layers, !rawLayers.isEmpty {
-                        let layers = LayerMigration.upgrade(rawLayers)
-                        FitToCanvasLayers(
-                            layers: layers,
-                            canvasSize: g.size,
-                            telemetry: telemetry,
-                            vehicle: entry.vehicle,
-                            entryDate: entryDate
-                        )
+    var body: some View {
+        let activeSpec = entry.slot?.spec
+        let captured = Captured(
+            telemetry: entry.telemetry,
+            vehicle: entry.vehicle,
+            spec: activeSpec
+        )
+        return MinuteClockView(data: captured) { displayDate, cap in
+            GeometryReader { g in
+                ZStack {
+                    if let spec = cap.spec,
+                       let specialView = NativeSpecialRenderer.renderIfSpecial(
+                        spec: spec, telemetry: cap.telemetry, vehicle: cap.vehicle,
+                        displayDate: displayDate
+                       ) {
+                        specialView
                     } else {
-                        VStack(spacing: 4) {
-                            Image(systemName: "square.grid.2x2")
-                                .font(.system(size: max(14, g.size.width * 0.15)))
-                                .foregroundColor(.gray)
-                            Text("Slot \(entry.slotIndex + 1)")
-                                .font(.system(size: max(9, g.size.width * 0.08), weight: .semibold, design: .rounded))
-                                .foregroundColor(.gray)
+                        BackgroundView(spec: cap.spec)
+                        if let spec = cap.spec, let rawLayers = spec.layers, !rawLayers.isEmpty {
+                            let layers = LayerMigration.upgrade(rawLayers)
+                            FitToCanvasLayers(
+                                layers: layers,
+                                canvasSize: g.size,
+                                telemetry: cap.telemetry,
+                                vehicle: cap.vehicle,
+                                entryDate: displayDate
+                            )
+                        } else {
+                            VStack(spacing: 4) {
+                                Image(systemName: "square.grid.2x2")
+                                    .font(.system(size: max(14, g.size.width * 0.15)))
+                                    .foregroundColor(.gray)
+                                Text("Slot \(entry.slotIndex + 1)")
+                                    .font(.system(size: max(9, g.size.width * 0.08), weight: .semibold, design: .rounded))
+                                    .foregroundColor(.gray)
+                            }
+                            .multilineTextAlignment(.center)
                         }
-                        .multilineTextAlignment(.center)
                     }
                 }
             }
+            .widgetContainerBackground(spec: cap.spec)
         }
-        .widgetContainerBackground(spec: activeSpec)
     }
 }
 
@@ -527,7 +538,7 @@ struct ScaledLayerView: View {
             case "draw":
                 DrawStrokesCanvas(strokesJSON: layer.strokes, color: layerColor, opacity: opacityVal)
             case "analog":
-                AnalogClockView(color: layerColor, opacity: opacityVal)
+                AnalogClockView(color: layerColor, opacity: opacityVal, displayDate: entryDate)
             default:
                 EmptyView()
             }
@@ -601,25 +612,11 @@ struct ScaledLayerView: View {
     }
 
     /// Maps the current battery percentage to the matching SF Symbol
-    /// so the icon reflects the actual charge level rather than always
-    /// showing 100%. Falls back to `battery.100` when no telemetry is
-    /// available so the widget still has a sensible empty-state icon.
-    /// iOS-6 fix.
+    /// via the shared `WidgetBatteryIcon` helper. Unknown battery
+    /// returns the neutral `bolt.slash` symbol rather than pretending
+    /// the battery is full.
     static func batterySymbolName(percent: Int?, isCharging: Bool) -> String {
-        let base: String
-        if let p = percent {
-            switch p {
-            case 0: base = "battery.0"
-            case 1...24: base = "battery.25"
-            case 25...49: base = "battery.25"
-            case 50...74: base = "battery.50"
-            case 75...94: base = "battery.75"
-            default: base = "battery.100" // 95...100
-            }
-        } else {
-            base = "battery.100"
-        }
-        return isCharging ? "\(base).bolt" : base
+        return WidgetBatteryIcon.symbolName(percent: percent, isCharging: isCharging)
     }
 }
 
@@ -636,18 +633,21 @@ enum WidgetBatteryMath {
 }
 
 /// Renders a live analog clock face for `kind == "analog"` layers.
-/// Uses SwiftUI Canvas driven by `Date()` so the widget auto-refreshes
-/// the hands via the system timeline; the editor's pre-rendered PNG
-/// stays static underneath this overlay. iOS-7 fix.
+/// The clock uses the `displayDate` supplied by the caller so the
+/// minute-clock mechanism (`MinuteClockView` /
+/// `TimelineView(.everyMinute)`) controls when the hands advance.
+/// The view itself does NOT call `Date()` — callers must wrap this
+/// in a minute-clock context for the hands to refresh. The editor's
+/// pre-rendered PNG stays static underneath this overlay.
 struct AnalogClockView: View {
     let color: Color
     let opacity: Double
+    let displayDate: Date
 
     var body: some View {
         Canvas { context, size in
-            let now = Date()
             let cal = Calendar.current
-            let comps = cal.dateComponents([.hour, .minute, .second], from: now)
+            let comps = cal.dateComponents([.hour, .minute, .second], from: displayDate)
             // Pre-existing bug fix: Swift removed `Double % Int`, so compute
             // the modular reduction on the integer hour first, then convert.
             // Behavior is identical to the original `Double(...) % 12`.

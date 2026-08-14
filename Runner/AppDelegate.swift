@@ -48,7 +48,7 @@ struct DriveStudioApp: App {
             case .active:
                 // Returning to foreground — let the widget see the
                 // most recent foreground-collected telemetry.
-                WidgetCenter.shared.reloadAllTimelines()
+                WidgetReloadThrottle.shared.requestReload(kind: .foregroundActivation)
             default:
                 break
             }

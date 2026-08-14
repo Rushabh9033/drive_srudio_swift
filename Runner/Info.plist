@@ -27,13 +27,17 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
-		<string>fetch</string>
 	</array>
 	<!-- BGTaskSchedulerPermittedIdentifiers intentionally absent.
 	The host app removed its BGAppRefreshTask implementation because
 	background refresh cannot provide real-time speed. Telemetry
 	freshness comes from foreground collection plus WidgetKit's
-	normal timeline policy. -->
+	normal timeline policy.
+	The `fetch` UIBackgroundModes entry was also removed because no
+	application:performFetchWithCompletionHandler: implementation
+	exists in the codebase. Apple requires a real background-fetch
+	handler for every declared `fetch` mode; declaring it without one
+	is a rejection risk. -->
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Drive Studio needs access to your microphone to record custom vehicle audio prompts and cues.</string>
 	<key>UILaunchStoryboardName</key>
@@ -65,8 +69,14 @@
 	<string>Drive Studio uses the camera so you can photograph your car for widget artwork.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Drive Studio uses your location while the app is open to show live GPS speed on speedometer widgets. Speed is never invented when GPS is unavailable.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Drive Studio uses your location in the background to keep speedometer widgets accurate while driving. Speed is never invented when GPS is unavailable, and you can disable background location at any time in Settings.</string>
+	<!-- NSLocationAlwaysAndWhenInUseUsageDescription intentionally absent.
+	The host app uses foreground-only GPS for this milestone
+	(requestWhenInUseAuthorization in TelemetryService). There is no
+	verified background-location feature today, so we do not request
+	Always authorization nor declare the matching purpose string. If
+	a future feature requires background GPS, add it back here AND
+	add the `location` UIBackgroundModes entry plus a working
+	background-update path. -->
 	<!-- Flutter / go_router deep links for drivestudio:// -->
 	<key>FlutterDeepLinkingEnabled</key>
 	<true/>

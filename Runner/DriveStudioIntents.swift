@@ -29,7 +29,7 @@ struct RefreshDriveStudioWidgetIntent: AppIntent {
     @MainActor
     func perform() async throws -> some IntentResult {
         TelemetryService.shared.snapshotAndSave()
-        WidgetCenter.shared.reloadAllTimelines()
+        WidgetReloadThrottle.shared.forceReload()
         return .result()
     }
 }

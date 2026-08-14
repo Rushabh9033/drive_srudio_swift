@@ -40,15 +40,25 @@ enum WidgetTelemetryReader {
     /// The first time the host writes a snapshot it appears here; if
     /// the user force-quits the app the widget continues to render the
     /// most recent snapshot until iOS evicts the timeline.
-    static func liveSnapshot() -> TelemetrySnapshot? {
-        return decodeLiveSnapshot()
+    ///
+    /// **Freshness:** Speed is only considered present if the
+    /// snapshot's `timestamp` exists and is within the freshness
+    /// window (`WidgetSnapshotFreshness.maxAge`). A stale or
+    /// timestamp-less snapshot returns `speed == nil` even though the
+    /// underlying record is non-nil. Battery and charging remain
+    /// latest-known — they do not vanish when speed expires.
+    static func liveSnapshot(referenceDate: Date = Date()) -> TelemetrySnapshot? {
+        guard let raw = decodeLiveSnapshot() else { return nil }
+        return WidgetSnapshotFreshness.apply(to: raw, referenceDate: referenceDate)
     }
 
-    /// Decode the host-app-written telemetry snapshot. Tries the
-    /// canonical key first, falls back to the legacy key only when the
-    /// canonical key is absent (so older host builds that still write
-    /// the legacy key keep working until they upgrade). Never returns
-    /// a fabricated value.
+    /// Decode the raw (unexpired) host-app-written telemetry snapshot.
+    /// Tries the canonical key first, falls back to the legacy key
+    /// only when the canonical key is absent (so older host builds that
+    /// still write the legacy key keep working until they upgrade).
+    /// Never returns a fabricated value. **Does not apply the speed
+    /// freshness policy** — callers that need the policy applied use
+    /// `liveSnapshot(referenceDate:)`.
     static func decodeLiveSnapshot() -> TelemetrySnapshot? {
         guard let defaults = UserDefaults(suiteName: AppGroupContract.suiteName) else {
             return nil
@@ -104,6 +114,14 @@ enum WidgetDisplayMath {
     static func batteryFraction(_ pct: Int?) -> Double? {
         guard let clamped = clampedBatteryPercent(pct) else { return nil }
         return Double(clamped) / 100.0
+    }
+
+    /// Battery text used by production renderers and tests. Unknown
+    /// (`nil`) battery renders as `"—"`. Genuine 0 renders as `"0%"`.
+    /// The widget never substitutes 88 or 100 for an unknown battery.
+    static func batteryText(percent: Int?) -> String {
+        guard let clamped = clampedBatteryPercent(percent) else { return "—" }
+        return "\(clamped)%"
     }
 
     /// Speed text used by production renderers. `nil` becomes `"—"`;

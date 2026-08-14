@@ -52,7 +52,12 @@ struct WidgetCanvas: View {
             ZStack(alignment: .topLeading) {
                 // ── Clipped content (bg + layers stay inside the rounded square) ──
                 ZStack(alignment: .topLeading) {
-                    if let specialView = NativeSpecialRenderer.renderIfSpecial(spec: liveSpec, telemetry: nil, vehicle: nil) {
+                    if let specialView = NativeSpecialRenderer.renderIfSpecial(
+                        spec: liveSpec,
+                        telemetry: hostTelemetrySnapshot(),
+                        vehicle: hostSelectedVehicle(),
+                        displayDate: currentDate
+                    ) {
                         specialView
                             .frame(width: side, height: side)
                     } else {
@@ -204,16 +209,52 @@ struct WidgetCanvas: View {
             }
             return "--"
         case "vehicle_name":
-            return "Cyber Sedan"
+            // Vehicle-name layers display the selected vehicle's name.
+            // Unknown vehicle renders as "—"; we never invent a
+            // placeholder like "Cyber Sedan" or "My Vehicle".
+            return WidgetDisplayMath.vehicleLabel(hostSelectedVehicle()?.displayName)
         case "battery", "battery_text":
-            // Battery monitoring is enabled once at AppStore init; reading
-            // is safe here without touching the side-effecting setter.
-            let level = UIDevice.current.batteryLevel
-            let pct = level >= 0 ? Int(level * 100) : 88
-            return "\(pct)%"
+            // Unknown battery (UIDevice returns -1 or telemetry never
+            // published) renders as "—" via the shared helper. Genuine
+            // 0% renders as "0%". We never substitute 88 or 100.
+            let raw = hostLiveBatteryPercent()
+            if let pct = WidgetDisplayMath.clampedBatteryPercent(raw) {
+                return "\(pct)%"
+            }
+            return "—"
         default:
             return layer.text ?? ""
         }
+    }
+
+    // ── Live host telemetry for canvas preview ──────────────────────────
+    //
+    // The canvas renders the same widget content the user will see on
+    // the home screen, so it must read the same truthful telemetry the
+    // widget extension reads. We reuse the host-side AppStore values
+    // (which already wrote the App Group snapshot the widget reads)
+    // and the App Group state for the selected vehicle.
+    private func hostLiveBatteryPercent() -> Int? {
+        return AppStore.shared.liveBatteryPercent
+    }
+
+    private func hostSelectedVehicle() -> VehicleData? {
+        return AppGroupState.loadState()?.vehicle
+    }
+
+    private func hostTelemetrySnapshot() -> TelemetrySnapshot? {
+        // Compose the same shape the widget extension would read:
+        // timestamp from the host's latest write, battery + charging
+        // from AppStore, speed from CLLocationManager (km/h).
+        let timestamp = Date()
+        let speed = TelemetryService.shared.currentSpeed
+        return TelemetrySnapshot(
+            carConnected: TelemetryService.shared.carConnected,
+            batteryPercent: AppStore.shared.liveBatteryPercent,
+            isCharging: AppStore.shared.liveIsCharging,
+            speed: speed,
+            timestamp: timestamp
+        )
     }
 
     private func parseWeight(_ weight: Int?) -> Font.Weight {
@@ -273,11 +314,17 @@ struct LayerView: View {
         switch layer.kind {
         // ── Live data ────────────────────────────────────────
         case "battery", "battery_text":
-            let lvl = UIDevice.current.batteryLevel
-            let pct = lvl >= 0 ? Int(lvl * 100) : 0
-            let charging = UIDevice.current.batteryState == .charging
-                        || UIDevice.current.batteryState == .full
-            return charging ? "\(pct)% ⚡" : "\(pct)%"
+            // Unknown battery (UIDevice returns -1 or telemetry never
+            // published) renders as "—" via the shared helper. Genuine
+            // 0% renders as "0%". We never substitute 0 (which would
+            // look like a full discharge reading) when battery is
+            // actually unknown.
+            let raw = AppStore.shared.liveBatteryPercent
+            let charging = AppStore.shared.liveIsCharging
+            if let pct = WidgetDisplayMath.clampedBatteryPercent(raw) {
+                return charging ? "\(pct)% ⚡" : "\(pct)%"
+            }
+            return charging ? "— ⚡" : "—"
         case "clock":
             return FormatterCache.timeFormatter.string(from: Date())
         case "date":
@@ -292,7 +339,15 @@ struct LayerView: View {
             }
             return "--"
         case "vehicle_name":
-            return layer.text ?? "My Vehicle"
+            // Live vehicle-name layers render the selected vehicle's
+            // name. Unknown vehicle (no selection, missing snapshot)
+            // renders as "—" via the shared helper. We never invent
+            // a placeholder like "My Vehicle" or "Cyber Sedan".
+            // A user-authored `text` field is treated as a fallback
+            // for **static** vehicle-name layers; live vehicle-name
+            // layers (no `text` set) read the App Group selection.
+            if let t = layer.text, !t.isEmpty { return t }
+            return WidgetDisplayMath.vehicleLabel(AppGroupState.loadState()?.vehicle?.displayName)
         case "analog":
             return "🕐 Analog"
         // ── Static text ──────────────────────────────────────
@@ -322,10 +377,13 @@ struct LayerView: View {
             // ── Analog clock preview — proper clock face with hour ticks,
             // hands, and center pin. Uses the shared `AnalogClockView` from
             // the widget extension target (compiled into both via the file
-            // system synchronized group).
+            // system synchronized group). The canvas drives its own
+            // 60-second timer (line 36) and passes the current date so
+            // the hands advance every minute without WidgetKit.
             AnalogClockView(
                 color: Color(hex: layer.color ?? "FFFFFF") ?? .white,
-                opacity: layer.opacity ?? 1.0
+                opacity: layer.opacity ?? 1.0,
+                displayDate: Date()
             )
         } else if kind == "image" {
             // ── Image / Vehicle Position Guide ───────────────────────────

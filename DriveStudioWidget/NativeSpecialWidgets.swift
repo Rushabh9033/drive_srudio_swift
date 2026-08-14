@@ -9,10 +9,10 @@ import UIKit
 // `isCharging` is the exact state written by the host, never ORed with
 // a previously cached value.
 struct OrbitDateEntry: TimelineEntry {
-    let date: Date
-    let batteryLevel: Double? // 0.0…1.0. nil = unknown.
-    let isCharging: Bool      // Exact current state.
-    let vehicleName: String?  // Display name. nil = none selected.
+    var date: Date
+    var batteryLevel: Double? // 0.0…1.0. nil = unknown.
+    var isCharging: Bool      // Exact current state.
+    var vehicleName: String?  // Display name. nil = none selected.
 }
 
 // MARK: - Real Data Timeline Provider (Live Battery, System Clock, & Vehicle Data)
@@ -135,12 +135,16 @@ struct OrbitDateWidget: Widget {
     let kind = "OrbitDateWidget"
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: kind, provider: OrbitDateProvider()) { entry in
-            OrbitDateWidgetView(entry: entry)
+            MinuteClockView(data: entry) { displayDate, captured in
+                var liveEntry = captured
+                liveEntry.date = displayDate
+                return OrbitDateWidgetView(entry: liveEntry)
+            }
         }
         .configurationDisplayName("Orbit Date")
         .description("Day progress ring with live clock and date.")
         .supportedFamilies([.systemSmall, .systemMedium])
-        
+
         if #available(iOS 17.0, *) {
             return config.contentMarginsDisabled()
         } else {
@@ -206,12 +210,16 @@ struct NoirGoldWidget: Widget {
     let kind = "NoirGoldWidget"
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: kind, provider: OrbitDateProvider()) { entry in
-            NoirGoldWidgetView(entry: entry)
+            MinuteClockView(data: entry) { displayDate, captured in
+                var liveEntry = captured
+                liveEntry.date = displayDate
+                return NoirGoldWidgetView(entry: liveEntry)
+            }
         }
         .configurationDisplayName("Noir Gold")
         .description("Black canvas with gold border frame and clock.")
         .supportedFamilies([.systemSmall, .systemMedium])
-        
+
         if #available(iOS 17.0, *) {
             return config.contentMarginsDisabled()
         } else {
@@ -318,7 +326,11 @@ struct SegmentsWidget: Widget {
     let kind = "SegmentsWidget"
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: kind, provider: OrbitDateProvider()) { entry in
-            SegmentsWidgetView(entry: entry)
+            MinuteClockView(data: entry) { displayDate, captured in
+                var liveEntry = captured
+                liveEntry.date = displayDate
+                return SegmentsWidgetView(entry: liveEntry)
+            }
         }
         .configurationDisplayName("Segments")
         .description("Dual arc rings for hours and minutes with tick marks.")
@@ -440,12 +452,16 @@ struct AuroraRingWidget: Widget {
     let kind = "AuroraRingWidget"
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: kind, provider: OrbitDateProvider()) { entry in
-            AuroraRingWidgetView(entry: entry)
+            MinuteClockView(data: entry) { displayDate, captured in
+                var liveEntry = captured
+                liveEntry.date = displayDate
+                return AuroraRingWidgetView(entry: liveEntry)
+            }
         }
         .configurationDisplayName("Aurora Ring")
         .description("Rainbow gradient ring with live analog hands.")
         .supportedFamilies([.systemSmall, .systemMedium])
-        
+
         if #available(iOS 17.0, *) {
             return config.contentMarginsDisabled()
         } else {
@@ -552,12 +568,16 @@ struct BatteryPieWidget: Widget {
     let kind = "BatteryPieWidget"
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: kind, provider: OrbitDateProvider()) { entry in
-            BatteryPieWidgetView(entry: entry)
+            MinuteClockView(data: entry) { displayDate, captured in
+                var liveEntry = captured
+                liveEntry.date = displayDate
+                return BatteryPieWidgetView(entry: liveEntry)
+            }
         }
         .configurationDisplayName("Battery Pie")
         .description("Pie chart showing live battery percentage.")
         .supportedFamilies([.systemSmall, .systemMedium])
-        
+
         if #available(iOS 17.0, *) {
             return config.contentMarginsDisabled()
         } else {
@@ -630,12 +650,16 @@ struct MinimalDateWidget: Widget {
     let kind = "MinimalDateWidget"
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: kind, provider: OrbitDateProvider()) { entry in
-            MinimalDateWidgetView(entry: entry)
+            MinuteClockView(data: entry) { displayDate, captured in
+                var liveEntry = captured
+                liveEntry.date = displayDate
+                return MinimalDateWidgetView(entry: liveEntry)
+            }
         }
         .configurationDisplayName("Minimal Date")
         .description("Clean teal dark card with large clock and date.")
         .supportedFamilies([.systemSmall, .systemMedium])
-        
+
         if #available(iOS 17.0, *) {
             return config.contentMarginsDisabled()
         } else {

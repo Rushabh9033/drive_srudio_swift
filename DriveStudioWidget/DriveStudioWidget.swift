@@ -314,97 +314,95 @@ struct BackgroundView: View {
 
 // MARK: - Fit-to-canvas scaling
 
+/// Renders all widget layers at the native 340×340 design size, then
+/// applies a single `.scaleEffect` to fit the whole group into the
+/// actual widget canvas (e.g. ~155×155 pt for .systemSmall).
+///
+/// This approach is simpler and more reliable than applying a
+/// per-layer `CGAffineTransform` to each layer's frame because:
+///   - SwiftUI's `.scaleEffect` scales the RENDERED pixels, not the
+///     layout geometry, so there are no coordinate-space surprises.
+///   - All layers share one consistent coordinate origin (0,0 =
+///     top-left of the 340×340 canvas) without any transform math.
+///   - Text sizing, shape radii, and image fitting all work correctly
+///     at 1× design size and then shrink proportionally.
 struct FitToCanvasLayers: View {
     let layers: [WidgetLayer]
     let canvasSize: CGSize
     let telemetry: TelemetrySnapshot?
     let vehicle: VehicleData?
-    /// Generation to scope image-cache lookups by. Threaded all the
-    /// way through to `ScaledLayerView` so the same filename across
-    /// two generations resolves to two distinct cached images.
     var generation: String? = nil
     var entryDate: Date = Date()
 
-    /// Reference design canvas side (square). `computeFitTransform` was
-    /// hardcoded to 340.0; named here so the magic number has one home.
-    private static let designSide: CGFloat = 340
+    /// Canonical design canvas. The Flutter editor paints on a 340×340
+    /// logical canvas; all layer x/y/w/h values are % of this size.
+    static let designSide: CGFloat = 340
 
     var body: some View {
-        let transform = Self.computeFitTransform(for: canvasSize)
+        let design = Self.designSide
+        // **Uniform** scale factor. Using different x/y scales here
+        // (scaleX vs scaleY) would distort every layer's aspect ratio
+        // — most visibly the user's vehicle image in the medium
+        // widget where the canvas is wide-but-short (≈338×158) and
+        // non-uniform scaling would horizontally stretch the design.
+        // We pick the smaller of the two so the whole 340×340 design
+        // fits inside the widget canvas without distortion. The
+        // resulting design is letterboxed/pillarboxed inside the
+        // canvas; that empty margin is preferable to a distorted image.
+        let scale = min(canvasSize.width, canvasSize.height) / design
+
         ZStack(alignment: .topLeading) {
             ForEach(layers) { layer in
                 if layer.hidden != true {
-                    ScaledLayerView(
+                    DesignSpaceLayerView(
                         layer: layer,
-                        canvasSize: canvasSize,
                         telemetry: telemetry,
                         vehicle: vehicle,
-                        transform: transform,
                         generation: generation,
                         entryDate: entryDate
                     )
                 }
             }
         }
+        // The ZStack lives in 340×340 design space.
+        .frame(width: design, height: design, alignment: .topLeading)
+        // Scale the whole rendered group uniformly into the widget
+        // canvas. Anchor `.topLeading` so (0,0) sits at the widget's
+        // top-left corner after scaling.
+        .scaleEffect(scale, anchor: .topLeading)
+        // After scaleEffect the layout frame is still 340×340 pt but
+        // visually scaled. Fix the layout frame to the real canvas so
+        // the widget container clips correctly.
         .frame(width: canvasSize.width, height: canvasSize.height, alignment: .topLeading)
-    }
-
-    /// Maps the 340×340 design coordinate space onto the actual widget
-    /// canvas, with uniform aspect-ratio scaling.
-    ///
-    /// For .systemSmall (~158 pt) the design canvas is 340 pt. The
-    /// scale factor is 158/340 ≈ 0.465 — much smaller than the old
-    /// hardcoded 90%. The previous implementation only applied a scale
-    /// with no translation, so layers at the bottom/right of the design
-    /// overflowed the 158 pt canvas and were clipped by the widget
-    /// container's rounded rectangle.
-    ///
-    /// This transform:
-    ///   1. Scales the design space uniformly to fit inside the canvas.
-    ///   2. Translates so the scaled content is top-left-anchored
-    ///      within the canvas (matching the ZStack .topLeading alignment
-    ///      above), which is the natural origin for absolute-positioned
-    ///      layers whose (x, y) are % offsets from the top-left corner.
-    private static func computeFitTransform(for canvas: CGSize) -> CGAffineTransform {
-        // Use the smaller dimension so portrait/landscape and non-square
-        // canvases (.systemMedium) still fit without cropping.
-        let scaleX = canvas.width  / designSide
-        let scaleY = canvas.height / designSide
-        // No extra inset — the widget container already applies its own
-        // safe-area / margin. Scaling to fill gives the crispest result.
-        return CGAffineTransform.identity
-            .scaledBy(x: scaleX, y: scaleY)
     }
 }
 
-struct ScaledLayerView: View {
+/// Renders a single widget layer in 340×340 design-space coordinates.
+/// The parent (`FitToCanvasLayers`) applies a single `.scaleEffect`
+/// on the whole ZStack to map design space → actual widget canvas.
+/// This view therefore uses plain 340-pt pixel math with no transform.
+struct DesignSpaceLayerView: View {
     let layer: WidgetLayer
-    let canvasSize: CGSize
     let telemetry: TelemetrySnapshot?
     let vehicle: VehicleData?
-    let transform: CGAffineTransform
-    /// Generation to scope image-cache lookups by. When the user
-    /// edits an image, the host writes a new generation with the
-    /// new bytes; without this thread the widget would return the
-    /// previous generation's cached UIImage.
     var generation: String? = nil
     var entryDate: Date = Date()
 
-    private static let designSize = CGSize(width: 340, height: 340)
+    private static let design = CGSize(width: 340, height: 340)
 
     var body: some View {
-        let design = Self.designSize
-        let x = (layer.x ?? 0) / 100 * design.width
-        let y = (layer.y ?? 0) / 100 * design.height
-        let w = (layer.w ?? 100) / 100 * design.width
-        let h = (layer.h ?? 100) / 100 * design.height
-        // `x` is always the top-left of the layer frame, regardless of
-        // `align`. The `align` field only affects how text is justified
-        // inside the bounding box (see the per-`kind` rendering below).
-        let rect = CGRect(x: x, y: y, width: w, height: h).applying(transform)
-        let fontSize = (layer.fontSize ?? 14) * (canvasSize.width / 180)
+        let d = Self.design
+        let x = (layer.x ?? 0) / 100 * d.width
+        let y = (layer.y ?? 0) / 100 * d.height
+        let w = max(1, (layer.w ?? 100) / 100 * d.width)
+        let h = max(1, (layer.h ?? 100) / 100 * d.height)
+        // fontSize relative to 180pt (matching the Flutter editor's
+        // reference width). The parent scaleEffect handles the rest.
+        let fontSize = (layer.fontSize ?? 14) * (340.0 / 180.0)
         let layerColor = Color(hex: layer.color ?? "#FFFFFF", fallback: .white)
         let opacityVal = layer.opacity ?? 1
+        // Effective rect in design space.
+        let rect = CGRect(x: x, y: y, width: w, height: h)
         Group {
             switch layer.kind {
             case "text":
@@ -435,7 +433,7 @@ struct ScaledLayerView: View {
                 // Both kinds show battery icon + percentage. Unknown
                 // battery renders as a dash — we never substitute 100%.
                 HStack(spacing: max(2, fontSize * 0.2)) {
-                    Image(systemName: ScaledLayerView.batterySymbolName(
+                    Image(systemName: DesignSpaceLayerView.batterySymbolName(
                         percent: telemetry?.batteryPercent,
                         isCharging: telemetry?.isCharging == true
                     ))
@@ -477,7 +475,8 @@ struct ScaledLayerView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.3)
             case "shape":
-                let r = (layer.radius ?? 0) * (canvasSize.width / 180)
+                // In design space, corner radius is relative to 180pt reference.
+                let r = (layer.radius ?? 0) * (340.0 / 180.0)
                 let color = Color(hex: layer.color ?? "#FFFFFF", fallback: .white).opacity(layer.opacity ?? 1)
                 if (layer.radius ?? 0) >= 50 {
                     Circle().fill(color)
@@ -494,7 +493,7 @@ struct ScaledLayerView: View {
                 let trackHex = layer.label ?? "1E1E24"
                 let trackColor = Color(hex: trackHex, fallback: Color(hex: "#1E1E24", fallback: .black))
                 let fillColor = Color(hex: layer.color ?? "#22C55E", fallback: .green)
-                let barRadius = CGFloat(layer.radius ?? 4) * (canvasSize.width / 180)
+                let barRadius = CGFloat(layer.radius ?? 4) * (340.0 / 180.0)
                 GeometryReader { barGeo in
                     let totalW = barGeo.size.width
                     let fillW  = max(0, totalW * CGFloat(pct) - 2)
@@ -532,7 +531,7 @@ struct ScaledLayerView: View {
                 let thickness = max(1, min(4, (layer.h ?? 0) / 6))
                 Rectangle()
                     .fill(Color(hex: layer.color ?? "#FFFFFF", fallback: .white).opacity(layer.opacity ?? 1))
-                    .frame(height: CGFloat(thickness) * (canvasSize.width / 338))
+                    .frame(height: CGFloat(thickness))
             case "draw":
                 DrawStrokesCanvas(strokesJSON: layer.strokes, color: layerColor, opacity: opacityVal)
             case "analog":
@@ -617,6 +616,11 @@ struct ScaledLayerView: View {
         return WidgetBatteryIcon.symbolName(percent: percent, isCharging: isCharging)
     }
 }
+
+// Keep backward-compat alias so WidgetCanvas.swift (Runner target) and any
+// other callers that still reference ScaledLayerView.batterySymbolName continue
+// to compile without changes.
+typealias ScaledLayerView = DesignSpaceLayerView
 
 // MARK: - Free helper for other files in this target
 //

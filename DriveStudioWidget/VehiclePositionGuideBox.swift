@@ -30,5 +30,12 @@ struct VehiclePositionGuideBox: View {
             }
         }
         .padding(2)
+        // Keep the guide square (1:1) and let it fit within the
+        // layer's frame the same way the user's image does via
+        // `.aspectRatio(contentMode: .fit)`. Without this the dashed
+        // outline fills the entire layer rect, which makes it appear
+        // visibly larger than the rendered photo whenever the layer's
+        // aspect ratio doesn't match the photo's natural ratio.
+        .aspectRatio(1, contentMode: .fit)
     }
 }

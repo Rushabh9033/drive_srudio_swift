@@ -1,6 +1,15 @@
 import CarPlay
 import UIKit
-import CryptoKit
+
+// NOTE: This file is intentionally NOT registered in project.pbxproj and
+// does NOT compile. It is kept here for reference and as a starting point
+// for when Apple grants the com.apple.developer.carplay-driving-task
+// entitlement. To activate:
+//   1. Add `CPTemplateApplicationSceneSessionRoleApplication` to Info.plist
+//   2. Uncomment the entitlement in Runner.entitlements
+//   3. Add this file to Runner's Sources phase
+// Until then, the App Intents + CarPlay Shortcuts path is the active
+// CarPlay integration surface.
 
 /// CarPlay scene delegate.
 ///
@@ -19,8 +28,8 @@ import CryptoKit
 /// `DriveStudioSlot1Widget`/`…Slot4Widget` definitions — this delegate
 /// is only the scene host, not the widget renderer.
 ///
-/// AppGroupHelper lives in the widget extension target, so this file
-/// inlines a minimal V2/V1 reader to pull the slot summaries it needs.
+/// Slot summaries are loaded via the shared `AppGroupState` reader
+/// (see `DriveStudioWidget/AppGroupState.swift`).
 @available(iOS 16.0, *)
 final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
     private var interfaceController: CPInterfaceController?
@@ -61,63 +70,29 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
         self.interfaceController = nil
     }
 
-    // MARK: - Inline App Group reader
-
-    private struct AppGroupReader {
-        static let suiteName = "group.com.drivestudio.shared"
-
-        static func loadState() -> [String: Any]? {
-            guard let defaults = UserDefaults(suiteName: suiteName),
-                  let metadataData = defaults.data(forKey: "widget_state_v2_metadata"),
-                  let metadata = try? JSONSerialization.jsonObject(with: metadataData) as? [String: Any],
-                  let stateFile = metadata["stateFile"] as? String,
-                  let checksum = metadata["checksum"] as? String,
-                  let sharedURL = FileManager.default.containerURL(
-                    forSecurityApplicationGroupIdentifier: suiteName)
-            else {
-                // V1 fallback
-                if let defaults = UserDefaults(suiteName: suiteName),
-                   let json = defaults.string(forKey: "widget_state_v1"),
-                   let data = json.data(using: .utf8),
-                   let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                    return dict
-                }
-                return nil
-            }
-
-            let fileURL = sharedURL.appendingPathComponent(stateFile)
-            guard let data = try? Data(contentsOf: fileURL) else { return nil }
-            let actual = SHA256.hash(data: data)
-                .compactMap { String(format: "%02x", $0) }
-                .joined()
-            guard actual == checksum else { return nil }
-            return try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-        }
-    }
-
     /// Pull a short summary (vehicle name + battery) for each of the four
     /// slots from the same App Group JSON the widget reads.
     private static func loadSlotSummaries() -> [String?] {
-        guard let state = AppGroupReader.loadState() else {
+        guard let state = AppGroupState.loadState() else {
             return Array(repeating: nil, count: 4)
         }
-        let vehicle = state["vehicle"] as? [String: Any]
-        let vehicleName = (vehicle?["displayName"] as? String)
-            ?? (vehicle?["modelId"] as? String)
+        let vehicleName = state.vehicle?.displayName
+            ?? state.vehicle?.modelId
             ?? "Drive Studio"
-        let telemetry = state["telemetry"] as? [String: Any]
-        let battery = (telemetry?["batteryPercent"] as? Int)
-            .map { "\($0)%" } ?? "—"
-        let connected = ((telemetry?["carConnected"] as? Bool) ?? false)
-            ? "Connected" : "Disconnected"
+        let battery: String
+        if let pct = state.telemetry?.batteryPercent {
+            battery = "\(pct)%"
+        } else {
+            battery = "—"
+        }
+        let connected = state.telemetry?.carConnected == true ? "Connected" : "Disconnected"
         let line = "\(vehicleName) · \(battery) · \(connected)"
 
-        let slots = state["slots"] as? [[String: Any]] ?? []
+        let slots = state.slots ?? []
         return (0..<4).map { idx in
             guard idx < slots.count else { return "Not assigned" }
             let slot = slots[idx]
-            let draftId = slot["draftId"] as? String
-            if draftId == nil || draftId?.isEmpty == true { return "Not assigned" }
+            if slot.draftId == nil || slot.draftId?.isEmpty == true { return "Not assigned" }
             return line
         }
     }

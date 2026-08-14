@@ -7,7 +7,8 @@ struct NativeSpecialRenderer {
         let textHints = (spec.layers ?? []).compactMap { $0.text ?? $0.kind }.joined(separator: " ").lowercased()
         
         let realBatt: Double = {
-            UIDevice.current.isBatteryMonitoringEnabled = true
+            // Battery monitoring is enabled once at AppStore / TelemetryService
+            // init — never inside a view body. Reading here is safe.
             let b = Double(UIDevice.current.batteryLevel)
             return b >= 0 ? b : Double(telemetry?.batteryPercent ?? 85) / 100.0
         }()

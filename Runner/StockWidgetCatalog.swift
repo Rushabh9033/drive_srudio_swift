@@ -1441,8 +1441,8 @@ struct StockWidgetCatalog {
             document: WidgetSpec(
                 background: WidgetBackground(type: "solid", from: "12131C", to: nil, imageSrc: nil),
                 layers: [
-                    WidgetLayer(id: uid(), kind: "clock", text: "HH:mm", x: 8, y: 8, w: 50, h: 8, fontSize: 10, weight: 700, align: "left", color: "8899AA"),
-                    WidgetLayer(id: uid(), kind: "speed", text: "0", x: 8, y: 22, w: 60, h: 32, fontSize: 42, weight: 900, align: "left", color: "FF6B35"),
+                    WidgetLayer(id: uid(), kind: "clock", x: 8, y: 8, w: 50, h: 8, fontSize: 10, weight: 700, align: "left", color: "8899AA"),
+                    WidgetLayer(id: uid(), kind: "speed", x: 8, y: 22, w: 60, h: 32, fontSize: 42, weight: 900, align: "left", color: "FF6B35"),
                     WidgetLayer(id: uid(), kind: "text", text: "KM/H", x: 70, y: 38, w: 22, h: 8, fontSize: 11, weight: 800, align: "left", color: "FF6B35"),
                     WidgetLayer(id: uid(), kind: "battery", x: 8, y: 68, w: 84, h: 10, fontSize: 12, weight: 800, align: "left", color: "4DC98A")
                 ]
@@ -1460,9 +1460,9 @@ struct StockWidgetCatalog {
                 background: WidgetBackground(type: "solid", from: "181822", to: nil, imageSrc: nil),
                 layers: [
                     WidgetLayer(id: uid(), kind: "shape", label: "rect", x: 6, y: 6, w: 88, h: 38, color: "FFFFFF", opacity: 0.06, radius: 10),
-                    WidgetLayer(id: uid(), kind: "speed", text: "0", x: 10, y: 12, w: 40, h: 22, fontSize: 24, weight: 900, align: "center", color: "FF6B35"),
-                    WidgetLayer(id: uid(), kind: "battery", text: "85%", x: 50, y: 12, w: 40, h: 22, fontSize: 22, weight: 900, align: "center", color: "4DC98A"),
-                    WidgetLayer(id: uid(), kind: "clock", text: "HH:mm", x: 10, y: 56, w: 80, h: 20, fontSize: 20, weight: 800, align: "center", color: "FFFFFF")
+                    WidgetLayer(id: uid(), kind: "speed", x: 10, y: 12, w: 40, h: 22, fontSize: 24, weight: 900, align: "center", color: "FF6B35"),
+                    WidgetLayer(id: uid(), kind: "battery", x: 50, y: 12, w: 40, h: 22, fontSize: 22, weight: 900, align: "center", color: "4DC98A"),
+                    WidgetLayer(id: uid(), kind: "clock", x: 10, y: 56, w: 80, h: 20, fontSize: 20, weight: 800, align: "center", color: "FFFFFF")
                 ]
             )
         )
@@ -1478,9 +1478,9 @@ struct StockWidgetCatalog {
                 background: WidgetBackground(type: "solid", from: "021720", to: nil, imageSrc: nil),
                 layers: [
                     WidgetLayer(id: uid(), kind: "shape", label: "ring", x: 15, y: 10, w: 70, h: 70, color: "00E5FF", opacity: 0.85, radius: 35),
-                    WidgetLayer(id: uid(), kind: "speed", text: "0", x: 15, y: 28, w: 70, h: 22, fontSize: 28, weight: 900, align: "center", color: "FFFFFF"),
+                    WidgetLayer(id: uid(), kind: "speed", x: 15, y: 28, w: 70, h: 22, fontSize: 28, weight: 900, align: "center", color: "FFFFFF"),
                     WidgetLayer(id: uid(), kind: "text", text: "KM/H", x: 15, y: 52, w: 70, h: 6, fontSize: 9, weight: 800, align: "center", color: "00E5FF"),
-                    WidgetLayer(id: uid(), kind: "date", text: "EEE d", x: 10, y: 84, w: 80, h: 6, fontSize: 9, weight: 700, align: "center", color: "88CCDD")
+                    WidgetLayer(id: uid(), kind: "date", x: 10, y: 84, w: 80, h: 6, fontSize: 9, weight: 700, align: "center", color: "88CCDD")
                 ]
             )
         )
@@ -1496,9 +1496,9 @@ struct StockWidgetCatalog {
                 background: WidgetBackground(type: "solid", from: "0D1020", to: nil, imageSrc: nil),
                 layers: [
                     WidgetLayer(id: uid(), kind: "shape", label: "rect", x: 5, y: 5, w: 90, h: 40, color: "FFFFFF", opacity: 0.08, radius: 10),
-                    WidgetLayer(id: uid(), kind: "clock", text: "HH:mm", x: 10, y: 12, w: 80, h: 20, fontSize: 24, weight: 900, align: "center", color: "FFFFFF"),
-                    WidgetLayer(id: uid(), kind: "speed", text: "0", x: 5, y: 50, w: 42, h: 22, fontSize: 22, weight: 900, align: "center", color: "FF6B35"),
-                    WidgetLayer(id: uid(), kind: "battery", text: "85%", x: 53, y: 50, w: 42, h: 22, fontSize: 20, weight: 900, align: "center", color: "22C55E")
+                    WidgetLayer(id: uid(), kind: "clock", x: 10, y: 12, w: 80, h: 20, fontSize: 24, weight: 900, align: "center", color: "FFFFFF"),
+                    WidgetLayer(id: uid(), kind: "speed", x: 5, y: 50, w: 42, h: 22, fontSize: 22, weight: 900, align: "center", color: "FF6B35"),
+                    WidgetLayer(id: uid(), kind: "battery", x: 53, y: 50, w: 42, h: 22, fontSize: 20, weight: 900, align: "center", color: "22C55E")
                 ]
             )
         )
@@ -1513,9 +1513,9 @@ struct StockWidgetCatalog {
             document: WidgetSpec(
                 background: WidgetBackground(type: "solid", from: "0F0A1C", to: nil, imageSrc: nil),
                 layers: [
-                    WidgetLayer(id: uid(), kind: "vehicle_name", text: "CYBER SEDAN", x: 8, y: 8, w: 84, h: 8, fontSize: 11, weight: 800, align: "center", color: "A78BFA"),
+                    WidgetLayer(id: uid(), kind: "vehicle_name", x: 8, y: 8, w: 84, h: 8, fontSize: 11, weight: 800, align: "center", color: "A78BFA"),
                     WidgetLayer(id: uid(), kind: "image", src: "template_car", x: 12, y: 22, w: 76, h: 36),
-                    WidgetLayer(id: uid(), kind: "battery", text: "85%", x: 8, y: 66, w: 84, h: 14, fontSize: 16, weight: 800, align: "center", color: "4DC98A")
+                    WidgetLayer(id: uid(), kind: "battery", x: 8, y: 66, w: 84, h: 14, fontSize: 16, weight: 800, align: "center", color: "4DC98A")
                 ]
             )
         )
@@ -1530,9 +1530,9 @@ struct StockWidgetCatalog {
             document: WidgetSpec(
                 background: WidgetBackground(type: "solid", from: "1A1A24", to: nil, imageSrc: nil),
                 layers: [
-                    WidgetLayer(id: uid(), kind: "vehicle_name", text: "HYPER ROADSTER", x: 8, y: 8, w: 84, h: 8, fontSize: 10, weight: 800, align: "left", color: "FFB84D"),
-                    WidgetLayer(id: uid(), kind: "speed", text: "0", x: 8, y: 22, w: 50, h: 26, fontSize: 32, weight: 900, align: "left", color: "FFFFFF"),
-                    WidgetLayer(id: uid(), kind: "clock", text: "HH:mm", x: 60, y: 32, w: 32, h: 10, fontSize: 12, weight: 700, align: "right", color: "8899AA"),
+                    WidgetLayer(id: uid(), kind: "vehicle_name", x: 8, y: 8, w: 84, h: 8, fontSize: 10, weight: 800, align: "left", color: "FFB84D"),
+                    WidgetLayer(id: uid(), kind: "speed", x: 8, y: 22, w: 50, h: 26, fontSize: 32, weight: 900, align: "left", color: "FFFFFF"),
+                    WidgetLayer(id: uid(), kind: "clock", x: 60, y: 32, w: 32, h: 10, fontSize: 12, weight: 700, align: "right", color: "8899AA"),
                     WidgetLayer(id: uid(), kind: "shape", label: "rect", x: 8, y: 56, w: 84, h: 3, color: "FFB84D", opacity: 0.8, radius: 2)
                 ]
             )
@@ -1549,9 +1549,9 @@ struct StockWidgetCatalog {
                 background: WidgetBackground(type: "solid", from: "141008", to: nil, imageSrc: nil),
                 layers: [
                     WidgetLayer(id: uid(), kind: "shape", label: "ring", x: 15, y: 10, w: 70, h: 70, color: "F0C040", opacity: 0.85, radius: 35),
-                    WidgetLayer(id: uid(), kind: "vehicle_name", text: "GRAND TOURER", x: 15, y: 28, w: 70, h: 8, fontSize: 10, weight: 800, align: "center", color: "F0C040"),
-                    WidgetLayer(id: uid(), kind: "battery", text: "85%", x: 15, y: 40, w: 70, h: 16, fontSize: 18, weight: 900, align: "center", color: "FFFFFF"),
-                    WidgetLayer(id: uid(), kind: "clock", text: "HH:mm", x: 10, y: 84, w: 80, h: 6, fontSize: 10, weight: 700, align: "center", color: "D0A030")
+                    WidgetLayer(id: uid(), kind: "vehicle_name", x: 15, y: 28, w: 70, h: 8, fontSize: 10, weight: 800, align: "center", color: "F0C040"),
+                    WidgetLayer(id: uid(), kind: "battery", x: 15, y: 40, w: 70, h: 16, fontSize: 18, weight: 900, align: "center", color: "FFFFFF"),
+                    WidgetLayer(id: uid(), kind: "clock", x: 10, y: 84, w: 80, h: 6, fontSize: 10, weight: 700, align: "center", color: "D0A030")
                 ]
             )
         )
@@ -1567,8 +1567,8 @@ struct StockWidgetCatalog {
                 background: WidgetBackground(type: "solid", from: "141419", to: nil, imageSrc: nil),
                 layers: [
                     WidgetLayer(id: uid(), kind: "image", src: "template_car", x: 15, y: 10, w: 70, h: 36),
-                    WidgetLayer(id: uid(), kind: "speed", text: "0", x: 10, y: 50, w: 40, h: 18, fontSize: 20, weight: 900, align: "center", color: "FFFFFF"),
-                    WidgetLayer(id: uid(), kind: "battery", text: "85%", x: 50, y: 50, w: 40, h: 18, fontSize: 18, weight: 800, align: "center", color: "4DC98A")
+                    WidgetLayer(id: uid(), kind: "speed", x: 10, y: 50, w: 40, h: 18, fontSize: 20, weight: 900, align: "center", color: "FFFFFF"),
+                    WidgetLayer(id: uid(), kind: "battery", x: 50, y: 50, w: 40, h: 18, fontSize: 18, weight: 800, align: "center", color: "4DC98A")
                 ]
             )
         )

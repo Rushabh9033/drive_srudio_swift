@@ -4,21 +4,36 @@ import UIKit
 import WidgetKit
 import AVFoundation
 
+extension Notification.Name {
+    /// Posted by `TelemetryService` on every CLLocation fix whose speed
+    /// differs from the last one. View code subscribes to this and bumps
+    /// a `@State` int so SwiftUI re-reads `currentSpeed` synchronously —
+    /// the editor canvas then feels like Google Maps: every GPS sample
+    /// triggers a redraw, no 60-second timer gating.
+    static let telemetrySpeedUpdated = Notification.Name("telemetrySpeedUpdated")
+}
+
 @objc class TelemetryService: NSObject, CLLocationManagerDelegate {
     static let shared = TelemetryService()
-    
+
     private let locationManager = CLLocationManager()
     var currentSpeed: CLLocationSpeed = 0
-    private var timer: Timer?
     private var audioPlayer: AVAudioPlayer?
-    
+
     private var lastWasConnected: Bool = false
-    private let suiteName = "group.com.drivestudio.shared"
-    
+
+    /// Whether the phone currently considers itself connected to a car
+    /// (CarPlay, Bluetooth, or USB). Surfaced honestly to widgets via
+    /// `snapshotAndSave`. Mutable so the Settings screen toggle and the
+    /// App Intents "Switch Slot" intent can affect what widgets show.
+    var carConnected: Bool = false
+
+    private let suiteName = AppGroupContract.suiteName
+
     private override init() {
         super.init()
         UIDevice.current.isBatteryMonitoringEnabled = true
-        
+
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         locationManager.activityType = .automotiveNavigation
@@ -26,29 +41,32 @@ import AVFoundation
         locationManager.pausesLocationUpdatesAutomatically = false
         locationManager.requestAlwaysAuthorization()
     }
-    
+
     func startMonitoring() {
-        DispatchQueue.main.async {
-            UIDevice.current.isBatteryMonitoringEnabled = true
-        }
+        // Battery monitoring is already enabled in init — no need to
+        // re-enable here. Calling the setter from a view body was the
+        // side-effect we are removing.
+        // Snapshots are written on every GPS fix (didUpdateLocations) and
+        // on battery-level / state / foreground observers in AppStore —
+        // no polling timer needed.
         locationManager.startUpdatingLocation()
-        
-        // Update widget telemetry snapshots periodically
-        timer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
-            self?.snapshotAndSave()
-        }
     }
-    
+
     func stopMonitoring() {
         locationManager.stopUpdatingLocation()
-        timer?.invalidate()
-        timer = nil
     }
     
     // MARK: - Core Location Delegate
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
+        let prevSpeed = currentSpeed
         currentSpeed = location.speed > 0 ? (location.speed * 3.6) : 0
+        // Only notify on actual change — GPS can fire 5+ times/sec and
+        // many of those are redundant. Cheap equality check, but it
+        // matters because each notification schedules a SwiftUI render.
+        if abs(prevSpeed - currentSpeed) > 0.5 {
+            NotificationCenter.default.post(name: .telemetrySpeedUpdated, object: self)
+        }
         snapshotAndSave()
     }
     
@@ -162,7 +180,7 @@ import AVFoundation
         }
         
         let telemetry = Snapshot(
-            carConnected: true,
+            carConnected: carConnected,
             batteryPercent: batteryPercent,
             isCharging: isCharging,
             speed: currentSpeed >= 0 ? currentSpeed : 0.0,

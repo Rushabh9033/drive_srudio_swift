@@ -47,7 +47,7 @@ struct OrbitDateProvider: TimelineProvider {
         if lvl >= 0 { return lvl }
         
         // Fallback to shared UserDefaults App Group if UIDevice isn't ready in background
-        if let defaults = UserDefaults(suiteName: AppGroupHelper.suiteName),
+        if let defaults = UserDefaults(suiteName: AppGroupContract.suiteName),
            let snapshotData = defaults.data(forKey: "drive_studio_telemetry"),
            let snapshot = try? JSONDecoder().decode(TelemetrySnapshot.self, from: snapshotData),
            let pct = snapshot.batteryPercent {
@@ -61,7 +61,7 @@ struct OrbitDateProvider: TimelineProvider {
         let state = UIDevice.current.batteryState
         if state == .charging || state == .full { return true }
         
-        if let defaults = UserDefaults(suiteName: AppGroupHelper.suiteName),
+        if let defaults = UserDefaults(suiteName: AppGroupContract.suiteName),
            let snapshotData = defaults.data(forKey: "drive_studio_telemetry"),
            let snapshot = try? JSONDecoder().decode(TelemetrySnapshot.self, from: snapshotData) {
             return snapshot.isCharging ?? false
@@ -70,7 +70,7 @@ struct OrbitDateProvider: TimelineProvider {
     }
 
     private func fetchVehicleName() -> String {
-        let state = AppGroupHelper.loadState()
+        let state = AppGroupState.loadState()
         return state?.vehicle?.displayName ?? "MY VEHICLE"
     }
 }

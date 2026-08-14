@@ -50,7 +50,7 @@ struct DriveProvider: TimelineProvider {
         let lvl = Double(UIDevice.current.batteryLevel)
         if lvl >= 0 { return lvl }
         
-        if let defaults = UserDefaults(suiteName: AppGroupHelper.suiteName),
+        if let defaults = UserDefaults(suiteName: AppGroupContract.suiteName),
            let snapshotData = defaults.data(forKey: "drive_studio_telemetry"),
            let snapshot = try? JSONDecoder().decode(TelemetrySnapshot.self, from: snapshotData),
            let pct = snapshot.batteryPercent {
@@ -64,7 +64,7 @@ struct DriveProvider: TimelineProvider {
         let state = UIDevice.current.batteryState
         if state == .charging || state == .full { return true }
         
-        if let defaults = UserDefaults(suiteName: AppGroupHelper.suiteName),
+        if let defaults = UserDefaults(suiteName: AppGroupContract.suiteName),
            let snapshotData = defaults.data(forKey: "drive_studio_telemetry"),
            let snapshot = try? JSONDecoder().decode(TelemetrySnapshot.self, from: snapshotData) {
             return snapshot.isCharging ?? false
@@ -73,7 +73,7 @@ struct DriveProvider: TimelineProvider {
     }
 
     private func fetchRealSpeed() -> Double {
-        if let defaults = UserDefaults(suiteName: AppGroupHelper.suiteName),
+        if let defaults = UserDefaults(suiteName: AppGroupContract.suiteName),
            let snapshotData = defaults.data(forKey: "drive_studio_telemetry"),
            let snapshot = try? JSONDecoder().decode(TelemetrySnapshot.self, from: snapshotData),
            let spd = snapshot.speed {
@@ -83,7 +83,7 @@ struct DriveProvider: TimelineProvider {
     }
 
     private func fetchVehicleName() -> String {
-        let state = AppGroupHelper.loadState()
+        let state = AppGroupState.loadState()
         return state?.vehicle?.displayName ?? "Tesla Model 3"
     }
 }

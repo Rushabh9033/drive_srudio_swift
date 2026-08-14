@@ -66,16 +66,16 @@ struct DashboardView: View {
                             DrivePill(label: "Synced")
                         }
 
-                        Text("Battery \(store.batteryPercent)% · \(store.isCharging ? "charging · " : "")car linked · GPS speed available")
+                        Text("Battery \(store.liveBatteryPercent)% · \(store.liveIsCharging ? "charging · " : "")car linked · GPS speed available")
                             .font(.system(size: 13))
                             .lineSpacing(5)
                             .foregroundColor(DriveColors.mutedFg)
 
                         HStack(spacing: 16) {
-                            MetricBar(icon: store.isCharging ? "battery.100.bolt" : "battery.100",
+                            MetricBar(icon: store.liveIsCharging ? "battery.100.bolt" : "battery.100",
                                       label: "Battery",
-                                      value: "\(store.batteryPercent)%",
-                                      progress: Double(store.batteryPercent) / 100)
+                                      value: "\(store.liveBatteryPercent)%",
+                                      progress: Double(store.liveBatteryPercent) / 100)
                             let currentSpeed = Int(TelemetryService.shared.currentSpeed)
                             MetricBar(icon: "gauge.with.dots.needle.bottom.50percent",
                                       label: "GPS speed",
@@ -189,7 +189,7 @@ struct DashboardView: View {
                                   label: "Telemetry permissions", value: "Granted")
                         Divider().background(DriveColors.border).padding(.vertical, 12)
                         StatusRow(icon: "battery.100", iconColor: DriveColors.success,
-                                  label: "Battery reporting", value: "\(store.batteryPercent)%")
+                                  label: "Battery reporting", value: "\(store.liveBatteryPercent)%")
                         Divider().background(DriveColors.border).padding(.vertical, 12)
                         StatusRow(
                             icon: "checkmark.circle",
@@ -199,7 +199,7 @@ struct DashboardView: View {
                         )
 
                         Spacer().frame(height: 20)
-                        Button(action: {}) {
+                        Button(action: { showAutomationGuide = true }) {
                             Text("Install & live sync guide")
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(DriveColors.foreground)

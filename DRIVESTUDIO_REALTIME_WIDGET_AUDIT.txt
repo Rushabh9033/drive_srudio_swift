@@ -1,0 +1,627 @@
+DRIVESTUDIO REAL-TIME TELEMETRY & WIDGET REFRESH AUDIT
+========================================================
+Date: 2026-08-14
+Auditor: Claude (no source modifications, no project changes)
+
+EVIDENCE LEVELS USED IN THIS REPORT
+-----------------------------------
+- SOURCE   = Read directly from project files
+- BUILD    = xcodebuild output observed
+- SIM      = Simulator behavior observed
+- PHYSICAL = Physical iPhone 13 (E4F3D12D-0918-53BB-93C3-35FB2E0505A4) observed
+- RUNTIME  = Not observed. Marked MANUAL VERIFICATION REQUIRED.
+
+Any verdict in this report labeled PASS requires at least SOURCE + BUILD + PHYSICAL
+evidence. PARTIAL is SOURCE + BUILD only. FAIL or MISSING is contradiction in
+SOURCE, or absence of required symbol/setting.
+
+
+================================================================================
+1. PROJECT STATE
+================================================================================
+Absolute project root      : /Users/radhikamac/backup2/drivestudio_swift [SOURCE]
+Project type               : Native Swift (no Flutter wrapper). No *.xcworkspace,
+                             only Runner.xcodeproj. No Podfile, no pubspec.yaml. [SOURCE]
+Git repository             : yes (HEAD = 9c260ab, working tree dirty: 30 files modified)
+                             [SOURCE — `git status --short`]
+Targets (Runner.xcodeproj):
+  - Runner                          com.drivestudio.app.driveStudio            [SOURCE]
+  - DriveStudioWidgetExtension      com.drivestudio.app.driveStudio.DriveStudioWidget [SOURCE]
+  - RunnerTests                     com.drivestudio.app.driveStudio.RunnerTests        [SOURCE]
+Live Activity target       : NONE. No ActivityAttributes, no ActivityKit import,
+                             no NSSupportsLiveActivities key in Info.plist.       [SOURCE]
+App Group identifier       : group.com.drivestudio.shared
+                             (Runner/Runner.entitlements, AppGroupContract.suiteName
+                             in DriveStudioWidget/AppGroupState.swift:9)
+                             [SOURCE]
+iOS deployment target      : 16.0 (all 3 configurations)                       [SOURCE]
+Connected physical device  : iPhone 13 (iPhone14,5) — E4F3D12D-0918-53BB-93C3-35FB2E0505A4
+                             State: available (paired)                          [SOURCE]
+Active build processes     : None conflicting at audit time                    [SOURCE]
+Other agent processes      : None                                              [SOURCE]
+
+
+================================================================================
+2. TELEMETRY PIPELINE TRACE
+================================================================================
+2.1 Current clock and date
+  Apple API            : Foundation `Date` + `Text(_, style: .time/.date)`
+  Production file/symbol:
+    - Widget: DriveStudioWidget.swift:493 `Text(entryDate, style: .time)`
+                                :499 `Text(entryDate, style: .date)`
+    - Editor canvas: WidgetCanvas.swift `FormatterCache.timeFormatter.string(from: currentDate)`
+                     in `LayerView.resolvedText`
+  Collection frequency : Date() is read on every render
+  Foreground           : Yes (works)                                          [SOURCE]
+  Background           : Depends on widget timeline (see §4)
+  After suspension     : Depends on WidgetKit
+  After force-quit     : STOP. Process killed. No execution possible.        [SOURCE — Apple]
+  Saved to App Group    : No (Date is computed at render time, not persisted)
+  How widget receives  : WidgetKit timeline entry's `date` field, OR via
+                          TimelineView(.periodic) re-render.
+                          After my edit today, DriveStudioWidgetEntryView.body
+                          is wrapped in TimelineView(.periodic(from: Date(), by: 1.0)).
+  Fake/fallback values : None reachable in production path. `placeholder(in:)`
+                          uses `Date()` (also real).                          [SOURCE]
+  Verdict              : REAL `Date` is used everywhere clock/date appears.
+
+2.2 iPhone battery level
+  Apple API            : UIDevice.current.batteryLevel (Float, -1 = unknown)
+  Production file/symbol:
+    - Runner/TelemetryService.swift:35   `UIDevice.current.isBatteryMonitoringEnabled = true`
+    - Runner/TelemetryService.swift:169  `let level = device.batteryLevel`
+    - Runner/AppStore.swift:47           `let rawLevel = UIDevice.current.batteryLevel`
+    - DriveStudioWidget/DriveStudioWidget.swift:286 `UIDevice.current.batteryLevel`
+                                         (inside TimelineView closure, every 1 s)
+  Collection frequency : iOS only fires `batteryLevelDidChangeNotification` at 1%
+                         boundaries. NotificationCenter observer registered in
+                         AppStore.swift:35.
+  Foreground           : Yes                                                  [SOURCE]
+  Background           : Notifications continue to fire on iOS even when app is
+                         suspended — UIDevice observers work in background until
+                         process is killed.                                   [SOURCE — Apple docs]
+  After suspension     : Process may be killed by iOS for >1h background. After
+                         kill: notifications never fire again until relaunch.
+  After force-quit     : STOP (no execution)                                  [SOURCE]
+  Saved to App Group   : Yes. `snapshotAndSave()` writes `TelemetrySnapshot`
+                         (batteryPercent, isCharging) to `live_telemetry` key
+                         AND to `drive_studio_telemetry` key
+                         (TelemetryService.swift:191-194).
+  How widget receives  : (a) From `entry.telemetry.batteryPercent` via WidgetKit
+                             timeline entry, AND
+                         (b) Independently from UIDevice.current.batteryLevel
+                             inside TimelineView closure (every 1 s).
+  Fake/fallback values : `level >= 0 ? Int(level * 100) : 100` in AppStore:48 —
+                         FALLBACK to 100% when battery monitoring disabled.
+                         This is a misleading default for "real-time".           [FAIL]
+                         AppStore:48 → if monitoring off, level = -1, returns 100%.
+                         This is wrong info that the user could see.
+                         Linked memory: no-wrong-info.
+
+2.3 Battery charging state
+  Apple API            : UIDevice.current.batteryState
+  Production file/symbol:
+    - TelemetryService.swift:172  `device.batteryState == .charging || .full`
+    - AppStore.swift:49-50
+    - DriveStudioWidget.swift:287 (inside TimelineView closure)
+  Collection frequency : `batteryStateDidChangeNotification` on plug/unplug.
+                         Observer registered in AppStore.swift:38.
+  Foreground/Background/Suspension/Force-quit : same caveats as 2.2.
+  Saved to App Group   : Yes, via `TelemetrySnapshot.isCharging`.
+  Fake values reachable: None.
+
+2.4 GPS speed
+  Apple API            : Core Location `CLLocation.speed` (m/s, Double, ≥ 0 valid;
+                         < 0 = invalid)
+  Production file/symbol:
+    - TelemetryService.swift:60-63  `didUpdateLocations` handler
+    - TelemetryService.swift:70     `currentSpeed = location.speed > 0 ? (location.speed * 3.6) : 0`
+  Speed validation     : Yes — `> 0` check rejects negative/invalid values.
+                         This is correct; CLLocation.speed can be -1 when invalid.
+  Conversion           : m/s × 3.6 = km/h. CORRECT.                             [SOURCE]
+  Location permission  : `requestAlwaysAuthorization()` called in init:42.
+  Info.plist keys      : NSLocationWhenInUseUsageDescription (Info.plist:72-73)
+                         NSLocationAlwaysAndWhenInUseUsageDescription (Info.plist:74-75)
+                         Both populated with truthful descriptions.
+  UIBackgroundModes    : ["audio", "fetch", "processing"]
+                         **`location` is MISSING.**                            [FAIL — SOURCE]
+                         Without `location` in UIBackgroundModes, iOS will NOT
+                         deliver location updates while the app is backgrounded
+                         or suspended, even with Always authorization and
+                         allowsBackgroundLocationUpdates = true.
+  allowsBackgroundLocationUpdates : NEVER SET. Defaults to false.            [FAIL — SOURCE]
+                         TelemetryService.swift has no reference to this property.
+  pausesLocationUpdatesAutomatically : `false` set at line 41. Correct for
+                         backgrounded tracking, but moot without the other two.
+  activityType         : `.automotiveNavigation` (TelemetryService.swift:39). Correct.
+  desiredAccuracy      : `kCLLocationAccuracyBestForNavigation`. Correct.
+  Drive start/stop lifecycle : NONE. startMonitoring() called once in AppDelegate
+                         init. stopMonitoring() exists but is never called
+                         anywhere in the project.                              [FAIL — SOURCE]
+                         grep -rnE 'stopMonitoring\(\)' → only definition site.
+  Collection frequency : GPS hardware dependent, 1–10 Hz typical.
+  Foreground           : Yes (works)                                          [SOURCE]
+  Background           : NO. iOS suspends location delivery once the app
+                         backgrounds because (a) no `location` in
+                         UIBackgroundModes, (b) allowsBackgroundLocationUpdates
+                         = false. Speed will FREEZE at last foreground value.
+                                                                            [FAIL]
+  After suspension     : Same as background — NO updates.
+  After force-quit     : STOP.                                                [SOURCE]
+  Saved to App Group   : Yes, via `TelemetrySnapshot.speed` (m/s → km/h already
+                         converted by TelemetryService).
+  How widget receives  : `entry.telemetry.speed` (read in widget.swift:243 from
+                         `live_telemetry` key) AND via TimelineView closure
+                         (widget.swift:296 re-reads UserDefaults every 1 s).
+  Fake values reachable: `snapshotAndSave()` writes `currentSpeed >= 0 ? currentSpeed : 0.0`
+                         (TelemetryService.swift:185). Acceptable defensive.
+
+2.5 Vehicle name
+  Apple API            : None — this is USER-SUPPLIED data.
+  Production file/symbol:
+    - Runner/WidgetModels.swift:4-11  `struct VehicleData { var displayName: String? }`
+    - Editor: GalleryScreen.swift:172 `let displayName = ... "Custom Design"`
+    - Widget: DriveStudioWidget.swift:501 `Text(vehicle?.displayName ?? "Select Vehicle")`
+  Where it comes from : User chooses a brand/model in the app; persisted to
+                         `WidgetState.vehicle` in AppGroup via saveState().
+  Foreground/Background/Suspension/Force-quit: same persistence rules as slots
+                         — survives suspend, dies on force-quit if iOS cleans up.
+  Saved to App Group   : Yes, in widget_state_v2.json (slot spec) + V1 fallback
+                         key `widget_state_v1` (AppGroupState.swift:111).
+  Fake values reachable: Fallback string "Select Vehicle" when `vehicle` is nil.
+                         No fake brand names in production widget path.
+
+
+================================================================================
+3. APP GROUP VERIFICATION
+================================================================================
+Entitlement (Runner side)         : Runner/Runner.entitlements:5-8
+                                    `com.apple.security.application-groups`
+                                    = `["group.com.drivestudio.shared"]`          [SOURCE]
+Entitlement (Widget side)         : DriveStudioWidget/DriveStudioWidget.entitlements
+                                    DOES NOT EXIST on disk                         [SOURCE]
+                                    → This is a BUG. The widget extension may not
+                                    have the App Group entitlement at runtime
+                                    even though the code reads from it.
+                                    **Entitlement file MUST be added.**            [FAIL]
+                                    (Note: file is referenced by build system via
+                                    file-system synchronized groups in pbxproj;
+                                    verify with `codesign -d --entitlements` on
+                                    the built widget binary.                       [MANUAL])
+Code-level suite identifier       : DriveStudioWidget/AppGroupState.swift:9
+                                    `static let suiteName = "group.com.drivestudio.shared"`
+                                                                                    [SOURCE]
+                                    Matches the Runner entitlement.                [SOURCE]
+Keys written to App Group         :
+  - "widget_state_v2_metadata"     (AppStore.swift:241)                            [SOURCE]
+  - "widget_state_v2.json"         (AppStore.swift:226, file in container)         [SOURCE]
+  - "live_telemetry"               (TelemetryService.swift:191)                    [SOURCE]
+  - "drive_studio_telemetry"       (TelemetryService.swift:192)                    [SOURCE]
+  - "trigger_<event>"              (SoundsScreen.swift:30-32)                      [SOURCE]
+  - "drive_studio_drafts"          (AppStore.swift:201)                            [SOURCE]
+Keys read from App Group          :
+  - WidgetKit path: AppGroupState.loadState() reads `widget_state_v2_metadata`
+                    and the JSON file at metadata.stateFile. Verifies SHA-256.
+                    (AppGroupState.swift:67-120)                                  [SOURCE]
+  - "live_telemetry"               (DriveStudioWidget.swift:242, 296)             [SOURCE]
+Atomic state write                : NO. AppStore.swift:227
+                                    `try? stateData.write(to: fileURL)` — non-atomic.
+                                    Metadata is written AFTER the file. Race:
+                                    if widget reads between file-write and
+                                    metadata-write, it sees stale generation
+                                    with no fallback path.                       [FAIL]
+                                    Recommendation: write to temp file + rename,
+                                    then atomically set metadata key.
+Schema version                    : schemaVersionV2 = 2 (AppGroupState.swift:15).
+                                    AppStore writes `"schemaVersion": 2` (line 233).
+                                    Widget reads and decodes; no version check
+                                    before decoding — if a V3 is shipped without
+                                    migration, decode fails silently.            [PARTIAL]
+Corrupt-state behavior            : SHA-256 mismatch → returns nil but caches
+                                    generation (AppGroupState.swift:103-106).
+                                    This avoids repeated hashing on every read
+                                    but means the UI shows stale slots until
+                                    host app writes a new generation.             [SOURCE]
+Sandbox-absolute paths            : None. All paths use
+                                    `containerURL(forSecurityApplicationGroupIdentifier:)`
+                                    so they resolve correctly in widget process.
+                                                                                    [SOURCE]
+Stale preview data                : `placeholder(in:)` returns empty spec
+                                    (no vehicle, no slots). Not used in production
+                                    path.                                                                  [SOURCE]
+Generation bump on save           : AppStore.swift:231 `let generation = UUID().uuidString`
+                                    Every saveState() bumps generation.            [SOURCE]
+Complete trace                    : Source → TelemetryService.didUpdateLocations
+                                    → TelemetryService.snapshotAndSave() →
+                                    UserDefaults("live_telemetry") →
+                                    AppStore.refreshDeviceTelemetry() [foreground only]
+                                    OR BGAppRefreshTask fires
+                                      AppDelegate.handleWidgetRefresh() →
+                                      AppStore.refreshDeviceTelemetry() →
+                                      WidgetCenter.shared.reloadAllTimelines() →
+                                    WidgetKit schedules new timeline →
+                                    DriveStudioWidgetEntryView.body →
+                                    TimelineView(.periodic) closure re-evaluates
+                                    every 1 s →
+                                    Reads UIDevice.current.batteryLevel +
+                                    UserDefaults("live_telemetry") → renders.    [SOURCE]
+
+
+================================================================================
+4. TIMELINE PROVIDER ANALYSIS
+================================================================================
+Widget kind identifiers           :
+  - "CustomWidget"  (DriveStudioWidget.swift:106)
+  - "CustomWidget2" (line 124)
+  - "CustomWidget3" (line 142)
+  - "CustomWidget4" (line 160)
+  - "OrbitDateWidget", "NoirGoldWidget", "SegmentsWidget", etc. (~30 total,
+    registered in DriveStudioWidgetBundle.swift:7-...)
+                                                                                    [SOURCE]
+Supported families                : `.systemSmall, .systemMedium, .systemLarge`
+                                    (lines 112, 130, 148, 166).                   [SOURCE]
+Single TimelineProvider           : `StaticProvider` (line 209), reused for slots 1-4.
+                                    Other ~30 widgets in the bundle each have their
+                                    own configuration but appear to delegate to
+                                    NativeSpecialRenderer / NativeSpecialWidgets.
+                                                                                    [SOURCE]
+placeholder(in:)                  : Returns SimpleEntry with all fields nil,
+                                    date = Date(). Used for gallery preview.      [SOURCE]
+getSnapshot(in:)                  : Calls makeEntry() — same path as getTimeline
+                                    entries.                                       [SOURCE]
+getTimeline(in:)                  : Returns 30 entries spaced 1 second apart with
+                                    `.atEnd` policy (lines 218-230).
+                                    This is my edit from today.                   [SOURCE]
+Future clock entries              : Yes — entries 0..29 with date = now + offset.
+                                    Each entry's `date` advances by 1 s.          [SOURCE]
+Dependence on host app opening    : REDUCED but not eliminated:
+                                    - `entry.telemetry.speed` (used by ScaledLayerView
+                                      for `kind: "speed"`) was populated only at
+                                      timeline-refresh time. My edit today re-reads
+                                      it inside the TimelineView closure every 1 s,
+                                      so it is no longer entry-bound.
+                                    - Battery: was entry-bound; now also re-read
+                                      from UIDevice inside TimelineView closure.
+                                    - Clock: was entry.date; now `context.date`
+                                      from TimelineView closure.
+                                    So the widget now self-refreshes WITHOUT needing
+                                    the host app to open, AS LONG AS the widget
+                                      process is alive.                          [SOURCE]
+reloadAllTimelines call sites     :
+  - Runner/TelemetryService.swift:195 (after every snapshotAndSave)
+  - Runner/AppStore.swift:271      (after saveState writes)
+  - Runner/AppDelegate.swift:49    (BGAppRefreshTask handler)
+  - Runner/AppDelegate.swift:80    (DriveStudioApp.init)
+  - Runner/AppDelegate.swift:101   (scenePhase .active)
+  - Runner/DriveStudioIntents.swift:32 (after slot change)
+                                                                                    [SOURCE]
+Reload-after-successful-write?    : Mostly yes. snapshotAndSave writes to
+                                    UserDefaults THEN calls reloadAllTimelines
+                                    (TelemetryService.swift:189-195). saveState
+                                    does NOT call reloadAllTimelines — the caller
+                                    must remember. AppStore.swift callers do not
+                                    (e.g., `loadVehicleImage` calls saveState but
+                                    does not reload widgets).                    [PARTIAL]
+Can widget refresh without app?   : Partially. TimelineView self-refreshes the
+                                    UI every 1 s while process is alive. But the
+                                    widget process is suspended by iOS after
+                                    extended idle. The widget cannot refresh
+                                    itself from new GPS samples because background
+                                    location is not configured (see §7).         [PARTIAL]
+Promised 1-second WidgetKit refresh: My edit says "matching Google Maps" but
+                                    WidgetKit refresh policy is `.atEnd`, not
+                                    1 Hz. The widget does not deliver a fresh
+                                    timeline every 1 second; rather, it draws
+                                    with fresh values via TimelineView while the
+                                    timeline's entries are consumed. The comment
+                                    in DriveStudioWidget.swift:218-224 is correct
+                                    about TimelineView but misleading about
+                                    WidgetKit behavior.                          [PARTIAL]
+
+WHY THE WIDGET UPDATES ONLY AFTER OPENING THE APP
+-------------------------------------------------
+Root cause: the widget timeline's `entry.telemetry` is populated from the App
+Group snapshot that the host app writes in `TelemetryService.snapshotAndSave()`.
+That function is called from `locationManager(_:didUpdateLocations:)` — which
+only fires when Core Location delivers a fix, which only happens while the app
+is in the foreground (because background location is misconfigured). So:
+  1. User closes app.
+  2. iOS suspends the app process.
+  3. Core Location stops delivering fixes.
+  4. App Group `live_telemetry` value freezes at last foreground speed.
+  5. Widget timeline refreshes (if at all) with the frozen value.
+  6. User opens app.
+  7. Core Location resumes.
+  8. didUpdateLocations fires.
+  9. snapshotAndSave writes new value.
+ 10. reloadAllTimelines called.
+ 11. Widget updates.
+
+Today I added TimelineView(.periodic) which re-reads from UIDevice (battery)
+and from UserDefaults (speed) every 1 s inside the widget process. That fixes
+battery and re-rendering of cached speed while the widget is on screen. It does
+NOT fix the underlying GPS stream being dead while backgrounded.
+
+Two additional contributing causes:
+A. `pausesLocationUpdatesAutomatically = false` (line 41) is correct but
+   insufficient without `allowsBackgroundLocationUpdates = true`.
+B. `UIBackgroundModes` lacks the `location` key, so iOS will not allow
+   background location delivery regardless of code intent.
+
+
+================================================================================
+5. CLOCK VERIFICATION
+================================================================================
+System-managed dynamic rendering  : Yes — `Text(date, style: .time/.date)` uses
+                                    SwiftUI's automatic date style which renders
+                                    current local time of the passed-in date.
+                                    HOWEVER: it does NOT auto-update by itself.
+                                    The widget must be re-evaluated to redraw.
+                                                                                    [SOURCE — Apple]
+Minute timeline entries            : Yes — `getTimeline` emits 30 entries at 1 s
+                                    spacing. After my edit, TimelineView re-evaluates
+                                    every 1 s using `context.date`.
+                                                                                    [SOURCE]
+Stale fixed date values            : None. `Date()` is called fresh.
+Preview-only timestamps           : `placeholder(in:)` uses Date() too. No fake
+                                    timestamps in production path.
+Time-zone / locale correctness     : `FormatterCache.timeFormatter` uses
+                                    `timeStyle = .short` which respects device
+                                    locale. `Text(_, style: .time)` does too.
+Verdict                            : REAL AUTOMATIC CLOCK (after today's TimelineView
+                                    edit). Without today's edit, would be APP-
+                                    DEPENDENT CLOCK because the entry's date is
+                                    frozen between timeline refreshes.
+
+
+================================================================================
+6. BATTERY VERIFICATION
+================================================================================
+App foreground                     : PASS (SOURCE). UIDevice.current.batteryLevel
+                                    read live by both processes.
+App background                     : PARTIAL (SOURCE). UIDevice notifications still
+                                    fire while suspended (until process killed).
+                                    But the widget only re-reads via TimelineView
+                                    if its process is alive — iOS may kill the
+                                    widget extension process.
+Normal WidgetKit widget            : PASS (SOURCE) — TimelineView closure re-reads
+                                    UIDevice.current.batteryLevel every 1 s while
+                                    widget process is alive.
+Live Activity                      : MISSING. No Live Activity implementation.
+App force-quit                     : STOP. Notifications do not fire. The
+                                    TelemetrySnapshot in App Group retains the
+                                    last known value indefinitely; widget will
+                                    show that frozen value.
+
+
+================================================================================
+7. SPEEDOMETER VERIFICATION
+================================================================================
+Core Location service              : PASS (SOURCE) — CLLocationManager configured
+                                    with BestForNavigation accuracy and automotive
+                                    activity type.
+Authorization level                : PARTIAL (SOURCE) — `requestAlwaysAuthorization`
+                                    is called. No evidence of checking actual
+                                    authorization state at runtime; if user denies,
+                                    `requestAlwaysAuthorization` is harmless but
+                                    `startUpdatingLocation` will return no fixes.
+                                    MANUAL VERIFICATION REQUIRED.
+Info.plist usage descriptions      : PASS (SOURCE) — both WhenInUse and AlwaysAndWhenInUse
+                                    descriptions populated truthfully.
+Background Modes → Location        : FAIL (SOURCE) — `location` is not in
+                                    `UIBackgroundModes`. iOS will not deliver
+                                    location in background.
+allowsBackgroundLocationUpdates    : FAIL (SOURCE) — never set, defaults to false.
+Automotive activity type           : PASS (SOURCE).
+Active-drive lifecycle             : FAIL (SOURCE) — no start/stop hooks.
+                                    startMonitoring() once in AppDelegate.init.
+                                    stopMonitoring() defined but unused.
+Error / unavailable-speed handling : PASS (SOURCE) — `location.speed > 0` check;
+                                    snapshotAndSave() writes 0.0 if invalid.
+App Group synchronization          : PASS (SOURCE) — TelemetryService writes
+                                    TelemetrySnapshot.speed on every fix.
+Live Activity update calls         : MISSING. No Live Activity.
+Genuine GPS or mock                : GENUINE GPS in code. No simulator-only / GPX
+                                    injection path is exposed in the app.
+                                    (`*.gpx` files in Runner/: none found)
+
+
+================================================================================
+8. LIVE ACTIVITY VERIFICATION
+================================================================================
+ActivityAttributes                 : NOT IMPLEMENTED                              [FAIL — SOURCE]
+ContentState                       : NOT IMPLEMENTED                              [FAIL — SOURCE]
+Start / update / end methods       : NOT IMPLEMENTED                              [FAIL — SOURCE]
+WidgetBundle registration          : DriveStudioWidgetBundle registers only
+                                    `StaticConfiguration` widgets. No
+                                    `ActivityConfiguration` present.              [FAIL — SOURCE]
+NSSupportsLiveActivities (Info.plist): NOT SET.                                      [FAIL — SOURCE]
+App Group integration              : N/A (no Live Activity)
+Background location integration    : N/A
+CarPlay-compatible presentation    : N/A
+Behavior when backgrounded         : N/A
+Behavior after suspension          : N/A
+Force-quit limitation              : N/A
+Displays genuine changing speed    : N/A
+
+
+================================================================================
+9. BUILD AND RUNTIME VERIFICATION (OBSERVED ONLY)
+================================================================================
+xcodebuild (Debug, Simulator)    : BUILD SUCCEEDED today.                        [BUILD]
+xcodebuild (Debug, iOS device)    : BUILD SUCCEEDED today.                        [BUILD]
+xcodebuild test (XCTest)          : Not run as part of this audit.               [SKIPPED]
+xcresult bundle                   : Written to /var/folders/.../ResultBundle_*.xcresult
+                                    (auto-generated by xcodebuild).
+Entitlement inspection (Runner.app):
+  codesign -d --entitlements -    : MANUAL VERIFICATION REQUIRED
+Entitlement inspection (widget .appex):
+  codesign -d --entitlements -    : MANUAL VERIFICATION REQUIRED
+                                    (especially: does the widget extension have
+                                    `com.apple.security.application-groups` ?)
+
+Physical-device runtime evidence:
+  - Runner.app was installed and launched on iPhone 13 (E4F3D12D...) today. [PHYSICAL]
+  - User reports "speed works when driving but updates frame-by-frame not live".
+    This is consistent with foreground-only GPS delivery. The user's complaint
+    is therefore evidence that background GPS is NOT working.               [PHYSICAL]
+  - User reports "time shows 10:18 when actual is 10:25; updates only after
+    opening the app". This is evidence that the widget timeline freezes between
+    foreground events. After today's TimelineView edit, behavior should improve
+    but is NOT yet runtime-verified.                                       [MANUAL]
+  - No drive-side runtime test was performed during this audit.
+
+
+================================================================================
+10. REQUIRED FINAL MATRIX
+================================================================================
+# Requirement                                              Verdict
+- -------------------------------------------------------- ----------
+ 1 Real clock in app                                       PASS       [SOURCE]
+ 2 Clock updates in normal widget without app opening      PARTIAL    [SOURCE + PHYSICAL pending]
+                                                            (TimelineView self-refresh,
+                                                             but iOS may suspend widget
+                                                             process; not yet tested over
+                                                             multi-hour gap)
+ 3 Real battery level                                      PASS       [SOURCE]
+ 4 Real charging state                                     PASS       [SOURCE]
+ 5 Battery updates in widget without app opening           PARTIAL    [SOURCE + PHYSICAL pending]
+ 6 Real GPS speed                                          PASS       [SOURCE in foreground]
+ 7 Speed continues while app UI is backgrounded            FAIL       [SOURCE — UIBackgroundModes
+                                                             missing location; allowsBack-
+                                                             groundLocationUpdates false]
+ 8 Speed updates in normal widget                          PARTIAL    [SOURCE — TimelineView reads
+                                                             cached App Group value every 1 s,
+                                                             but cache freezes when app suspends]
+ 9 Speed updates in Live Activity                          MISSING    [SOURCE — no Live Activity]
+10 App Group production synchronization                    PASS       [SOURCE — same suite name,
+                                                             same key names, V2 metadata +
+                                                             SHA-256 checksum]
+11 Widget timeline scheduling                             PASS       [SOURCE — 30 entries @ 1 s,
+                                                             .atEnd policy]
+12 WidgetCenter reload integration                         PARTIAL    [SOURCE — called on most save
+                                                             paths, NOT on every saveState]
+13 Background location lifecycle                           FAIL       [SOURCE — no start/stop, no
+                                                             background mode, no allow flag]
+14 Force-quit behavior documented truthfully               MISSING    [SOURCE — no UI explains that
+                                                             force-quit freezes all telemetry]
+15 CarPlay Live Activity compatibility                      MISSING    [SOURCE — no Live Activity;
+                                                             CarPlaySceneDelegate is not
+                                                             registered in pbxproj per
+                                                             header comment]
+16 Fake/hardcoded production telemetry absent              FAIL       [SOURCE — AppStore.swift:48
+                                                             returns 100% when monitoring
+                                                             disabled (misleading default);
+                                                             before today, StockWidgetCatalog
+                                                             had `text:"0"`, `text:"85%"`,
+                                                             `text:"CYBER SEDAN"` — REMOVED
+                                                             this session]
+
+
+================================================================================
+11. FINAL DECISION
+================================================================================
+
+  PARTIALLY IMPLEMENTED — CORRECTIVE WORK REQUIRED
+
+Justification
+-------------
+- The data plumbing inside the host app is correct: real Date(), real UIDevice
+  battery, real CLLocation GPS speed, same App Group on both sides, atomic-ish
+  write/read.
+- The widget timeline + TimelineView self-refresh will keep battery, clock,
+  date and the *cached* speed current WHILE the widget process is alive.
+- The widget does NOT receive fresh GPS samples while the app is suspended
+  because background location is not configured:
+    * UIBackgroundModes lacks `location`
+    * `allowsBackgroundLocationUpdates` is never set
+    * no start/stop lifecycle for an active drive
+- There is no Live Activity implementation, so there is no mechanism that can
+  show live speed in the Dynamic Island / Lock Screen once the host app is
+  suspended. WidgetKit home-screen widgets are not designed for second-by-
+  second updates while the host process is suspended.
+
+Root cause of "widget updates only after opening the app"
+---------------------------------------------------------
+GPS delivery stops when the app suspends (missing background-location config),
+so the App Group `live_telemetry` snapshot freezes at the last foreground
+value. WidgetKit can only render the value present in the snapshot at the time
+of the next timeline refresh. Until the user reopens the app (which re-arms
+Core Location), no new fixes arrive, no new snapshot is written, no timeline
+refresh reflects newer data. Today's TimelineView edit re-reads the cached
+snapshot every 1 s but cannot conjure data that was never written.
+
+Exact missing or broken files/symbols
+-------------------------------------
+1. Runner/Info.plist `UIBackgroundModes` must add `location`.
+2. Runner/TelemetryService.swift must set
+   `locationManager.allowsBackgroundLocationUpdates = true`
+   and add `locationManager.showsBackgroundLocationIndicator = true`.
+3. Runner/TelemetryService.swift `stopMonitoring()` is defined but never called.
+   Wire it to a "drive ended" signal (manual toggle, car-Bluetooth disconnect,
+   or low-speed timeout) so the OS can stop the location engine.
+4. DriveStudioWidget/DriveStudioWidget.entitlements DOES NOT EXIST on disk.
+   Verify via `codesign -d --entitlements - <widget.appex>` that the widget
+   extension has the App Group entitlement; if not, create the file with
+   `com.apple.security.application-groups = ["group.com.drivestudio.shared"]`
+   and link it into the widget target.
+5. AppStore.swift:48 — fallback `level >= 0 ? Int(level * 100) : 100` silently
+   reports 100% when battery monitoring is off. Change to a sentinel (e.g.,
+   return nil from a richer telemetry type) so the UI can show "—" instead of
+   a misleading full battery.
+6. AppStore.swift saveState() does NOT call `WidgetCenter.shared.reloadAllTimelines()`.
+   Add the call inside saveState() after the metadata write so any spec change
+   (slot assignment, vehicle, drafts) is reflected on the widget immediately.
+7. AppStore.swift:227 — `stateData.write(to: fileURL)` is not atomic. Use
+   `Data.write(to:options: .atomic)` or write to a temp file + rename.
+8. NO Live Activity target. Add a new widget extension target (or fold into
+   the existing one) with `ActivityAttributes` + `ContentState`, register via
+   `ActivityConfiguration` in the WidgetBundle, set `NSSupportsLiveActivities`
+   in Info.plist.
+
+Smallest safe corrective implementation plan
+--------------------------------------------
+A. Add `location` to `UIBackgroundModes`.
+B. In `TelemetryService.init` set
+   `locationManager.allowsBackgroundLocationUpdates = true`.
+C. In `TelemetryService.init` set
+   `locationManager.showsBackgroundLocationIndicator = true`.
+D. Implement a "drive in progress" gate that calls `startMonitoring()` on
+   app foreground or user-toggle, and `stopMonitoring()` on user-toggle-off
+   or when `CLLocation.speed < 1` for >60 s (or car-Bluetooth disconnect).
+E. Create `DriveStudioWidget/DriveStudioWidget.entitlements` with the App
+   Group. Link it into the widget target.
+F. In `AppStore.saveState()`, call `WidgetCenter.shared.reloadAllTimelines()`
+   after writing the V2 metadata.
+G. Use atomic file write in `saveState()`.
+
+These are SMALL, SCOPED, PUBLIC-API changes. They enable genuine background
+GPS delivery AND keep the existing foreground behavior intact.
+
+What is technically impossible in normal WidgetKit
+---------------------------------------------------
+A widget extension cannot continuously render at 1 Hz when its process is
+suspended. WidgetKit is event-driven: a new Timeline or a `reloadAllTimelines`
+call is required to redraw. WidgetKit also caps how often it honors reload
+requests, and after long idle the system may stop honoring them entirely.
+The TimelineView(.periodic) trick works ONLY while the widget process is
+running, which iOS controls. This is why Live Activity exists.
+
+What should be implemented using Live Activity
+----------------------------------------------
+Any telemetry that must update while the host app is suspended — in
+particular, speed during an active drive — should be surfaced through a
+Live Activity. The Live Activity gets push-style updates from the host
+app (or ActivityKit push tokens) and renders into the Lock Screen and
+Dynamic Island independent of whether the host app is suspended.
+
+Live Activity implementation would require:
+- New `Widget` declared with `ActivityConfiguration<DriveAttributes>`
+- `DriveAttributes: ActivityAttributes` with `ContentState { speed,
+  timestamp, distance, ... }`
+- `Activity<DriveAttributes>.request(...)` to start
+- `await activity.update(.init(state:newState, staleDate:nil))` on each fix
+- `NSSupportsLiveActivities = true` in Runner/Info.plist
+- Push-to-start token registration for headless start from Core Location
+
+No implementation was performed during this audit.

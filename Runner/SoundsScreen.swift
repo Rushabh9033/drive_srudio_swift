@@ -34,60 +34,64 @@ struct SoundsScreenView: View {
 
     @State private var selectedCategory = "All"
 
-    private let sounds: [(name: String, duration: String, isPremium: Bool, category: String)] = [
-        ("Welcome Back", "0:02", false, "Connect"),
-        ("Vehicle Connected", "0:03", false, "Connect"),
-        ("Everything Ready", "0:02", false, "Connect"),
-        ("System Online", "0:02", false, "Connect"),
-        ("Dashboard Ready", "0:03", false, "Connect"),
-        ("Buckle Up", "0:02", false, "Connect"),
-        ("Adventure Begins", "0:03", false, "Connect"),
-        ("Welcome Aboard", "0:02", false, "Connect"),
-        ("Connection Successful", "0:03", false, "Connect"),
-        ("Drive Mode", "0:02", false, "Connect"),
-        ("Lock Vehicle", "0:02", false, "Disconnect"),
-        ("Safe Arrival", "0:02", false, "Disconnect"),
-        ("Goodbye", "0:01", false, "Disconnect"),
-        ("Nice Parking", "0:02", false, "Disconnect"),
-        ("Until Next Time", "0:02", false, "Disconnect"),
-        ("Vehicle Secured", "0:02", false, "Disconnect"),
-        ("Phone Reminder", "0:03", false, "Reminders"),
-        ("Phone Keys Wallet", "0:03", false, "Reminders"),
-        ("Check Windows", "0:02", false, "Reminders"),
-        ("Check Back Seat", "0:02", false, "Reminders"),
-        ("Acura Nsx", "0:04", false, "Engines"),
-        ("Alfa Romeo Giulia", "0:04", false, "Engines"),
-        ("Aston Martin Db12", "0:04", true, "Engines"),
-        ("Audi Rs7", "0:04", false, "Engines"),
-        ("Bentley Continental", "0:04", true, "Engines"),
-        ("Byd Seal", "0:04", false, "Engines"),
-        ("Cadillac Escalade", "0:04", false, "Engines"),
-        ("Chery Tiggo 8", "0:04", false, "Engines"),
-        ("Chrysler 300", "0:04", false, "Engines"),
-        ("Citroen C5 Aircross", "0:04", false, "Engines"),
-        ("Ferrari 296", "0:04", true, "Engines"),
-        ("Genesis G80", "0:04", false, "Engines"),
-        ("Gmc Hummer Ev", "0:04", false, "Engines"),
-        ("Hyundai Ioniq 5", "0:04", false, "Engines"),
-        ("Jaguar F Type", "0:04", false, "Engines"),
-        ("Jeep Wrangler", "0:04", false, "Engines"),
-        ("Kia Ev6", "0:04", false, "Engines"),
-        ("Lamborghini Huracan", "0:04", true, "Engines"),
-        ("Land Rover Defender", "0:04", false, "Engines"),
-        ("Lexus Lc 500", "0:04", false, "Engines"),
-        ("Lucid Air", "0:04", true, "Engines"),
-        ("Maserati Granturismo", "0:04", false, "Engines"),
-        ("Mazda Mx5", "0:04", false, "Engines"),
-        ("Mclaren 750s", "0:04", true, "Engines"),
-        ("Mini Cooper", "0:04", false, "Engines"),
-        ("Nissan Gtr", "0:04", false, "Engines"),
-        ("Peugeot 508", "0:04", false, "Engines"),
-        ("Range Rover Sport", "0:04", false, "Engines"),
-        ("Subaru Wrx", "0:04", false, "Engines"),
-        ("Volvo Xc90", "0:04", false, "Engines"),
+    // Engine cue names reference widely-known automotive brands as
+    // evocative labels for the bundled WAV files. The recordings
+    // themselves are synthesized placeholders. This is a fan /
+    // educational project — no endorsement or affiliation is implied.
+    private let sounds: [(name: String, duration: String, category: String)] = [
+        ("Welcome Back", "0:02", "Connect"),
+        ("Vehicle Connected", "0:03", "Connect"),
+        ("Everything Ready", "0:02", "Connect"),
+        ("System Online", "0:02", "Connect"),
+        ("Dashboard Ready", "0:03", "Connect"),
+        ("Buckle Up", "0:02", "Connect"),
+        ("Adventure Begins", "0:03", "Connect"),
+        ("Welcome Aboard", "0:02", "Connect"),
+        ("Connection Successful", "0:03", "Connect"),
+        ("Drive Mode", "0:02", "Connect"),
+        ("Lock Vehicle", "0:02", "Disconnect"),
+        ("Safe Arrival", "0:02", "Disconnect"),
+        ("Goodbye", "0:01", "Disconnect"),
+        ("Nice Parking", "0:02", "Disconnect"),
+        ("Until Next Time", "0:02", "Disconnect"),
+        ("Vehicle Secured", "0:02", "Disconnect"),
+        ("Phone Reminder", "0:03", "Reminders"),
+        ("Phone Keys Wallet", "0:03", "Reminders"),
+        ("Check Windows", "0:02", "Reminders"),
+        ("Check Back Seat", "0:02", "Reminders"),
+        ("Acura Nsx", "0:04", "Engines"),
+        ("Alfa Romeo Giulia", "0:04", "Engines"),
+        ("Aston Martin Db12", "0:04", "Engines"),
+        ("Audi Rs7", "0:04", "Engines"),
+        ("Bentley Continental", "0:04", "Engines"),
+        ("Byd Seal", "0:04", "Engines"),
+        ("Cadillac Escalade", "0:04", "Engines"),
+        ("Chery Tiggo 8", "0:04", "Engines"),
+        ("Chrysler 300", "0:04", "Engines"),
+        ("Citroen C5 Aircross", "0:04", "Engines"),
+        ("Ferrari 296", "0:04", "Engines"),
+        ("Genesis G80", "0:04", "Engines"),
+        ("Gmc Hummer Ev", "0:04", "Engines"),
+        ("Hyundai Ioniq 5", "0:04", "Engines"),
+        ("Jaguar F Type", "0:04", "Engines"),
+        ("Jeep Wrangler", "0:04", "Engines"),
+        ("Kia Ev6", "0:04", "Engines"),
+        ("Lamborghini Huracan", "0:04", "Engines"),
+        ("Land Rover Defender", "0:04", "Engines"),
+        ("Lexus Lc 500", "0:04", "Engines"),
+        ("Lucid Air", "0:04", "Engines"),
+        ("Maserati Granturismo", "0:04", "Engines"),
+        ("Mazda Mx5", "0:04", "Engines"),
+        ("Mclaren 750s", "0:04", "Engines"),
+        ("Mini Cooper", "0:04", "Engines"),
+        ("Nissan Gtr", "0:04", "Engines"),
+        ("Peugeot 508", "0:04", "Engines"),
+        ("Range Rover Sport", "0:04", "Engines"),
+        ("Subaru Wrx", "0:04", "Engines"),
+        ("Volvo Xc90", "0:04", "Engines"),
     ]
 
-    var filteredSounds: [(name: String, duration: String, isPremium: Bool, category: String)] {
+    var filteredSounds: [(name: String, duration: String, category: String)] {
         if selectedCategory == "All" {
             return sounds
         } else if selectedCategory == "Custom" {
@@ -406,20 +410,9 @@ struct SoundsScreenView: View {
                                     }) {
                                         HStack {
                                             VStack(alignment: .leading, spacing: 2) {
-                                                HStack(spacing: 8) {
-                                                    Text(snd.name)
-                                                        .font(.system(size: 14, weight: .semibold))
-                                                        .foregroundColor(DriveColors.foreground)
-                                                    if snd.isPremium {
-                                                        Text("PRO")
-                                                            .font(.system(size: 9, weight: .bold))
-                                                            .foregroundColor(DriveColors.primary)
-                                                            .padding(.horizontal, 6)
-                                                            .padding(.vertical, 2)
-                                                            .background(DriveColors.primary.opacity(0.15))
-                                                            .cornerRadius(4)
-                                                    }
-                                                }
+                                                Text(snd.name)
+                                                    .font(.system(size: 14, weight: .semibold))
+                                                    .foregroundColor(DriveColors.foreground)
                                                 Text(snd.duration)
                                                     .font(.system(size: 11, design: .monospaced))
                                                     .foregroundColor(DriveColors.mutedFg)

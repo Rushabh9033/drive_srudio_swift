@@ -338,7 +338,26 @@ struct EditorScreen: View {
             WidgetLibrarySheet { layers in
                 commitState()
                 var newLayers = spec.layers ?? []
-                newLayers.append(contentsOf: layers)
+
+                // 1) Fresh IDs on every insertion so tapping the same library
+                //    item twice doesn't yield duplicate Identifiable IDs.
+                // 2) Multi-layer items get a shared groupId so the composite
+                //    moves and resizes together as one unit.
+                let groupId: String? = layers.count > 1 ? UUID().uuidString : nil
+                let insertedLayers = layers.map { l -> WidgetLayer in
+                    var copy = l
+                    copy.id = UUID().uuidString
+                    copy.groupId = groupId
+                    return copy
+                }
+
+                // 3) Translate the inserted group so its bounding box is
+                //    centered on the canvas — library items store absolute
+                //    positions (e.g. x:25), so without this every asset would
+                //    pile up in the top-left corner.
+                let centered = centerOnCanvas(insertedLayers)
+
+                newLayers.append(contentsOf: centered)
                 spec.layers = newLayers
                 selectedLayerIndex = newLayers.count - 1
             }
@@ -466,7 +485,15 @@ struct EditorScreen: View {
     func deleteLayer(index: Int) {
         guard var layers = spec.layers, index < layers.count else { return }
         commitState()
-        layers.remove(at: index)
+
+        // If this layer is part of a group, delete every sibling in the same
+        // group at once so the user doesn't have to tap the trash button
+        // once per layer to clear the whole composite.
+        if let gid = layers[index].groupId {
+            layers.removeAll { $0.groupId == gid }
+        } else {
+            layers.remove(at: index)
+        }
         spec.layers = layers
         selectedLayerIndex = nil
     }
@@ -486,36 +513,12 @@ struct EditorScreen: View {
             widgetName = "Untitled Widget"
         }
         // Auto-migrate legacy hardcoded placeholder layers to live kinds
-        migrateLegacyLayers()
+        spec.layers = LayerMigration.upgrade(spec.layers ?? [])
     }
 
-    /// Upgrades old `kind:"text"` layers that held placeholder values
-    /// (e.g. "85%", "100%", "124 km/h") to the correct live-data kind
-    /// so the canvas preview and home screen widget both show real data.
-    private func migrateLegacyLayers() {
-        guard var layers = spec.layers else { return }
-        var changed = false
-        let batteryPattern = #"^\d{1,3}\s*%"#   // "85%", "100 %", "72%"
-        let speedPattern   = #"^\d+"#             // "124", "0"
-        for i in layers.indices {
-            let layer = layers[i]
-            guard layer.kind == "text", let txt = layer.text else { continue }
-            let trimmed = txt.trimmingCharacters(in: .whitespaces)
-            if trimmed.range(of: batteryPattern, options: .regularExpression) != nil
-                && trimmed.hasSuffix("%") {
-                // Looks like a battery placeholder → upgrade to live battery
-                layers[i].kind = "battery"
-                layers[i].text = nil
-                changed = true
-            } else if trimmed.uppercased() == "BATTERY"
-                       || trimmed.uppercased() == "BAT" {
-                layers[i].kind = "battery"
-                layers[i].text = nil
-                changed = true
-            }
-        }
-        if changed { spec.layers = layers }
-    }
+    /// Upgrades old placeholder text layers to live-data kinds via the
+    /// shared `LayerMigration` enum so the editor preview and the home
+    /// screen widget agree on what a layer represents.
 
     func saveAndExit() {
         let actualId = (draftId == "new" || draftId == "new_blank") ? UUID().uuidString : draftId
@@ -719,6 +722,35 @@ struct EditorScreen: View {
             let resultImage = UIImage(cgImage: newCgImage, scale: image.scale, orientation: image.imageOrientation)
             completion(resultImage)
         }
+    }
+}
+
+/// Translate a set of inserted library layers so the group's bounding box is
+/// centered on the canvas. Library items are authored with absolute design-
+/// space positions (e.g. `x: 25, y: 22`), so without this shift every asset
+/// would land in the top-left quadrant of the canvas instead of wherever the
+/// user expects. Operates in 0-100% design space.
+func centerOnCanvas(_ layers: [WidgetLayer]) -> [WidgetLayer] {
+    guard !layers.isEmpty else { return layers }
+    var minX: Double =  200; var minY: Double =  200
+    var maxX: Double = -200; var maxY: Double = -200
+    for l in layers {
+        let x = l.x ?? 0; let y = l.y ?? 0
+        let w = l.w ?? 20; let h = l.h ?? 10
+        if x < minX { minX = x }
+        if y < minY { minY = y }
+        if x + w > maxX { maxX = x + w }
+        if y + h > maxY { maxY = y + h }
+    }
+    let cx = (minX + maxX) / 2
+    let cy = (minY + maxY) / 2
+    let dx = 50 - cx
+    let dy = 50 - cy
+    return layers.map { l -> WidgetLayer in
+        var copy = l
+        copy.x = (l.x ?? 0) + dx
+        copy.y = (l.y ?? 0) + dy
+        return copy
     }
 }
 

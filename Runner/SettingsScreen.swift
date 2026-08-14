@@ -3,17 +3,12 @@ import SwiftUI
 // MARK: - Settings Screen
 struct SettingsScreenView: View {
     @EnvironmentObject var store: AppStore
-    @State private var useLiveData = true
-    @State private var carConnected = true
-    @State private var playSoundsOnCarLink = true
-    @State private var playbackOutput = "iPhone"
+    @AppStorage("settings.carConnected") private var carConnected = true
     @State private var showClearConfirm = false
     @State private var showAutomationGuide = false
     @State private var alertMessage = ""
     @State private var showAlertMessage = false
     @State private var selectedLegalType: LegalContentType? = nil
-
-    private let playbackOptions = ["iPhone", "Car Audio", "Both"]
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -77,41 +72,9 @@ struct SettingsScreenView: View {
                     VStack(alignment: .leading, spacing: 0) {
                         MonoLabel(text: "Device sync").padding(.bottom, 8)
 
-                        ToggleRow(label: "Use live device data",
-                                  hint: "Read battery and GPS from this device",
-                                  isOn: $useLiveData)
-
-                        Divider().background(DriveColors.border).padding(.vertical, 12)
-
                         ToggleRow(label: "Car connected",
                                   hint: "Manual override for the car link state",
                                   isOn: $carConnected)
-
-                        Divider().background(DriveColors.border).padding(.vertical, 12)
-
-                        ToggleRow(label: "Play sounds on car link",
-                                  hint: nil,
-                                  isOn: $playSoundsOnCarLink)
-
-                        Spacer().frame(height: 16)
-                        MonoLabel(text: "Playback output").padding(.bottom, 8)
-
-                        HStack(spacing: 8) {
-                            ForEach(playbackOptions, id: \.self) { opt in
-                                Button(action: { playbackOutput = opt }) {
-                                    Text(opt)
-                                        .font(.system(size: 13, weight: .semibold))
-                                        .foregroundColor(playbackOutput == opt ? DriveColors.primary : DriveColors.mutedFg)
-                                        .padding(.horizontal, 14)
-                                        .padding(.vertical, 8)
-                                        .background(playbackOutput == opt ? DriveColors.primary.opacity(0.15) : DriveColors.secondary)
-                                        .cornerRadius(999)
-                                        .overlay(
-                                            Capsule().stroke(playbackOutput == opt ? DriveColors.primary : DriveColors.border, lineWidth: 1)
-                                        )
-                                }
-                            }
-                        }
                     }
                 }
                 .padding(.horizontal, 20)
@@ -206,55 +169,7 @@ struct SettingsScreenView: View {
                 }
                 .padding(.horizontal, 20)
 
-                // Card 5: Premium
-                SurfaceCard {
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            MonoLabel(text: "Premium")
-                            Spacer()
-                            DrivePill(label: "Free", selected: false)
-                        }
-
-                        Text("Unlock all templates, sounds, and advanced layer tools.")
-                            .font(.system(size: 12))
-                            .lineSpacing(5)
-                            .foregroundColor(DriveColors.mutedFg)
-
-                        Button(action: {
-                            alertMessage = "Drive Studio Full Edition Unlocked! All widget templates, audio cues, and layer editing features are active."
-                            showAlertMessage = true
-                        }) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "star.fill")
-                                    .font(.system(size: 14))
-                                Text("Unlock Premium")
-                                    .font(.system(size: 14, weight: .semibold))
-                            }
-                            .foregroundColor(DriveColors.primaryFg)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(DriveColors.primary)
-                            .cornerRadius(12)
-                        }
-
-                        Button(action: {
-                            alertMessage = "Purchases restored successfully!"
-                            showAlertMessage = true
-                        }) {
-                            Text("Restore purchases")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(DriveColors.foreground)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
-                                .background(DriveColors.secondary)
-                                .cornerRadius(12)
-                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(DriveColors.border, lineWidth: 1))
-                        }
-                    }
-                }
-                .padding(.horizontal, 20)
-
-                // Card 6: About & Legal
+                // Card 5: About & Legal
                 SurfaceCard {
                     VStack(alignment: .leading, spacing: 0) {
                         MonoLabel(text: "About & legal")
@@ -303,6 +218,12 @@ struct SettingsScreenView: View {
             }
         }
         .background(DriveColors.background)
+        .onChange(of: carConnected) { newValue in
+            // Push the user's manual car-link state into TelemetryService so the
+            // next snapshotAndSave() reflects it on the widget timeline.
+            TelemetryService.shared.carConnected = newValue
+            TelemetryService.shared.snapshotAndSave()
+        }
         .alert("Clear all drafts?", isPresented: $showClearConfirm) {
             Button("Cancel", role: .cancel) {}
             Button("Clear", role: .destructive) {

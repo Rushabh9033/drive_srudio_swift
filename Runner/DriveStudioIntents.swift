@@ -1,5 +1,4 @@
 import AppIntents
-import CryptoKit
 import WidgetKit
 
 /// App Intents exposed by Drive Studio so they surface in:
@@ -56,21 +55,20 @@ struct DriveStudioStatusIntent: AppIntent {
     }
 
     private static func loadSpokenSummary() -> String {
-        let state = DriveStudioIntentsReader.loadState()
-        guard let state = state else {
+        guard let state = AppGroupState.loadState() else {
             return "Drive Studio has no data yet. Open the app once to set up your vehicle and slots."
         }
-        let vehicle = state["vehicle"] as? [String: Any]
-        let vehicleName = (vehicle?["displayName"] as? String)
-            ?? (vehicle?["modelId"] as? String)
+        let vehicleName = state.vehicle?.displayName
+            ?? state.vehicle?.modelId
             ?? "your car"
-        let telemetry = state["telemetry"] as? [String: Any]
-        let battery = (telemetry?["batteryPercent"] as? Int)
-            .map { "Battery \($0) percent." } ?? "Battery unknown."
-        let charging = (telemetry?["isCharging"] as? Bool ?? false)
-            ? "Charging." : "On battery."
-        let connection = (telemetry?["carConnected"] as? Bool ?? false)
-            ? "Connected." : "Disconnected."
+        let battery: String
+        if let pct = state.telemetry?.batteryPercent {
+            battery = "Battery \(pct) percent."
+        } else {
+            battery = "Battery unknown."
+        }
+        let charging = state.telemetry?.isCharging == true ? "Charging." : "On battery."
+        let connection = state.telemetry?.carConnected == true ? "Connected." : "Disconnected."
         return "Drive Studio status. \(vehicleName). \(battery) \(charging) \(connection)"
     }
 }
@@ -93,9 +91,10 @@ enum DriveStudioSlot: Int, AppEnum, CaseIterable {
 
 // MARK: - Switch Slot
 
-/// Switches which App Group slot is "active" by writing the slot index
-/// to a preference key the Flutter app reads on next launch. Lets the
-/// user say "Hey Siri, switch Drive Studio to slot 2" while driving.
+/// Writes `drive_studio_active_slot` to App Group defaults. The DriveStudio
+/// widget renders all four slots in the widget gallery, so this intent's
+/// effect is mainly to record the user's selection for future telemetry
+/// overlays (e.g. focused-slot dashboards in CarPlay Shortcuts).
 @available(iOS 16.0, *)
 struct SwitchDriveStudioSlotIntent: AppIntent {
     static var title: LocalizedStringResource = "Switch Drive Studio Slot"
@@ -112,15 +111,16 @@ struct SwitchDriveStudioSlotIntent: AppIntent {
         Summary("Show \(\.$slot) on Drive Studio")
     }
 
+    @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
         let index = max(0, min(3, slot.rawValue - 1))
-        let defaults = UserDefaults(suiteName: "group.com.drivestudio.shared")
+        let defaults = UserDefaults(suiteName: AppGroupContract.suiteName)
         defaults?.set(index, forKey: "drive_studio_active_slot")
         defaults?.synchronize()
         // No widget currently consumes `drive_studio_active_slot`, so a
         // timeline reload would be a no-op. The intent just records the
-        // preference for the next sync. iOS-4 fix.
-        return .result(dialog: "Slot switch queued. Widget will refresh on next save.")
+        // preference for the next sync.
+        return .result(dialog: "Slot preference saved. Open Drive Studio to apply it.")
     }
 }
 
@@ -206,36 +206,10 @@ struct DriveStudioAppShortcuts: AppShortcutsProvider {
     static var shortcutTileColor: ShortcutTileColor = .navy
 }
 
-// MARK: - Inline App Group reader (AppGroupHelper lives in widget extension)
-
-private enum DriveStudioIntentsReader {
-    static let suiteName = "group.com.drivestudio.shared"
-
-    static func loadState() -> [String: Any]? {
-        guard let defaults = UserDefaults(suiteName: suiteName),
-              let metadataData = defaults.data(forKey: "widget_state_v2_metadata"),
-              let metadata = try? JSONSerialization.jsonObject(with: metadataData) as? [String: Any],
-              let stateFile = metadata["stateFile"] as? String,
-              let checksum = metadata["checksum"] as? String,
-              let sharedURL = FileManager.default.containerURL(
-                forSecurityApplicationGroupIdentifier: suiteName)
-        else {
-            // V1 fallback
-            if let defaults = UserDefaults(suiteName: suiteName),
-               let json = defaults.string(forKey: "widget_state_v1"),
-               let data = json.data(using: .utf8),
-               let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                return dict
-            }
-            return nil
-        }
-
-        let fileURL = sharedURL.appendingPathComponent(stateFile)
-        guard let data = try? Data(contentsOf: fileURL) else { return nil }
-        let actual = SHA256.hash(data: data)
-            .compactMap { String(format: "%02x", $0) }
-            .joined()
-        guard actual == checksum else { return nil }
-        return try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-    }
-}
+// MARK: - App Group reader
+//
+// `DriveStudioIntentsReader` was an inline copy of the V2 metadata +
+// SHA-256 protocol. The same reader is now provided by `AppGroupState`
+// (see `DriveStudioWidget/AppGroupState.swift`), which both the Runner
+// app and the widget extension compile automatically via the
+// fileSystemSynchronizedGroups setup.

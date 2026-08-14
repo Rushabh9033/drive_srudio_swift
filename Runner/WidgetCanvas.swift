@@ -2,8 +2,8 @@ import SwiftUI
 
 // ─── PreferenceKey: reports natural (unstretched) size of each text layer ────
 struct TextNaturalSizeKey: PreferenceKey {
-    static var defaultValue: [Int: CGSize] = [:]
-    static func reduce(value: inout [Int: CGSize], nextValue: () -> [Int: CGSize]) {
+    static var defaultValue: [String: CGSize] = [:]
+    static func reduce(value: inout [String: CGSize], nextValue: () -> [String: CGSize]) {
         value.merge(nextValue()) { _, new in new }
     }
 }
@@ -16,58 +16,33 @@ struct WidgetCanvas: View {
     let logicalSize: CGFloat = 340
 
     // Actual natural (content) sizes reported by text layers
-    @State private var naturalTextSizes: [Int: CGSize] = [:]
+    @State private var naturalTextSizes: [String: CGSize] = [:]
     @State private var currentDate = Date()
-    private let timer = Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()
+    // Battery ticker — bumped on every `batteryLevelDidChange` notification
+    // so the canvas re-renders the instant the device battery crosses a
+    // 1% boundary. Reading `UIDevice.current.batteryLevel` returns the
+    // cached value, so this `@State` change is what forces the view to
+    // recompute `resolvedText` for any `battery` / `battery_text` layers.
+    @State private var batteryTick: Int = 0
+    // Live speed tick — bumped on every GPS fix whose value changed
+    // (NotificationCenter.telemetrySpeedUpdated). Forces the speed layer
+    // to re-read `TelemetryService.shared.currentSpeed` synchronously so
+    // changes feel instant, like Google Maps, instead of gated by the
+    // 60-second clock/battery timer above.
+    @State private var speedTick: Int = 0
+    // Was 1 Hz before — clock displays only need minute precision, and
+    // 1 Hz caused needless SwiftUI re-renders for thumbnails that were
+    // not even visible on screen.
+    private let timer = Timer.publish(every: 60.0, on: .main, in: .common).autoconnect()
 
     /// Spec with ALL legacy hardcoded placeholder layers auto-upgraded to live kinds.
     /// Applied at render time — gallery, detail sheet, editor, library all get live data
     /// without the user needing to manually edit existing drafts.
+    ///
+    /// Delegates to the shared `LayerMigration` enum so the editor canvas
+    /// and the home-screen widget use identical upgrade rules.
     private var liveSpec: WidgetSpec {
-        guard var layers = spec.layers else { return spec }
-        var changed = false
-        for i in layers.indices {
-            let layer = layers[i]
-            guard layer.kind == "text", let txt = layer.text else { continue }
-            let t = txt.trimmingCharacters(in: .whitespaces)
-
-            // ── Battery: "85%", "100 %", "72%" ─────────────────────────────
-            let digits = t.hasSuffix("%")
-                ? t.dropLast().trimmingCharacters(in: .whitespaces)
-                : ""
-            if !digits.isEmpty && digits.allSatisfy({ $0.isNumber }) {
-                layers[i].kind = "battery"; layers[i].text = nil; changed = true; continue
-            }
-
-            // ── Clock: "12:00", "6:12 PM", "23:59", "12:00:00" ─────────────
-            let clockRx = #"^\d{1,2}:\d{2}(:\d{2})?(\s*(AM|PM|am|pm))?$"#
-            if t.range(of: clockRx, options: .regularExpression) != nil {
-                layers[i].kind = "clock"; layers[i].text = nil; changed = true; continue
-            }
-
-            // ── Date: "MON 24", "Mon 24 Jan", "Sun", "Monday", "Jan 2025"
-            let dateRx = #"(?i)^(mon|tue|wed|thu|fri|sat|sun|monday|tuesday|wednesday|thursday|friday|saturday|sunday)"#
-            let monthRx = #"(?i)^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)"#
-            if t.range(of: dateRx, options: .regularExpression) != nil
-               || t.range(of: monthRx, options: .regularExpression) != nil {
-                layers[i].kind = "date"; layers[i].text = nil; changed = true; continue
-            }
-
-            // ── Speed: pure 1–3 digit integer "0" – "999" ──────────────────
-            // (Only upgrade if text is ONLY digits — avoids touching labels like "SLOT 1")
-            if t.count <= 3 && !t.isEmpty && t.allSatisfy({ $0.isNumber }) {
-                layers[i].kind = "speed"; layers[i].text = nil; changed = true; continue
-            }
-
-            // ── Vehicle name placeholders ────────────────────────────────────
-            let vehicleHints = ["cyber sedan", "my vehicle", "select vehicle",
-                                "vehicle name", "car name", "vehicle"]
-            if vehicleHints.contains(t.lowercased()) {
-                layers[i].kind = "vehicle_name"; layers[i].text = nil; changed = true; continue
-            }
-        }
-        if !changed { return spec }
-        var s = spec; s.layers = layers; return s
+        return LayerMigration.upgrade(spec)
     }
 
     var body: some View {
@@ -85,18 +60,22 @@ struct WidgetCanvas: View {
                             .frame(width: side, height: side)
 
                         // ── Layer rendering — uses liveSpec so old "85%" text auto-shows real battery
-                        if let layers = liveSpec.layers {
-                            ForEach(layers.indices, id: \.self) { i in
-                                let layer = layers[i]
-                                let w = (CGFloat(layer.w ?? 50) / 100.0) * side
-                                let h = (CGFloat(layer.h ?? 30) / 100.0) * side
-                                let x = (CGFloat(layer.x ?? 0) / 100.0) * side
-                                let y = (CGFloat(layer.y ?? 0) / 100.0) * side
+                        ForEach(liveSpec.layers ?? []) { layer in
+                            let w = (CGFloat(layer.w ?? 50) / 100.0) * side
+                            let h = (CGFloat(layer.h ?? 30) / 100.0) * side
+                            let x = (CGFloat(layer.x ?? 0) / 100.0) * side
+                            let y = (CGFloat(layer.y ?? 0) / 100.0) * side
 
-                                LayerView(layer: layer, canvasSide: side)
-                                    .frame(width: w, height: h)
-                                    .position(x: x + w / 2, y: y + h / 2)
-                                    .allowsHitTesting(false)
+                            // `x` is always the top-left of the layer
+                            // frame in 0-100% design space, regardless of
+                            // `align`. The `align` field only affects how
+                            // the text is justified within the bounding
+                            // box (see `LayerView`).
+
+                            LayerView(layer: layer, canvasSide: side, batteryTick: batteryTick, speedTick: speedTick)
+                                .frame(width: w, height: h)
+                                .position(x: x + w / 2, y: y + h / 2)
+                                .allowsHitTesting(false)
 
                             // Hidden natural-size measurement for text layers
                             if isTextKind(layer.kind) {
@@ -110,7 +89,7 @@ struct WidgetCanvas: View {
                                         GeometryReader { tg in
                                             Color.clear.preference(
                                                 key: TextNaturalSizeKey.self,
-                                                value: [i: tg.size]
+                                                value: [layer.id: tg.size]
                                             )
                                         }
                                     )
@@ -119,9 +98,29 @@ struct WidgetCanvas: View {
                         }
                     }
                 }
-                }
                 .frame(width: side, height: side)
                 .clipShape(RoundedRectangle(cornerRadius: 24))
+
+                // ── Group bounding box indicator ─────────────────────────
+                // When the selected layer is part of a group, draw a faint
+                // dashed rectangle around the group's bbox so the user can
+                // see what's linked together.
+                if let idx = selectedLayerIndex,
+                   let layers = liveSpec.layers,
+                   idx < layers.count,
+                   let gid = layers[idx].groupId {
+                    let bbox = computeGroupBBox(layers: layers, groupId: gid, canvasSide: side)
+                    if let bbox {
+                        RoundedRectangle(cornerRadius: 6)
+                            .strokeBorder(
+                                style: StrokeStyle(lineWidth: 1, dash: [4, 3])
+                            )
+                            .foregroundColor(Color.blue.opacity(0.55))
+                            .frame(width: bbox.width, height: bbox.height)
+                            .position(x: bbox.midX, y: bbox.midY)
+                            .allowsHitTesting(false)
+                    }
+                }
 
                 // ── Interaction overlay — NOT clipped so handles show at edges ──
                 LayerEditorOverlay(
@@ -140,10 +139,40 @@ struct WidgetCanvas: View {
             .onReceive(timer) { input in
                 currentDate = input
             }
+            .onReceive(NotificationCenter.default.publisher(for: UIDevice.batteryLevelDidChangeNotification)) { _ in
+                batteryTick &+= 1
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIDevice.batteryStateDidChangeNotification)) { _ in
+                batteryTick &+= 1
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .telemetrySpeedUpdated)) { _ in
+                // Every GPS fix whose speed changed — repaint speed layers
+                // immediately. With this subscription the editor canvas
+                // catches up to driving speed in well under a second.
+                speedTick &+= 1
+            }
         }
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────
+    private func computeGroupBBox(layers: [WidgetLayer], groupId: String, canvasSide: CGFloat) -> CGRect? {
+        let grouped = layers.filter { $0.groupId == groupId }
+        guard !grouped.isEmpty else { return nil }
+        var minX: CGFloat =  .greatestFiniteMagnitude
+        var minY: CGFloat =  .greatestFiniteMagnitude
+        var maxX: CGFloat = -.greatestFiniteMagnitude
+        var maxY: CGFloat = -.greatestFiniteMagnitude
+        for l in grouped {
+            let x = CGFloat(l.x ?? 0) / 100 * canvasSide
+            let y = CGFloat(l.y ?? 0) / 100 * canvasSide
+            let w = CGFloat(l.w ?? 0) / 100 * canvasSide
+            let h = CGFloat(l.h ?? 0) / 100 * canvasSide
+            minX = min(minX, x); minY = min(minY, y)
+            maxX = max(maxX, x + w); maxY = max(maxY, y + h)
+        }
+        return CGRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
+    }
+
     private func isTextKind(_ kind: String) -> Bool {
         ["text", "speed", "vehicle_name", "battery_text", "clock"].contains(kind)
     }
@@ -151,20 +180,30 @@ struct WidgetCanvas: View {
     private func resolvedText(for layer: WidgetLayer) -> String {
         switch layer.kind {
         case "clock":
-            let formatter = DateFormatter()
-            formatter.dateFormat = (layer.format?.isEmpty == false) ? layer.format! : "h:mm"
-            return formatter.string(from: currentDate)
+            if let fmt = layer.format, !fmt.isEmpty {
+                // Per-layer custom format — build a one-off formatter
+                // rather than caching every possible user-supplied pattern.
+                let f = DateFormatter()
+                f.dateFormat = fmt
+                return f.string(from: currentDate)
+            }
+            return FormatterCache.timeFormatter.string(from: currentDate)
         case "date":
-            let formatter = DateFormatter()
-            formatter.dateFormat = (layer.format?.isEmpty == false) ? layer.format! : "EEE, MMM d"
-            return formatter.string(from: currentDate)
+            if let fmt = layer.format, !fmt.isEmpty {
+                let f = DateFormatter()
+                f.dateFormat = fmt
+                return f.string(from: currentDate)
+            }
+            return FormatterCache.mediumDateFormatter.string(from: currentDate)
         case "speed":
+            // TelemetryService.currentSpeed is already in km/h
             let spd = Int(TelemetryService.shared.currentSpeed)
             return spd > 0 ? "\(spd)" : "0"
         case "vehicle_name":
             return "Cyber Sedan"
         case "battery", "battery_text":
-            UIDevice.current.isBatteryMonitoringEnabled = true
+            // Battery monitoring is enabled once at AppStore init; reading
+            // is safe here without touching the side-effecting setter.
             let level = UIDevice.current.batteryLevel
             let pct = level >= 0 ? Int(level * 100) : 88
             return "\(pct)%"
@@ -214,25 +253,36 @@ struct WidgetCanvas: View {
 struct LayerView: View {
     let layer: WidgetLayer
     var canvasSide: CGFloat = 340
+    // Bumped by `WidgetCanvas` whenever the device battery level changes.
+    // Reading it here forces SwiftUI to re-evaluate `resolvedText` for any
+    // `battery` / `battery_text` layer so the canvas updates in real time.
+    var batteryTick: Int = 0
+    // Bumped by `WidgetCanvas` on every GPS fix whose speed changed.
+    // Forces the speed layer to re-read `TelemetryService.shared.currentSpeed`
+    // synchronously so changes feel like Google Maps, not the 60s clock timer.
+    var speedTick: Int = 0
 
     private var resolvedText: String {
+        // Touch the ticks so SwiftUI sees this computation as dependent on them.
+        _ = batteryTick
+        _ = speedTick
         switch layer.kind {
         // ── Live data ────────────────────────────────────────
         case "battery", "battery_text":
-            UIDevice.current.isBatteryMonitoringEnabled = true
             let lvl = UIDevice.current.batteryLevel
             let pct = lvl >= 0 ? Int(lvl * 100) : 0
             let charging = UIDevice.current.batteryState == .charging
                         || UIDevice.current.batteryState == .full
             return charging ? "\(pct)% ⚡" : "\(pct)%"
         case "clock":
-            let f = DateFormatter(); f.timeStyle = .short
-            return f.string(from: Date())
+            return FormatterCache.timeFormatter.string(from: Date())
         case "date":
-            let f = DateFormatter(); f.dateStyle = .medium; f.timeStyle = .none
-            return f.string(from: Date())
+            return FormatterCache.mediumDateFormatter.string(from: Date())
         case "speed":
-            return "-- km/h"
+            // Read live from TelemetryService — `speedTick` invalidation
+            // guarantees this is evaluated on every GPS fix.
+            let spd = Int(TelemetryService.shared.currentSpeed)
+            return spd > 0 ? "\(spd)" : "0"
         case "vehicle_name":
             return layer.text ?? "My Vehicle"
         case "analog":
@@ -261,13 +311,14 @@ struct LayerView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity,
                        alignment: parseFrameAlignment(layer.align))
         } else if kind == "analog" {
-            // ── Analog clock preview ─────────────────────────────────────
-            ZStack {
-                Circle().stroke(Color(hex: layer.color ?? "FFFFFF") ?? .white, lineWidth: 1.5)
-                Text(resolvedText)
-                    .font(.system(size: scaledFontSize * 0.35))
-                    .foregroundColor(Color(hex: layer.color ?? "FFFFFF") ?? .white)
-            }
+            // ── Analog clock preview — proper clock face with hour ticks,
+            // hands, and center pin. Uses the shared `AnalogClockView` from
+            // the widget extension target (compiled into both via the file
+            // system synchronized group).
+            AnalogClockView(
+                color: Color(hex: layer.color ?? "FFFFFF") ?? .white,
+                opacity: layer.opacity ?? 1.0
+            )
         } else if kind == "image" {
             // ── Image / Vehicle Position Guide ───────────────────────────
             if let src = layer.src, let uiImage = loadImage(path: src) {
@@ -299,6 +350,30 @@ struct LayerView: View {
             } else {
                 RoundedRectangle(cornerRadius: CGFloat(layer.radius ?? 4))
                     .fill(Color(hex: layer.color ?? "FFFFFF") ?? .white)
+            }
+        } else if kind == "battery_bar" {
+            // ── Live battery progress bar ──────────────────────────────────
+            // Unlike a static `shape/rect`, this layer's fill width is driven
+            // by the actual device battery level at render time. Reads
+            // `UIDevice.current.batteryLevel` directly — the host process
+            // (TelemetryService.init) has already enabled battery monitoring.
+            let lvl = UIDevice.current.batteryLevel
+            let pct = max(0, min(1, lvl >= 0 ? lvl : 0))
+            let trackColor = Color(hex: layer.label ?? "1E1E24", fallback: Color(hex: "1E1E24", fallback: .black))
+            let fillColor  = Color(hex: layer.color ?? "22C55E", fallback: .green)
+            let hPadding: CGFloat = 1
+            let radius: CGFloat = CGFloat(layer.radius ?? 4)
+            GeometryReader { barGeo in
+                let totalW = barGeo.size.width
+                let fillW  = max(0, totalW * CGFloat(pct) - hPadding * 2)
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: radius)
+                        .fill(trackColor)
+                    RoundedRectangle(cornerRadius: radius)
+                        .fill(fillColor)
+                        .frame(width: fillW)
+                        .padding(hPadding)
+                }
             }
         } else {
             Color.clear

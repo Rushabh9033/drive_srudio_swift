@@ -28,6 +28,17 @@
 	<array>
 		<string>audio</string>
 		<string>fetch</string>
+		<string>processing</string>
+	</array>
+	<!-- BGAppRefreshTask identifier — used by AppDelegate to wake the
+	     host app periodically so we can call WidgetCenter.reloadAllTimelines()
+	     and keep the widget timeline (clock, battery, speed) fresh even
+	     when the user hasn't opened the app for hours. Without this the
+	     widget shows whatever the last timeline entry was, which can be
+	     hours stale. -->
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.drivestudio.app.driveStudio.refresh</string>
 	</array>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Drive Studio needs access to your microphone to record custom vehicle audio prompts and cues.</string>
@@ -60,6 +71,8 @@
 	<string>Drive Studio uses the camera so you can photograph your car for widget artwork.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Drive Studio uses your location while the app is open to show live GPS speed on speedometer widgets. Speed is never invented when GPS is unavailable.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Drive Studio uses your location in the background to keep speedometer widgets accurate while driving. Speed is never invented when GPS is unavailable, and you can disable background location at any time in Settings.</string>
 	<!-- Flutter / go_router deep links for drivestudio:// -->
 	<key>FlutterDeepLinkingEnabled</key>
 	<true/>

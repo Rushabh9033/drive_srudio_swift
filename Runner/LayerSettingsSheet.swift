@@ -120,6 +120,67 @@ struct LayerSettingsSheet: View {
                         Text(String(format: "%.1f", draft.h ?? 0)).foregroundColor(.secondary)
                     }
                 }
+
+                // ── Group section ─────────────────────────────────────
+                // Multi-layer library assets come in pre-grouped so the whole
+                // composite behaves as one unit on the canvas. User can ungroup
+                // to edit individual layers, or group this layer with the one
+                // below it to form a new composite.
+                Section(header: Text("Group")) {
+                    if let gid = draft.groupId,
+                       let allLayers = spec.layers {
+                        let siblingCount = allLayers.filter { $0.groupId == gid }.count - 1
+                        HStack {
+                            Image(systemName: "square.stack.3d.up.fill")
+                                .foregroundColor(.blue)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Grouped asset")
+                                    .font(.system(size: 14, weight: .semibold))
+                                Text(siblingCount > 0
+                                    ? "\(siblingCount) other layer\(siblingCount == 1 ? "" : "s") move & resize together"
+                                    : "Single layer group")
+                                    .font(.system(size: 11))
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        Button {
+                            if let layers = spec.layers {
+                                var updated = layers
+                                for i in updated.indices where updated[i].groupId == gid {
+                                    updated[i].groupId = nil
+                                }
+                                spec.layers = updated
+                                draft.groupId = nil
+                            }
+                        } label: {
+                            Label("Ungroup", systemImage: "rectangle.split.3x1")
+                                .foregroundColor(.red)
+                        }
+                    } else {
+                        Button {
+                            // Group this layer with the previous sibling (if any
+                            // and currently ungrouped). Forms a new composite
+                            // asset that the user can then drop into other
+                            // widgets as one unit.
+                            if let layers = spec.layers,
+                               layerIndex > 0,
+                               layerIndex - 1 < layers.count {
+                                let prev = layers[layerIndex - 1]
+                                if prev.groupId == nil {
+                                    let newGid = UUID().uuidString
+                                    var updated = layers
+                                    updated[layerIndex - 1].groupId = newGid
+                                    updated[layerIndex].groupId = newGid
+                                    spec.layers = updated
+                                    draft.groupId = newGid
+                                }
+                            }
+                        } label: {
+                            Label("Group with previous layer", systemImage: "rectangle.stack.fill.badge.plus")
+                        }
+                        .disabled(layerIndex <= 0)
+                    }
+                }
             }
             .navigationTitle("Edit \(draft.kind.capitalized)")
             .navigationBarTitleDisplayMode(.inline)

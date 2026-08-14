@@ -17,110 +17,73 @@ class AppStore: ObservableObject {
 
     private let suiteName = "group.com.drivestudio.shared"
     private let draftsKey = "drive_studio_drafts"
-    private var refreshTimer: Timer? = nil
 
     private init() {
-        UIDevice.current.isBatteryMonitoringEnabled = true
+        // TelemetryService.init() already enables UIDevice battery
+        // monitoring — don't duplicate it here.
         loadState()
         setupAutoRefresh()
     }
 
-    var batteryPercent: Int {
-        return liveBatteryPercent
-    }
-
-    var isCharging: Bool {
-        return liveIsCharging
-    }
-
     func setupAutoRefresh() {
         refreshDeviceTelemetry()
-        
+
+        // Battery observers fire at every 1% boundary (batteryLevelDidChange)
+        // and on every plug/unplug (batteryStateDidChange). willEnterForeground
+        // catches app-resume. These three together cover every meaningful
+        // state transition without needing a polling timer.
         NotificationCenter.default.addObserver(forName: UIDevice.batteryLevelDidChangeNotification, object: nil, queue: .main) { [weak self] _ in
-            self?.refreshDeviceTelemetry()
+            Task { @MainActor in self?.refreshDeviceTelemetry() }
         }
         NotificationCenter.default.addObserver(forName: UIDevice.batteryStateDidChangeNotification, object: nil, queue: .main) { [weak self] _ in
-            self?.refreshDeviceTelemetry()
+            Task { @MainActor in self?.refreshDeviceTelemetry() }
         }
         NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { [weak self] _ in
-            self?.refreshDeviceTelemetry()
-        }
-
-        refreshTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            Task { @MainActor in
-                self?.refreshDeviceTelemetry()
-            }
+            Task { @MainActor in self?.refreshDeviceTelemetry() }
         }
     }
 
     func refreshDeviceTelemetry() {
-        UIDevice.current.isBatteryMonitoringEnabled = true
         let rawLevel = UIDevice.current.batteryLevel
         let level = rawLevel >= 0 ? Int(round(rawLevel * 100)) : 100
         let state = UIDevice.current.batteryState
         let charging = (state == .charging || state == .full)
+        let currentTime = FormatterCache.hmmFormatter.string(from: Date())
 
-        let formatter = DateFormatter()
-        formatter.dateFormat = "h:mm a"
-        let currentTime = formatter.string(from: Date())
-
-        if self.liveBatteryPercent != level {
-            self.liveBatteryPercent = level
-        }
-        if self.liveIsCharging != charging {
-            self.liveIsCharging = charging
-        }
-        if self.liveTimeString != currentTime {
-            self.liveTimeString = currentTime
-        }
-
+        // Single change-check. Only write a fresh snapshot (and reload
+        // widgets) when something a user can see actually changed —
+        // iOS-1 / iOS-2 fix: the old code called `snapshotAndSave()` every
+        // second, hammering `WidgetCenter.reloadAllTimelines()`.
+        let prev = (liveBatteryPercent, liveIsCharging, liveTimeString)
+        let curr = (level, charging, currentTime)
+        guard prev != curr else { return }
+        (liveBatteryPercent, liveIsCharging, liveTimeString) = curr
         TelemetryService.shared.snapshotAndSave()
     }
 
-    let validTemplates = ["Apex", "Neon Grid", "Minimal", "Carbon", "Charge Arc", "Bolt Pill", "Power Ring", "Cell Bar", "Apex Gauge", "Dial", "Velocity", "Track"]
-    
-    struct Metadata: Codable {
-        let schemaVersion: Int
-        let generation: String
-        let stateFile: String
-        let checksum: String
-        let updatedAt: String
-    }
-    
     func loadState() {
         let defaults = UserDefaults(suiteName: suiteName) ?? UserDefaults.standard
-        
-        if let data = defaults.data(forKey: "widget_state_v2_metadata"),
-           let metadata = try? JSONDecoder().decode(Metadata.self, from: data),
-           let sharedURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: suiteName) {
-            
-            let fileURL = sharedURL.appendingPathComponent(metadata.stateFile)
-            if let stateData = try? Data(contentsOf: fileURL),
-               let state = try? JSONDecoder().decode(WidgetState.self, from: stateData) {
-                for (i, slot) in (state.slots ?? []).enumerated() {
-                    if i < 4 {
-                        // Wipe the broken "template_x" assignments from previous build
-                        if let draftId = slot.draftId, draftId.hasPrefix("template_") {
-                            self.slots[i] = nil
-                        } else {
-                            self.slots[i] = slot.draftId
-                        }
-                    }
-                }
+
+        // Delegate slot recovery to the shared V2 reader so the
+        // host app, widget extension, and intents all agree on the
+        // same generation/checksum/cache semantics.
+        if let state = AppGroupState.loadState() {
+            for (i, slot) in (state.slots ?? []).enumerated() where i < 4 {
+                self.slots[i] = slot.draftId
             }
         }
-        
+
         if let draftsData = defaults.data(forKey: draftsKey),
            let savedDrafts = try? JSONDecoder().decode([Draft].self, from: draftsData) {
             self.drafts = savedDrafts
         }
-        
+
         // Also cleanup slots that don't correspond to any draft or actual default template
         for i in 0..<4 {
             if let slot = self.slots[i] {
                 let isCustomDraft = self.drafts.contains(where: { $0.id == slot })
                 let isDefaultTemplate = StockWidgetCatalog.shared.widgets.contains(where: { $0.stockWidgetId == slot })
-                
+
                 if !isCustomDraft && !isDefaultTemplate {
                     self.slots[i] = nil // Reset corrupted slot
                 }
@@ -252,7 +215,7 @@ class AppStore: ObservableObject {
                     slotSpec = stockWidget.document
                 }
             }
-            newSlots.append(Slot(index: i, draftId: draftId, name: draftId, summary: nil, spec: slotSpec))
+            newSlots.append(Slot(index: i, draftId: draftId, spec: slotSpec))
         }
         oldState.slots = newSlots
         
@@ -263,10 +226,6 @@ class AppStore: ObservableObject {
             let fileURL = sharedURL.appendingPathComponent(stateFile)
             try? stateData.write(to: fileURL)
             
-            // Calculate SHA256 (requires CryptoKit, so I'll do a simple hash or we can use CryptoKit)
-            // Wait, we need to import CryptoKit at the top of AppStore.swift
-            let checksum = Insecure.MD5.hash(data: stateData).map { String(format: "%02x", $0) }.joined()
-            // Wait! The widget extension expects SHA256. 
             let sha256 = SHA256.hash(data: stateData).compactMap { String(format: "%02x", $0) }.joined()
             
             let generation = UUID().uuidString

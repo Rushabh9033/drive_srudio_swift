@@ -169,8 +169,24 @@ class AppStore: ObservableObject {
         defaults.set(clamped, forKey: Self.activeSlotKey)
         // Persist V2 envelope so the widget reads the latest state
         // alongside the active-slot preference.
-        saveState()
+        trySaveStateLoggingFailure()
         WidgetReloadThrottle.shared.requestReload(kind: .slotChange)
+    }
+
+    /// Call `saveState()` and log the typed error if it throws.
+    /// The rollback inside `saveState()` already restores the
+    /// in-memory `drafts` / `slots` to the pre-call snapshot; this
+    /// wrapper exists so callers that don't need to surface the
+    /// error to the user still see it in the console rather than
+    /// silently dropping the failure.
+    private func trySaveStateLoggingFailure() {
+        do {
+            try saveState()
+        } catch let err as SaveStateError {
+            print("AppStore.saveState failed (rolled back): \(err)")
+        } catch {
+            print("AppStore.saveState failed (rolled back): \(error)")
+        }
     }
 
     func saveVehicleImage(_ image: UIImage) {
@@ -222,21 +238,21 @@ class AppStore: ObservableObject {
     func assignSlot(_ index: Int, draftId: String?) {
         guard index >= 0 && index < 4 else { return }
         slots[index] = draftId
-        saveState()
+        trySaveStateLoggingFailure()
     }
 
     func moveSlots(fromOffsets: IndexSet, toOffset: Int) {
         slots.move(fromOffsets: fromOffsets, toOffset: toOffset)
-        saveState()
+        trySaveStateLoggingFailure()
     }
-    
+
     func saveDraft(_ draft: Draft) {
         if let index = drafts.firstIndex(where: { $0.id == draft.id }) {
             drafts[index] = draft
         } else {
             drafts.append(draft)
         }
-        saveState()
+        trySaveStateLoggingFailure()
     }
 
     func deleteDraft(_ id: String) {
@@ -246,13 +262,13 @@ class AppStore: ObservableObject {
                 slots[i] = nil
             }
         }
-        saveState()
+        trySaveStateLoggingFailure()
     }
 
     func clearAllDrafts() {
         drafts.removeAll()
         slots = [nil, nil, nil, nil]
-        saveState()
+        trySaveStateLoggingFailure()
     }
 
     func clearCustomVehicleImage() {
@@ -271,14 +287,33 @@ class AppStore: ObservableObject {
             try? FileManager.default.removeItem(at: fileURL)
         }
 
-        saveState()
+        trySaveStateLoggingFailure()
     }
 
-    func saveState() {
+    func saveState() throws {
+        // Snapshot in-memory state for rollback. If the App Group
+        // install fails, we restore the user's view to the pre-call
+        // value so the next `saveState()` re-attempts from the same
+        // starting point instead of getting further out of sync.
+        // `vehicleImage` is intentionally NOT rolled back — it's a
+        // host-only UIImage that doesn't need App Group visibility
+        // to be useful to the editor canvas.
+        let snapshotDrafts = drafts
+        let snapshotSlots = slots
+
         let defaults = UserDefaults(suiteName: suiteName) ?? UserDefaults.standard
-        if let data = try? JSONEncoder().encode(drafts) {
-            defaults.set(data, forKey: draftsKey)
+
+        // Step 1: persist drafts cache. A failure here aborts before
+        // any App Group mutation so the widget-side state file stays
+        // consistent with the host's UserDefaults drafts.
+        let draftsData: Data
+        do {
+            draftsData = try JSONEncoder().encode(drafts)
+        } catch {
+            throw SaveStateError.draftCacheWriteFailed(
+                "drafts cache encode failed: \(error)")
         }
+        defaults.set(draftsData, forKey: draftsKey)
 
         // Build the V2 envelope. **Persist real selected-vehicle and
         // real telemetry values** so the widget extension, App Intents
@@ -336,9 +371,20 @@ class AppStore: ObservableObject {
         // publication, the previous generation's metadata entry
         // stays canonical and readers continue to read the previous
         // (valid) generation file unchanged.
-        guard let sharedURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: suiteName),
-              let stateData = try? JSONEncoder().encode(envelope) else {
-            return
+        guard let sharedURL = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: suiteName) else {
+            self.drafts = snapshotDrafts
+            self.slots = snapshotSlots
+            throw SaveStateError.noSharedContainer
+        }
+        let stateData: Data
+        do {
+            stateData = try JSONEncoder().encode(envelope)
+        } catch {
+            self.drafts = snapshotDrafts
+            self.slots = snapshotSlots
+            throw SaveStateError.stateEnvelopeEncodeFailed(
+                "state envelope encode failed: \(error)")
         }
 
         // Look up the previous generation so the install can
@@ -349,7 +395,6 @@ class AppStore: ObservableObject {
             metadataKey: AppGroupContract.v2MetadataKey
         )
 
-        let installResult: StateInstallResult
         do {
             // **Pure asset plan.** Compute the set of image filenames
             // that the new generation references. We resolve this
@@ -358,7 +403,7 @@ class AppStore: ObservableObject {
             // operation and the plan is testable independently.
             let imagesToSync = Self.referencedImageFilenames(in: newSlots)
 
-            installResult = try Self.installState(
+            _ = try Self.installState(
                 stateData: stateData,
                 sharedContainer: sharedURL,
                 stageAssets: { staged in
@@ -406,13 +451,15 @@ class AppStore: ObservableObject {
                 }
             )
         } catch {
-            // Replacement failed — the previous valid generation
-            // is still readable. Bail without invalidating the cache,
-            // bail without requesting a widget reload, and bail
-            // without staging any partial asset directory.
-            return
+            // Roll back in-memory state. The previous valid generation
+            // is still readable on disk; we never invalidate the cache
+            // and never request a widget reload, so the widget
+            // continues to display the last-known-good snapshot.
+            self.drafts = snapshotDrafts
+            self.slots = snapshotSlots
+            throw SaveStateError.stateInstallFailed(
+                "installState failed: \(error)")
         }
-        _ = installResult.generation
 
         // **Cache invalidation.** The installer published the new
         // generation's checksum, generation, and timestamp. Now drop
@@ -547,6 +594,29 @@ class AppStore: ObservableObject {
         /// file and any staged assets are removed; the previous
         /// generation remains canonical.
         case metadataPublishFailed(String)
+    }
+
+    /// Errors thrown by `saveState()`. Callers (editor, gallery,
+    /// telemetry pipeline, App Intents, App Store hooks) receive a
+    /// typed value so they can decide whether to surface a user-
+    /// visible alert, retry, or fall back to a draft-only path.
+    enum SaveStateError: Error, Equatable {
+        /// The drafts cache JSON could not be encoded. Thrown before
+        /// any App Group mutation, so the widget-side state file
+        /// stays consistent with the host's UserDefaults drafts.
+        case draftCacheWriteFailed(String)
+        /// The V2 envelope could not be encoded. Thrown before the
+        /// App Group install begins, so no metadata is published.
+        case stateEnvelopeEncodeFailed(String)
+        /// The shared App Group container was unreachable. Nothing
+        /// was written; the host-side drafts cache was rolled back.
+        case noSharedContainer
+        /// The state-install transaction failed (write, verify,
+        /// stage, or publish). The host-side drafts cache and slot
+        /// mapping were rolled back to their pre-call snapshot. The
+        /// previous valid generation is still readable on disk; no
+        /// cache invalidation or widget reload was requested.
+        case stateInstallFailed(String)
     }
 
     struct StateInstallResult: Equatable {
@@ -744,15 +814,24 @@ class AppStore: ObservableObject {
     /// Pure: enumerate the image filenames referenced by the slot
     /// specs being saved. Order-independent (returns a Set) so the
     /// caller can run it before any I/O and so the test can pin it.
+    ///
+    /// Symbolic editor guides (`template_car`) are NOT real image
+    /// filenames and are filtered out — the asset stager must never
+    /// search for them on disk. See `ImageSource.symbolicVehicleGuide`
+    /// for the typed classification.
     nonisolated static func referencedImageFilenames(in slots: [Slot]) -> Set<String> {
         var names: Set<String> = []
         for slot in slots {
             if let bgSrc = slot.spec?.background?.imageSrc {
-                names.insert(bgSrc)
+                if !ImageSource.symbolicVehicleGuideNames.contains(bgSrc) {
+                    names.insert(bgSrc)
+                }
             }
             for layer in slot.spec?.layers ?? [] {
                 if layer.kind == "image", let src = layer.src {
-                    names.insert(src)
+                    if !ImageSource.symbolicVehicleGuideNames.contains(src) {
+                        names.insert(src)
+                    }
                 }
             }
         }
@@ -829,6 +908,15 @@ class AppStore: ObservableObject {
             at: destinationFolder,
             withIntermediateDirectories: true)
         for name in filenames {
+            // Defense in depth: skip symbolic editor guides even if
+            // a caller passed them in. `referencedImageFilenames`
+            // already filters these out at the top of the staging
+            // pipeline, but the stager itself MUST refuse to
+            // search for `template_car` (and any future symbolic
+            // name) — there is no such file on disk.
+            if ImageSource.symbolicVehicleGuideNames.contains(name) {
+                continue
+            }
             try Self.copyOrVerifyOneImage(
                 name: name,
                 destinationFolder: destinationFolder,

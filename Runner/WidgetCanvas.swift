@@ -380,25 +380,25 @@ struct LayerView: View {
             )
         } else if kind == "image" {
             // ── Image / Vehicle Position Guide ───────────────────────────
-            if let src = layer.src, let uiImage = DriveStudioImageLoader.load(from: src) {
+            let src = layer.src ?? ""
+            if ImageSource.symbolicVehicleGuideNames.contains(src) {
+                // Symbolic editor guide (`template_car`) — render the
+                // neutral guide box. We never search for these names
+                // on disk; there is no such file.
+                VehiclePositionGuideBox(
+                    primary: DriveColors.primary,
+                    label: "CAR PHOTO"
+                )
+            } else if let uiImage = DriveStudioImageLoader.load(from: src) {
                 Image(uiImage: uiImage).resizable().scaledToFit()
             } else {
-                // Vehicle Position Guide Box
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(style: StrokeStyle(lineWidth: 1.2, dash: [4, 3]))
-                        .foregroundColor(DriveColors.primary.opacity(0.7))
-                    
-                    VStack(spacing: 2) {
-                        Image(systemName: "car.side.fill")
-                            .font(.system(size: max(14, scaledFontSize * 0.7), weight: .bold))
-                            .foregroundColor(DriveColors.primary)
-                        Text("CAR PHOTO")
-                            .font(.system(size: max(7, scaledFontSize * 0.28), weight: .bold))
-                            .foregroundColor(DriveColors.primary)
-                    }
-                }
-                .padding(2)
+                // Real image, but the load failed (truly missing).
+                // Surface the same neutral guide so the user knows
+                // where their photo is supposed to land.
+                VehiclePositionGuideBox(
+                    primary: DriveColors.primary,
+                    label: "CAR PHOTO"
+                )
             }
         } else if kind == "shape" || kind == "draw" || kind == "divider" {
             // ── Shapes ───────────────────────────────────────────────────

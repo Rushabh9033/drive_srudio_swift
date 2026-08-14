@@ -489,7 +489,16 @@ struct ScaledLayerView: View {
                 }
             case "image":
                 let src = layer.src ?? ""
-                if !src.isEmpty, let img = DriveStudioImageLoader.load(
+                if ImageSource.symbolicVehicleGuideNames.contains(src) {
+                    // Symbolic editor guide — NOT a real image
+                    // filename. Render the neutral "CAR PHOTO"
+                    // placeholder box the same way the editor
+                    // canvas does, so the home-screen widget and
+                    // the in-app preview agree. We never load
+                    // `template_car` from a bundle or the App
+                    // Group; there is no such file.
+                    VehiclePositionGuideBox()
+                } else if !src.isEmpty, let img = DriveStudioImageLoader.load(
                     from: src, generation: generation) {
                     Image(uiImage: img).resizable().aspectRatio(contentMode: .fit)
                 } else {

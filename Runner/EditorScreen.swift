@@ -591,39 +591,88 @@ struct EditorScreen: View {
 
     private func addVehicleLayer(image: UIImage) {
         let filename = "vehicle_\(UUID().uuidString).png"
-        let pngData = image.pngData()
-        
-        // 1. Save to private Documents Directory
-        if let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-            let fileURL = docs.appendingPathComponent(filename)
-            try? pngData?.write(to: fileURL)
+        guard let pngData = image.pngData() else {
+            print("addVehicleLayer: image.pngData() returned nil")
+            return
         }
-        
-        // 2. Save PERMANENTLY to App Group Shared Container (so Home Screen Widget extension can access it forever!)
+
+        // Write to the three locations the loader can read from:
+        //   * host Documents (kept for legacy / host-side references)
+        //   * App Group root (third immediate-write path)
+        //   * App Group SharedImages (the stable widget-read location)
+        //
+        // Every write goes through `writeImageVerified(_:to:)` which
+        // byte-compares the on-disk file against the source before
+        // returning. We only update the spec if the widget-readable
+        // App Group write verifies; a half-written file would
+        // otherwise strand the widget pointing at nothing. The
+        // App Group staging path in `AppStore.installState` remains
+        // the authoritative commit point for cross-process state.
+        let docsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?
+            .appendingPathComponent(filename)
+        if let docsURL = docsURL {
+            Self.writeImageVerified(pngData, to: docsURL)
+        }
+
+        var widgetVisibleVerified = false
         if let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.drivestudio.shared") {
             let sharedRootURL = groupURL.appendingPathComponent(filename)
-            try? pngData?.write(to: sharedRootURL)
-            
+            Self.writeImageVerified(pngData, to: sharedRootURL)
+
             let sharedImagesDir = groupURL.appendingPathComponent("SharedImages")
             try? FileManager.default.createDirectory(at: sharedImagesDir, withIntermediateDirectories: true)
             let sharedImagesURL = sharedImagesDir.appendingPathComponent(filename)
-            try? pngData?.write(to: sharedImagesURL)
+            widgetVisibleVerified = Self.writeImageVerified(pngData, to: sharedImagesURL)
         }
-        
+
+        if !widgetVisibleVerified {
+            print("addVehicleLayer: widget-visible App Group write failed verification; refusing to update spec")
+            return
+        }
+
         commitState()
-        var newLayers = spec.layers ?? []
-        let layer = WidgetLayer(
-            id: UUID().uuidString,
-            kind: "image",
-            src: filename,
-            x: 10.0,
-            y: 10.0,
-            w: 80.0,
-            h: 80.0
+
+        // Use the pure merge helper so adding a user image replaces
+        // a selected `template_car` guide (or the single visible
+        // guide if there is no selection) instead of piling up new
+        // layers. See Fix 2.
+        let existing = spec.layers ?? []
+        let merged = WidgetLayer.mergedLayersAfterAddingImage(
+            current: existing,
+            selectedIndex: selectedLayerIndex,
+            newImageSrc: filename
         )
-        newLayers.append(layer)
-        spec.layers = newLayers
-        selectedLayerIndex = newLayers.count - 1
+        spec.layers = merged.layers
+        selectedLayerIndex = merged.selectedIndex
+    }
+
+    /// Write `data` to `url` and byte-compare the result against the
+    /// source. Returns `true` only when the on-disk bytes match the
+    /// in-memory bytes exactly. On any failure (write error, read
+    /// error, byte mismatch) the partial file is removed and the
+    /// function returns `false`.
+    @discardableResult
+    static func writeImageVerified(_ data: Data, to url: URL) -> Bool {
+        do {
+            try data.write(to: url, options: [.atomic])
+        } catch {
+            print("writeImageVerified: write failed at \(url.path): \(error)")
+            return false
+        }
+        let readBack: Data
+        do {
+            readBack = try Data(contentsOf: url)
+        } catch {
+            print("writeImageVerified: read-back failed at \(url.path): \(error)")
+            try? FileManager.default.removeItem(at: url)
+            return false
+        }
+        guard readBack == data else {
+            print("writeImageVerified: byte mismatch at \(url.path) (wrote \(data.count), read \(readBack.count))")
+            try? FileManager.default.removeItem(at: url)
+            return false
+        }
+        return true
     }
 
     private func removeBackground(from image: UIImage, completion: @escaping (UIImage?) -> Void) {

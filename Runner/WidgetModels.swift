@@ -47,7 +47,7 @@ struct WidgetLayer: Codable, Identifiable, Equatable {
     /// that contain multiple layers assign a shared `groupId` so the whole
     /// composite asset behaves as a single unit on the canvas.
     var groupId: String?
-    
+
     // Default initializers for editor creation
     static func newText() -> WidgetLayer {
         WidgetLayer(
@@ -64,9 +64,73 @@ struct WidgetLayer: Codable, Identifiable, Equatable {
             color: "FFFFFF"
         )
     }
-    
+
     static func newCar(src: String) -> WidgetLayer {
         WidgetLayer(id: UUID().uuidString, kind: "image", src: src, x: 0, y: 0, w: 150, h: 100)
+    }
+
+    // MARK: - Image-add merge
+    //
+    // Pure, testable decision: when the user picks a new image to add
+    // to a draft, where does it land? Rules (in order):
+    //
+    //   1. If the currently-selected layer is a symbolic vehicle
+    //      guide (`template_car`), replace it in place — keep its
+    //      `id`, `x`, `y`, `w`, `h`, `opacity`, `hidden`, `groupId`.
+    //      The selection stays on the (now-real) layer.
+    //   2. Else if exactly one visible symbolic vehicle guide
+    //      exists in the layer list, replace that one in place. The
+    //      selection moves to its index. (Multiple visible guides:
+    //      ambiguous — append a new layer; the user can move or
+    //      delete one of the guides manually.)
+    //   3. Else append a new layer with default placement.
+    //
+    // Returns the new layer array and the index the editor should
+    // select after the merge. Callers update `selectedLayerIndex`
+    // themselves so the helper stays pure.
+    static func mergedLayersAfterAddingImage(
+        current: [WidgetLayer],
+        selectedIndex: Int?,
+        newImageSrc: String
+    ) -> (layers: [WidgetLayer], selectedIndex: Int?) {
+        // Rule 1: selected symbolic guide → replace in place.
+        if let sel = selectedIndex,
+           sel >= 0, sel < current.count,
+           current[sel].kind == "image",
+           let src = current[sel].src,
+           ImageSource.symbolicVehicleGuideNames.contains(src) {
+            var updated = current
+            updated[sel] = current[sel].withReplacedImageSrc(newImageSrc)
+            return (updated, sel)
+        }
+        // Rule 2: exactly one visible symbolic guide → replace that.
+        let visibleGuideIndices = current.enumerated().compactMap { idx, layer -> Int? in
+            guard layer.kind == "image",
+                  let src = layer.src,
+                  ImageSource.symbolicVehicleGuideNames.contains(src),
+                  layer.hidden != true else { return nil }
+            return idx
+        }
+        if visibleGuideIndices.count == 1 {
+            let target = visibleGuideIndices[0]
+            var updated = current
+            updated[target] = current[target].withReplacedImageSrc(newImageSrc)
+            return (updated, target)
+        }
+        // Rule 3: append a new layer.
+        var updated = current
+        let newLayer = WidgetLayer.newCar(src: newImageSrc)
+        updated.append(newLayer)
+        return (updated, updated.count - 1)
+    }
+
+    /// Return a copy with `src` replaced. Preserves `id`, `x`, `y`,
+    /// `w`, `h`, `opacity`, `hidden`, and `groupId` so the new image
+    /// lands exactly where the guide was.
+    private func withReplacedImageSrc(_ newSrc: String) -> WidgetLayer {
+        var copy = self
+        copy.src = newSrc
+        return copy
     }
 }
 

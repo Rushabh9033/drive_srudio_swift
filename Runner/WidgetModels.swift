@@ -68,22 +68,33 @@ struct WidgetLayer: Codable, Identifiable, Equatable {
     static func newCar(src: String, aspectRatio: CGFloat? = nil) -> WidgetLayer {
         // Default small initial footprint so the user sees their
         // freshly-uploaded image at a manageable size and can drag
-        // the corners to make it bigger. When `aspectRatio` is known
-        // (width / height), the height is derived so the frame
-        // matches the image's natural shape exactly.
-        let width: CGFloat = 35
+        // the corners to make it bigger. The *longer* dimension is
+        // anchored at 30% of the design canvas and the shorter is
+        // derived from `aspectRatio` (width / height) so the frame
+        // matches the image's natural shape exactly — the dashed
+        // border lines up with the photo's edges instead of
+        // floating around it with empty space.
+        let initialLongSide: CGFloat = 30
+        let width: CGFloat
         let height: CGFloat
         if let ar = aspectRatio, ar > 0 {
-            height = width / ar
+            if ar >= 1 {
+                width = initialLongSide
+                height = initialLongSide / ar
+            } else {
+                height = initialLongSide
+                width = initialLongSide * ar
+            }
         } else {
-            height = 35
+            width = initialLongSide
+            height = initialLongSide
         }
         return WidgetLayer(
             id: UUID().uuidString,
             kind: "image",
             src: src,
-            x: 32.5,
-            y: 32.5,
+            x: 35,
+            y: 35,
             w: width,
             h: height
         )
@@ -148,11 +159,11 @@ struct WidgetLayer: Codable, Identifiable, Equatable {
     /// Return a copy with `src` replaced. Preserves `id`, `x`, `y`,
     /// `opacity`, `hidden`, and `groupId` so the new image stays
     /// anchored where the guide was. `w` / `h` are recomputed from
-    /// `aspectRatio` (width / height) when available — using the
-    /// guide's old `w` and aspect-derived `h` keeps the guide's
-    /// horizontal footprint while making the frame match the image's
-    /// actual shape, so the dashed border and the image land on the
-    /// same edge instead of the border floating around the photo.
+    /// `aspectRatio` (width / height) when available — using a
+    /// **small** default footprint (the guide's old `w` is ignored;
+    /// it could be 76% of the canvas which would swamp the user)
+    /// and deriving the other dimension from the image's aspect
+    /// keeps the dashed border exactly hugging the photo's edges.
     private func withReplacedImageSrc(
         _ newSrc: String,
         aspectRatio: CGFloat?
@@ -160,9 +171,21 @@ struct WidgetLayer: Codable, Identifiable, Equatable {
         var copy = self
         copy.src = newSrc
         if let ar = aspectRatio, ar > 0 {
-            let anchorW = copy.w ?? 30
-            copy.w = anchorW
-            copy.h = anchorW / ar
+            // Anchor the *longer* dimension at a small initial size
+            // (30% of the design canvas) and derive the shorter
+            // dimension from the image's aspect ratio. This means
+            // the frame matches the image's natural shape AND starts
+            // small enough for the user to drag-resize.
+            let initialLongSide: CGFloat = 30
+            if ar >= 1 {
+                // Landscape (or square) — width is the long side.
+                copy.w = initialLongSide
+                copy.h = initialLongSide / ar
+            } else {
+                // Portrait — height is the long side.
+                copy.h = initialLongSide
+                copy.w = initialLongSide * ar
+            }
         }
         return copy
     }

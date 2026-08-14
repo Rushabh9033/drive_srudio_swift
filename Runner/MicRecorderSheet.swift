@@ -13,6 +13,7 @@ struct MicRecorderSheet: View {
 
     @State private var audioRecorder: AVAudioRecorder? = nil
     @State private var audioPlayer: AVAudioPlayer? = nil
+    @State private var audioPlayerDelegate: MicRecorderAudioDelegate? = nil
     @State private var recordedFileURL: URL? = nil
     @State private var isPlayingPreview: Bool = false
 
@@ -30,7 +31,7 @@ struct MicRecorderSheet: View {
                 // ── Top Bar ─────────────────────────────────────────────
                 HStack {
                     Button("Cancel") {
-                        stopRecording()
+                        cancelRecordingAndReleaseSession()
                         dismiss()
                     }
                     .font(.system(size: 15, weight: .medium))
@@ -55,6 +56,15 @@ struct MicRecorderSheet: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 28)
                 .padding(.bottom, 16)
+                // **Audio-session lifecycle.** A `.playAndRecord`
+                // session that survives the sheet leaves the mic
+                // channel hot. Cancel returns it to idle so other
+                // apps (Music, Maps navigation) can resume using
+                // audio immediately.
+                .onAppear { /* see body.onDisappear */ }
+                .onDisappear {
+                    cancelRecordingAndReleaseSession()
+                }
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 16) {
@@ -166,7 +176,7 @@ struct MicRecorderSheet: View {
         }
         .preferredColorScheme(.dark)
         .onDisappear {
-            stopRecording()
+            cancelRecordingAndReleaseSession()
         }
     }
 
@@ -252,32 +262,81 @@ struct MicRecorderSheet: View {
         }
     }
 
+    /// Release the `.playAndRecord` session and stop any preview
+    /// playback. Called from Cancel, Save, and `onDisappear` so the
+    /// mic channel is never left hot when the sheet goes away.
+    private func cancelRecordingAndReleaseSession() {
+        // Stop any in-flight recording first; the recorder holds the
+        // `.playAndRecord` session active.
+        timer?.invalidate()
+        timer = nil
+        if isRecording {
+            audioRecorder?.stop()
+            audioRecorder = nil
+            isRecording = false
+        }
+        // Stop and release the preview player too. If the preview
+        // were still playing when we deactivate the session, the
+        // route would flip mid-playback and the user would hear
+        // a click.
+        stopPreviewPlayback(deactivateSession: true)
+    }
+
+    /// Stop the in-app preview player and (optionally) deactivate
+    /// the shared audio session. `deactivateSession: true` is the
+    /// right call from Cancel / Save / sheet dismissal where we
+    /// want to leave the system in an idle state; `false` keeps the
+    /// session live for an immediate re-play (used internally).
+    private func stopPreviewPlayback(deactivateSession: Bool) {
+        if let player = audioPlayer, player.isPlaying {
+            player.stop()
+        }
+        audioPlayer = nil
+        audioPlayerDelegate?.invalidate()
+        audioPlayerDelegate = nil
+        isPlayingPreview = false
+        if deactivateSession {
+            try? AVAudioSession.sharedInstance().setActive(false,
+                options: [.notifyOthersOnDeactivation])
+        }
+    }
+
     private func togglePlayPreview() {
         guard let url = recordedFileURL else { return }
         if isPlayingPreview {
-            audioPlayer?.stop()
-            isPlayingPreview = false
-        } else {
-            do {
-                let session = AVAudioSession.sharedInstance()
-                try? session.setCategory(.playback, mode: .default, options: [.defaultToSpeaker])
-                try? session.setActive(true)
+            // Pausing: stop the player but keep the session live so
+            // the user can hit Play again immediately.
+            stopPreviewPlayback(deactivateSession: false)
+            return
+        }
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try? session.setCategory(.playback, mode: .default, options: [.defaultToSpeaker])
+            try? session.setActive(true)
 
-                audioPlayer = try AVAudioPlayer(contentsOf: url)
-                audioPlayer?.volume = 1.0
-                audioPlayer?.prepareToPlay()
-                audioPlayer?.play()
-                isPlayingPreview = true
-
-                let duration = audioPlayer?.duration ?? 2.0
-                DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-                    if self.isPlayingPreview {
-                        self.isPlayingPreview = false
-                    }
-                }
-            } catch {
-                print("Could not play recording preview: \(error)")
+            let delegate = MicRecorderAudioDelegate { [self] in
+                self.stopPreviewPlayback(deactivateSession: true)
             }
+            audioPlayerDelegate = delegate
+            let player = try AVAudioPlayer(contentsOf: url)
+            player.volume = 1.0
+            player.delegate = delegate
+            player.prepareToPlay()
+            player.play()
+            audioPlayer = player
+            isPlayingPreview = true
+
+            // Safety net in case the delegate never fires (e.g. the
+            // file is shorter than `audioPlayer.duration` reported
+            // because of a corrupt header).
+            let safetyDuration = player.duration > 0 ? player.duration : 2.0
+            DispatchQueue.main.asyncAfter(deadline: .now() + safetyDuration + 0.5) {
+                if self.isPlayingPreview, self.audioPlayer === player {
+                    self.stopPreviewPlayback(deactivateSession: true)
+                }
+            }
+        } catch {
+            print("Could not play recording preview: \(error)")
         }
     }
 
@@ -313,9 +372,35 @@ struct MicRecorderSheet: View {
         // OS can hand the route to other apps and so a future
         // `setCategory(.playback)` call doesn't have to fight an
         // already-active `.playAndRecord` session.
+        stopPreviewPlayback(deactivateSession: true)
         try? AVAudioSession.sharedInstance().setActive(false, options: [.notifyOthersOnDeactivation])
 
         onRecordingFinished(displayTitle, finalDocsURL)
         dismiss()
+    }
+}
+
+// MARK: - MicRecorderAudioDelegate
+//
+// `AVAudioPlayer` does NOT retain its delegate; without this proxy
+// the finish callback would never reach the view and the session
+// would stay active until the view itself is destroyed. We hold an
+// unowned capture of the SwiftUI view (which is a struct with
+// predictable lifetime — only valid while the sheet is on screen)
+// and forward the finish notification to a closure so the view
+// can release the audio session.
+private final class MicRecorderAudioDelegate: NSObject, AVAudioPlayerDelegate {
+    private let onFinish: () -> Void
+    private var invalidated = false
+
+    init(onFinish: @escaping () -> Void) { self.onFinish = onFinish }
+
+    func invalidate() {
+        invalidated = true
+    }
+
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        guard !invalidated else { return }
+        onFinish()
     }
 }

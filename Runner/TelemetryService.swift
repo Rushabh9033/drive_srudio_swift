@@ -18,8 +18,20 @@ extension Notification.Name {
     static let locationAuthorizationChanged = Notification.Name("locationAuthorizationChanged")
 }
 
-@objc class TelemetryService: NSObject, CLLocationManagerDelegate {
+@objc class TelemetryService: NSObject, CLLocationManagerDelegate, AVAudioPlayerDelegate {
     static let shared = TelemetryService()
+
+    /// Heartbeat interval for telemetry persistence writes that are
+    /// driven by "nothing visibly changed". Keeps the App Group
+    /// blob's `timestamp` fresh without writing several times per
+    /// second while the device is stationary.
+    static let heartbeatPersistenceInterval: TimeInterval = 30.0
+
+    /// Smallest speed delta (km/h) that justifies an immediate
+    /// persistence write. Sub-threshold deltas ride the heartbeat
+    /// instead so a parked phone with GPS jitter doesn't burn
+    /// through `defaults.set` calls.
+    static let significantSpeedDelta: Double = 1.0
 
     private let locationManager = CLLocationManager()
     /// Latest GPS speed in km/h, exactly as Core Location reported it.
@@ -28,6 +40,15 @@ extension Notification.Name {
     /// "unknown". Widgets must distinguish the two cases.
     var currentSpeed: Double? = nil
     private var audioPlayer: AVAudioPlayer?
+    private var audioDelegate: TelemetryAudioDelegate?
+
+    /// Test seam. Production code uses `Date()`; tests inject a
+    /// mutable closure so they can drive the heartbeat policy
+    /// deterministically.
+    private let clock: () -> Date
+    /// Timestamp of the most recent persistence write to App Group
+    /// defaults. Cleared by `resetPersistenceState()` between tests.
+    private var lastPersistenceDate: Date? = nil
 
     private var lastWasConnected: Bool = false
 
@@ -40,14 +61,36 @@ extension Notification.Name {
     private let suiteName = AppGroupContract.suiteName
 
     private override init() {
+        self.clock = { Date() }
         super.init()
+        Self.configureShared(self)
+    }
+
+    /// Designated test initializer. Pass a fixed-clock closure (or a
+    /// mutable-reference closure) to drive the heartbeat policy
+    /// deterministically. Production code uses `TelemetryService.shared`,
+    /// which is constructed with the real-clock initializer.
+    internal init(clock: @escaping () -> Date) {
+        self.clock = clock
+        super.init()
+        Self.configureShared(self)
+    }
+
+    /// Reset persistence state. Test-only — production code never
+    /// resets `lastPersistenceDate` outside the heartbeat cadence.
+    func resetPersistenceState() {
+        lastPersistenceDate = nil
+        currentSpeed = nil
+    }
+
+    private static func configureShared(_ service: TelemetryService) {
         UIDevice.current.isBatteryMonitoringEnabled = true
 
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
-        locationManager.activityType = .automotiveNavigation
-        locationManager.distanceFilter = kCLDistanceFilterNone
-        locationManager.pausesLocationUpdatesAutomatically = false
+        service.locationManager.delegate = service
+        service.locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+        service.locationManager.activityType = .automotiveNavigation
+        service.locationManager.distanceFilter = kCLDistanceFilterNone
+        service.locationManager.pausesLocationUpdatesAutomatically = false
         // **No automatic permission request at init.**
         // iOS permission prompts are only shown in response to an
         // explicit user action. `beginLocationIfAuthorized()` is the
@@ -95,15 +138,25 @@ extension Notification.Name {
 
     /// Re-arm monitoring after a Settings round-trip or after a
     /// successful authorization prompt. Idempotent.
+    ///
+    /// **Never presents a permission prompt.** Only starts Core
+    /// Location updates when the user has already granted When-In-Use
+    /// or Always authorization. When authorization is undetermined,
+    /// denied, or restricted, this method is a silent no-op — the
+    /// user must tap the Dashboard's "Enable GPS speed" button (which
+    /// routes through `beginLocationIfAuthorized()`) to actually
+    /// surface the system permission dialog.
     func startMonitoring() {
         switch locationManager.authorizationStatus {
         case .authorizedAlways, .authorizedWhenInUse:
             locationManager.startUpdatingLocation()
-        default:
-            // Caller invoked `startMonitoring` without authorization;
-            // route through the user-driven path so the prompt is
-            // shown explicitly rather than silently failing.
-            _ = beginLocationIfAuthorized()
+        case .notDetermined, .denied, .restricted:
+            // No prompt, no fallback to `beginLocationIfAuthorized`.
+            // The Dashboard button is the only path that may present
+            // the When-In-Use dialog.
+            break
+        @unknown default:
+            break
         }
     }
 
@@ -149,24 +202,34 @@ extension Notification.Name {
         } else {
             currentSpeed = nil
         }
-        // Only notify on actual change — GPS can fire 5+ times/sec and
-        // many of those are redundant. Cheap equality check, but it
-        // matters because each notification schedules a SwiftUI render.
+        // **Foreground UI keeps feeling live.** Every real speed
+        // change triggers a notification so SwiftUI re-renders. This
+        // is independent of persistence — the App Group blob is
+        // NOT written here. `persistTelemetryIfMeaningful` is what
+        // decides whether the on-disk defaults change.
         if prevSpeed != currentSpeed {
             NotificationCenter.default.post(name: .telemetrySpeedUpdated, object: self)
         }
-        snapshotAndSave()
+        persistTelemetryIfMeaningful(previousSpeed: prevSpeed)
     }
 
     // MARK: - Play Sound Cues
     @discardableResult
     func triggerSound(for trigger: String) -> Double {
         let defaults = UserDefaults(suiteName: suiteName)
+        // Resolve the user's assigned cue without force-unwrapping the
+        // `String?` lookup result. A missing assignment falls back to
+        // the bundled default for that trigger; "none" means "user
+        // explicitly silenced this cue" and we return zero.
         let assigned = defaults?.string(forKey: "trigger_\(trigger)")
-        let soundName = (assigned != nil && assigned != "none") ? assigned! : fallbackSound(for: trigger)
-
-        guard soundName != "none" else { return 0.0 }
-        return playSoundByName(soundName)
+        let resolved: String
+        if let assigned = assigned, !assigned.isEmpty, assigned != "none" {
+            resolved = assigned
+        } else {
+            resolved = fallbackSound(for: trigger)
+        }
+        guard resolved != "none" else { return 0.0 }
+        return playSoundByName(resolved)
     }
 
     private func fallbackSound(for trigger: String) -> String {
@@ -249,8 +312,19 @@ extension Notification.Name {
             try? session.overrideOutputAudioPort(.none)
             try? session.setActive(true)
 
+            // Replace any in-flight player. Stop it first so its
+            // delegate doesn't fire a stale finish callback that
+            // would prematurely deactivate the session we just
+            // activated for the new sound.
+            audioPlayer?.stop()
+            audioPlayer = nil
+            audioDelegate?.invalidate()
+            let delegate = TelemetryAudioDelegate(owner: self)
+            self.audioDelegate = delegate
+
             let player = try AVAudioPlayer(contentsOf: soundURL)
             player.volume = 0.85
+            player.delegate = delegate
             player.prepareToPlay()
             player.play()
             audioPlayer = player
@@ -268,10 +342,68 @@ extension Notification.Name {
             return duration
         } catch {
             print("[TelemetryService] ❌ AVAudioPlayer failed (\(error)), falling back to SystemSound")
+            // **Fallback system sound.** `AudioServicesPlaySystemSound`
+            // does not use the `AVAudioSession`, so we must release
+            // the `.playback` session we activated above. If we don't,
+            // the session stays active until the host app is killed —
+            // exactly the leak we are closing here.
+            try? AVAudioSession.sharedInstance().setActive(false,
+                options: [.notifyOthersOnDeactivation])
+            audioPlayer = nil
+            audioDelegate?.invalidate()
             var soundID: SystemSoundID = 0
             AudioServicesCreateSystemSoundID(soundURL as CFURL, &soundID)
             AudioServicesPlaySystemSound(soundID)
             return 2.0
+        }
+    }
+
+    // MARK: - AVAudioPlayerDelegate
+    //
+    // The delegate methods are routed through `TelemetryAudioDelegate`
+    // (a small NSObject proxy) so the player retains a strong
+    // reference to its delegate — the player does not retain its
+    // delegate, so without the proxy the delegate would be
+    // deallocated immediately and the finish callback would never
+    // fire. The proxy calls back into this service to deactivate the
+    // session once playback actually completes (success or failure).
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        deactivatePlaybackSession(reason: "finished")
+        if audioPlayer === player {
+            audioPlayer = nil
+        }
+        audioDelegate?.invalidate()
+    }
+
+    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+        print("[TelemetryService] ❌ AVAudioPlayer decode error: \(error?.localizedDescription ?? "unknown")")
+        deactivatePlaybackSession(reason: "decode error")
+        if audioPlayer === player {
+            audioPlayer = nil
+        }
+        audioDelegate?.invalidate()
+    }
+
+    /// Deactivate the shared `AVAudioSession` after playback has
+    /// ended, failed, or been replaced. Uses
+    /// `.notifyOthersOnDeactivation` so any other app that was
+    /// ducked under our session (Music, Maps navigation) can resume
+    /// immediately. Safe to call when the session is already
+    /// inactive — `setActive(false)` is a no-op in that case.
+    private func deactivatePlaybackSession(reason: String) {
+        let session = AVAudioSession.sharedInstance()
+        // Only deactivate if we actually own a `.playback` session.
+        // If a mic recording is currently active (`.playAndRecord`),
+        // we MUST NOT deactivate — that would interrupt the user's
+        // recording. The mic session takes precedence.
+        if session.category == .playAndRecord || session.category == .record {
+            return
+        }
+        do {
+            try session.setActive(false, options: [.notifyOthersOnDeactivation])
+            print("[TelemetryService] 🔇 Audio session deactivated (\(reason))")
+        } catch {
+            print("[TelemetryService] ⚠️ Failed to deactivate audio session (\(reason)): \(error)")
         }
     }
 
@@ -298,16 +430,40 @@ extension Notification.Name {
     }
 
     // MARK: - Save Telemetry Snapshot
+    /// Public entry point — preserved for callers (`AppStore` and the
+    /// "Refresh Drive Studio" intent) that want a guaranteed
+    /// persistence pass. Delegates to the meaningful-change policy
+    /// so callers get the throttled behavior for free.
     func snapshotAndSave() {
+        persistTelemetryIfMeaningful(previousSpeed: currentSpeed)
+    }
+
+    /// Write the current telemetry to App Group defaults only when:
+    ///
+    ///   1. A widget-visible signal flipped (battery %, charging,
+    ///      carConnected, speed availability).
+    ///   2. Speed changed by ≥ `significantSpeedDelta` km/h.
+    ///   3. The heartbeat window (`heartbeatPersistenceInterval`)
+    ///      has elapsed since the last write.
+    ///
+    /// In every other case the in-memory `currentSpeed` and the UI
+    /// notification already give the foreground the latest reading;
+    /// the App Group blob is left alone so a parked device with GPS
+    /// jitter doesn't write defaults 5+ times per second. Widget
+    /// reload throttling is handled separately by
+    /// `WidgetReloadThrottle.shared.requestReload(kind:)` below.
+    private func persistTelemetryIfMeaningful(previousSpeed: Double?) {
+        let now = clock()
         let device = UIDevice.current
         let level = device.batteryLevel
-        // Unknown battery (`batteryLevel == -1`) is propagated as `nil`.
-        // We never substitute a fake value.
+        // Unknown battery (`batteryLevel == -1`) is propagated as
+        // `nil`. We never substitute a fake value.
         let batteryPercent: Int? = level >= 0 ? Int(level * 100) : nil
         // Exact current charging state. Do not OR with any previously
-        // cached state — if the device just unplugged, this must flip
-        // to false on the next snapshot.
-        let isCharging = device.batteryState == .charging || device.batteryState == .full
+        // cached state — if the device just unplugged, this must
+        // flip to false on the next snapshot.
+        let isCharging = device.batteryState == .charging
+            || device.batteryState == .full
 
         struct Snapshot: Codable {
             let carConnected: Bool
@@ -317,10 +473,38 @@ extension Notification.Name {
             let timestamp: Date?
         }
 
-        // `currentSpeed` is the most recent GPS-derived km/h value, or
-        // `nil` when no valid fix exists. Genuine stationary (0) is
-        // preserved; "no fix" stays `nil`. The widget extension renders
-        // each case differently.
+        guard let defaults = UserDefaults(suiteName: suiteName) else { return }
+
+        // Decode the previous snapshot ONCE — never multiple times.
+        let prev: Snapshot?
+        if let prevData = defaults.data(forKey: AppGroupContract.liveTelemetryKey) {
+            prev = try? JSONDecoder().decode(Snapshot.self, from: prevData)
+        } else {
+            prev = nil
+        }
+
+        let batteryChanged = prev?.batteryPercent != batteryPercent
+        let chargingChanged = prev?.isCharging != isCharging
+        let connectionChanged = prev?.carConnected != carConnected
+        let availabilityChanged = (prev?.speed == nil) != (currentSpeed == nil)
+        let speedDelta: Double = {
+            if let p = previousSpeed, let c = currentSpeed {
+                return abs(c - p)
+            }
+            return 0
+        }()
+        let speedMeaningful = speedDelta >= Self.significantSpeedDelta
+
+        let heartbeatDue: Bool = {
+            guard let last = lastPersistenceDate else { return true }
+            return now.timeIntervalSince(last) >= Self.heartbeatPersistenceInterval
+        }()
+
+        let shouldPersist = batteryChanged || chargingChanged
+            || connectionChanged || availabilityChanged
+            || speedMeaningful || heartbeatDue
+        guard shouldPersist else { return }
+
         let telemetry = Snapshot(
             carConnected: carConnected,
             batteryPercent: batteryPercent,
@@ -328,20 +512,11 @@ extension Notification.Name {
             speed: currentSpeed,
             timestamp: Date()
         )
-
-        guard let defaults = UserDefaults(suiteName: suiteName),
-              let data = try? JSONEncoder().encode(telemetry) else {
-            return
-        }
-
-        // Decode the previous snapshot ONCE — never multiple times. The
-        // previous implementation decoded the same Data up to three
-        // times, wasting CPU on the timeline thread.
-        let prev = (try? JSONDecoder().decode(Snapshot.self,
-            from: defaults.data(forKey: AppGroupContract.liveTelemetryKey) ?? Data()))
+        guard let data = try? JSONEncoder().encode(telemetry) else { return }
 
         defaults.set(data, forKey: AppGroupContract.liveTelemetryKey)
         defaults.set(data, forKey: AppGroupContract.legacyTelemetryKey)
+        lastPersistenceDate = now
 
         // Decide reload kind based on what actually changed. The
         // throttle rate-limits speed-driven reloads to once per 5
@@ -350,19 +525,62 @@ extension Notification.Name {
         // signal transitions. **An identical snapshot performs zero
         // WidgetCenter reloads** — no `.other` bypass.
         let kind: WidgetReloadKind
-        if prev?.isCharging != isCharging {
+        if chargingChanged {
             kind = .chargingStateChange
-        } else if prev?.carConnected != carConnected {
+        } else if connectionChanged {
             kind = .connectionStateChange
-        } else if prev?.batteryPercent != batteryPercent {
+        } else if batteryChanged {
             kind = .batteryLevelChange
-        } else if prev?.speed != currentSpeed {
+        } else if speedMeaningful {
             kind = .speedChange
         } else {
             kind = .noVisibleChange
         }
         if #available(iOS 14.0, *) {
-            WidgetReloadThrottle.shared.requestReload(kind: kind)
+            WidgetReloadThrottle.shared.requestReload(kind: kind, now: now)
         }
+    }
+
+    /// Test-only entry point that exposes the private
+    /// `persistTelemetryIfMeaningful` to the test target via
+    /// `@testable import Runner`. Production callers go through
+    /// `locationManager(_:didUpdateLocations:)` which already
+    /// supplies `previousSpeed` from the in-memory `currentSpeed`.
+    func _persistForTest(previousSpeed: Double?, currentSpeed: Double? = nil) {
+        if let currentSpeed = currentSpeed { self.currentSpeed = currentSpeed }
+        persistTelemetryIfMeaningful(previousSpeed: previousSpeed)
+    }
+}
+
+// MARK: - TelemetryAudioDelegate
+//
+// `AVAudioPlayer` does NOT retain its delegate. Without this proxy
+// the delegate would be deallocated as soon as the player's `play`
+// call returned and `audioPlayerDidFinishPlaying` would never
+// reach the service. The proxy keeps a weak reference back to the
+// owning service so the finish / decode-error notifications actually
+// fire — and so the service can invalidate the proxy after use
+// without falling into a retain cycle.
+private final class TelemetryAudioDelegate: NSObject, AVAudioPlayerDelegate {
+    weak var owner: TelemetryService?
+    private var invalidated = false
+
+    init(owner: TelemetryService) {
+        self.owner = owner
+    }
+
+    func invalidate() {
+        invalidated = true
+        owner = nil
+    }
+
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        guard !invalidated else { return }
+        owner?.audioPlayerDidFinishPlaying(player, successfully: flag)
+    }
+
+    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+        guard !invalidated else { return }
+        owner?.audioPlayerDecodeErrorDidOccur(player, error: error)
     }
 }

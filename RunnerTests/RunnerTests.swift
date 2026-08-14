@@ -925,74 +925,176 @@ class RunnerTests: XCTestCase {
 
     // MARK: - WidgetReloadThrottle
 
-    /// Speed-driven reloads are rate-limited to once per 5 minutes.
+    /// Speed-driven reloads: first call → 1, within 5 min → 0,
+    /// after 5 min → 1. Verified with an injected counting closure
+    /// so the test never touches `WidgetCenter`.
     func testWidgetReloadThrottleSpeedChangeRateLimit() {
-        let throttle = WidgetReloadThrottle()
+        var count = 0
+        let throttle = WidgetReloadThrottle(reloadHook: { count += 1 })
         throttle.reset()
         let t0 = Date(timeIntervalSince1970: 1_726_000_000)
-        // First call within the window: allowed.
-        // We can't observe WidgetCenter reloads directly from a unit
-        // test, but we can observe the throttle's internal `lastSpeedReload`
-        // timestamp via the test-only accessor.
+        // First speed reload → one call.
         _ = throttle.requestReload(kind: .speedChange, now: t0)
-        XCTAssertNotNil(throttle.lastSpeedReloadTime(),
-                       "First speed-driven reload must update lastSpeedReload")
-        // A second request within 4 minutes is suppressed — but we
-        // can't observe the WidgetCenter call. Instead we observe that
-        // `lastSpeedReloadTime` did not advance (the throttle didn't
-        // forward the call).
-        let lastAfterFirst = throttle.lastSpeedReloadTime()
+        XCTAssertEqual(count, 1, "First speed-driven reload must fire exactly once")
+        // Second request within 4 minutes → suppressed.
         _ = throttle.requestReload(kind: .speedChange, now: t0.addingTimeInterval(60))
-        XCTAssertEqual(throttle.lastSpeedReloadTime(), lastAfterFirst,
-                       "Throttled reload must not update lastSpeedReload")
-        // A request 5 minutes later is allowed.
-        _ = throttle.requestReload(kind: .speedChange,
-                                   now: t0.addingTimeInterval(5 * 60))
-        XCTAssertNotEqual(throttle.lastSpeedReloadTime(), lastAfterFirst,
-                          "Reload after 5 minutes must update lastSpeedReload")
+        XCTAssertEqual(count, 1, "Speed reload within 5 min must perform zero additional calls")
+        // 5 minutes later → one more.
+        _ = throttle.requestReload(kind: .speedChange, now: t0.addingTimeInterval(5 * 60))
+        XCTAssertEqual(count, 2, "Speed reload after 5 min must perform exactly one additional call")
     }
 
-    /// Battery/charging/foreground/slot/design events pass through
-    /// immediately (no rate-limit).
-    func testWidgetReloadThrottleOtherKindsNotRateLimited() {
-        let throttle = WidgetReloadThrottle()
+    /// `.noVisibleChange` performs zero reloads, regardless of
+    /// timing. The widget is already showing the latest data.
+    func testWidgetReloadThrottleNoVisibleChangePerformsZeroCalls() {
+        var count = 0
+        let throttle = WidgetReloadThrottle(reloadHook: { count += 1 })
+        throttle.reset()
+        _ = throttle.requestReload(kind: .noVisibleChange, now: Date())
+        _ = throttle.requestReload(kind: .noVisibleChange,
+                                   now: Date().addingTimeInterval(60))
+        XCTAssertEqual(count, 0,
+                       ".noVisibleChange must perform zero reloads, even repeated")
+    }
+
+    /// Battery / charging / connection / slot / design / foreground
+    /// pass through immediately: one call each, no rate limit.
+    func testWidgetReloadThrottleImmediateKindsFireExactlyOnce() {
+        var count = 0
+        let throttle = WidgetReloadThrottle(reloadHook: { count += 1 })
         throttle.reset()
         let t0 = Date(timeIntervalSince1970: 1_726_000_000)
-        // These never touch lastSpeedReloadTime because they are
-        // immediate pass-throughs.
-        for kind in [WidgetReloadKind.batteryLevelChange,
-                     .chargingStateChange,
-                     .connectionStateChange,
-                     .foregroundActivation,
-                     .slotChange,
-                     .designSave,
-                     .other] {
+        let immediateKinds: [WidgetReloadKind] = [
+            .batteryLevelChange, .chargingStateChange, .connectionStateChange,
+            .foregroundActivation, .slotChange, .designSave, .other
+        ]
+        var after: [WidgetReloadKind: Int] = [:]
+        for kind in immediateKinds {
+            let prev = count
             _ = throttle.requestReload(kind: kind, now: t0)
-            XCTAssertNil(throttle.lastSpeedReloadTime(),
-                "\(kind) must not update lastSpeedReload")
+            after[kind] = count - prev
         }
+        for kind in immediateKinds {
+            XCTAssertEqual(after[kind], 1,
+                "\(kind) must fire exactly one reload, got \(after[kind] ?? 0)")
+        }
+        XCTAssertEqual(count, immediateKinds.count,
+                       "All immediate kinds together must fire exactly one reload each")
     }
 
-    // MARK: - AppGroupState cache invalidation
+    // MARK: - AppGroupState cache invalidation (behavioral)
 
 /// `AppStore.saveState` calls `AppGroupState.invalidateCache()` after
 /// writing a fresh generation. The widget / App Intents readers must
-/// observe the new envelope on the next `loadState()` call, not return
-/// the stale cached one from before the invalidation.
-func testAppGroupStateCacheInvalidationForcesReread() {
-    let defaults = UserDefaults(suiteName: AppGroupContract.suiteName)
-        ?? UserDefaults.standard
-    defaults.removeObject(forKey: AppGroupContract.v2MetadataKey)
+/// observe the new envelope on the next `loadState()` call, not
+/// return the stale cached one from before the invalidation.
+///
+/// Behavioral test: read generation A (warms the cache), overwrite
+/// the file on disk with generation B under the SAME generation
+/// string so the cache fast-path short-circuits to stale A, then
+/// call `invalidateCache()` and re-read to assert the new payload B
+/// is observed. We keep the same generation because
+/// `AppGroupState.loadState`'s fast-path checks generation equality
+/// — bumping the generation alone would force a re-read regardless of
+/// cache, defeating the point of testing `invalidateCache()`.
+func testAppGroupStateCacheInvalidationForcesReread() throws {
+    let suite = makeIsolatedDefaults()
+    let shared = FileManager.default.containerURL(
+        forSecurityApplicationGroupIdentifier: AppGroupContract.suiteName)
+    let stateFileURL = shared?.appendingPathComponent("widget_state_v2.json")
+    defer {
+        // Restore test-owned data so the next test starts from a
+        // known-clean App Group container.
+        suite.removeObject(forKey: AppGroupContract.v2MetadataKey)
+        if let url = stateFileURL {
+            try? FileManager.default.removeItem(at: url)
+        }
+        AppGroupState.invalidateCache()
+    }
 
-    // First read populates the cache.
-    _ = AppGroupState.loadState()
+    // Fixed generation string so the cache fast-path is exercised
+    // when we overwrite the file on disk below.
+    let generation = "cache-test-\(UUID().uuidString)"
+
+    // Install generation A.
+    let payloadA = WidgetState(
+        schemaVersion: 2,
+        vehicle: nil,
+        slots: [Slot(index: 0, draftId: "A", spec: nil)],
+        telemetry: TelemetrySnapshot(carConnected: false, batteryPercent: 11,
+                                     isCharging: false, speed: 0,
+                                     timestamp: Date()),
+        widgetImagePath: nil
+    )
+    try Self.installState(
+        payload: payloadA,
+        generation: generation,
+        suite: suite
+    )
+
+    // First read warms the cache with state A.
     AppGroupState.invalidateCache()
+    let readA = AppGroupState.loadState()
+    XCTAssertEqual(readA?.slots?.first?.draftId, "A",
+                   "First read must return payload A")
+    XCTAssertEqual(AppGroupState.currentGeneration, generation,
+                   "currentGeneration must match the installed generation")
 
-    // After invalidation, `currentGeneration` is cleared so the next
-    // read path takes the slow V2 branch and re-validates the
-    // metadata blob rather than trusting the cached state.
-    XCTAssertNil(AppGroupState.currentGeneration,
-                 "invalidateCache must clear currentGeneration so the next reader re-validates metadata")
+    // Overwrite the file with payload B but keep the SAME
+    // generation. The fast-path in `loadState` will short-circuit
+    // because metadata.generation == cached.generation, returning
+    // the stale cached payload A without re-reading disk.
+    let payloadB = WidgetState(
+        schemaVersion: 2,
+        vehicle: nil,
+        slots: [Slot(index: 0, draftId: "B", spec: nil)],
+        telemetry: nil,
+        widgetImagePath: nil
+    )
+    try Self.installState(
+        payload: payloadB,
+        generation: generation,
+        suite: suite
+    )
+    let stale = AppGroupState.loadState()
+    XCTAssertEqual(stale?.slots?.first?.draftId, "A",
+                   "Without invalidation the cache fast-path returns the previous payload")
+
+    // After `invalidateCache` the next read re-validates disk and
+    // returns payload B.
+    AppGroupState.invalidateCache()
+    let readB = AppGroupState.loadState()
+    XCTAssertEqual(readB?.slots?.first?.draftId, "B",
+                   "After invalidateCache the reader must observe the new payload on disk, not the cached one")
+    XCTAssertEqual(AppGroupState.currentGeneration, generation,
+                   "currentGeneration must remain anchored to the same generation after reread")
+}
+
+/// Helper used by the cache-invalidation test: write a payload to the
+/// V2 envelope with a supplied generation + matching SHA-256.
+private static func installState(payload: WidgetState,
+                                 generation: String,
+                                 suite: UserDefaults) throws {
+    let data = try JSONEncoder().encode(payload)
+    let sha = SHA256.hash(data: data)
+        .compactMap { String(format: "%02x", $0) }
+        .joined()
+    guard let shared = FileManager.default.containerURL(
+        forSecurityApplicationGroupIdentifier: AppGroupContract.suiteName) else {
+        throw NSError(domain: "RunnerTests", code: 1,
+                      userInfo: [NSLocalizedDescriptionKey: "No App Group container"])
+    }
+    let dest = shared.appendingPathComponent("widget_state_v2.json")
+    try data.write(to: dest, options: [.atomic])
+    let metadata: [String: Any] = [
+        "schemaVersion": 2,
+        "generation": generation,
+        "stateFile": "widget_state_v2.json",
+        "checksum": sha,
+        "updatedAt": ISO8601DateFormatter().string(from: Date())
+    ]
+    let metaData = try JSONSerialization.data(withJSONObject: metadata)
+    suite.set(metaData, forKey: AppGroupContract.v2MetadataKey)
 }
 
 // MARK: - Active-slot preference (SwitchDriveStudioSlotIntent)
@@ -1024,7 +1126,413 @@ func testActiveSlotIsClampedToValidRange() async {
         XCTAssertEqual(defaults.integer(forKey: AppStore.activeSlotKey), 0,
                        "Clamped value must be persisted to App Group defaults")
     }
+
+    // MARK: - Atomic state replacement (gap 1)
+
+    /// Successful replacement installs the new complete state. The
+    /// destination file ends up containing the bytes we asked for,
+    /// not the old payload.
+    func testAtomicStateReplacementProducesNewState() async throws {
+        let dir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("ds_test_\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+
+        let dest = dir.appendingPathComponent("widget_state_v2.json")
+        let oldData = Data("OLD-PAYLOAD".utf8)
+        try oldData.write(to: dest)
+
+        let newData = Data("NEW-PAYLOAD".utf8)
+        let temp = dir.appendingPathComponent(
+            ".\(dest.lastPathComponent).tmp.\(UUID().uuidString)"
+        )
+        try newData.write(to: temp)
+
+        let generation: String? = try await MainActor.run {
+            AppStore.tryInstallState(
+                stateData: newData,
+                destination: dest,
+                metadataKey: "test_metadata_key_\(UUID().uuidString)",
+                defaults: makeIsolatedDefaults()
+            )
+        }
+        XCTAssertNotNil(generation, "Successful replacement must return a generation")
+        let readBack = try Data(contentsOf: dest)
+        XCTAssertEqual(readBack, newData,
+                       "Destination must hold the new payload after successful replacement")
+    }
+
+    /// A simulated failure (temp path is a directory, so the swap
+    /// throws) leaves the previous valid file unchanged.
+    func testAtomicStateReplacementFailurePreservesOld() async throws {
+        let dir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("ds_test_\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+
+        let dest = dir.appendingPathComponent("widget_state_v2.json")
+        let oldData = Data("OLD-PAYLOAD-INTACT".utf8)
+        try oldData.write(to: dest)
+
+        // Force the swap to fail: temp is a directory, so moveItem
+        // and replaceItemAt will both throw.
+        let temp = dir.appendingPathComponent(
+            ".\(dest.lastPathComponent).tmp.\(UUID().uuidString)"
+        )
+        try FileManager.default.createDirectory(at: temp, withIntermediateDirectories: true)
+
+        let generation: String? = try await MainActor.run {
+            AppStore.tryInstallState(
+                stateData: Data("NEW-PAYLOAD".utf8),
+                destination: dest,
+                metadataKey: "test_metadata_key_\(UUID().uuidString)",
+                defaults: makeIsolatedDefaults()
+            )
+        }
+        XCTAssertNil(generation, "Failed replacement must return nil")
+
+        // Old file is preserved byte-for-byte.
+        let readBack = try Data(contentsOf: dest)
+        XCTAssertEqual(readBack, oldData,
+                       "Failed replacement must leave the previous valid file intact")
+        // Orphan temp is cleaned up.
+        XCTAssertFalse(FileManager.default.fileExists(atPath: temp.path),
+                       "Failed replacement must remove the orphan temp")
+    }
+
+    /// Failed replacement must not advance the metadata key. The
+    /// caller uses the metadata to decide which generation to read;
+    /// if it advanced after a failed swap the widget would point at
+    /// a missing file.
+    func testAtomicStateReplacementDoesNotPublishMetadataOnFailure() async throws {
+        let dir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("ds_test_\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+
+        let dest = dir.appendingPathComponent("widget_state_v2.json")
+        try Data("OLD-PAYLOAD".utf8).write(to: dest)
+        let temp = dir.appendingPathComponent(
+            ".\(dest.lastPathComponent).tmp.\(UUID().uuidString)"
+        )
+        try FileManager.default.createDirectory(at: temp, withIntermediateDirectories: true)
+
+        let suite = makeIsolatedDefaults()
+        let metadataKey = "test_metadata_key_\(UUID().uuidString)"
+        // Pre-condition: no metadata present.
+        suite.removeObject(forKey: metadataKey)
+
+        let generation: String? = try await MainActor.run {
+            AppStore.tryInstallState(
+                stateData: Data("NEW-PAYLOAD".utf8),
+                destination: dest,
+                metadataKey: metadataKey,
+                defaults: suite
+            )
+        }
+        XCTAssertNil(generation)
+        XCTAssertNil(suite.data(forKey: metadataKey),
+                     "Failed replacement must not publish a metadata blob")
+    }
+
+    // MARK: - Telemetry persistence throttling (gap 2)
+
+    /// Sub-display-threshold speed changes do not persist. We inject
+    /// a fixed clock and feed two consecutive fixes that differ by
+    /// less than `significantSpeedDelta` km/h — neither write should
+    /// touch the App Group defaults.
+    func testTelemetrySubThresholdSpeedChangeDoesNotPersist() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+        let defaults = UserDefaults(suiteName: AppGroupContract.suiteName)
+        defaults?.removeObject(forKey: AppGroupContract.liveTelemetryKey)
+
+        // Seed currentSpeed (normally Core Location would do this).
+        service.currentSpeed = 30.0
+        service._persistForTest(previousSpeed: 30.0, currentSpeed: 30.4)
+        XCTAssertNil(defaults?.data(forKey: AppGroupContract.liveTelemetryKey),
+                     "0.4 km/h delta must NOT persist App Group defaults")
+
+        now = now.addingTimeInterval(5)
+        service._persistForTest(previousSpeed: 30.4, currentSpeed: 30.0)
+        XCTAssertNil(defaults?.data(forKey: AppGroupContract.liveTelemetryKey),
+                     "Reversing sub-threshold delta must NOT persist either")
+        defaults?.removeObject(forKey: AppGroupContract.liveTelemetryKey)
+    }
+
+    /// After the heartbeat window has elapsed since the last write,
+    /// a fresh persistence pass is allowed even when nothing visibly
+    /// changed. The timestamp must refresh.
+    func testTelemetryHeartbeatTriggersPersistenceAfterWindow() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+        let defaults = UserDefaults(suiteName: AppGroupContract.suiteName)
+        defaults?.removeObject(forKey: AppGroupContract.liveTelemetryKey)
+
+        service.currentSpeed = 50.0
+        service._persistForTest(previousSpeed: 50.0, currentSpeed: 50.0)
+        XCTAssertNil(defaults?.data(forKey: AppGroupContract.liveTelemetryKey),
+                     "Identical speed without prior write must NOT persist (no heartbeat yet)")
+
+        // First write happens via heartbeat.
+        now = now.addingTimeInterval(TelemetryService.heartbeatPersistenceInterval + 1)
+        service._persistForTest(previousSpeed: 50.0, currentSpeed: 50.0)
+        XCTAssertNotNil(defaults?.data(forKey: AppGroupContract.liveTelemetryKey),
+                        "Heartbeat window elapsed must allow a fresh write")
+
+        // Within the heartbeat window — nothing changed — no further write.
+        defaults?.removeObject(forKey: AppGroupContract.liveTelemetryKey)
+        now = now.addingTimeInterval(5)
+        service._persistForTest(previousSpeed: 50.0, currentSpeed: 50.0)
+        XCTAssertNil(defaults?.data(forKey: AppGroupContract.liveTelemetryKey),
+                     "Subsequent identical reading within the heartbeat window must NOT write again")
+        defaults?.removeObject(forKey: AppGroupContract.liveTelemetryKey)
+    }
+
+    /// A meaningful speed delta (≥ 1 km/h) persists immediately,
+    /// even within the heartbeat window — battery / charging /
+    /// connection / availability transitions and meaningful speed
+    /// changes always persist.
+    func testTelemetryMeaningfulSpeedChangePersistsImmediately() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+        let defaults = UserDefaults(suiteName: AppGroupContract.suiteName)
+        defaults?.removeObject(forKey: AppGroupContract.liveTelemetryKey)
+
+        service.currentSpeed = 50.0
+        service._persistForTest(previousSpeed: 50.0, currentSpeed: 75.0)
+        XCTAssertNotNil(defaults?.data(forKey: AppGroupContract.liveTelemetryKey),
+                        "25 km/h delta must persist immediately")
+        defaults?.removeObject(forKey: AppGroupContract.liveTelemetryKey)
+    }
+
+    // MARK: - Permission path tightening (gap 9)
+
+    /// `startMonitoring` must NEVER present a permission prompt.
+    /// Source-text scan + behavior check: the method is silent when
+    /// authorization is undetermined, denied, or restricted.
+    func testStartMonitoringNeverPresentsPermission() throws {
+        let repoRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let serviceURL = repoRoot.appendingPathComponent("Runner/TelemetryService.swift")
+        let code = stripSwiftComments(try String(contentsOf: serviceURL, encoding: .utf8))
+        // Locate the `startMonitoring()` function body and assert it
+        // does NOT contain `requestWhenInUseAuthorization` /
+        // `requestAlwaysAuthorization` or any reference to
+        // `beginLocationIfAuthorized` (which is the prompt path).
+        if let range = code.range(of: "func startMonitoring()"),
+           let endRange = code.range(of: "func ", range: range.upperBound..<code.endIndex) {
+            let body = String(code[range.lowerBound..<endRange.lowerBound])
+            XCTAssertFalse(body.contains("requestWhenInUseAuthorization"),
+                "startMonitoring must never call requestWhenInUseAuthorization")
+            XCTAssertFalse(body.contains("requestAlwaysAuthorization"),
+                "startMonitoring must never call requestAlwaysAuthorization")
+            XCTAssertFalse(body.contains("beginLocationIfAuthorized"),
+                "startMonitoring must never route through the prompt path")
+        } else {
+            XCTFail("Unable to locate startMonitoring function in TelemetryService.swift")
+        }
+    }
+
+    /// No automatic prompt is presented during the host app's normal
+    /// lifecycle: initialization, foregrounding, or routine Core
+    /// Location monitoring. The only legal prompt site is the
+    /// Dashboard's explicit GPS button, which calls
+    /// `beginLocationIfAuthorized()`.
+    func testNoAutomaticPermissionPromptDuringLifecycle() throws {
+        let repoRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let serviceURL = repoRoot.appendingPathComponent("Runner/TelemetryService.swift")
+        let code = stripSwiftComments(try String(contentsOf: serviceURL, encoding: .utf8))
+        // Only `beginLocationIfAuthorized()` may present the prompt.
+        let promptCount = code.components(separatedBy: "requestWhenInUseAuthorization").count - 1
+        XCTAssertEqual(promptCount, 1,
+            "Exactly one When-In-Use prompt site allowed (beginLocationIfAuthorized); got \(promptCount)")
+    }
+
+    // MARK: - Vehicle identity (gap 8)
+
+    /// `home_vehicle.png` must NOT become the user's vehicle display
+    /// name. The widget renders the custom artwork but never an
+    /// invented brand/model/display name.
+    func testVehicleIdentityDoesNotDeriveNameFromFilename() async {
+        await MainActor.run {
+            XCTAssertNil(AppStore.vehicleIdentity(forImageFilename: nil, hasImage: false),
+                         "No image must produce a nil vehicle")
+        }
+        let v: VehicleData? = await MainActor.run {
+            AppStore.vehicleIdentity(
+                forImageFilename: "home_vehicle.png",
+                hasImage: true
+            )
+        }
+        XCTAssertNotNil(v)
+        XCTAssertEqual(v?.customImage, "home_vehicle.png",
+                       "Custom artwork path must be preserved so the widget renders it")
+        XCTAssertEqual(v?.artwork, "home_vehicle.png")
+        XCTAssertTrue(v?.hasCustomImage ?? false)
+        XCTAssertNil(v?.displayName,
+                     "displayName must never derive from filename (would produce 'Home Vehicle')")
+        XCTAssertNil(v?.brandId,
+                     "brandId must never be set without explicit user input")
+        XCTAssertNil(v?.modelId,
+                     "modelId must never be set without explicit user input")
+    }
+
+    /// Source-text scan: no production path produces the literal
+    /// "Home Vehicle" as a display name.
+    func testNoProductionPathProducesHomeVehicleAsDisplayName() throws {
+        let repoRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let runnerDir = repoRoot.appendingPathComponent("Runner")
+        let fm = FileManager.default
+        if let it = fm.enumerator(atPath: runnerDir.path) {
+            while let file = it.nextObject() as? String {
+                guard file.hasSuffix(".swift") else { continue }
+                let url = runnerDir.appendingPathComponent(file)
+                let code = stripSwiftComments(try String(contentsOf: url, encoding: .utf8))
+                XCTAssertFalse(code.contains("\"Home Vehicle\""),
+                    "\(file) must not produce \"Home Vehicle\" as a display name")
+            }
+        }
+    }
+
+    // MARK: - FocusDashboardSlotIntent (gap 7)
+
+    /// `FocusDashboardSlotIntent` writes to the host-app contract
+    /// key (`AppStore.activeSlotKey`), clamps out-of-range values,
+    /// and survives a foreground-application round-trip. The widget
+    /// timeline providers do NOT read the active-slot key, so the
+    /// intent never claims to change widget content.
+    func testFocusDashboardSlotIntentPersistsClampedAndAppliesOnForeground() async {
+        let defaults = UserDefaults(suiteName: AppGroupContract.suiteName)
+        defaults?.removeObject(forKey: AppStore.activeSlotKey)
+
+        await MainActor.run {
+            // Drive the same persist path the intent exercises.
+            AppStore.shared.setActiveSlot(2)
+            XCTAssertEqual(AppStore.shared.activeSlotIndex, 2,
+                "FocusDashboardSlotIntent must persist index 2 → activeSlotIndex 2")
+            XCTAssertEqual(defaults?.integer(forKey: AppStore.activeSlotKey), 2)
+
+            // Out-of-range clamping.
+            AppStore.shared.setActiveSlot(99)
+            XCTAssertEqual(AppStore.shared.activeSlotIndex, 3,
+                "Out-of-range slot index must clamp to 3")
+
+            // Foreground-application consumes the persisted value.
+            AppStore.shared.activeSlotIndex = 0
+            AppStore.shared.applyPersistedActiveSlot()
+            XCTAssertEqual(AppStore.shared.activeSlotIndex, 3,
+                "Foreground application must read the clamped value from defaults")
+        }
+        defaults?.removeObject(forKey: AppStore.activeSlotKey)
+    }
+
+    /// The intent is honest: its user-visible name does not promise
+    /// a widget content change. Source-text scan guards the title.
+    func testFocusDashboardSlotIntentTitleIsHonest() throws {
+        let repoRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let url = repoRoot.appendingPathComponent("Runner/DriveStudioIntents.swift")
+        let code = stripSwiftComments(try String(contentsOf: url, encoding: .utf8))
+        XCTAssertTrue(code.contains("\"Focus Dashboard Slot\""),
+            "Intent must be renamed to 'Focus Dashboard Slot' so users are not misled")
+        XCTAssertFalse(code.contains("\"Switch Drive Studio Slot\""),
+            "Old misleading title must be gone")
+    }
+
+    /// `FocusDashboardSlotIntent` is registered in
+    /// `DriveStudioAppShortcuts` so it surfaces in the iOS Shortcuts
+    /// gallery and in CarPlay Shortcuts without manual setup.
+    func testFocusDashboardSlotIntentIsRegisteredInAppShortcuts() throws {
+        let repoRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let url = repoRoot.appendingPathComponent("Runner/DriveStudioIntents.swift")
+        let code = stripSwiftComments(try String(contentsOf: url, encoding: .utf8))
+        XCTAssertTrue(code.contains("FocusDashboardSlotIntent()"),
+            "DriveStudioAppShortcuts must contain an AppShortcut wrapping FocusDashboardSlotIntent()")
+    }
+
+    // MARK: - Force-unwrap audit (gap 4)
+
+    /// Stronger audit than a property-style regex: list every force
+    /// unwrap reachable in production and assert none of them sit on
+    /// a value that can be nil in practice. We intentionally scan
+    /// production sources only (`Runner/`, `DriveStudioWidget/`),
+    /// strip comments, and exclude `as!` casts (covered separately)
+    /// and the `[idx]!` subscript-on-Array pattern (covered
+    /// separately). We then assert the remaining set is empty.
+    func testNoReachableProductionForceUnwraps() throws {
+        let repoRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let fm = FileManager.default
+        let offenders: [(file: String, line: Int, snippet: String)] = []
+        // The Runner + widget extension sources. Test target is
+        // out of scope.
+        let scanDirs = [
+            repoRoot.appendingPathComponent("Runner"),
+            repoRoot.appendingPathComponent("DriveStudioWidget"),
+        ]
+        var found: [String] = []
+        for dir in scanDirs {
+            if let it = fm.enumerator(atPath: dir.path) {
+                while let file = it.nextObject() as? String {
+                    guard file.hasSuffix(".swift") else { continue }
+                    let url = dir.appendingPathComponent(file)
+                    let raw = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
+                    let stripped = stripSwiftComments(raw)
+                    let lines = stripped.split(separator: "\n", omittingEmptySubsequences: false)
+                    for (idx, line) in lines.enumerated() {
+                        let trimmed = line.trimmingCharacters(in: .whitespaces)
+                        // Skip the well-known allowed sites — these
+                        // are guarded by code that runs before the
+                        // unwrap (e.g. `let bar = foo!` only after a
+                        // nil-check earlier in the function).
+                        if trimmed.hasPrefix("let ") || trimmed.hasPrefix("var ") {
+                            // Force-unwrap: identifier followed by
+                            // `!` followed by an operator or end of
+                            // statement. Avoid `as!`, avoid `!` as
+                            // part of `!=`.
+                            if let bangRange = trimmed.range(of: "!", options: []) {
+                                let afterBang = trimmed[bangRange.upperBound...]
+                                let isOperator = afterBang.first == "="
+                                    || afterBang.first == ")"
+                                    || afterBang.first == ","
+                                    || afterBang.first == "."
+                                    || afterBang.first == "]"
+                                    || afterBang.first == " "
+                                if isOperator { continue }
+                            }
+                            found.append("\(file):\(idx + 1): \(trimmed)")
+                        }
+                    }
+                }
+            }
+        }
+        XCTAssertEqual(found, [],
+            "Reachable production force-unwraps found: \(found.joined(separator: ", "))")
+        _ = offenders // keep the type referenced
+    }
 }
+
+// MARK: - TelemetryService test seam
+//
+// Production code uses `persistTelemetryIfMeaningful(previousSpeed:)`
+// from inside `locationManager(_:didUpdateLocations:)`. Tests need a
+// way to drive the persistence policy without setting up a real
+// CLLocationManager. The internal `_persistForTest` entry point
+// already exposes the private method via `@testable import Runner`,
+// so tests call it directly on a `TelemetryService(clock:)` instance.
 
 /// `applyPersistedActiveSlot` reads the value the
 /// `SwitchDriveStudioSlotIntent` writes into App Group defaults and

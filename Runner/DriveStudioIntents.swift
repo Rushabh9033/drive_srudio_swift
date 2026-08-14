@@ -99,20 +99,21 @@ enum DriveStudioSlot: Int, AppEnum, CaseIterable {
     ]
 }
 
-// MARK: - Switch Slot
-
-/// Writes `drive_studio_active_slot` to App Group defaults. The host app
-/// (`AppStore.applyPersistedActiveSlot`) reads this preference on launch
-/// and on every foreground transition, then focuses the chosen slot in
-/// the dashboard and triggers a widget reload. The DriveStudio widget
-/// renders all four slots in the gallery; this intent primarily affects
-/// which slot the dashboard highlights and which slot's draft the user
-/// sees first when they open Drive Studio.
+// MARK: - Focus Dashboard Slot
+//
+// Truthful scope: this intent writes `drive_studio_active_slot` to App
+// Group defaults so the host app can highlight the chosen slot on the
+// **Dashboard** tab on its next launch or foreground event. It does NOT
+// change widget content — every Drive Studio widget renders all four
+// slots in its gallery and the active-slot key is not consumed by the
+// widget timeline providers. The dialog and Shortcut registration make
+// this scope honest: "focus the dashboard slot", not "switch the
+// widget".
 @available(iOS 16.0, *)
-struct SwitchDriveStudioSlotIntent: AppIntent {
-    static var title: LocalizedStringResource = "Switch Drive Studio Slot"
+struct FocusDashboardSlotIntent: AppIntent {
+    static var title: LocalizedStringResource = "Focus Dashboard Slot"
     static var description = IntentDescription(
-        "Focuses a specific Drive Studio slot (1 to 4) on the dashboard. The host app reads this preference on its next foreground transition and refreshes the widget gallery."
+        "Focuses a specific Drive Studio slot (1 to 4) on the host app's Dashboard tab. The widget gallery renders all four slots and is unaffected by this action."
     )
 
     static var openAppWhenRun: Bool = false
@@ -121,7 +122,7 @@ struct SwitchDriveStudioSlotIntent: AppIntent {
     var slot: DriveStudioSlot
 
     static var parameterSummary: some ParameterSummary {
-        Summary("Focus slot \(\.$slot) in Drive Studio")
+        Summary("Focus slot \(\.$slot) on the Drive Studio dashboard")
     }
 
     @MainActor
@@ -136,9 +137,12 @@ struct SwitchDriveStudioSlotIntent: AppIntent {
         // The preference is now persisted. The host app reads it on
         // its next foreground transition and applies it to
         // `AppStore.activeSlotIndex`. We deliberately do NOT call
-        // WidgetCenter here — the host triggers the reload when it
-        // applies the change.
-        return .result(dialog: "Slot \(slot.rawValue) focused. Open Drive Studio to see it highlighted.")
+        // WidgetCenter here — the widget does not consume the
+        // active-slot key and forcing a reload would mislead the
+        // user into thinking we had changed widget content.
+        return .result(
+            dialog: "Slot \(slot.rawValue) focused on the Dashboard. Open Drive Studio to see it highlighted. Widgets are unchanged."
+        )
     }
 }
 
@@ -218,6 +222,15 @@ struct DriveStudioAppShortcuts: AppShortcutsProvider {
             ],
             shortTitle: "Play Disconnect Cue",
             systemImageName: "speaker.wave.1.fill"
+        )
+        AppShortcut(
+            intent: FocusDashboardSlotIntent(),
+            phrases: [
+                "Focus \(.applicationName) dashboard slot",
+                "Switch \(.applicationName) slot",
+            ],
+            shortTitle: "Focus Dashboard Slot",
+            systemImageName: "scope"
         )
     }
 

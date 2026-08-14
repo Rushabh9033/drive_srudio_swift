@@ -324,10 +324,15 @@ class AppStore: ObservableObject {
             widgetImagePath: nil
         )
 
-        // **Atomic write.** Encode once, write to a temp file, then
-        // rename. A crash mid-write can no longer truncate the JSON
-        // half-written; the next read either sees the old (valid)
-        // version or the new (complete) version.
+        // **Atomic replacement.** Encode once, then hand off to a
+        // dedicated installer that uses `FileManager.replaceItemAt`
+        // (APFS-atomic) and only publishes the new metadata / bumps
+        // the cache after the swap has actually succeeded. If the
+        // swap fails for any reason the previous valid file is
+        // preserved, the orphan temp file is removed, and we bail
+        // without advancing the generation — a crash window where
+        // the widget reads "metadata points at a missing file"
+        // is no longer reachable.
         guard let sharedURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: suiteName),
               let stateData = try? JSONEncoder().encode(envelope) else {
             return
@@ -335,34 +340,25 @@ class AppStore: ObservableObject {
 
         let stateFile = "widget_state_v2.json"
         let fileURL = sharedURL.appendingPathComponent(stateFile)
-        let tempURL = sharedURL.appendingPathComponent("\(stateFile).tmp")
-        do {
-            try stateData.write(to: tempURL, options: [.atomic])
-            _ = try? FileManager.default.removeItem(at: fileURL)
-            try FileManager.default.moveItem(at: tempURL, to: fileURL)
-        } catch {
-            // Last-resort fallback: direct write (older filesystems).
-            try? stateData.write(to: fileURL, options: [.atomic])
+        let installedGeneration = Self.tryInstallState(
+            stateData: stateData,
+            destination: fileURL,
+            metadataKey: AppGroupContract.v2MetadataKey,
+            defaults: defaults
+        )
+        guard let generation = installedGeneration else {
+            // Replacement failed — preserve the previous valid file,
+            // drop the orphan temp, and bail. Widget reads continue
+            // to see the previous (valid) state.
+            return
         }
 
-        let sha256 = SHA256.hash(data: stateData).compactMap { String(format: "%02x", $0) }.joined()
-        let generation = UUID().uuidString
-        let metadata: [String: Any] = [
-            "schemaVersion": 2,
-            "generation": generation,
-            "stateFile": stateFile,
-            "checksum": sha256,
-            "updatedAt": ISO8601DateFormatter().string(from: Date())
-        ]
-
-        if let metaDataJSON = try? JSONSerialization.data(withJSONObject: metadata, options: []) {
-            defaults.set(metaDataJSON, forKey: "widget_state_v2_metadata")
-        }
-
-        // **Cache invalidation.** Bumping the generation also
-        // invalidates the in-memory cache inside `AppGroupState` so the
-        // very next read sees the new envelope instead of returning
-        // the previous generation's cached value.
+        // **Cache invalidation.** The installer published the new
+        // generation's checksum, generation, and timestamp. Now drop
+        // the in-memory cache so the very next read in any process
+        // — Runner, widget extension, App Intents — is forced to
+        // re-fetch and re-hash instead of returning the previous
+        // generation's cached value.
         AppGroupState.invalidateCache()
 
         // Sync referenced image files into the App Group so the widget
@@ -395,15 +391,14 @@ class AppStore: ObservableObject {
 
     /// Build the selected-vehicle `VehicleData` from the user-imported
     /// vehicle image (if any). Returns `nil` when no vehicle has been
-    /// selected so the widget renders "—"; never invents a brand.
+    /// selected so the widget renders "—"; never invents a brand,
+    /// model, or display name.
     private func currentSelectedVehicle() -> VehicleData? {
-        // We currently derive the displayed vehicle name from the
-        // filename of the imported image. The user picks the image —
-        // we never invent the model. When the image is absent we
-        // return `nil` so the widget renders the unavailable marker.
         guard let image = vehicleImage else { return nil }
-        // Find the on-disk filename so the widget extension and the
-        // App Intents reader all see the same identifier.
+        // Confirm the artwork actually exists on disk in either the
+        // sandboxed Documents dir or the App Group SharedImages
+        // folder — the user may have cleared one of them since the
+        // image was first imported.
         let filename = "home_vehicle.png"
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
         let docsURL = docs?.appendingPathComponent(filename)
@@ -412,34 +407,123 @@ class AppStore: ObservableObject {
         let found = (docsURL.map { FileManager.default.fileExists(atPath: $0.path) } == true) ||
                     (sharedURL.map { FileManager.default.fileExists(atPath: $0.path) } == true)
         guard found else { return nil }
-        // Surface the filename as the user-visible label. The image
-        // exists; the user picked it; we report it honestly. No fake
-        // brand strings.
-        let displayName = humanReadableName(for: filename) ?? filename
+        // The user uploaded custom artwork. Surface only the artwork
+        // path. We deliberately do NOT derive `displayName` from the
+        // filename (which would produce "Home Vehicle" from
+        // `home_vehicle.png` — an invented identity we never agreed
+        // to). The widget renders a generic unavailable marker for
+        // `brandId == nil` and `modelId == nil` and `displayName ==
+        // nil`. See `vehicleIdentity(forImageFilename:hasImage:)`
+        // for the testable shape of this decision.
+        return Self.vehicleIdentity(forImageFilename: filename, hasImage: true)
+    }
+
+    /// Pure, testable decision: given whether the user uploaded an
+    /// image (and its on-disk filename), what `VehicleData` should
+    /// the App Group envelope carry? We **never** invent brandId,
+    /// modelId, or displayName — those require the user to pick or
+    /// type them. We do preserve the artwork path so the widget
+    /// renders the user's custom image.
+    static func vehicleIdentity(forImageFilename filename: String?, hasImage: Bool) -> VehicleData? {
+        guard hasImage, let filename = filename, !filename.isEmpty else { return nil }
         return VehicleData(
             brandId: nil,
             modelId: nil,
             artwork: filename,
-            displayName: displayName,
+            displayName: nil,
             hasCustomImage: true,
             customImage: filename
         )
     }
 
-    /// Convert a filename like `home_vehicle.png` into a human-readable
-    /// label. Pure: no side effects, no I/O. Returns `nil` if the
-    /// filename cannot be turned into a sensible label.
-    private func humanReadableName(for filename: String) -> String? {
-        let base = (filename as NSString).deletingPathExtension
-        guard !base.isEmpty else { return nil }
-        // Replace separators with spaces and Title-Case each word.
-        let parts = base.replacingOccurrences(of: "_", with: " ")
-                       .replacingOccurrences(of: "-", with: " ")
-                       .split(separator: " ")
-        let titled = parts.map { word -> String in
-            guard let first = word.first else { return "" }
-            return first.uppercased() + word.dropFirst()
+    /// Install a new V2 state file atomically and publish its
+    /// metadata. Returns the new generation on success, `nil` on
+    /// any failure so the caller can preserve the previous valid
+    /// file and skip cache invalidation.
+    ///
+    /// - Writes the new payload to a unique temp file (not the
+    ///   destination).
+    /// - Uses `FileManager.replaceItemAt` when the destination
+    ///   exists (APFS-atomic), and a plain move when it doesn't
+    ///   (first-launch).
+    /// - On failure, removes the orphan temp file and returns
+    ///   `nil` without touching metadata or the cache.
+    /// - On success, publishes a metadata blob (schemaVersion,
+    ///   generation UUID, stateFile name, SHA-256, timestamp) to
+    ///   `metadataKey` in `defaults`.
+    static func tryInstallState(stateData: Data,
+                                destination: URL,
+                                metadataKey: String,
+                                defaults: UserDefaults) -> String? {
+        let fm = FileManager.default
+        let tempURL = destination.appendingPathComponent(
+            ".\(destination.lastPathComponent).tmp.\(UUID().uuidString)"
+        )
+
+        // 1. Stage to a unique temp file.
+        do {
+            try stateData.write(to: tempURL, options: [.atomic])
+        } catch {
+            return nil
         }
-        return titled.joined(separator: " ")
+
+        // 2. Atomic swap into the destination. `replaceItemAt`
+        //    guarantees (on APFS) that the destination is replaced
+        //    in place — no window where it is missing or partial.
+        //    If the swap fails we drop the orphan temp and bail.
+        let replaced: Bool
+        if fm.fileExists(atPath: destination.path) {
+            do {
+                try fm.replaceItemAt(
+                    destination,
+                    withItemAt: tempURL,
+                    backupItemName: nil,
+                    options: []
+                )
+                replaced = true
+            } catch {
+                try? fm.removeItem(at: tempURL)
+                replaced = false
+            }
+        } else {
+            // First launch — no destination exists yet. A plain
+            // move is safe and atomic on APFS.
+            do {
+                try fm.moveItem(at: tempURL, to: destination)
+                replaced = true
+            } catch {
+                try? fm.removeItem(at: tempURL)
+                replaced = false
+            }
+        }
+        if !replaced { return nil }
+
+        // 3. Best-effort cleanup of any orphaned `.tmp.*` files
+        //    left behind by previous installs which crashed before
+        //    their swap finished.
+        let parent = destination.deletingLastPathComponent()
+        if let entries = try? fm.contentsOfDirectory(atPath: parent.path) {
+            for entry in entries where entry.hasPrefix(".\(destination.lastPathComponent).tmp.") {
+                let url = parent.appendingPathComponent(entry)
+                try? fm.removeItem(at: url)
+            }
+        }
+
+        // 4. Publish metadata only after the swap is durable.
+        let sha256 = SHA256.hash(data: stateData)
+            .compactMap { String(format: "%02x", $0) }
+            .joined()
+        let generation = UUID().uuidString
+        let metadata: [String: Any] = [
+            "schemaVersion": 2,
+            "generation": generation,
+            "stateFile": destination.lastPathComponent,
+            "checksum": sha256,
+            "updatedAt": ISO8601DateFormatter().string(from: Date())
+        ]
+        if let metaDataJSON = try? JSONSerialization.data(withJSONObject: metadata, options: []) {
+            defaults.set(metaDataJSON, forKey: metadataKey)
+        }
+        return generation
     }
 }

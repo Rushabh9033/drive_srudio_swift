@@ -350,8 +350,13 @@ struct FitToCanvasLayers: View {
     }
 
     private static func computeFitTransform(for canvas: CGSize) -> CGAffineTransform {
-        let scaleX = canvas.width  / designSide
-        let scaleY = canvas.height / designSide
+        // For small 2x2 square widget (.systemSmall, canvas.width < 200),
+        // scale content down slightly (90% scale) so bottom car photos and top text
+        // sit comfortably inside the small rounded corner clipping mask!
+        let targetWidth = canvas.width < 200 ? canvas.width * 0.90 : canvas.width
+        let targetHeight = canvas.height < 200 ? canvas.height * 0.90 : canvas.height
+        let scaleX = targetWidth  / designSide
+        let scaleY = targetHeight / designSide
         return CGAffineTransform.identity
             .scaledBy(x: scaleX, y: scaleY)
     }

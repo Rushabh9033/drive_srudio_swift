@@ -1028,15 +1028,14 @@ class AppStore: ObservableObject {
         }
         let stableRoot = shared.appendingPathComponent("SharedImages")
         let stableFile = stableRoot.appendingPathComponent(name)
-        if FileManager.default.fileExists(atPath: stableFile.path) {
-            return
-        }
-        // Look in the host Documents directory for the source.
+
+        // Look in the host Documents directory for the source and overwrite stableFile with latest artwork
         for dir in sourceDirectories {
             let candidate = dir.appendingPathComponent(name)
             if FileManager.default.fileExists(atPath: candidate.path) {
                 try FileManager.default.createDirectory(
                     at: stableRoot, withIntermediateDirectories: true)
+                try? FileManager.default.removeItem(at: stableFile)
                 try FileManager.default.copyItem(at: candidate, to: stableFile)
                 return
             }

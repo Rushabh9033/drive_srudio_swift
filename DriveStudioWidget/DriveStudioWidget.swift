@@ -367,12 +367,25 @@ struct FitToCanvasLayers: View {
         // The ZStack lives in 340×340 design space.
         .frame(width: design, height: design, alignment: .topLeading)
         // Scale the whole rendered group uniformly into the widget
-        // canvas. Anchor `.topLeading` so (0,0) sits at the widget's
+        // canvas. Anchor `.topLeading` so (0,0) sits at the design's
         // top-left corner after scaling.
         .scaleEffect(scale, anchor: .topLeading)
         // After scaleEffect the layout frame is still 340×340 pt but
-        // visually scaled. Fix the layout frame to the real canvas so
-        // the widget container clips correctly.
+        // visually scaled. Reset the layout frame to the *visual*
+        // (post-scale) size so the next step can center it inside
+        // the widget canvas. Without this override SwiftUI would
+        // treat the content as 340×340 and try to center that — which
+        // would extend off-canvas on the medium widget (158 pt tall
+        // canvas can't contain a 340-pt centered layout).
+        .frame(width: design * scale, height: design * scale, alignment: .topLeading)
+        // **Center** the scaled design inside the widget canvas. For
+        // the medium widget (≈338×158) the design is 158×158 after
+        // uniform scaling, so this places it horizontally centered
+        // with ≈90 pt of letterbox on each side and vertically flush
+        // at the top of the canvas (158 pt = canvas height).
+        .position(x: canvasSize.width / 2, y: canvasSize.height / 2)
+        // Final layout frame matches the widget canvas so the
+        // container clips correctly.
         .frame(width: canvasSize.width, height: canvasSize.height, alignment: .topLeading)
     }
 }

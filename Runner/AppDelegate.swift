@@ -4,67 +4,110 @@ import WidgetKit
 import BackgroundTasks
 import CoreLocation
 
-/// Background task identifier — must match the entry in Info.plist
-/// `BGTaskSchedulerPermittedIdentifiers`. Used to schedule a periodic
-/// "wake the app, refresh the widget timeline" job so the home-screen
-/// widget shows current time/battery/speed even when the user hasn't
-/// opened the app for hours.
+/// Background refresh task identifier. Must match the value declared in
+/// `Runner/Info.plist` under `BGTaskSchedulerPermittedIdentifiers`.
+///
+/// IMPORTANT — what this task is and is not:
+///   * It is an *opportunistic* aid, not a real-time refresh
+///     mechanism. iOS controls when (and whether) the task actually
+///     runs. `earliestBeginDate` is a *hint*; the system may delay it
+///     indefinitely or skip it entirely (low-power mode, background
+///     app refresh disabled, system pressure, etc.).
+///   * It does not collect GPS while the app is suspended. It only
+///     calls `WidgetCenter.reloadAllTimelines` so the widget reads the
+///     most recent telemetry the host app already wrote.
+///   * It does not update speed while suspended. Speed updates only
+///     happen while the host app is running in the foreground (or in
+///     a future explicit Drive Mode, which is reserved for a later
+///     milestone).
 let widgetRefreshTaskID = "com.drivestudio.app.driveStudio.refresh"
 
 final class AppDelegate: NSObject, UIApplicationDelegate {
-    /// Register the background-task handler as early as possible —
-    /// `BGTaskScheduler.shared.register` MUST be called before the app
-    /// finishes launching, otherwise iOS will silently drop the next
-    /// scheduled refresh.
+
+    /// Set when a `BGAppRefreshTaskRequest` has been submitted but the
+    /// system hasn't run it yet. Prevents piling up duplicate pending
+    /// requests for the same identifier (each duplicate is a wasted
+    /// scheduling slot).
+    private var hasPendingRefreshRequest = false
+    private let refreshLock = NSLock()
+
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        // `BGTaskScheduler.shared.register` MUST be called before the
+        // app finishes launching — otherwise iOS silently drops every
+        // subsequent request for this identifier.
         BGTaskScheduler.shared.register(forTaskWithIdentifier: widgetRefreshTaskID, using: nil) { task in
-            // Off the main thread — do the widget reload, then schedule
-            // the next refresh so the cycle continues. Marking the task
-            // `.succeeded` before `setTaskCompleted` causes iOS to call
-            // the completion handler immediately.
             self.handleWidgetRefresh(task: task as! BGAppRefreshTask)
         }
         return true
     }
 
-    /// Called when iOS wakes our app for the scheduled refresh.
-    /// We refresh telemetry (writes a fresh `live_telemetry` to the App
-    /// Group), poke the widget timeline, then schedule the next refresh.
+    /// Called by iOS when it decides to wake us up. We do not collect
+    /// GPS, start a sound, or do anything that requires sustained
+    /// background execution — the system budget for a BGAppRefreshTask
+    /// is short and unpredictable.
     private func handleWidgetRefresh(task: BGAppRefreshTask) {
-        // Reschedule first so the chain doesn't break if the body throws.
+        // The pending flag must clear here regardless of whether we
+        // successfully reschedule, otherwise we would never submit a
+        // fresh request again.
+        clearPendingRequest()
+
+        // Reschedule first so the chain doesn't break if the body of
+        // the task errors out before the system suspends us.
         scheduleNextWidgetRefresh()
 
-        task.expirationHandler = {
-            // iOS is about to suspend us; nothing to clean up here.
-            task.setTaskCompleted(success: false)
+        var didComplete = false
+        let complete: (Bool) -> Void = { success in
+            // Ensure the task is completed exactly once, even if both
+            // the expiration handler and the body race for it.
+            guard !didComplete else { return }
+            didComplete = true
+            task.setTaskCompleted(success: success)
         }
 
-        // Refresh telemetry on the main actor (TelemetryService writes
-        // to the App Group + calls reloadAllTimelines). Then mirror the
-        // reload here so the widget refresh happens even if telemetry
-        // hasn't changed.
+        task.expirationHandler = {
+            // iOS is about to suspend us. Mark the task unsuccessful
+            // but do not start any new work — the budget is gone.
+            complete(false)
+        }
+
         Task { @MainActor in
             AppStore.shared.refreshDeviceTelemetry()
             WidgetCenter.shared.reloadAllTimelines()
-            task.setTaskCompleted(success: true)
+            complete(true)
         }
     }
 
-    /// Schedule another refresh ~15 minutes from now. iOS will run it
-    /// opportunistically — exact timing depends on usage, charge state,
-    /// and Low Power Mode. Asking for less than 15 min is silently
-    /// clamped by the system.
+    /// Schedule another refresh ~15 minutes from now. iOS may delay
+    /// this arbitrarily. We dedupe so we never have more than one
+    /// outstanding request for this identifier.
     func scheduleNextWidgetRefresh() {
+        refreshLock.lock()
+        if hasPendingRefreshRequest {
+            refreshLock.unlock()
+            return
+        }
+        hasPendingRefreshRequest = true
+        refreshLock.unlock()
+
         let request = BGAppRefreshTaskRequest(identifier: widgetRefreshTaskID)
         request.earliestBeginDate = Date(timeIntervalSinceNow: 15 * 60)
         do {
             try BGTaskScheduler.shared.submit(request)
         } catch {
-            // Common causes: identifier not in Info.plist, low-power mode,
-            // background refresh disabled in Settings. Log and bail.
+            // Common causes: identifier not in Info.plist, low-power
+            // mode, background refresh disabled in Settings. Clear the
+            // pending flag so we can try again on the next scenePhase
+            // transition.
+            clearPendingRequest()
             print("[AppDelegate] ⚠️ Could not schedule widget refresh: \(error)")
         }
+    }
+
+    private func clearPendingRequest() {
+        refreshLock.lock()
+        hasPendingRefreshRequest = false
+        refreshLock.unlock()
     }
 }
 
@@ -91,13 +134,13 @@ struct DriveStudioApp: App {
         .onChange(of: scenePhase) { newPhase in
             switch newPhase {
             case .background:
-                // Background fires when the user leaves the app — schedule
-                // a widget refresh so the timeline gets reloaded by the
-                // system within ~15 min while we're suspended.
+                // Background fires when the user leaves the app. We ask
+                // the system to schedule an opportunistic refresh; iOS
+                // decides whether and when to actually run it.
                 appDelegate.scheduleNextWidgetRefresh()
             case .active:
-                // Returning to foreground — make sure the widget reflects
-                // any pending state immediately.
+                // Returning to foreground — let the widget see the
+                // most recent foreground-collected telemetry.
                 WidgetCenter.shared.reloadAllTimelines()
             default:
                 break

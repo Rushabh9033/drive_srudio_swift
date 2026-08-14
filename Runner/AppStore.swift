@@ -11,7 +11,7 @@ class AppStore: ObservableObject {
     @Published var vehicleImage: UIImage? = nil
     @Published var drafts: [Draft] = []
 
-    @Published var liveBatteryPercent: Int = 100
+    @Published var liveBatteryPercent: Int? = nil
     @Published var liveIsCharging: Bool = false
     @Published var liveTimeString: String = ""
 
@@ -45,15 +45,19 @@ class AppStore: ObservableObject {
 
     func refreshDeviceTelemetry() {
         let rawLevel = UIDevice.current.batteryLevel
-        let level = rawLevel >= 0 ? Int(round(rawLevel * 100)) : 100
+        // `batteryLevel` returns -1 when monitoring is disabled or the
+        // reading is genuinely unavailable. We propagate that as `nil`
+        // rather than substituting a fake number like 100.
+        let level: Int? = rawLevel >= 0 ? Int(round(rawLevel * 100)) : nil
         let state = UIDevice.current.batteryState
+        // Use the exact current state. We never OR with a previously
+        // cached charging flag — if the phone just unplugged, we must
+        // show "not charging" immediately.
         let charging = (state == .charging || state == .full)
         let currentTime = FormatterCache.hmmFormatter.string(from: Date())
 
         // Single change-check. Only write a fresh snapshot (and reload
-        // widgets) when something a user can see actually changed —
-        // iOS-1 / iOS-2 fix: the old code called `snapshotAndSave()` every
-        // second, hammering `WidgetCenter.reloadAllTimelines()`.
+        // widgets) when something a user can see actually changed.
         let prev = (liveBatteryPercent, liveIsCharging, liveTimeString)
         let curr = (level, charging, currentTime)
         guard prev != curr else { return }

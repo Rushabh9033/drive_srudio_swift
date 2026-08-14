@@ -216,18 +216,35 @@ struct StaticProvider: TimelineProvider {
         completion(makeEntry(slotIndex: slotIndex, isPreview: context.isPreview))
     }
     func getTimeline(in context: Context, completion: @escaping (Timeline<SimpleEntry>) -> Void) {
-        // Live speed cadence: emit one entry per second for the next 30 s,
-        // then ask for a new timeline. Each `makeEntry` reads the latest
-        // telemetry from the App Group at render time, so the speed
-        // number tracks GPS samples within ≈1 s — matching Google Maps.
-        // The `.atEnd` policy triggers a fresh timeline request exactly
-        // when the last entry is consumed, so there's no "freeze" gap.
+        // Normal WidgetKit timeline: 60 entries, one per minute,
+        // aligned to real wall-clock minute boundaries. WidgetKit
+        // decides when to actually swap to the next entry — `.atEnd`
+        // simply asks the system to call `getTimeline` again once the
+        // last entry is consumed.
+        //
+        // We deliberately do NOT emit one-second entries or run timers
+        // inside the widget view. WidgetKit is not a real-time surface;
+        // it throttles, batches, and can skip individual entries.
         let now = Date()
-        let entries: [SimpleEntry] = (0..<30).map { offset in
-            let entryDate = now.addingTimeInterval(TimeInterval(offset))
-            return makeEntry(slotIndex: slotIndex, date: entryDate, isPreview: context.isPreview)
-        }
-        completion(Timeline(entries: entries, policy: .atEnd))
+        let snapshot = makeEntry(slotIndex: slotIndex, date: now, isPreview: context.isPreview)
+        completion(WidgetTimelineSchedule.makeMinuteAlignedTimeline(
+            count: WidgetTimelineSchedule.defaultEntryCount,
+            start: now
+        ) { date in
+            // All minute slots share the same telemetry snapshot; the
+            // only thing that varies per entry is the date stamp, which
+            // is what drives clock/date text rendering.
+            return SimpleEntry(
+                date: date,
+                slotIndex: snapshot.slotIndex,
+                slot: snapshot.slot,
+                vehicle: snapshot.vehicle,
+                telemetry: snapshot.telemetry,
+                widgetImagePath: snapshot.widgetImagePath,
+                generation: snapshot.generation,
+                isPreview: snapshot.isPreview
+            )
+        })
     }
 
     private func makeEntry(slotIndex: Int, isPreview: Bool) -> SimpleEntry {
@@ -237,27 +254,17 @@ struct StaticProvider: TimelineProvider {
     private func makeEntry(slotIndex: Int, date: Date, isPreview: Bool) -> SimpleEntry {
         let state = AppGroupState.loadState()
         let slot = state?.slots?.first(where: { $0.index == slotIndex })
-        
+
+        // Telemetry snapshot is read once, from the App Group key the
+        // host app wrote. We never read `UIDevice` battery state inside
+        // the widget extension — the host process is the single owner
+        // of that reading, and the widget just displays the last truth.
         var currentTelemetry = state?.telemetry
         if let liveData = UserDefaults(suiteName: AppGroupContract.suiteName)?.data(forKey: "live_telemetry"),
            let liveTelemetry = try? JSONDecoder().decode(TelemetrySnapshot.self, from: liveData) {
             currentTelemetry = liveTelemetry
         }
-        
-        // Fetch real device battery
-        UIDevice.current.isBatteryMonitoringEnabled = true
-        let realBatteryLevel = UIDevice.current.batteryLevel
-        let realBatteryState = UIDevice.current.batteryState
-        
-        if currentTelemetry == nil {
-            currentTelemetry = TelemetrySnapshot(carConnected: false, batteryPercent: nil, isCharging: false, speed: nil)
-        }
-        
-        if realBatteryLevel >= 0 {
-            currentTelemetry?.batteryPercent = Int(realBatteryLevel * 100)
-            currentTelemetry?.isCharging = (realBatteryState == .charging || realBatteryState == .full)
-        }
-        
+
         return SimpleEntry(
             date: date,
             slotIndex: slotIndex,
@@ -277,56 +284,21 @@ struct StaticProvider: TimelineProvider {
 struct DriveStudioWidgetEntryView: View {
     let entry: SimpleEntry
 
-    /// Reads fresh live values (UIDevice battery + App Group speed) on
-    /// every call. Cheap — a couple of UserDefaults reads and a UIDevice
-    /// property access — so it's safe to call inside the per-second
-    /// TimelineView tick.
-    private func freshTelemetry() -> TelemetrySnapshot {
-        UIDevice.current.isBatteryMonitoringEnabled = true
-        let liveBatteryLevel = UIDevice.current.batteryLevel
-        let liveBatteryState = UIDevice.current.batteryState
-
-        var live = entry.telemetry ?? TelemetrySnapshot(
-            carConnected: false, batteryPercent: nil, isCharging: false, speed: nil
-        )
-        // Latest speed the host app wrote to the App Group. Without this
-        // the widget would only see speed at timeline-refresh boundaries.
-        if let data = UserDefaults(suiteName: AppGroupContract.suiteName)?.data(forKey: "live_telemetry"),
-           let fresh = try? JSONDecoder().decode(TelemetrySnapshot.self, from: data) {
-            live.speed = fresh.speed
-            if fresh.batteryPercent != nil { live.batteryPercent = fresh.batteryPercent }
-            live.isCharging = live.isCharging || fresh.isCharging
-            // `isStale` is a computed getter on TelemetrySnapshot, no
-            // need to write it here — it evaluates from `timestamp`.
-        }
-        if liveBatteryLevel >= 0 {
-            live.batteryPercent = Int(liveBatteryLevel * 100)
-            live.isCharging = (liveBatteryState == .charging || liveBatteryState == .full)
-        }
-        return live
-    }
-
     var body: some View {
-        // TimelineView(.periodic(from:)) re-evaluates the closure on a
-        // schedule inside the widget process. Bypasses WidgetKit's
-        // timeline-throttling — clock, date, battery, speed all refresh
-        // every 1 s even if no new timeline entry is delivered. This is
-        // what makes the home-screen widget feel "live" like Google Maps.
-        TimelineView(.periodic(from: Date(), by: 1.0)) { context in
-            let liveTelemetry = freshTelemetry()
-            widgetContent(geo: nil, liveTelemetry: liveTelemetry, currentDate: context.date)
-        }
-    }
+        // Normal WidgetKit rendering: one snapshot per timeline entry.
+        // We do not read `UIDevice` or run timers from inside the view
+        // body; the host app is the single owner of telemetry, and
+        // clock/date text advances when WidgetKit advances the entry.
+        let telemetry = entry.telemetry
+        let entryDate = entry.date
+        let activeSpec = entry.slot?.spec
 
-    /// Single-source-of-truth rendering. Pulled out so TimelineView's
-    /// closure stays a one-liner View expression (the type checker
-    /// rejects statements at the closure's top level).
-    @ViewBuilder
-    private func widgetContent(geo: GeometryProxy?, liveTelemetry: TelemetrySnapshot, currentDate: Date) -> some View {
-        let content = GeometryReader { g in
+        return GeometryReader { g in
             ZStack {
-                let activeSpec = entry.slot?.spec
-                if let spec = activeSpec, let specialView = NativeSpecialRenderer.renderIfSpecial(spec: spec, telemetry: liveTelemetry, vehicle: entry.vehicle) {
+                if let spec = activeSpec,
+                   let specialView = NativeSpecialRenderer.renderIfSpecial(
+                    spec: spec, telemetry: telemetry, vehicle: entry.vehicle
+                   ) {
                     specialView
                 } else {
                     BackgroundView(spec: activeSpec)
@@ -335,9 +307,9 @@ struct DriveStudioWidgetEntryView: View {
                         FitToCanvasLayers(
                             layers: layers,
                             canvasSize: g.size,
-                            telemetry: liveTelemetry,
+                            telemetry: telemetry,
                             vehicle: entry.vehicle,
-                            entryDate: currentDate
+                            entryDate: entryDate
                         )
                     } else {
                         VStack(spacing: 4) {
@@ -353,13 +325,7 @@ struct DriveStudioWidgetEntryView: View {
                 }
             }
         }
-        if #available(iOS 17.0, *) {
-            content.containerBackground(for: .widget) {
-                BackgroundView(spec: entry.slot?.spec)
-            }
-        } else {
-            content
-        }
+        .widgetContainerBackground(spec: activeSpec)
     }
 }
 
@@ -502,7 +468,8 @@ struct ScaledLayerView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.3)
             case "battery", "battery_text":
-                // Both kinds show live battery icon + percentage
+                // Both kinds show battery icon + percentage. Unknown
+                // battery renders as a dash — we never substitute 100%.
                 HStack(spacing: max(2, fontSize * 0.2)) {
                     Image(systemName: ScaledLayerView.batterySymbolName(
                         percent: telemetry?.batteryPercent,
@@ -510,7 +477,7 @@ struct ScaledLayerView: View {
                     ))
 
                     if let level = telemetry?.batteryPercent {
-                        Text("\(level)%")
+                        Text("\(WidgetBatteryMath.clamp(level))%")
                     } else {
                         Text("—")
                     }
@@ -552,14 +519,12 @@ struct ScaledLayerView: View {
                     RoundedRectangle(cornerRadius: r).fill(color)
                 }
             case "battery_bar":
-                // Live battery progress bar — fill width driven by the
-                // actual device battery level at render time, so it
-                // always matches the live battery % text on the same
-                // widget. Reads `UIDevice.current.batteryLevel` directly
-                // because the widget extension process has battery
-                // monitoring enabled (see line ~236).
-                let lvl = UIDevice.current.batteryLevel
-                let pct = max(0, min(1, lvl >= 0 ? lvl : 0))
+                // Battery progress bar — fill width is driven by the
+                // telemetry snapshot the host app wrote to the App Group.
+                // Unknown battery (snapshot's `batteryPercent == nil`)
+                // renders as an empty bar; we never invent a number.
+                let pct = telemetry?.batteryPercent
+                    .map { Double(WidgetBatteryMath.clamp($0)) / 100.0 } ?? 0
                 let trackHex = layer.label ?? "1E1E24"
                 let trackColor = Color(hex: trackHex, fallback: Color(hex: "#1E1E24", fallback: .black))
                 let fillColor = Color(hex: layer.color ?? "#22C55E", fallback: .green)
@@ -688,6 +653,18 @@ struct ScaledLayerView: View {
             base = "battery.100"
         }
         return isCharging ? "\(base).bolt" : base
+    }
+}
+
+// MARK: - Free helper for other files in this target
+//
+// `WidgetBatteryMath.clamp` is the canonical place to clamp a battery
+// percentage to the displayable 0–100 range. We never invent a value
+// when battery is unknown — that case is handled at the call site by
+// checking `telemetry?.batteryPercent == nil`.
+enum WidgetBatteryMath {
+    static func clamp(_ pct: Int) -> Int {
+        return max(0, min(100, pct))
     }
 }
 

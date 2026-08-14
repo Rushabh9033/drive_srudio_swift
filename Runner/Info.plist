@@ -28,14 +28,11 @@
 	<array>
 		<string>audio</string>
 		<string>fetch</string>
-		<string>processing</string>
 	</array>
-	<!-- BGAppRefreshTask identifier — used by AppDelegate to wake the
-	     host app periodically so we can call WidgetCenter.reloadAllTimelines()
-	     and keep the widget timeline (clock, battery, speed) fresh even
-	     when the user hasn't opened the app for hours. Without this the
-	     widget shows whatever the last timeline entry was, which can be
-	     hours stale. -->
+	<!-- BGAppRefreshTask identifier — used by AppDelegate to opportunistically
+	     wake the host app so we can call WidgetCenter.reloadAllTimelines().
+	     iOS controls actual execution timing; this is not a real-time
+	     refresh mechanism. -->
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>com.drivestudio.app.driveStudio.refresh</string>

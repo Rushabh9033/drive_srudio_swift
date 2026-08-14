@@ -66,16 +66,16 @@ struct DashboardView: View {
                             DrivePill(label: "Synced")
                         }
 
-                        Text("Battery \(store.liveBatteryPercent)% · \(store.liveIsCharging ? "charging · " : "")car linked · GPS speed available")
+                        Text(batterySummary(for: store))
                             .font(.system(size: 13))
                             .lineSpacing(5)
                             .foregroundColor(DriveColors.mutedFg)
 
                         HStack(spacing: 16) {
-                            MetricBar(icon: store.liveIsCharging ? "battery.100.bolt" : "battery.100",
+                            MetricBar(icon: batteryIcon(for: store),
                                       label: "Battery",
-                                      value: "\(store.liveBatteryPercent)%",
-                                      progress: Double(store.liveBatteryPercent) / 100)
+                                      value: batteryValueText(for: store),
+                                      progress: batteryProgress(for: store))
                             let currentSpeed = Int(TelemetryService.shared.currentSpeed)
                             MetricBar(icon: "gauge.with.dots.needle.bottom.50percent",
                                       label: "GPS speed",
@@ -189,7 +189,7 @@ struct DashboardView: View {
                                   label: "Telemetry permissions", value: "Granted")
                         Divider().background(DriveColors.border).padding(.vertical, 12)
                         StatusRow(icon: "battery.100", iconColor: DriveColors.success,
-                                  label: "Battery reporting", value: "\(store.liveBatteryPercent)%")
+                                  label: "Battery reporting", value: batteryValueText(for: store))
                         Divider().background(DriveColors.border).padding(.vertical, 12)
                         StatusRow(
                             icon: "checkmark.circle",
@@ -271,6 +271,52 @@ struct DashboardView: View {
             AutomationGuideSheet()
         }
     }
+}
+
+// MARK: - Battery text helpers
+//
+// The dashboard displays whatever the most recent telemetry refresh
+// reported. Battery can legitimately be unknown (UIDevice returns -1
+// before monitoring is enabled, on simulators, or when the OS
+// deliberately withholds a reading). In every unknown case we surface
+// "—" rather than a fake 100%.
+@MainActor
+private func batteryValueText(for store: AppStore) -> String {
+    if let pct = store.liveBatteryPercent {
+        return "\(pct)%"
+    }
+    return "—"
+}
+
+@MainActor
+private func batteryIcon(for store: AppStore) -> String {
+    let charging = store.liveIsCharging
+    guard let pct = store.liveBatteryPercent else { return "battery.0" }
+    switch pct {
+    case ...24: return charging ? "battery.25.bolt" : "battery.25"
+    case 25...49: return charging ? "battery.25.bolt" : "battery.25"
+    case 50...74: return charging ? "battery.50.bolt" : "battery.50"
+    case 75...94: return charging ? "battery.75.bolt" : "battery.75"
+    default: return charging ? "battery.100.bolt" : "battery.100"
+    }
+}
+
+@MainActor
+private func batteryProgress(for store: AppStore) -> Double {
+    guard let pct = store.liveBatteryPercent else { return 0 }
+    return Double(pct) / 100.0
+}
+
+@MainActor
+private func batterySummary(for store: AppStore) -> String {
+    let battery: String
+    if let pct = store.liveBatteryPercent {
+        battery = "\(pct)%"
+    } else {
+        battery = "—"
+    }
+    let charging = store.liveIsCharging ? "charging · " : ""
+    return "Battery \(battery) · \(charging)car linked · GPS speed available"
 }
 
 // MARK: - Slot Cell

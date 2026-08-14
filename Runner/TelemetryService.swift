@@ -168,9 +168,14 @@ extension Notification.Name {
     func snapshotAndSave() {
         let device = UIDevice.current
         let level = device.batteryLevel
-        let batteryPercent = level >= 0 ? Int(level * 100) : nil
+        // Unknown battery (`batteryLevel == -1`) is propagated as `nil`.
+        // We never substitute a fake value.
+        let batteryPercent: Int? = level >= 0 ? Int(level * 100) : nil
+        // Exact current charging state. Do not OR with any previously
+        // cached state — if the device just unplugged, this must flip
+        // to false on the next snapshot.
         let isCharging = device.batteryState == .charging || device.batteryState == .full
-        
+
         struct Snapshot: Codable {
             let carConnected: Bool
             let batteryPercent: Int?
@@ -178,15 +183,18 @@ extension Notification.Name {
             var speed: Double?
             let timestamp: Date?
         }
-        
+
+        // `currentSpeed` is already km/h (we converted in
+        // `didUpdateLocations`). It can be 0 (genuine stationary) or
+        // positive; we preserve the exact value rather than clamping.
         let telemetry = Snapshot(
             carConnected: carConnected,
             batteryPercent: batteryPercent,
             isCharging: isCharging,
-            speed: currentSpeed >= 0 ? currentSpeed : 0.0,
+            speed: currentSpeed,
             timestamp: Date()
         )
-        
+
         if let defaults = UserDefaults(suiteName: suiteName),
            let data = try? JSONEncoder().encode(telemetry) {
             defaults.set(data, forKey: "live_telemetry")

@@ -7,10 +7,18 @@ struct NativeSpecialRenderer {
         let textHints = (spec.layers ?? []).compactMap { $0.text ?? $0.kind }.joined(separator: " ").lowercased()
         
         let realBatt: Double = {
-            // Battery monitoring is enabled once at AppStore / TelemetryService
-            // init — never inside a view body. Reading here is safe.
-            let b = Double(UIDevice.current.batteryLevel)
-            return b >= 0 ? b : Double(telemetry?.batteryPercent ?? 85) / 100.0
+            // Battery monitoring is enabled once at AppStore /
+            // TelemetryService init — never inside a view body.
+            // Reading here is safe, but we must NOT fall back to a
+            // hardcoded number when battery is unknown; that would
+            // lie to the user. `nil` propagates to the native
+            // widget view, which renders its own "—" state.
+            let lvl = Double(UIDevice.current.batteryLevel)
+            if lvl >= 0 { return lvl }
+            if let pct = telemetry?.batteryPercent {
+                return Double(WidgetBatteryMath.clamp(pct)) / 100.0
+            }
+            return 0
         }()
         let spd = telemetry?.speed ?? 0.0
         let vName = vehicle?.displayName ?? "Tesla Model 3"

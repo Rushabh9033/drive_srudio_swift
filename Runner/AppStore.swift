@@ -208,6 +208,8 @@ class AppStore: ObservableObject {
             let sharedImagesURL = sharedImagesDir.appendingPathComponent(filename)
             try? pngData?.write(to: sharedImagesURL)
         }
+
+        trySaveStateLoggingFailure()
     }
 
     private func loadVehicleImage() {
@@ -333,6 +335,19 @@ class AppStore: ObservableObject {
                     slotSpec = stockWidget.document
                 }
             }
+
+            // Inject custom vehicle image into slot spec if present
+            if self.vehicleImage != nil, var spec = slotSpec, let rawLayers = spec.layers {
+                var updatedLayers = rawLayers
+                for idx in updatedLayers.indices {
+                    if updatedLayers[idx].kind == "image" || updatedLayers[idx].src == "template_car" {
+                        updatedLayers[idx].src = "home_vehicle.png"
+                    }
+                }
+                spec.layers = updatedLayers
+                slotSpec = spec
+            }
+
             newSlots.append(Slot(index: i, draftId: draftId, spec: slotSpec))
         }
 

@@ -3,75 +3,46 @@ import WidgetKit
 import UIKit
 
 // MARK: - Real Data Timeline Entry
+//
+// Every telemetry field is optional on purpose. The widget must render
+// an unavailable marker for `nil`; it must never invent a number.
+// `isCharging` is the exact state written by the host, never ORed with
+// a previously cached value.
 struct OrbitDateEntry: TimelineEntry {
     let date: Date
-    let batteryLevel: Double // 0.0 to 1.0 (real device battery)
-    let isCharging: Bool
-    let vehicleName: String
+    let batteryLevel: Double? // 0.0…1.0. nil = unknown.
+    let isCharging: Bool      // Exact current state.
+    let vehicleName: String?  // Display name. nil = none selected.
 }
 
 // MARK: - Real Data Timeline Provider (Live Battery, System Clock, & Vehicle Data)
+//
+// Reads ONLY the App Group via WidgetTelemetryReader. Never touches
+// UIDevice — the widget extension cannot poll sensors reliably, and
+// the host app is the single owner of telemetry truth.
 struct OrbitDateProvider: TimelineProvider {
     func placeholder(in context: Context) -> OrbitDateEntry {
-        OrbitDateEntry(
-            date: Date(),
-            batteryLevel: fetchRealBattery(),
-            isCharging: fetchIsCharging(),
-            vehicleName: fetchVehicleName()
-        )
+        WidgetTelemetryFactory.orbitEntry(at: Date())
     }
-    
+
     func getSnapshot(in context: Context, completion: @escaping (OrbitDateEntry) -> Void) {
-        completion(OrbitDateEntry(
-            date: Date(),
-            batteryLevel: fetchRealBattery(),
-            isCharging: fetchIsCharging(),
-            vehicleName: fetchVehicleName()
-        ))
+        completion(WidgetTelemetryFactory.orbitEntry(at: Date()))
     }
-    
+
     func getTimeline(in context: Context, completion: @escaping (Timeline<OrbitDateEntry>) -> Void) {
-        let next = Calendar.current.date(byAdding: .minute, value: 1, to: Date())!
-        let entry = OrbitDateEntry(
-            date: Date(),
-            batteryLevel: fetchRealBattery(),
-            isCharging: fetchIsCharging(),
-            vehicleName: fetchVehicleName()
+        // Apple-documented normal-provider model. First entry represents
+        // the current time; subsequent entries are spaced at least ~5
+        // minutes apart; `.atEnd` asks WidgetKit to call us again after
+        // the last entry is consumed.
+        let now = Date()
+        let timeline = WidgetTimelineSchedule.makeProviderTimeline(
+            startingAt: now,
+            providerEntryCount: WidgetTimelineSchedule.defaultProviderEntryCount,
+            factory: { date in
+                WidgetTelemetryFactory.orbitEntry(at: date)
+            }
         )
-        completion(Timeline(entries: [entry], policy: .after(next)))
-    }
-
-    private func fetchRealBattery() -> Double {
-        UIDevice.current.isBatteryMonitoringEnabled = true
-        let lvl = Double(UIDevice.current.batteryLevel)
-        if lvl >= 0 { return lvl }
-        
-        // Fallback to shared UserDefaults App Group if UIDevice isn't ready in background
-        if let defaults = UserDefaults(suiteName: AppGroupContract.suiteName),
-           let snapshotData = defaults.data(forKey: "drive_studio_telemetry"),
-           let snapshot = try? JSONDecoder().decode(TelemetrySnapshot.self, from: snapshotData),
-           let pct = snapshot.batteryPercent {
-            return Double(pct) / 100.0
-        }
-        return 0.85
-    }
-
-    private func fetchIsCharging() -> Bool {
-        UIDevice.current.isBatteryMonitoringEnabled = true
-        let state = UIDevice.current.batteryState
-        if state == .charging || state == .full { return true }
-        
-        if let defaults = UserDefaults(suiteName: AppGroupContract.suiteName),
-           let snapshotData = defaults.data(forKey: "drive_studio_telemetry"),
-           let snapshot = try? JSONDecoder().decode(TelemetrySnapshot.self, from: snapshotData) {
-            return snapshot.isCharging ?? false
-        }
-        return false
-    }
-
-    private func fetchVehicleName() -> String {
-        let state = AppGroupState.loadState()
-        return state?.vehicle?.displayName ?? "MY VEHICLE"
+        completion(timeline)
     }
 }
 
@@ -493,8 +464,9 @@ struct BatteryPieWidgetView: View {
 
     var body: some View {
         let bgColor = Color(hex: "100505")
-        let realBattery = max(0.05, min(1.0, entry.batteryLevel))
-        
+        // Unknown battery = empty pie; known battery = exact clamped value.
+        let realBattery: Double? = entry.batteryLevel.map { max(0.0, min(1.0, $0)) }
+
         let content = ZStack {
             bgColor
 
@@ -516,7 +488,7 @@ struct BatteryPieWidgetView: View {
                             center: CGPoint(x: cx, y: cy),
                             radius: R,
                             startAngle: .degrees(-90),
-                            endAngle: .degrees(-90 + realBattery * 360),
+                            endAngle: .degrees(-90 + (realBattery ?? 0) * 360),
                             clockwise: false
                         )
                         p.closeSubpath()
@@ -537,16 +509,22 @@ struct BatteryPieWidgetView: View {
 
                     VStack(spacing: 2) {
                         HStack(spacing: 2) {
-                            Text("\(Int(realBattery * 100))%")
-                                .font(.system(size: size * 0.165, weight: .black, design: .rounded))
-                                .foregroundColor(.white)
+                            if let frac = realBattery {
+                                Text("\(Int(frac * 100))%")
+                                    .font(.system(size: size * 0.165, weight: .black, design: .rounded))
+                                    .foregroundColor(.white)
+                            } else {
+                                Text("—")
+                                    .font(.system(size: size * 0.165, weight: .black, design: .rounded))
+                                    .foregroundColor(.white)
+                            }
                             if entry.isCharging {
                                 Image(systemName: "bolt.fill")
                                     .font(.system(size: size * 0.12))
                                     .foregroundColor(Color(hex: "FFD166"))
                             }
                         }
-                        
+
                         Text("BATTERY")
                             .font(.system(size: size * 0.065, weight: .bold))
                             .foregroundColor(Color(hex: "E24B4A"))

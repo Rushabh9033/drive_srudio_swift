@@ -17,7 +17,11 @@ extension Notification.Name {
     static let shared = TelemetryService()
 
     private let locationManager = CLLocationManager()
-    var currentSpeed: CLLocationSpeed = 0
+    /// Latest GPS speed in km/h, exactly as Core Location reported it.
+    /// `nil` means there is no valid fix yet. A genuine `0` means the
+    /// phone is stationary with a valid fix — it is NOT the same as
+    /// "unknown". Widgets must distinguish the two cases.
+    var currentSpeed: Double? = nil
     private var audioPlayer: AVAudioPlayer?
 
     private var lastWasConnected: Bool = false
@@ -55,32 +59,39 @@ extension Notification.Name {
     func stopMonitoring() {
         locationManager.stopUpdatingLocation()
     }
-    
+
     // MARK: - Core Location Delegate
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
+        // Core Location reports negative `speed` when it does not yet
+        // have a confident fix. We treat that as "no speed available"
+        // rather than coercing to 0.
         let prevSpeed = currentSpeed
-        currentSpeed = location.speed > 0 ? (location.speed * 3.6) : 0
+        if location.speed >= 0 {
+            currentSpeed = location.speed * 3.6
+        } else {
+            currentSpeed = nil
+        }
         // Only notify on actual change — GPS can fire 5+ times/sec and
         // many of those are redundant. Cheap equality check, but it
         // matters because each notification schedules a SwiftUI render.
-        if abs(prevSpeed - currentSpeed) > 0.5 {
+        if prevSpeed != currentSpeed {
             NotificationCenter.default.post(name: .telemetrySpeedUpdated, object: self)
         }
         snapshotAndSave()
     }
-    
+
     // MARK: - Play Sound Cues
     @discardableResult
     func triggerSound(for trigger: String) -> Double {
         let defaults = UserDefaults(suiteName: suiteName)
         let assigned = defaults?.string(forKey: "trigger_\(trigger)")
         let soundName = (assigned != nil && assigned != "none") ? assigned! : fallbackSound(for: trigger)
-        
+
         guard soundName != "none" else { return 0.0 }
         return playSoundByName(soundName)
     }
-    
+
     private func fallbackSound(for trigger: String) -> String {
         switch trigger {
         case "Connect": return "Welcome Back"
@@ -89,13 +100,13 @@ extension Notification.Name {
         default: return "none"
         }
     }
-    
+
     @discardableResult
     func playSoundByName(_ name: String) -> Double {
         let fm = FileManager.default
         var targetURL: URL? = nil
         let targetNameClean = name.lowercased().replacingOccurrences(of: " ", with: "_").replacingOccurrences(of: "-", with: "_")
-        
+
         var searchDirectories: [URL] = []
         if let shared = fm.containerURL(forSecurityApplicationGroupIdentifier: suiteName) {
             searchDirectories.append(shared)
@@ -103,17 +114,17 @@ extension Notification.Name {
         if let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first {
             searchDirectories.append(docs)
         }
-        
+
         // 1. Search App Group & Documents directory for Custom / Mic / TTS sound files
         for dir in searchDirectories {
             if let files = try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) {
                 for file in files {
                     let ext = file.pathExtension.lowercased()
                     guard ["wav", "mp3", "m4a", "caf"].contains(ext) else { continue }
-                    
+
                     let fname = file.deletingPathExtension().lastPathComponent.lowercased()
                     let cleanFname = fname.replacingOccurrences(of: " ", with: "_").replacingOccurrences(of: "-", with: "_")
-                    
+
                     if fname == name.lowercased() || cleanFname == targetNameClean || cleanFname.contains(targetNameClean) || targetNameClean.contains(cleanFname) {
                         targetURL = file
                         break
@@ -122,7 +133,7 @@ extension Notification.Name {
             }
             if targetURL != nil { break }
         }
-        
+
         // 2. Search Bundle Resources for Stock Sounds
         if targetURL == nil {
             if let urls = Bundle.main.urls(forResourcesWithExtension: "wav", subdirectory: nil) {
@@ -135,18 +146,18 @@ extension Notification.Name {
                 }
             }
         }
-        
+
         guard let soundURL = targetURL else {
             print("[TelemetryService] ⚠️ Could not find sound URL for: \(name)")
             return 0.0
         }
-        
+
         do {
             let session = AVAudioSession.sharedInstance()
             try? session.setCategory(.playback, mode: .default, options: [.allowBluetoothA2DP, .mixWithOthers])
             try? session.overrideOutputAudioPort(.none)
             try? session.setActive(true)
-            
+
             let player = try AVAudioPlayer(contentsOf: soundURL)
             player.volume = 0.85
             player.prepareToPlay()
@@ -163,7 +174,7 @@ extension Notification.Name {
             return 2.0
         }
     }
-    
+
     // MARK: - Save Telemetry Snapshot
     func snapshotAndSave() {
         let device = UIDevice.current
@@ -184,9 +195,10 @@ extension Notification.Name {
             let timestamp: Date?
         }
 
-        // `currentSpeed` is already km/h (we converted in
-        // `didUpdateLocations`). It can be 0 (genuine stationary) or
-        // positive; we preserve the exact value rather than clamping.
+        // `currentSpeed` is the most recent GPS-derived km/h value, or
+        // `nil` when no valid fix exists. Genuine stationary (0) is
+        // preserved; "no fix" stays `nil`. The widget extension renders
+        // each case differently.
         let telemetry = Snapshot(
             carConnected: carConnected,
             batteryPercent: batteryPercent,
@@ -197,8 +209,8 @@ extension Notification.Name {
 
         if let defaults = UserDefaults(suiteName: suiteName),
            let data = try? JSONEncoder().encode(telemetry) {
-            defaults.set(data, forKey: "live_telemetry")
-            defaults.set(data, forKey: "drive_studio_telemetry")
+            defaults.set(data, forKey: AppGroupContract.liveTelemetryKey)
+            defaults.set(data, forKey: AppGroupContract.legacyTelemetryKey)
             if #available(iOS 14.0, *) {
                 WidgetCenter.shared.reloadAllTimelines()
             }

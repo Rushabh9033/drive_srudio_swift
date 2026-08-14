@@ -29,14 +29,11 @@
 		<string>audio</string>
 		<string>fetch</string>
 	</array>
-	<!-- BGAppRefreshTask identifier — used by AppDelegate to opportunistically
-	     wake the host app so we can call WidgetCenter.reloadAllTimelines().
-	     iOS controls actual execution timing; this is not a real-time
-	     refresh mechanism. -->
-	<key>BGTaskSchedulerPermittedIdentifiers</key>
-	<array>
-		<string>com.drivestudio.app.driveStudio.refresh</string>
-	</array>
+	<!-- BGTaskSchedulerPermittedIdentifiers intentionally absent.
+	The host app removed its BGAppRefreshTask implementation because
+	background refresh cannot provide real-time speed. Telemetry
+	freshness comes from foreground collection plus WidgetKit's
+	normal timeline policy. -->
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Drive Studio needs access to your microphone to record custom vehicle audio prompts and cues.</string>
 	<key>UILaunchStoryboardName</key>

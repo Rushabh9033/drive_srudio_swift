@@ -1,6 +1,7 @@
 import SwiftUI
 import UIKit
 import PhotosUI
+import CoreLocation
 
 // MARK: - Dashboard (Home Tab)
 struct DashboardView: View {
@@ -76,11 +77,14 @@ struct DashboardView: View {
                                       label: "Battery",
                                       value: batteryValueText(for: store),
                                       progress: batteryProgress(for: store))
-                            let currentSpeed = Int(TelemetryService.shared.currentSpeed)
+                            // TelemetryService.currentSpeed is now optional. `nil`
+                            // means "no valid GPS fix yet" — render "-- km/h",
+                            // not "0 km/h". Genuine 0 km/h still renders "0 km/h".
+                            let currentSpeed = TelemetryService.shared.currentSpeed
                             MetricBar(icon: "gauge.with.dots.needle.bottom.50percent",
                                       label: "GPS speed",
-                                      value: currentSpeed > 0 ? "\(currentSpeed) km/h" : "-- km/h",
-                                      progress: min(Double(currentSpeed) / 240.0, 1.0))
+                                      value: currentSpeed.map { "\(Int($0)) km/h" } ?? "-- km/h",
+                                      progress: currentSpeed.map { min($0 / 240.0, 1.0) } ?? 0)
                         }
                     }
                 }
@@ -185,11 +189,22 @@ struct DashboardView: View {
                         MonoLabel(text: "Setup status")
                         Spacer().frame(height: 16)
 
-                        StatusRow(icon: "checkmark.circle", iconColor: DriveColors.success,
-                                  label: "Telemetry permissions", value: "Granted")
+                        StatusRow(
+                            icon: gpsStatusIcon(),
+                            iconColor: gpsStatusColor(),
+                            label: "Telemetry permissions",
+                            value: gpsStatusText()
+                        )
                         Divider().background(DriveColors.border).padding(.vertical, 12)
                         StatusRow(icon: "battery.100", iconColor: DriveColors.success,
                                   label: "Battery reporting", value: batteryValueText(for: store))
+                        Divider().background(DriveColors.border).padding(.vertical, 12)
+                        StatusRow(
+                            icon: TelemetryService.shared.carConnected ? "checkmark.circle" : "circle.dashed",
+                            iconColor: TelemetryService.shared.carConnected ? DriveColors.success : DriveColors.warning,
+                            label: "Car link",
+                            value: connectionStatusText(for: store)
+                        )
                         Divider().background(DriveColors.border).padding(.vertical, 12)
                         StatusRow(
                             icon: "checkmark.circle",
@@ -307,6 +322,55 @@ private func batteryProgress(for store: AppStore) -> Double {
     return Double(pct) / 100.0
 }
 
+// MARK: - Truthful status helpers
+//
+// The dashboard previously hardcoded "car linked · GPS speed available"
+// regardless of state. This helper surfaces each claim only when the
+// underlying signal is actually true.
+@MainActor
+private func connectionStatusText(for store: AppStore) -> String {
+    if TelemetryService.shared.carConnected {
+        return "car linked"
+    }
+    return "car not linked"
+}
+
+@MainActor
+private func gpsStatusText() -> String {
+    switch CLLocationManager.authorizationStatus() {
+    case .notDetermined:
+        return "GPS permission: not requested"
+    case .denied, .restricted:
+        return "GPS permission: denied"
+    case .authorizedAlways:
+        return "GPS always authorized"
+    case .authorizedWhenInUse:
+        return "GPS when-in-use only"
+    @unknown default:
+        return "GPS permission: unknown"
+    }
+}
+
+@MainActor
+private func gpsStatusIcon() -> String {
+    switch CLLocationManager.authorizationStatus() {
+    case .authorizedAlways, .authorizedWhenInUse:
+        return "checkmark.circle"
+    default:
+        return "exclamationmark.triangle"
+    }
+}
+
+@MainActor
+private func gpsStatusColor() -> Color {
+    switch CLLocationManager.authorizationStatus() {
+    case .authorizedAlways, .authorizedWhenInUse:
+        return DriveColors.success
+    default:
+        return DriveColors.warning
+    }
+}
+
 @MainActor
 private func batterySummary(for store: AppStore) -> String {
     let battery: String
@@ -316,7 +380,7 @@ private func batterySummary(for store: AppStore) -> String {
         battery = "—"
     }
     let charging = store.liveIsCharging ? "charging · " : ""
-    return "Battery \(battery) · \(charging)car linked · GPS speed available"
+    return "Battery \(battery) · \(charging)\(connectionStatusText(for: store)) · \(gpsStatusText())"
 }
 
 // MARK: - Slot Cell

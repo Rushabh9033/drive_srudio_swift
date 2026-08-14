@@ -1,29 +1,20 @@
 import SwiftUI
-import UIKit
 
+// NativeSpecialRenderer builds the entry structs from the App Group
+// reader. It MUST NOT touch UIDevice — the widget extension cannot
+// poll sensors, and the host app is the single owner of telemetry.
+// All fields are optional on purpose: unknown stays unknown.
 struct NativeSpecialRenderer {
     @ViewBuilder
     static func renderIfSpecial(spec: WidgetSpec, telemetry: TelemetrySnapshot?, vehicle: VehicleData?) -> AnyView? {
         let textHints = (spec.layers ?? []).compactMap { $0.text ?? $0.kind }.joined(separator: " ").lowercased()
-        
-        let realBatt: Double = {
-            // Battery monitoring is enabled once at AppStore /
-            // TelemetryService init — never inside a view body.
-            // Reading here is safe, but we must NOT fall back to a
-            // hardcoded number when battery is unknown; that would
-            // lie to the user. `nil` propagates to the native
-            // widget view, which renders its own "—" state.
-            let lvl = Double(UIDevice.current.batteryLevel)
-            if lvl >= 0 { return lvl }
-            if let pct = telemetry?.batteryPercent {
-                return Double(WidgetBatteryMath.clamp(pct)) / 100.0
-            }
-            return 0
-        }()
-        let spd = telemetry?.speed ?? 0.0
-        let vName = vehicle?.displayName ?? "Tesla Model 3"
-        let isChg = telemetry?.isCharging ?? false
-        
+
+        let realBatt: Double? = telemetry?.batteryPercent
+            .map { Double(WidgetBatteryMath.clamp($0)) / 100.0 }
+        let spd: Double? = telemetry?.speed
+        let vName: String? = vehicle?.displayName
+        let isChg: Bool = telemetry?.isCharging ?? false
+
         let driveEntry = DriveEntry(date: Date(), speed: spd, batteryLevel: realBatt, isCharging: isChg, vehicleName: vName)
         let orbitEntry = OrbitDateEntry(date: Date(), batteryLevel: realBatt, isCharging: isChg, vehicleName: vName)
 

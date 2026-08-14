@@ -212,69 +212,34 @@ struct StaticProvider: TimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
         SimpleEntry(date: Date(), slotIndex: slotIndex, slot: nil, vehicle: nil, telemetry: nil, generation: nil, isPreview: true)
     }
+
     func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> Void) {
-        completion(makeEntry(slotIndex: slotIndex, isPreview: context.isPreview))
-    }
-    func getTimeline(in context: Context, completion: @escaping (Timeline<SimpleEntry>) -> Void) {
-        // Normal WidgetKit timeline: 60 entries, one per minute,
-        // aligned to real wall-clock minute boundaries. WidgetKit
-        // decides when to actually swap to the next entry — `.atEnd`
-        // simply asks the system to call `getTimeline` again once the
-        // last entry is consumed.
-        //
-        // We deliberately do NOT emit one-second entries or run timers
-        // inside the widget view. WidgetKit is not a real-time surface;
-        // it throttles, batches, and can skip individual entries.
-        let now = Date()
-        let snapshot = makeEntry(slotIndex: slotIndex, date: now, isPreview: context.isPreview)
-        completion(WidgetTimelineSchedule.makeMinuteAlignedTimeline(
-            count: WidgetTimelineSchedule.defaultEntryCount,
-            start: now
-        ) { date in
-            // All minute slots share the same telemetry snapshot; the
-            // only thing that varies per entry is the date stamp, which
-            // is what drives clock/date text rendering.
-            return SimpleEntry(
-                date: date,
-                slotIndex: snapshot.slotIndex,
-                slot: snapshot.slot,
-                vehicle: snapshot.vehicle,
-                telemetry: snapshot.telemetry,
-                widgetImagePath: snapshot.widgetImagePath,
-                generation: snapshot.generation,
-                isPreview: snapshot.isPreview
-            )
-        })
-    }
-
-    private func makeEntry(slotIndex: Int, isPreview: Bool) -> SimpleEntry {
-        return makeEntry(slotIndex: slotIndex, date: Date(), isPreview: isPreview)
-    }
-
-    private func makeEntry(slotIndex: Int, date: Date, isPreview: Bool) -> SimpleEntry {
-        let state = AppGroupState.loadState()
-        let slot = state?.slots?.first(where: { $0.index == slotIndex })
-
-        // Telemetry snapshot is read once, from the App Group key the
-        // host app wrote. We never read `UIDevice` battery state inside
-        // the widget extension — the host process is the single owner
-        // of that reading, and the widget just displays the last truth.
-        var currentTelemetry = state?.telemetry
-        if let liveData = UserDefaults(suiteName: AppGroupContract.suiteName)?.data(forKey: "live_telemetry"),
-           let liveTelemetry = try? JSONDecoder().decode(TelemetrySnapshot.self, from: liveData) {
-            currentTelemetry = liveTelemetry
-        }
-
-        return SimpleEntry(
-            date: date,
+        completion(WidgetTelemetryFactory.simpleEntry(
             slotIndex: slotIndex,
-            slot: slot,
-            vehicle: state?.vehicle,
-            telemetry: currentTelemetry,
-            widgetImagePath: state?.widgetImagePath,
-            generation: AppGroupState.currentGeneration,
-            isPreview: isPreview
-        )
+            at: Date(),
+            isPreview: context.isPreview
+        ))
+    }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<SimpleEntry>) -> Void) {
+        // Apple-documented normal-provider model: first entry's date is
+        // the current time; subsequent entries are spaced at least ~5
+        // minutes apart; `.atEnd` asks WidgetKit to call us again after
+        // the last entry is consumed. Telemetry stays frozen on the
+        // snapshot WidgetKit hands to each entry — clock/date text
+        // advances when WidgetKit advances the entry.
+        let now = Date()
+        let timeline = WidgetTimelineSchedule.makeProviderTimeline(
+            startingAt: now,
+            providerEntryCount: WidgetTimelineSchedule.defaultProviderEntryCount
+        ) { date in
+            WidgetTelemetryFactory.simpleEntry(
+                slotIndex: self.slotIndex,
+                at: date,
+                isPreview: context.isPreview
+            )
+        }
+        completion(timeline)
     }
 }
 
@@ -505,7 +470,9 @@ struct ScaledLayerView: View {
                         .minimumScaleFactor(0.3)
                 }
             case "vehicle_name":
-                Text(vehicle?.displayName ?? "Select Vehicle")
+                // Vehicle-unavailable marker: never substitute a placeholder
+                // brand name; show "—" when no vehicle is selected.
+                Text(WidgetDisplayMath.vehicleLabel(vehicle?.displayName))
                     .font(.system(size: fontSize, weight: weight(for: layer.weight ?? 400), design: .rounded))
                     .foregroundColor(layerColor)
                     .lineLimit(1)

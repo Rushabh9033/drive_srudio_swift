@@ -196,9 +196,13 @@ struct WidgetCanvas: View {
             }
             return FormatterCache.mediumDateFormatter.string(from: currentDate)
         case "speed":
-            // TelemetryService.currentSpeed is already in km/h
-            let spd = Int(TelemetryService.shared.currentSpeed)
-            return spd > 0 ? "\(spd)" : "0"
+            // TelemetryService.currentSpeed is already in km/h. Nil means
+            // "no valid GPS fix yet" — render "--". Genuine 0 km/h must
+            // render as "0".
+            if let spd = TelemetryService.shared.currentSpeed {
+                return "\(Int(spd))"
+            }
+            return "--"
         case "vehicle_name":
             return "Cyber Sedan"
         case "battery", "battery_text":
@@ -280,9 +284,13 @@ struct LayerView: View {
             return FormatterCache.mediumDateFormatter.string(from: Date())
         case "speed":
             // Read live from TelemetryService — `speedTick` invalidation
-            // guarantees this is evaluated on every GPS fix.
-            let spd = Int(TelemetryService.shared.currentSpeed)
-            return spd > 0 ? "\(spd)" : "0"
+            // guarantees this is evaluated on every GPS fix. Nil means
+            // "no valid GPS fix yet" — render "--". Genuine 0 km/h
+            // renders as "0".
+            if let spd = TelemetryService.shared.currentSpeed {
+                return "\(Int(spd))"
+            }
+            return "--"
         case "vehicle_name":
             return layer.text ?? "My Vehicle"
         case "analog":

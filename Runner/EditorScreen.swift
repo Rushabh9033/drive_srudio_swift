@@ -596,6 +596,15 @@ struct EditorScreen: View {
             return
         }
 
+        // Capture the image's natural aspect ratio BEFORE we hand the
+        // bytes off to disk so we can size the layer's frame to match.
+        // Width / height — when this is provided to the merge helper
+        // the dashed yellow guide border lines up with the image's
+        // edges instead of floating around it with empty space.
+        let aspect: CGFloat? = image.size.width > 0 && image.size.height > 0
+            ? image.size.width / image.size.height
+            : nil
+
         // Write to the three locations the loader can read from:
         //   * host Documents (kept for legacy / host-side references)
         //   * App Group root (third immediate-write path)
@@ -635,12 +644,16 @@ struct EditorScreen: View {
         // Use the pure merge helper so adding a user image replaces
         // a selected `template_car` guide (or the single visible
         // guide if there is no selection) instead of piling up new
-        // layers. See Fix 2.
+        // layers. We pass `aspect` so the resulting layer's `w` and
+        // `h` reflect the image's natural aspect ratio — the dashed
+        // yellow border then hugs the photo's edges instead of
+        // floating around it with empty space.
         let existing = spec.layers ?? []
         let merged = WidgetLayer.mergedLayersAfterAddingImage(
             current: existing,
             selectedIndex: selectedLayerIndex,
-            newImageSrc: filename
+            newImageSrc: filename,
+            newImageAspect: aspect
         )
         spec.layers = merged.layers
         selectedLayerIndex = merged.selectedIndex

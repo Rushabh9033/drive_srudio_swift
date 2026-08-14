@@ -65,8 +65,28 @@ struct WidgetLayer: Codable, Identifiable, Equatable {
         )
     }
 
-    static func newCar(src: String) -> WidgetLayer {
-        WidgetLayer(id: UUID().uuidString, kind: "image", src: src, x: 0, y: 0, w: 150, h: 100)
+    static func newCar(src: String, aspectRatio: CGFloat? = nil) -> WidgetLayer {
+        // Default small initial footprint so the user sees their
+        // freshly-uploaded image at a manageable size and can drag
+        // the corners to make it bigger. When `aspectRatio` is known
+        // (width / height), the height is derived so the frame
+        // matches the image's natural shape exactly.
+        let width: CGFloat = 35
+        let height: CGFloat
+        if let ar = aspectRatio, ar > 0 {
+            height = width / ar
+        } else {
+            height = 35
+        }
+        return WidgetLayer(
+            id: UUID().uuidString,
+            kind: "image",
+            src: src,
+            x: 32.5,
+            y: 32.5,
+            w: width,
+            h: height
+        )
     }
 
     // MARK: - Image-add merge
@@ -91,7 +111,8 @@ struct WidgetLayer: Codable, Identifiable, Equatable {
     static func mergedLayersAfterAddingImage(
         current: [WidgetLayer],
         selectedIndex: Int?,
-        newImageSrc: String
+        newImageSrc: String,
+        newImageAspect: CGFloat? = nil
     ) -> (layers: [WidgetLayer], selectedIndex: Int?) {
         // Rule 1: selected symbolic guide → replace in place.
         if let sel = selectedIndex,
@@ -100,7 +121,7 @@ struct WidgetLayer: Codable, Identifiable, Equatable {
            let src = current[sel].src,
            ImageSource.symbolicVehicleGuideNames.contains(src) {
             var updated = current
-            updated[sel] = current[sel].withReplacedImageSrc(newImageSrc)
+            updated[sel] = current[sel].withReplacedImageSrc(newImageSrc, aspectRatio: newImageAspect)
             return (updated, sel)
         }
         // Rule 2: exactly one visible symbolic guide → replace that.
@@ -114,22 +135,35 @@ struct WidgetLayer: Codable, Identifiable, Equatable {
         if visibleGuideIndices.count == 1 {
             let target = visibleGuideIndices[0]
             var updated = current
-            updated[target] = current[target].withReplacedImageSrc(newImageSrc)
+            updated[target] = current[target].withReplacedImageSrc(newImageSrc, aspectRatio: newImageAspect)
             return (updated, target)
         }
         // Rule 3: append a new layer.
         var updated = current
-        let newLayer = WidgetLayer.newCar(src: newImageSrc)
+        let newLayer = WidgetLayer.newCar(src: newImageSrc, aspectRatio: newImageAspect)
         updated.append(newLayer)
         return (updated, updated.count - 1)
     }
 
     /// Return a copy with `src` replaced. Preserves `id`, `x`, `y`,
-    /// `w`, `h`, `opacity`, `hidden`, and `groupId` so the new image
-    /// lands exactly where the guide was.
-    private func withReplacedImageSrc(_ newSrc: String) -> WidgetLayer {
+    /// `opacity`, `hidden`, and `groupId` so the new image stays
+    /// anchored where the guide was. `w` / `h` are recomputed from
+    /// `aspectRatio` (width / height) when available — using the
+    /// guide's old `w` and aspect-derived `h` keeps the guide's
+    /// horizontal footprint while making the frame match the image's
+    /// actual shape, so the dashed border and the image land on the
+    /// same edge instead of the border floating around the photo.
+    private func withReplacedImageSrc(
+        _ newSrc: String,
+        aspectRatio: CGFloat?
+    ) -> WidgetLayer {
         var copy = self
         copy.src = newSrc
+        if let ar = aspectRatio, ar > 0 {
+            let anchorW = copy.w ?? 30
+            copy.w = anchorW
+            copy.h = anchorW / ar
+        }
         return copy
     }
 }

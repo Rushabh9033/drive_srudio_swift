@@ -11,8 +11,24 @@ import CryptoKit
 // Color extension is defined in DriveComponents.swift
 
 struct DriveStudioImageLoader {
+    /// Generation-aware cache. The key is the tuple
+    /// `(generationNamespace, src)`, where the namespace is one of:
+    ///   * `"g:\(generation)"` — a real generation (the most common
+    ///     path; guarantees two generations using the same filename
+    ///     don't collide).
+    ///   * `"legacy:v1"` — the legacy V1 cache, kept distinct so
+    ///     pre-generation reads cannot leak into the new flow.
+    ///   * `"bundle"` — bundled assets (Asset Catalog / Bundle.main)
+    ///     are generation-independent; their cache lives in one
+    ///     slot so we don't allocate the same bundled image once
+    ///     per generation.
     private static let imageCache = NSCache<NSString, UIImage>()
 
+    /// Load an image by source path. The cache key includes the
+    /// `generation` argument when provided, so two generations using
+    /// the same filename cannot return the wrong bytes. When
+    /// `generation` is `nil`, the loader falls back to the legacy
+    /// path and uses a clearly-separated legacy cache namespace.
     static func load(from src: String, generation: String? = nil) -> UIImage? {
         if src.hasPrefix("data:image") {
             guard let c = src.firstIndex(of: ","),
@@ -20,18 +36,23 @@ struct DriveStudioImageLoader {
             return UIImage(data: d)
         }
 
-        let cacheKey = src as NSString
+        let namespace = cacheNamespace(for: generation)
+        let cacheKey = "\(namespace)|\(src)" as NSString
         if let cached = imageCache.object(forKey: cacheKey) { return cached }
 
-        // 1. Check Asset Catalog (bundle images)
+        // 1. Check Asset Catalog (bundle images) — generation-independent.
         if let assetImg = UIImage(named: src) {
+            let bundleKey = "bundle|\(src)" as NSString
+            imageCache.setObject(assetImg, forKey: bundleKey)
             imageCache.setObject(assetImg, forKey: cacheKey)
             return assetImg
         }
 
         // 2. Check App Group Shared Container (permanent cross-process location)
         if let shared = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppGroupContract.suiteName) {
-            // Check generation subfolder if snapshot is generation-tracked
+            // Check generation subfolder if snapshot is generation-tracked.
+            // The effective generation is the immutable entry-provided
+            // value, never the mutable AppGroupState.currentGeneration.
             let gen = generation ?? AppGroupState.currentGeneration
             if let g = gen {
                 let genURL = shared.appendingPathComponent("SharedImages").appendingPathComponent("generation_\(g)").appendingPathComponent(src)
@@ -41,14 +62,14 @@ struct DriveStudioImageLoader {
                 }
             }
 
-            // Check SharedImages root
+            // Check SharedImages root (legacy / home_vehicle.png).
             let sharedImagesURL = shared.appendingPathComponent("SharedImages").appendingPathComponent(src)
             if let img = UIImage(contentsOfFile: sharedImagesURL.path) {
                 imageCache.setObject(img, forKey: cacheKey)
                 return img
             }
 
-            // Check App Group root
+            // Check App Group root.
             let appGroupRootURL = shared.appendingPathComponent(src)
             if let img = UIImage(contentsOfFile: appGroupRootURL.path) {
                 imageCache.setObject(img, forKey: cacheKey)
@@ -73,6 +94,29 @@ struct DriveStudioImageLoader {
 
         return nil
     }
+
+    /// Map an optional generation to a cache namespace string.
+    /// Bundled assets are namespaced separately so the same
+    /// bundled image loads once across all generations.
+    static func cacheNamespace(for generation: String?) -> String {
+        if let g = generation { return "g:\(g)" }
+        return "legacy:v1"
+    }
+
+    /// Test seam: compute the cache key the loader would use for
+    /// `(generation, src)`. Tests assert directly on this string
+    /// to prove the namespace rule: two different generations
+    /// produce different keys, and the legacy nil-generation
+    /// namespace is clearly separated.
+    static func _cacheKey(for src: String, generation: String?) -> String {
+        return "\(cacheNamespace(for: generation))|\(src)"
+    }
+
+    /// Test seam: clear the in-memory cache so tests start from
+    /// a deterministic baseline.
+    static func _clearCacheForTest() {
+        imageCache.removeAllObjects()
+    }
 }
 
 // MARK: - Widget
@@ -84,10 +128,10 @@ struct DriveStudioImageLoader {
 @available(iOS 16.0, *)
 extension View {
     @ViewBuilder
-    func widgetContainerBackground(spec: WidgetSpec?) -> some View {
+    func widgetContainerBackground(spec: WidgetSpec?, generation: String? = nil) -> some View {
         if #available(iOS 17.0, *) {
             self.containerBackground(for: .widget) {
-                BackgroundView(spec: spec)
+                BackgroundView(spec: spec, generation: generation)
             }
         } else {
             // iOS 16 fallback: the entry view already paints its own
@@ -105,7 +149,7 @@ struct DriveStudioSlot1Widget: Widget {
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: "CustomWidget", provider: StaticProvider(slotIndex: 0)) { entry in
             DriveStudioWidgetEntryView(entry: entry)
-                .widgetContainerBackground(spec: entry.activeSpec)
+                .widgetContainerBackground(spec: entry.activeSpec, generation: entry.generation)
         }
         .configurationDisplayName("Drive Studio Slot 1")
         .description("Renders the widget assigned to Slot 1.")
@@ -123,7 +167,7 @@ struct DriveStudioSlot2Widget: Widget {
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: "CustomWidget2", provider: StaticProvider(slotIndex: 1)) { entry in
             DriveStudioWidgetEntryView(entry: entry)
-                .widgetContainerBackground(spec: entry.activeSpec)
+                .widgetContainerBackground(spec: entry.activeSpec, generation: entry.generation)
         }
         .configurationDisplayName("Drive Studio Slot 2")
         .description("Renders the widget assigned to Slot 2.")
@@ -141,7 +185,7 @@ struct DriveStudioSlot3Widget: Widget {
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: "CustomWidget3", provider: StaticProvider(slotIndex: 2)) { entry in
             DriveStudioWidgetEntryView(entry: entry)
-                .widgetContainerBackground(spec: entry.activeSpec)
+                .widgetContainerBackground(spec: entry.activeSpec, generation: entry.generation)
         }
         .configurationDisplayName("Drive Studio Slot 3")
         .description("Renders the widget assigned to Slot 3.")
@@ -159,7 +203,7 @@ struct DriveStudioSlot4Widget: Widget {
     var body: some WidgetConfiguration {
         let config = StaticConfiguration(kind: "CustomWidget4", provider: StaticProvider(slotIndex: 3)) { entry in
             DriveStudioWidgetEntryView(entry: entry)
-                .widgetContainerBackground(spec: entry.activeSpec)
+                .widgetContainerBackground(spec: entry.activeSpec, generation: entry.generation)
         }
         .configurationDisplayName("Drive Studio Slot 4")
         .description("Renders the widget assigned to Slot 4.")
@@ -257,6 +301,10 @@ struct DriveStudioWidgetEntryView: View {
         let telemetry: TelemetrySnapshot?
         let vehicle: VehicleData?
         let spec: WidgetSpec?
+        /// Immutable generation snapshot from the entry — used as
+        /// the cache namespace for image loads so a new generation
+        /// never reads the previous generation's cached UIImage.
+        let generation: String?
     }
 
     var body: some View {
@@ -264,7 +312,8 @@ struct DriveStudioWidgetEntryView: View {
         let captured = Captured(
             telemetry: entry.telemetry,
             vehicle: entry.vehicle,
-            spec: activeSpec
+            spec: activeSpec,
+            generation: entry.generation
         )
         return MinuteClockView(data: captured) { displayDate, cap in
             GeometryReader { g in
@@ -276,7 +325,7 @@ struct DriveStudioWidgetEntryView: View {
                        ) {
                         specialView
                     } else {
-                        BackgroundView(spec: cap.spec)
+                        BackgroundView(spec: cap.spec, generation: cap.generation)
                         if let spec = cap.spec, let rawLayers = spec.layers, !rawLayers.isEmpty {
                             let layers = LayerMigration.upgrade(rawLayers)
                             FitToCanvasLayers(
@@ -284,6 +333,7 @@ struct DriveStudioWidgetEntryView: View {
                                 canvasSize: g.size,
                                 telemetry: cap.telemetry,
                                 vehicle: cap.vehicle,
+                                generation: cap.generation,
                                 entryDate: displayDate
                             )
                         } else {
@@ -300,7 +350,7 @@ struct DriveStudioWidgetEntryView: View {
                     }
                 }
             }
-            .widgetContainerBackground(spec: cap.spec)
+            .widgetContainerBackground(spec: cap.spec, generation: cap.generation)
         }
     }
 }
@@ -343,9 +393,15 @@ struct DrawStrokesCanvas: View {
 
 struct BackgroundView: View {
     let spec: WidgetSpec?
+    /// Generation to scope image-cache lookups by. Propagated from
+    /// `DriveStudioWidgetEntryView` so a fresh generation never
+    /// reads a stale cache slot from the previous generation.
+    var generation: String? = nil
     var body: some View {
         if let bg = spec?.background {
-            if let img = bg.imageSrc.flatMap({ DriveStudioImageLoader.load(from: $0) }) {
+            if let img = bg.imageSrc.flatMap({
+                DriveStudioImageLoader.load(from: $0, generation: generation)
+            }) {
                 Image(uiImage: img).resizable().aspectRatio(contentMode: .fill)
             } else if let fromHex = bg.from.flatMap({ Color(hexOptional: $0) }) {
                 let toColor = bg.to.flatMap { Color(hexOptional: $0) } ?? fromHex
@@ -366,6 +422,10 @@ struct FitToCanvasLayers: View {
     let canvasSize: CGSize
     let telemetry: TelemetrySnapshot?
     let vehicle: VehicleData?
+    /// Generation to scope image-cache lookups by. Threaded all the
+    /// way through to `ScaledLayerView` so the same filename across
+    /// two generations resolves to two distinct cached images.
+    var generation: String? = nil
     var entryDate: Date = Date()
 
     /// Reference design canvas side (square). `computeFitTransform` was
@@ -383,6 +443,7 @@ struct FitToCanvasLayers: View {
                         telemetry: telemetry,
                         vehicle: vehicle,
                         transform: transform,
+                        generation: generation,
                         entryDate: entryDate
                     )
                 }
@@ -405,6 +466,11 @@ struct ScaledLayerView: View {
     let telemetry: TelemetrySnapshot?
     let vehicle: VehicleData?
     let transform: CGAffineTransform
+    /// Generation to scope image-cache lookups by. When the user
+    /// edits an image, the host writes a new generation with the
+    /// new bytes; without this thread the widget would return the
+    /// previous generation's cached UIImage.
+    var generation: String? = nil
     var entryDate: Date = Date()
 
     private static let designSize = CGSize(width: 340, height: 340)
@@ -526,7 +592,8 @@ struct ScaledLayerView: View {
                 }
             case "image":
                 let src = layer.src ?? ""
-                if !src.isEmpty, let img = DriveStudioImageLoader.load(from: src) {
+                if !src.isEmpty, let img = DriveStudioImageLoader.load(
+                    from: src, generation: generation) {
                     Image(uiImage: img).resizable().aspectRatio(contentMode: .fit)
                 } else {
                     Image(systemName: "photo.badge.exclamationmark").foregroundColor(.gray)

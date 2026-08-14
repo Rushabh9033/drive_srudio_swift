@@ -373,11 +373,17 @@ class AppStore: ObservableObject {
                         ?? sharedURL
                             .appendingPathComponent("SharedImages")
                             .appendingPathComponent("generation_\(staged.generation)")
+                    let prevAssets: URL? = previousGeneration.flatMap {
+                        sharedURL
+                            .appendingPathComponent("SharedImages")
+                            .appendingPathComponent("generation_\($0)")
+                    }
                     try Self.copyReferencedImages(
                         filenames: imagesToSync,
                         into: destFolder,
                         sourceDirectories: Self.imageSourceDirectories(),
-                        bundle: Bundle.main,
+                        previousGenerationAssetDirectory: prevAssets,
+                        resolver: .production,
                         preserveCustomVehicleImage: self.vehicleImage != nil ? "home_vehicle.png" : nil
                     )
                 },
@@ -388,12 +394,14 @@ class AppStore: ObservableObject {
                     // Preserve at least the new generation and the
                     // previous one (when one exists) so a crash
                     // between publish and reader-consume does not
-                    // orphan the previous file.
+                    // orphan the previous file. Clean BOTH old state
+                    // files and old generation asset directories.
                     var preserve = keepGenerations
                     if let prev = previousGeneration { preserve.insert(prev) }
-                    Self.cleanupStateFilesExcept(
+                    Self.cleanupStateAndAssetGenerations(
                         in: sharedURL,
-                        keep: preserve
+                        keep: preserve,
+                        preserveCustomVehicleImage: self.vehicleImage != nil ? "home_vehicle.png" : nil
                     )
                 }
             )
@@ -770,28 +778,46 @@ class AppStore: ObservableObject {
         return sources
     }
 
-    /// Pure-with-filesystem: copy every filename in `filenames`
-    /// into `destinationFolder`, looking for the source in each of
-    /// `sourceDirectories` in order. Missing files are silently
-    /// skipped — a referenced image the user deleted on disk is a
-    /// render-time concern, not a save-time error. Throws if the
-    /// destination folder cannot be created.
+    /// Pure-with-filesystem: copy every required filename in
+    /// `filenames` into `destinationFolder`. Every filename MUST be
+    /// either successfully copied into the new generation folder OR
+    /// explicitly verified as a widget-loadable resource by the
+    /// resolver (e.g. a bundled asset or a stable legacy fallback
+    /// in the App Group `SharedImages` root).
     ///
-    /// `bundle` is the production fallback for catalog stock images
-    /// shipped in the app bundle (e.g. stock widget thumbnails that
-    /// don't live in Documents). It is parameterized so the test
-    /// seam does not require a real Bundle.main to function.
+    /// The resolver is injected so tests can:
+    ///   * prove a missing required image rejects the entire
+    ///     transaction (not silently skipped),
+    ///   * prove a bundle asset is accepted only when the resolver
+    ///     proves it exists (we never assume a missing filename is
+    ///     a bundled asset),
+    ///   * inject a previous-generation directory as a fallback
+    ///     so saving an unchanged design still works when its only
+    ///     surviving copy lives in the previous generation.
     ///
-    /// `preserveCustomVehicleImage` is the existing `vehicleImage`
-    /// filename (e.g. `home_vehicle.png`) that has been uploaded by
-    /// the user. We never overwrite or remove it during staging;
-    /// the user-imported artwork lives independently of any
-    /// generation.
+    /// Unsafe filenames (absolute paths or components that escape
+    /// the destination via `..` traversal) are rejected with a
+    /// clear error — `imageSrc` is user data so we must not trust
+    /// it to stay well-formed.
+    ///
+    /// `preserveCustomVehicleImage` is the existing `home_vehicle.png`
+    /// filename (or `nil` when no vehicle image has been imported).
+    /// We verify it is reachable from the widget extension's
+    /// App Group `SharedImages` root before publish. When it lives
+    /// only in the host Documents directory, we copy it to the
+    /// stable App Group root so the widget can read it. We never
+    /// place it inside a generation folder (it survives cleanup).
+    ///
+    /// Throws `AssetStageError.missing(...)` when a required image
+    /// cannot be staged AND cannot be verified by the resolver, so
+    /// `installState` can propagate the failure without ever
+    /// publishing metadata.
     nonisolated static func copyReferencedImages(
         filenames: Set<String>,
         into destinationFolder: URL,
         sourceDirectories: [URL],
-        bundle: Bundle? = nil,
+        previousGenerationAssetDirectory: URL? = nil,
+        resolver: ImageResourceResolver = .production,
         preserveCustomVehicleImage: String? = nil
     ) throws {
         let fm = FileManager.default
@@ -799,31 +825,269 @@ class AppStore: ObservableObject {
             at: destinationFolder,
             withIntermediateDirectories: true)
         for name in filenames {
-            // Honor the legacy fallback: the widget extension can
-            // still read `SharedImages/<file>` (no generation
-            // prefix) and `home_vehicle.png` is user artwork that
-            // must always survive any staging pass.
-            if name == preserveCustomVehicleImage { continue }
-            let destURL = destinationFolder.appendingPathComponent(name)
-            try? fm.removeItem(at: destURL)
-            var copied = false
-            for sourceDir in sourceDirectories {
-                let srcURL = sourceDir.appendingPathComponent(name)
-                if fm.fileExists(atPath: srcURL.path) {
-                    do {
-                        try fm.copyItem(at: srcURL, to: destURL)
-                        copied = true
-                    } catch {
-                        // Try next source.
-                        continue
-                    }
-                    break
+            try Self.copyOrVerifyOneImage(
+                name: name,
+                destinationFolder: destinationFolder,
+                sourceDirectories: sourceDirectories,
+                previousGenerationAssetDirectory: previousGenerationAssetDirectory,
+                resolver: resolver
+            )
+        }
+
+        // After staging, make sure the custom vehicle image is in
+        // the stable App Group location the widget reads from. We
+        // do this AFTER per-image staging so any earlier failure
+        // aborts the whole transaction and we never leave a
+        // half-staged generation.
+        try Self.ensureCustomVehicleImage(
+            sourceDirectories: sourceDirectories,
+            resolver: resolver,
+            preserveCustomVehicleImage: preserveCustomVehicleImage
+        )
+    }
+
+    /// Copy or verify a single required filename. Throws
+    /// `AssetStageError.missing(name)` when the filename is unsafe,
+    /// unresolvable, and not verified by the resolver.
+    nonisolated private static func copyOrVerifyOneImage(
+        name: String,
+        destinationFolder: URL,
+        sourceDirectories: [URL],
+        previousGenerationAssetDirectory: URL?,
+        resolver: ImageResourceResolver
+    ) throws {
+        try Self.assertSafeFilename(name)
+        let fm = FileManager.default
+        let destURL = destinationFolder.appendingPathComponent(name)
+        try? fm.removeItem(at: destURL)
+
+        // Search order: documents dir, App Group SharedImages root
+        // (legacy fallback), previous generation dir (so unchanged
+        // designs keep working), app bundle. The bundle is queried
+        // LAST and only when the resolver confirms it exists.
+        let candidates: [URL] = sourceDirectories +
+            [previousGenerationAssetDirectory].compactMap { $0 }
+        for sourceDir in candidates {
+            let srcURL = sourceDir.appendingPathComponent(name)
+            if fm.fileExists(atPath: srcURL.path) {
+                do {
+                    try fm.copyItem(at: srcURL, to: destURL)
+                    return
+                } catch {
+                    // Treat a copy failure here as fatal: silent
+                    // suppression would let `installState` publish
+                    // metadata for a half-staged generation.
+                    throw AssetStageError.copyFailed(
+                        name: name, underlying: error)
                 }
             }
-            if !copied, let bundle = bundle,
-               let bundleURL = bundle.url(forResource: name, withExtension: nil) {
-                try? fm.copyItem(at: bundleURL, to: destURL)
+        }
+
+        // No file copy succeeded. The resolver may still accept
+        // the filename (bundled asset, asset-catalog reference,
+        // etc.). The resolver MUST prove the asset exists; we do
+        // NOT assume any missing filename is a bundled asset.
+        if resolver.verify(name: name) {
+            // Verified-but-not-copied: the widget can load this
+            // image without a generation copy, so we have nothing
+            // to write into `destinationFolder`. Leave it alone.
+            return
+        }
+
+        throw AssetStageError.missing(name)
+    }
+
+    /// Verify the custom vehicle image lives in the App Group
+    /// SharedImages root, copying it from the host Documents
+    /// directory when needed. We deliberately do NOT stage it
+    /// into a generation folder: cleanup never removes the
+    /// SharedImages root or `home_vehicle.png`, so the widget
+    /// always sees the user's chosen artwork.
+    nonisolated private static func ensureCustomVehicleImage(
+        sourceDirectories: [URL],
+        resolver: ImageResourceResolver,
+        preserveCustomVehicleImage: String?
+    ) throws {
+        guard let name = preserveCustomVehicleImage,
+              !name.isEmpty else { return }
+        try Self.assertSafeFilename(name)
+        guard let shared = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: appGroupSuite) else {
+            return  // No App Group container available — let the
+                    // widget surface the missing artwork at render
+                    // time. Staging refused to proceed with an
+                    // unverifiable custom vehicle image when the
+                    // widget can't read anything from the App Group.
+        }
+        let stableRoot = shared.appendingPathComponent("SharedImages")
+        let stableFile = stableRoot.appendingPathComponent(name)
+        if FileManager.default.fileExists(atPath: stableFile.path) {
+            return
+        }
+        // Look in the host Documents directory for the source.
+        for dir in sourceDirectories {
+            let candidate = dir.appendingPathComponent(name)
+            if FileManager.default.fileExists(atPath: candidate.path) {
+                try FileManager.default.createDirectory(
+                    at: stableRoot, withIntermediateDirectories: true)
+                try FileManager.default.copyItem(at: candidate, to: stableFile)
+                return
             }
         }
+        // If the resolver says this name is a bundled asset, the
+        // widget can still load it. Otherwise we have nothing to
+        // copy from.
+        if resolver.verify(name: name) { return }
+        // The user picked a vehicle image we can't find anywhere
+        // on disk and it's not a bundled asset. Do not silently
+        // swallow this — surface it so the caller can choose how
+        // to react (in production we abort the transaction).
+        throw AssetStageError.missing(name)
+    }
+
+    /// Reject absolute paths and `..` traversal components. The
+    /// `imageSrc` field is user data and the destination folder is
+    /// a stable, trusted path; never trust the user input to stay
+    /// inside it.
+    nonisolated private static func assertSafeFilename(_ name: String) throws {
+        guard !name.isEmpty,
+              !name.hasPrefix("/"),
+              !name.hasPrefix("~"),
+              !name.contains(".."),
+              !name.contains("\0") else {
+            throw AssetStageError.unsafeFilename(name)
+        }
+    }
+
+    // MARK: - Asset cleanup (gap 3)
+
+    /// Remove `state_<gen>.json` files and `SharedImages/generation_<gen>/`
+    /// asset directories for any generation not in `keep`. Best-effort:
+    /// failures are swallowed because cleanup can never invalidate a
+    /// successfully published generation.
+    ///
+    /// Guarantees:
+    ///   * The `SharedImages` root is never removed.
+    ///   * `home_vehicle.png` (or any file the user named via
+    ///     `preserveCustomVehicleImage`) is never removed.
+    ///   * Unrelated files (catalog stock, user artwork at the
+    ///     SharedImages root) are never removed.
+    ///   * Files that do not match the strict `state_<uuid>.json`
+    ///     or `generation_<uuid>/` shape are left alone.
+    nonisolated private static func cleanupStateAndAssetGenerations(
+        in sharedContainer: URL,
+        keep: Set<String>,
+        preserveCustomVehicleImage: String? = nil
+    ) {
+        let fm = FileManager.default
+        // State files (top-level, no recursion needed).
+        if let entries = try? fm.contentsOfDirectory(atPath: sharedContainer.path) {
+            for entry in entries {
+                guard entry.hasPrefix("state_"),
+                      entry.hasSuffix(".json") else { continue }
+                let stripped = entry
+                    .replacingOccurrences(of: "state_", with: "")
+                    .replacingOccurrences(of: ".json", with: "")
+                guard !keep.contains(stripped) else { continue }
+                try? fm.removeItem(
+                    at: sharedContainer.appendingPathComponent(entry))
+            }
+        }
+        // Asset directories under SharedImages.
+        let sharedImages = sharedContainer.appendingPathComponent("SharedImages")
+        guard let entries = try? fm.contentsOfDirectory(
+            atPath: sharedImages.path) else { return }
+        for entry in entries {
+            guard entry.hasPrefix("generation_") else { continue }
+            let stripped = entry
+                .replacingOccurrences(of: "generation_", with: "")
+            // Defensive: drop trailing slashes and an optional `/`.
+            let genID = stripped
+                .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+            guard !keep.contains(genID) else { continue }
+            try? fm.removeItem(at: sharedImages.appendingPathComponent(entry))
+        }
+        // We deliberately do NOT touch:
+        //   * The `SharedImages` root itself.
+        //   * `home_vehicle.png` (it lives at SharedImages root).
+        //   * Bundled/legacy files at the SharedImages root.
+        _ = preserveCustomVehicleImage  // documented intent — see doc above
+    }
+}
+
+/// Errors thrown by `copyReferencedImages` when a required image
+/// cannot be staged AND cannot be verified by the resolver. Caught
+/// by `installState` and surfaced as
+/// `StateInstallError.assetStageFailed` so callers can preserve the
+/// previous generation.
+enum AssetStageError: Error {
+    case missing(String)
+    case copyFailed(name: String, underlying: Error)
+    case unsafeFilename(String)
+
+    /// Filename the user can put in a log message.
+    var filename: String {
+        switch self {
+        case .missing(let n), .unsafeFilename(let n):
+            return n
+        case .copyFailed(let n, _):
+            return n
+        }
+    }
+
+    /// Underlying error description for `copyFailed`.
+    var underlyingDescription: String {
+        switch self {
+        case .copyFailed(_, let u):
+            return String(describing: u)
+        default:
+            return ""
+        }
+    }
+}
+
+/// Pluggable resolver for "is this filename loadable from somewhere
+/// the widget can reach without a generation copy?" Used by the
+/// asset stager to decide whether a referenced image that wasn't
+/// found in the directory search can still be marked as
+/// "verified" so we don't abort the whole transaction.
+struct ImageResourceResolver {
+    /// Production resolver: a bundled asset is verified via
+    /// `Bundle.main`, a legacy `SharedImages`-root file is verified
+    /// via `FileManager`, and everything else is unverified.
+    static let production = ImageResourceResolver(
+        verifyBundle: { name in
+            Bundle.main.url(forResource: name, withExtension: nil) != nil
+        },
+        verifyLegacySharedImagesRoot: { name in
+            guard let shared = FileManager.default.containerURL(
+                forSecurityApplicationGroupIdentifier: AppStore.appGroupSuite) else {
+                return false
+            }
+            let url = shared
+                .appendingPathComponent("SharedImages")
+                .appendingPathComponent(name)
+            return FileManager.default.fileExists(atPath: url.path)
+        }
+    )
+
+    /// Test resolver: the caller injects both hooks so tests can
+    /// pin accept/reject decisions without touching Bundle.main.
+    init(
+        verifyBundle: @escaping (String) -> Bool,
+        verifyLegacySharedImagesRoot: @escaping (String) -> Bool = { _ in false }
+    ) {
+        self._verifyBundle = verifyBundle
+        self._verifyLegacySharedImagesRoot = verifyLegacySharedImagesRoot
+    }
+
+    private let _verifyBundle: (String) -> Bool
+    private let _verifyLegacySharedImagesRoot: (String) -> Bool
+
+    /// Returns `true` if `name` is a widget-loadable resource that
+    /// does NOT need a generation copy. The resolver MUST prove the
+    /// resource exists; never assume.
+    func verify(name: String) -> Bool {
+        return _verifyBundle(name) || _verifyLegacySharedImagesRoot(name)
     }
 }

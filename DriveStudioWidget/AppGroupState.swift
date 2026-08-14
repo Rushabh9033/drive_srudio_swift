@@ -118,4 +118,15 @@ enum AppGroupState {
         cachedState = (generation: "", state: nil)
         return nil
     }
+
+    /// Drop the in-memory cache. The host process (`AppStore.saveState`)
+    /// calls this every time it writes a fresh generation so the next
+    /// read in any process — Runner, widget extension, App Intents — is
+    /// forced to re-fetch and re-hash instead of returning the stale
+    /// cached `WidgetState`. Safe to call repeatedly; `currentGeneration`
+    /// is reset on the next `loadState` call.
+    static func invalidateCache() {
+        cachedState = nil
+        currentGeneration = nil
+    }
 }

@@ -285,7 +285,9 @@ struct WidgetCanvas: View {
     }
 
     func loadImage(path: String) -> UIImage? {
-        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        guard let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            return nil
+        }
         let url = docs.appendingPathComponent(path)
         if let data = try? Data(contentsOf: url) { return UIImage(data: data) }
         return nil
@@ -475,7 +477,9 @@ struct LayerView: View {
     }
 
     func loadImage(path: String) -> UIImage? {
-        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        guard let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            return nil
+        }
         let url = docs.appendingPathComponent(path)
         if let data = try? Data(contentsOf: url) { return UIImage(data: data) }
         return nil

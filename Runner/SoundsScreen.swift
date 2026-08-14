@@ -458,14 +458,17 @@ struct SoundsScreenView: View {
         ) { result in
             do {
                 guard let selectedFile: URL = try result.get().first else { return }
-                
+
                 if selectedFile.startAccessingSecurityScopedResource() {
                     defer { selectedFile.stopAccessingSecurityScopedResource() }
-                    
+
                     let fm = FileManager.default
-                    let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first!
+                    guard let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first else {
+                        print("SoundsScreen: documents directory unavailable; cannot import custom sound")
+                        return
+                    }
                     let destUrl = docs.appendingPathComponent(selectedFile.lastPathComponent)
-                    
+
                     if fm.fileExists(atPath: destUrl.path) {
                         try? fm.removeItem(at: destUrl)
                     }

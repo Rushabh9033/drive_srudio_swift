@@ -28,8 +28,18 @@ struct RefreshDriveStudioWidgetIntent: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult {
+        // `snapshotAndSave()` writes the latest live telemetry into the
+        // App Group JSON and then asks the throttle for a widget reload.
+        // If anything actually changed (battery / charging / connection /
+        // speed), the throttle fires one reload. If nothing changed
+        // (`.noVisibleChange`) the throttle performs zero reloads — the
+        // widget is already showing the latest data, so a forced reload
+        // would burn WidgetKit budget for no user-visible effect.
+        //
+        // We deliberately do NOT call `WidgetReloadThrottle.shared.forceReload()`
+        // here: that would double the reload count for the common case
+        // where the snapshot also triggered one.
         TelemetryService.shared.snapshotAndSave()
-        WidgetReloadThrottle.shared.forceReload()
         return .result()
     }
 }
@@ -91,15 +101,18 @@ enum DriveStudioSlot: Int, AppEnum, CaseIterable {
 
 // MARK: - Switch Slot
 
-/// Writes `drive_studio_active_slot` to App Group defaults. The DriveStudio
-/// widget renders all four slots in the widget gallery, so this intent's
-/// effect is mainly to record the user's selection for future telemetry
-/// overlays (e.g. focused-slot dashboards in CarPlay Shortcuts).
+/// Writes `drive_studio_active_slot` to App Group defaults. The host app
+/// (`AppStore.applyPersistedActiveSlot`) reads this preference on launch
+/// and on every foreground transition, then focuses the chosen slot in
+/// the dashboard and triggers a widget reload. The DriveStudio widget
+/// renders all four slots in the gallery; this intent primarily affects
+/// which slot the dashboard highlights and which slot's draft the user
+/// sees first when they open Drive Studio.
 @available(iOS 16.0, *)
 struct SwitchDriveStudioSlotIntent: AppIntent {
     static var title: LocalizedStringResource = "Switch Drive Studio Slot"
     static var description = IntentDescription(
-        "Switches the Home Screen widget to display the contents of a specific slot (1 to 4)."
+        "Focuses a specific Drive Studio slot (1 to 4) on the dashboard. The host app reads this preference on its next foreground transition and refreshes the widget gallery."
     )
 
     static var openAppWhenRun: Bool = false
@@ -108,19 +121,24 @@ struct SwitchDriveStudioSlotIntent: AppIntent {
     var slot: DriveStudioSlot
 
     static var parameterSummary: some ParameterSummary {
-        Summary("Show \(\.$slot) on Drive Studio")
+        Summary("Focus slot \(\.$slot) in Drive Studio")
     }
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
         let index = max(0, min(3, slot.rawValue - 1))
-        let defaults = UserDefaults(suiteName: AppGroupContract.suiteName)
-        defaults?.set(index, forKey: "drive_studio_active_slot")
-        defaults?.synchronize()
-        // No widget currently consumes `drive_studio_active_slot`, so a
-        // timeline reload would be a no-op. The intent just records the
-        // preference for the next sync.
-        return .result(dialog: "Slot preference saved. Open Drive Studio to apply it.")
+        guard let defaults = UserDefaults(suiteName: AppGroupContract.suiteName) else {
+            // App Group unavailable — refuse rather than silently no-op.
+            return .result(dialog: "Could not save slot preference: App Group defaults unavailable.")
+        }
+        defaults.set(index, forKey: AppStore.activeSlotKey)
+        defaults.synchronize()
+        // The preference is now persisted. The host app reads it on
+        // its next foreground transition and applies it to
+        // `AppStore.activeSlotIndex`. We deliberately do NOT call
+        // WidgetCenter here — the host triggers the reload when it
+        // applies the change.
+        return .result(dialog: "Slot \(slot.rawValue) focused. Open Drive Studio to see it highlighted.")
     }
 }
 

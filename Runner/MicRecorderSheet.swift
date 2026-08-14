@@ -179,13 +179,16 @@ struct MicRecorderSheet: View {
                     try session.setActive(true)
 
                     let fm = FileManager.default
-                    let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first!
-                    
+                    guard let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first else {
+                        print("MicRecorderSheet: documents directory unavailable; cannot record")
+                        return
+                    }
+
                     let title = self.soundTitle.trimmingCharacters(in: .whitespacesAndNewlines)
                     let safeTitle = title.isEmpty ? "Voice_Recording_\(Int(Date().timeIntervalSince1970))" : title.replacingOccurrences(of: " ", with: "_")
                     let filename = "\(safeTitle).wav"
                     let url = docs.appendingPathComponent(filename)
-                    
+
                     if fm.fileExists(atPath: url.path) {
                         try? fm.removeItem(at: url)
                     }
@@ -238,6 +241,14 @@ struct MicRecorderSheet: View {
             audioRecorder = nil
             isRecording = false
             isRecorded = true
+
+            // **AVAudioSession lifecycle.** After recording finishes we
+            // return the session to `.playback` so other apps (Music,
+            // Maps navigation, CarPlay audio) can resume without the
+            // mic channel holding the audio route. We don't deactivate
+            // entirely because `togglePlayPreview` will immediately
+            // reuse the session.
+            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.allowBluetoothA2DP, .mixWithOthers])
         }
     }
 
@@ -280,7 +291,10 @@ struct MicRecorderSheet: View {
         let cleanName = displayTitle.replacingOccurrences(of: " ", with: "_").replacingOccurrences(of: "/", with: "_")
         let finalFilename = "\(cleanName).wav"
 
-        let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first!
+        guard let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            print("MicRecorderSheet: documents directory unavailable; cannot save recording")
+            return
+        }
         let finalDocsURL = docs.appendingPathComponent(finalFilename)
 
         if oldURL.path != finalDocsURL.path {
@@ -294,6 +308,12 @@ struct MicRecorderSheet: View {
             try? fm.removeItem(at: sharedURL)
             try? fm.copyItem(at: finalDocsURL, to: sharedURL)
         }
+
+        // **AVAudioSession lifecycle.** Release the mic channel so the
+        // OS can hand the route to other apps and so a future
+        // `setCategory(.playback)` call doesn't have to fight an
+        // already-active `.playAndRecord` session.
+        try? AVAudioSession.sharedInstance().setActive(false, options: [.notifyOthersOnDeactivation])
 
         onRecordingFinished(displayTitle, finalDocsURL)
         dismiss()

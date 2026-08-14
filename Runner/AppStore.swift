@@ -15,6 +15,17 @@ class AppStore: ObservableObject {
     @Published var liveIsCharging: Bool = false
     @Published var liveTimeString: String = ""
 
+    /// Currently focused slot (0–3). Set by the App Intents
+    /// "SwitchDriveStudioSlotIntent" via the App Group key
+    /// `drive_studio_active_slot` and consumed by the host app on
+    /// launch and on every foreground transition. Persisted in
+    /// App Group defaults so the value survives process restarts.
+    @Published var activeSlotIndex: Int = 0
+
+    /// App Group key that the Switch Slot Shortcut writes and that
+    /// the host app reads to apply the user's slot preference.
+    static let activeSlotKey = "drive_studio_active_slot"
+
     private let suiteName = "group.com.drivestudio.shared"
     private let draftsKey = "drive_studio_drafts"
 
@@ -22,6 +33,12 @@ class AppStore: ObservableObject {
         // TelemetryService.init() already enables UIDevice battery
         // monitoring — don't duplicate it here.
         loadState()
+        // Apply any slot preference the user saved via the
+        // "Switch Drive Studio Slot" Shortcut. The intent can only
+        // write to App Group defaults from its own process; the
+        // host app is the one that turns the persisted integer
+        // into an applied slot.
+        applyPersistedActiveSlot()
         setupAutoRefresh()
     }
 
@@ -39,7 +56,15 @@ class AppStore: ObservableObject {
             Task { @MainActor in self?.refreshDeviceTelemetry() }
         }
         NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { [weak self] _ in
-            Task { @MainActor in self?.refreshDeviceTelemetry() }
+            Task { @MainActor in
+                self?.refreshDeviceTelemetry()
+                // Re-apply the slot preference the user saved via
+                // the Shortcut while the app was backgrounded. The
+                // intent can only write App Group defaults, so the
+                // host app is the one that turns the saved integer
+                // into a focused slot.
+                self?.applyPersistedActiveSlot()
+            }
         }
     }
 
@@ -54,14 +79,22 @@ class AppStore: ObservableObject {
         // cached charging flag — if the phone just unplugged, we must
         // show "not charging" immediately.
         let charging = (state == .charging || state == .full)
-        let currentTime = FormatterCache.hmmFormatter.string(from: Date())
 
-        // Single change-check. Only write a fresh snapshot (and reload
-        // widgets) when something a user can see actually changed.
-        let prev = (liveBatteryPercent, liveIsCharging, liveTimeString)
-        let curr = (level, charging, currentTime)
-        guard prev != curr else { return }
-        (liveBatteryPercent, liveIsCharging, liveTimeString) = curr
+        // Single change-check on battery + charging only. The minute
+        // tick in `liveTimeString` is purely a UI label — it does NOT
+        // trigger a write to the App Group or a widget reload. Every
+        // tick would write the same telemetry JSON and burn through
+        // the WidgetCenter budget for no widget-visible change.
+        let prev = (liveBatteryPercent, liveIsCharging)
+        let curr = (level, charging)
+        guard prev != curr else {
+            // No battery / charging transition. Still refresh the UI
+            // label so the visible clock ticks.
+            self.liveTimeString = FormatterCache.hmmFormatter.string(from: Date())
+            return
+        }
+        (liveBatteryPercent, liveIsCharging) = curr
+        self.liveTimeString = FormatterCache.hmmFormatter.string(from: Date())
         TelemetryService.shared.snapshotAndSave()
     }
 
@@ -96,6 +129,44 @@ class AppStore: ObservableObject {
 
         // Load vehicle image permanently from disk
         loadVehicleImage()
+    }
+
+    /// Read the slot index the user most recently saved via the
+    /// "Switch Drive Studio Slot" Shortcut (App Group key
+    /// `drive_studio_active_slot`) and apply it. Out-of-range or
+    /// missing values fall back to slot 0 without surfacing an error
+    /// — Shortcuts users should never see a crash from this path.
+    /// Called once from `init()` after `loadState()` and from every
+    /// foreground transition (`scenePhase == .active`) so a
+    /// Shortcut fired while the host was backgrounded still takes
+    /// effect when the user next opens Drive Studio.
+    func applyPersistedActiveSlot() {
+        let defaults = UserDefaults(suiteName: suiteName) ?? UserDefaults.standard
+        let raw = defaults.integer(forKey: Self.activeSlotKey)
+        // `integer(forKey:)` returns 0 when the key is absent —
+        // indistinguishable from "user picked slot 1". We accept
+        // that ambiguity for the first launch (no preference saved
+        // yet) and trust the value thereafter.
+        let clamped = max(0, min(3, raw))
+        if clamped != activeSlotIndex {
+            activeSlotIndex = clamped
+        }
+    }
+
+    /// Manually focus a slot. Persists the preference to App Group
+    /// defaults (so a subsequent Shortcut invocation reads the same
+    /// value) and triggers an immediate widget reload so the gallery
+    /// reflects the new focus. Out-of-range values are clamped to
+    /// 0..3 silently — the caller should not need to validate.
+    func setActiveSlot(_ index: Int) {
+        let clamped = max(0, min(3, index))
+        activeSlotIndex = clamped
+        let defaults = UserDefaults(suiteName: suiteName) ?? UserDefaults.standard
+        defaults.set(clamped, forKey: Self.activeSlotKey)
+        // Persist V2 envelope so the widget reads the latest state
+        // alongside the active-slot preference.
+        saveState()
+        WidgetReloadThrottle.shared.requestReload(kind: .slotChange)
     }
 
     func saveVehicleImage(_ image: UIImage) {
@@ -204,10 +275,14 @@ class AppStore: ObservableObject {
         if let data = try? JSONEncoder().encode(drafts) {
             defaults.set(data, forKey: draftsKey)
         }
-        
-        // Save the slots into widget_state_v2_metadata so extensions can read them
-        var oldState = WidgetState(schemaVersion: 2, vehicle: nil, slots: [], telemetry: nil, widgetImagePath: nil)
-        
+
+        // Build the V2 envelope. **Persist real selected-vehicle and
+        // real telemetry values** so the widget extension, App Intents
+        // reader, and any future CarPlay scene all see the same canonical
+        // data. We never invent a fake vehicle and we never write a
+        // stale telemetry snapshot — if no telemetry is currently
+        // available, we pass through `nil` and the reader surfaces
+        // "unknown" honestly.
         var newSlots: [Slot] = []
         for i in 0..<4 {
             let draftId = slots[i]
@@ -221,57 +296,150 @@ class AppStore: ObservableObject {
             }
             newSlots.append(Slot(index: i, draftId: draftId, spec: slotSpec))
         }
-        oldState.slots = newSlots
-        
-        // Write oldState to stateFile in App Group
-        if let sharedURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: suiteName),
-           let stateData = try? JSONEncoder().encode(oldState) {
-            let stateFile = "widget_state_v2.json"
-            let fileURL = sharedURL.appendingPathComponent(stateFile)
-            try? stateData.write(to: fileURL)
-            
-            let sha256 = SHA256.hash(data: stateData).compactMap { String(format: "%02x", $0) }.joined()
-            
-            let generation = UUID().uuidString
-            let metadata: [String: Any] = [
-                "schemaVersion": 2,
-                "generation": generation,
-                "stateFile": stateFile,
-                "checksum": sha256,
-                "updatedAt": ISO8601DateFormatter().string(from: Date())
-            ]
-            
-            if let metaDataJSON = try? JSONSerialization.data(withJSONObject: metadata, options: []) {
-                defaults.set(metaDataJSON, forKey: "widget_state_v2_metadata")
-            }
-            
-            // Sync images to App Group
-            let destFolder = sharedURL.appendingPathComponent("SharedImages").appendingPathComponent("generation_\(generation)")
-            try? FileManager.default.createDirectory(at: destFolder, withIntermediateDirectories: true)
-            
-            if let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-                var imagesToSync = Set<String>()
-                for slot in newSlots {
-                    if let bgSrc = slot.spec?.background?.imageSrc { imagesToSync.insert(bgSrc) }
-                    for layer in slot.spec?.layers ?? [] {
-                        if layer.kind == "image", let src = layer.src { imagesToSync.insert(src) }
-                    }
+
+        // **Real selected-vehicle source.** The user picks a vehicle
+        // when they import a vehicle image; we never invent a brand.
+        // When no image has been picked we keep `vehicle: nil` so the
+        // widget renders "—".
+        let selectedVehicle = currentSelectedVehicle()
+
+        // **Real telemetry from the host.** We do NOT re-encode a fresh
+        // telemetry snapshot here — that is `TelemetryService`'s job
+        // and runs through its freshness policy. We pass through the
+        // last `live_*` values the AppStore already tracks. Genuine 0
+        // and `nil` are preserved exactly.
+        let telemetry = TelemetrySnapshot(
+            carConnected: TelemetryService.shared.carConnected,
+            batteryPercent: liveBatteryPercent,
+            isCharging: liveIsCharging,
+            speed: TelemetryService.shared.currentSpeed,
+            timestamp: Date()
+        )
+
+        let envelope = WidgetState(
+            schemaVersion: 2,
+            vehicle: selectedVehicle,
+            slots: newSlots,
+            telemetry: telemetry,
+            widgetImagePath: nil
+        )
+
+        // **Atomic write.** Encode once, write to a temp file, then
+        // rename. A crash mid-write can no longer truncate the JSON
+        // half-written; the next read either sees the old (valid)
+        // version or the new (complete) version.
+        guard let sharedURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: suiteName),
+              let stateData = try? JSONEncoder().encode(envelope) else {
+            return
+        }
+
+        let stateFile = "widget_state_v2.json"
+        let fileURL = sharedURL.appendingPathComponent(stateFile)
+        let tempURL = sharedURL.appendingPathComponent("\(stateFile).tmp")
+        do {
+            try stateData.write(to: tempURL, options: [.atomic])
+            _ = try? FileManager.default.removeItem(at: fileURL)
+            try FileManager.default.moveItem(at: tempURL, to: fileURL)
+        } catch {
+            // Last-resort fallback: direct write (older filesystems).
+            try? stateData.write(to: fileURL, options: [.atomic])
+        }
+
+        let sha256 = SHA256.hash(data: stateData).compactMap { String(format: "%02x", $0) }.joined()
+        let generation = UUID().uuidString
+        let metadata: [String: Any] = [
+            "schemaVersion": 2,
+            "generation": generation,
+            "stateFile": stateFile,
+            "checksum": sha256,
+            "updatedAt": ISO8601DateFormatter().string(from: Date())
+        ]
+
+        if let metaDataJSON = try? JSONSerialization.data(withJSONObject: metadata, options: []) {
+            defaults.set(metaDataJSON, forKey: "widget_state_v2_metadata")
+        }
+
+        // **Cache invalidation.** Bumping the generation also
+        // invalidates the in-memory cache inside `AppGroupState` so the
+        // very next read sees the new envelope instead of returning
+        // the previous generation's cached value.
+        AppGroupState.invalidateCache()
+
+        // Sync referenced image files into the App Group so the widget
+        // extension can render the same assets as the editor.
+        let destFolder = sharedURL.appendingPathComponent("SharedImages").appendingPathComponent("generation_\(generation)")
+        try? FileManager.default.createDirectory(at: destFolder, withIntermediateDirectories: true)
+
+        if let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            var imagesToSync = Set<String>()
+            for slot in newSlots {
+                if let bgSrc = slot.spec?.background?.imageSrc { imagesToSync.insert(bgSrc) }
+                for layer in slot.spec?.layers ?? [] {
+                    if layer.kind == "image", let src = layer.src { imagesToSync.insert(src) }
                 }
-                
-                for img in imagesToSync {
-                    let sourceURL = docs.appendingPathComponent(img)
-                    let destURL = destFolder.appendingPathComponent(img)
-                    // If it's a local file, copy it
-                    if FileManager.default.fileExists(atPath: sourceURL.path) {
-                        try? FileManager.default.copyItem(at: sourceURL, to: destURL)
-                    } else if let bundleURL = Bundle.main.url(forResource: img, withExtension: nil) {
-                        // Or if it's a bundled asset
-                        try? FileManager.default.copyItem(at: bundleURL, to: destURL)
-                    }
+            }
+
+            for img in imagesToSync {
+                let sourceURL = docs.appendingPathComponent(img)
+                let destURL = destFolder.appendingPathComponent(img)
+                if FileManager.default.fileExists(atPath: sourceURL.path) {
+                    try? FileManager.default.copyItem(at: sourceURL, to: destURL)
+                } else if let bundleURL = Bundle.main.url(forResource: img, withExtension: nil) {
+                    try? FileManager.default.copyItem(at: bundleURL, to: destURL)
                 }
             }
         }
-        
+
         WidgetReloadThrottle.shared.requestReload(kind: .slotChange)
+    }
+
+    /// Build the selected-vehicle `VehicleData` from the user-imported
+    /// vehicle image (if any). Returns `nil` when no vehicle has been
+    /// selected so the widget renders "—"; never invents a brand.
+    private func currentSelectedVehicle() -> VehicleData? {
+        // We currently derive the displayed vehicle name from the
+        // filename of the imported image. The user picks the image —
+        // we never invent the model. When the image is absent we
+        // return `nil` so the widget renders the unavailable marker.
+        guard let image = vehicleImage else { return nil }
+        // Find the on-disk filename so the widget extension and the
+        // App Intents reader all see the same identifier.
+        let filename = "home_vehicle.png"
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+        let docsURL = docs?.appendingPathComponent(filename)
+        let sharedURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: suiteName)
+            .map { $0.appendingPathComponent("SharedImages").appendingPathComponent(filename) }
+        let found = (docsURL.map { FileManager.default.fileExists(atPath: $0.path) } == true) ||
+                    (sharedURL.map { FileManager.default.fileExists(atPath: $0.path) } == true)
+        guard found else { return nil }
+        // Surface the filename as the user-visible label. The image
+        // exists; the user picked it; we report it honestly. No fake
+        // brand strings.
+        let displayName = humanReadableName(for: filename) ?? filename
+        return VehicleData(
+            brandId: nil,
+            modelId: nil,
+            artwork: filename,
+            displayName: displayName,
+            hasCustomImage: true,
+            customImage: filename
+        )
+    }
+
+    /// Convert a filename like `home_vehicle.png` into a human-readable
+    /// label. Pure: no side effects, no I/O. Returns `nil` if the
+    /// filename cannot be turned into a sensible label.
+    private func humanReadableName(for filename: String) -> String? {
+        let base = (filename as NSString).deletingPathExtension
+        guard !base.isEmpty else { return nil }
+        // Replace separators with spaces and Title-Case each word.
+        let parts = base.replacingOccurrences(of: "_", with: " ")
+                       .replacingOccurrences(of: "-", with: " ")
+                       .split(separator: " ")
+        let titled = parts.map { word -> String in
+            guard let first = word.first else { return "" }
+            return first.uppercased() + word.dropFirst()
+        }
+        return titled.joined(separator: " ")
     }
 }

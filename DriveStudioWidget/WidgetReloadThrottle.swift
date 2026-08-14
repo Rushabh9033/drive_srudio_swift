@@ -12,15 +12,22 @@ import WidgetKit
 ///   * Rate-limits speed-driven reload requests to once every
 ///     `minSpeedReloadInterval` (5 minutes by default).
 ///   * Allows immediate reloads for events that genuinely matter
-///     (battery-level change, charging-state change, foreground
-///     activation, slot/design save). These are signals the user
-///     acted on, so an immediate WidgetKit prompt is appropriate.
+///     (battery-level change, charging-state change, connection-state
+///     change, foreground activation, slot/design save).
+///   * Performs **zero** WidgetCenter calls when nothing visible
+///     changed (`.noVisibleChange`).
 ///
 /// The throttle does NOT add background timers or polling. The
 /// 5-minute minimum is enforced only when a caller asks; if no
 /// caller asks for a reload, nothing fires.
 ///
 /// All state lives in memory. `reset()` is for tests.
+///
+/// **Injectable for tests.** Production code uses `WidgetReloadThrottle.shared`
+/// which calls the real `WidgetCenter`. Tests construct a
+/// `WidgetReloadThrottle(reloadHook: { count += 1 })` so the test never
+/// touches `WidgetCenter` and never crashes on simulator runs without a
+/// widget host.
 final class WidgetReloadThrottle {
 
     static let shared = WidgetReloadThrottle()
@@ -33,30 +40,45 @@ final class WidgetReloadThrottle {
     private var lastSpeedReload: Date? = nil
     private let lock = NSLock()
 
-    init() {}
+    /// Closure invoked whenever the throttle forwards a reload to
+    /// WidgetCenter. Production code points this at
+    /// `WidgetCenter.shared.reloadAllTimelines`. Tests supply a
+    /// counting closure so the assertion side can verify the throttle
+    /// without touching WidgetCenter (which is unsafe to call from
+    /// unit tests).
+    private let reloadHook: () -> Void
+
+    init(reloadHook: @escaping () -> Void = { WidgetCenter.shared.reloadAllTimelines() }) {
+        self.reloadHook = reloadHook
+    }
 
     /// Request a reload. The caller specifies `kind`; only
-    /// `.speedChange` is rate-limited. All other kinds (battery,
-    /// charging, foreground, slot save, design save) pass through
-    /// immediately.
+    /// `.speedChange` is rate-limited. Battery / charging /
+    /// connection / foreground / slot / design save pass through
+    /// immediately. `.noVisibleChange` performs zero reloads.
     ///
-    /// Returns `true` when the reload was actually requested from
-    /// WidgetKit, `false` when it was suppressed by the throttle.
+    /// Returns `true` when a reload was actually requested from
+    /// WidgetKit, `false` when it was suppressed (by the throttle
+    /// or by `.noVisibleChange`).
     @discardableResult
-    func requestReload(kind: ReloadKind = .other,
+    func requestReload(kind: WidgetReloadKind = .other,
                        now: Date = Date()) -> Bool {
         switch kind {
         case .speedChange:
             return requestSpeedReload(now: now)
         case .batteryLevelChange,
              .chargingStateChange,
+             .connectionStateChange,
              .foregroundActivation,
              .slotChange,
              .designSave,
              .other:
             // Immediate. The throttle does not gate these.
-            WidgetCenter.shared.reloadAllTimelines()
+            reloadHook()
             return true
+        case .noVisibleChange:
+            // Identical telemetry — perform zero reloads.
+            return false
         }
     }
 
@@ -65,7 +87,7 @@ final class WidgetReloadThrottle {
     /// `lastSpeedReload`, so a subsequent speed-driven request is
     /// still governed by the 5-minute minimum.
     func forceReload() {
-        WidgetCenter.shared.reloadAllTimelines()
+        reloadHook()
     }
 
     /// Reset internal state. Test-only.
@@ -90,26 +112,33 @@ final class WidgetReloadThrottle {
             return false
         }
         lastSpeedReload = now
-        WidgetCenter.shared.reloadAllTimelines()
+        reloadHook()
         return true
     }
+}
 
-    /// Categorizes why a reload is being requested. The throttle uses
-    /// this to decide whether to apply the speed-rate-limit.
-    enum ReloadKind {
-        /// GPS speed reading changed. Rate-limited.
-        case speedChange
-        /// Battery percentage reading crossed a boundary. Immediate.
-        case batteryLevelChange
-        /// Charging-state reading flipped. Immediate.
-        case chargingStateChange
-        /// App became active. Immediate.
-        case foregroundActivation
-        /// User assigned a slot to a draft. Immediate.
-        case slotChange
-        /// User saved a design. Immediate.
-        case designSave
-        /// Anything else not enumerated. Immediate.
-        case other
-    }
+/// Categorizes why a reload is being requested. The throttle uses
+/// this to decide whether to apply the speed-rate-limit. Lives at
+/// the top level (not nested in the throttle class) so both Runner
+/// and the widget extension compile cleanly when they reference the
+/// enum from their respective targets.
+enum WidgetReloadKind {
+    /// GPS speed reading changed. Rate-limited.
+    case speedChange
+    /// Battery percentage reading crossed a boundary. Immediate.
+    case batteryLevelChange
+    /// Charging-state reading flipped. Immediate.
+    case chargingStateChange
+    /// Car-link state (carConnected) flipped. Immediate.
+    case connectionStateChange
+    /// App became active. Immediate.
+    case foregroundActivation
+    /// User assigned a slot to a draft. Immediate.
+    case slotChange
+    /// User saved a design. Immediate.
+    case designSave
+    /// Anything else not enumerated. Immediate.
+    case other
+    /// Nothing visible changed. Performs zero reloads.
+    case noVisibleChange
 }

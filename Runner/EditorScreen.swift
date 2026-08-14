@@ -545,8 +545,13 @@ struct EditorScreen: View {
             let dir: URL
             if let groupURL = fm.containerURL(forSecurityApplicationGroupIdentifier: "group.com.drivestudio.shared") {
                 dir = groupURL
+            } else if let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first {
+                dir = docs
             } else {
-                dir = fm.urls(for: .documentDirectory, in: .userDomainMask).first!
+                // Documents directory unavailable — skip the write
+                // rather than crashing. The widget will fall back to
+                // the next-most-recent render.
+                return
             }
             let fileURL = dir.appendingPathComponent("custom_\(draftId).png")
             if let data = uiImage.pngData() {

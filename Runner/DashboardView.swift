@@ -173,8 +173,13 @@ struct DashboardView: View {
                                 } else {
                                     targetSlotPicker = SlotPickerTarget(id: i)
                                 }
+                                // Single tap on a populated slot also
+    // focuses it, so the user's manual focus and the
+    // Shortcut-driven focus share the same persisted
+    // preference and the same widget-reload trigger.
+    store.setActiveSlot(i)
                             }) {
-                                SlotCell(index: i, draftId: store.slots[i])
+                                SlotCell(index: i, draftId: store.slots[i], isFocused: i == store.activeSlotIndex)
                             }
                         }
                     }
@@ -189,12 +194,31 @@ struct DashboardView: View {
                         MonoLabel(text: "Setup status")
                         Spacer().frame(height: 16)
 
+                        // First row of the card now hosts the GPS status
+                        // + the user-driven GPS action button (set up
+                        // permission here, never at app launch).
                         StatusRow(
                             icon: gpsStatusIcon(),
                             iconColor: gpsStatusColor(),
                             label: "Telemetry permissions",
                             value: gpsStatusText()
                         )
+                        Divider().background(DriveColors.border).padding(.vertical, 12)
+                        Button(action: { handleGpsActionTap() }) {
+                            HStack(spacing: 8) {
+                                Image(systemName: gpsActionIcon())
+                                    .font(.system(size: 14, weight: .semibold))
+                                Text(gpsActionLabel())
+                                    .font(.system(size: 14, weight: .semibold))
+                            }
+                            .foregroundColor(gpsActionForeground())
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(gpsActionBackground())
+                            .cornerRadius(12)
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(gpsActionBorder(), lineWidth: 1))
+                            .contentShape(RoundedRectangle(cornerRadius: 12))
+                        }
                         Divider().background(DriveColors.border).padding(.vertical, 12)
                         StatusRow(icon: "battery.100", iconColor: DriveColors.success,
                                   label: "Battery reporting", value: batteryValueText(for: store))
@@ -366,6 +390,63 @@ private func gpsStatusColor() -> Color {
     }
 }
 
+// MARK: - GPS action button (user-driven, never automatic)
+@MainActor
+private func gpsActionIcon() -> String {
+    switch CLLocationManager.authorizationStatus() {
+    case .authorizedAlways, .authorizedWhenInUse: return "location.fill"
+    case .denied, .restricted:                   return "gearshape.fill"
+    default:                                      return "location"
+    }
+}
+
+@MainActor
+private func gpsActionLabel() -> String {
+    switch CLLocationManager.authorizationStatus() {
+    case .authorizedAlways, .authorizedWhenInUse: return "GPS monitoring"
+    case .denied, .restricted:                   return "Open Settings"
+    default:                                      return "Enable GPS speed"
+    }
+}
+
+@MainActor
+private func gpsActionForeground() -> Color {
+    switch CLLocationManager.authorizationStatus() {
+    case .authorizedAlways, .authorizedWhenInUse: return DriveColors.success
+    default:                                      return DriveColors.foreground
+    }
+}
+
+@MainActor
+private func gpsActionBackground() -> Color {
+    switch CLLocationManager.authorizationStatus() {
+    case .authorizedAlways, .authorizedWhenInUse: return DriveColors.success.opacity(0.15)
+    default:                                      return DriveColors.secondary
+    }
+}
+
+@MainActor
+private func gpsActionBorder() -> Color {
+    switch CLLocationManager.authorizationStatus() {
+    case .authorizedAlways, .authorizedWhenInUse: return DriveColors.success.opacity(0.6)
+    default:                                      return DriveColors.border
+    }
+}
+
+@MainActor
+private func handleGpsActionTap() {
+    let status = CLLocationManager.authorizationStatus()
+    if status == .denied || status == .restricted {
+        // Take the user to this app's settings page. They can flip the
+        // permission on there and come back.
+        if let url = URL(string: UIApplication.openSettingsURLString) {
+            UIApplication.shared.open(url)
+        }
+    } else {
+        _ = TelemetryService.shared.beginLocationIfAuthorized()
+    }
+}
+
 @MainActor
 private func batterySummary(for store: AppStore) -> String {
     let battery: String
@@ -382,6 +463,7 @@ private func batterySummary(for store: AppStore) -> String {
 struct SlotCell: View {
     let index: Int
     let draftId: String?
+    var isFocused: Bool = false
     @EnvironmentObject var store: AppStore
 
     var resolvedSpec: WidgetSpec? {
@@ -412,7 +494,13 @@ struct SlotCell: View {
                         WidgetCanvas(spec: .constant(spec), selectedLayerIndex: .constant(nil))
                             .frame(height: 120)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(DriveColors.border.opacity(0.4), lineWidth: 1))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(
+                                        isFocused ? DriveColors.primary : DriveColors.border.opacity(0.4),
+                                        lineWidth: isFocused ? 2.5 : 1
+                                    )
+                            )
                             .allowsHitTesting(false)
                     } else {
                         RoundedRectangle(cornerRadius: 12)
@@ -431,9 +519,16 @@ struct SlotCell: View {
                         }
                     }
                 }
-                
+
                 HStack {
-                    MonoLabel(text: "Slot \(index + 1)")
+                    HStack(spacing: 4) {
+                        MonoLabel(text: "Slot \(index + 1)")
+                        if isFocused {
+                            Image(systemName: "scope")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundColor(DriveColors.primary)
+                        }
+                    }
                     Spacer()
                     Text(resolvedName)
                         .font(.system(size: 11, weight: .semibold))

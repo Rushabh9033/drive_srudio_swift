@@ -960,8 +960,9 @@ class RunnerTests: XCTestCase {
         let t0 = Date(timeIntervalSince1970: 1_726_000_000)
         // These never touch lastSpeedReloadTime because they are
         // immediate pass-throughs.
-        for kind in [WidgetReloadThrottle.ReloadKind.batteryLevelChange,
+        for kind in [WidgetReloadKind.batteryLevelChange,
                      .chargingStateChange,
+                     .connectionStateChange,
                      .foregroundActivation,
                      .slotChange,
                      .designSave,
@@ -972,7 +973,80 @@ class RunnerTests: XCTestCase {
         }
     }
 
-    // MARK: - Background-mode audits
+    // MARK: - AppGroupState cache invalidation
+
+/// `AppStore.saveState` calls `AppGroupState.invalidateCache()` after
+/// writing a fresh generation. The widget / App Intents readers must
+/// observe the new envelope on the next `loadState()` call, not return
+/// the stale cached one from before the invalidation.
+func testAppGroupStateCacheInvalidationForcesReread() {
+    let defaults = UserDefaults(suiteName: AppGroupContract.suiteName)
+        ?? UserDefaults.standard
+    defaults.removeObject(forKey: AppGroupContract.v2MetadataKey)
+
+    // First read populates the cache.
+    _ = AppGroupState.loadState()
+    AppGroupState.invalidateCache()
+
+    // After invalidation, `currentGeneration` is cleared so the next
+    // read path takes the slow V2 branch and re-validates the
+    // metadata blob rather than trusting the cached state.
+    XCTAssertNil(AppGroupState.currentGeneration,
+                 "invalidateCache must clear currentGeneration so the next reader re-validates metadata")
+}
+
+// MARK: - Active-slot preference (SwitchDriveStudioSlotIntent)
+
+/// The host app exposes `activeSlotKey` so App Intents and the host
+/// share one contract. A typo here would silently break the
+/// SwitchSlot Shortcut's effect.
+func testActiveSlotKeyContractIsStable() {
+    XCTAssertEqual(AppStore.activeSlotKey, "drive_studio_active_slot")
+}
+
+/// `setActiveSlot` clamps out-of-range values to 0..3 silently and
+/// persists the clamped integer to App Group defaults. This guards
+/// against a user-supplied Shortcut parameter or corrupted App
+/// Group blob pointing the host at a non-existent slot.
+func testActiveSlotIsClampedToValidRange() async {
+    let defaults = UserDefaults(suiteName: AppGroupContract.suiteName)
+        ?? UserDefaults.standard
+    defaults.removeObject(forKey: AppStore.activeSlotKey)
+    await MainActor.run {
+        AppStore.shared.setActiveSlot(99)
+        XCTAssertEqual(AppStore.shared.activeSlotIndex, 3,
+                       "setActiveSlot(99) must clamp to slot index 3")
+        XCTAssertEqual(defaults.integer(forKey: AppStore.activeSlotKey), 3,
+                       "Clamped value must be persisted to App Group defaults")
+        AppStore.shared.setActiveSlot(-5)
+        XCTAssertEqual(AppStore.shared.activeSlotIndex, 0,
+                       "setActiveSlot(-5) must clamp to slot index 0")
+        XCTAssertEqual(defaults.integer(forKey: AppStore.activeSlotKey), 0,
+                       "Clamped value must be persisted to App Group defaults")
+    }
+}
+
+/// `applyPersistedActiveSlot` reads the value the
+/// `SwitchDriveStudioSlotIntent` writes into App Group defaults and
+/// applies it to `activeSlotIndex`. Out-of-range or missing values
+/// fall back to slot 0 without surfacing an error.
+func testApplyPersistedActiveSlotHonorsPersistedValue() async {
+    let defaults = UserDefaults(suiteName: AppGroupContract.suiteName)
+        ?? UserDefaults.standard
+    defaults.removeObject(forKey: AppStore.activeSlotKey)
+    defaults.set(2, forKey: AppStore.activeSlotKey)
+
+    await MainActor.run {
+        // Force a non-matching prior value to prove the read happens.
+        AppStore.shared.activeSlotIndex = 0
+        AppStore.shared.applyPersistedActiveSlot()
+        XCTAssertEqual(AppStore.shared.activeSlotIndex, 2,
+                       "Persisted slot index 2 must be applied on next read")
+    }
+    defaults.removeObject(forKey: AppStore.activeSlotKey)
+}
+
+// MARK: - Background-mode audits
 
     /// `UIBackgroundModes → fetch` must not be declared because no
     /// `application:performFetchWithCompletionHandler:` implementation

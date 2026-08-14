@@ -12,10 +12,17 @@ struct LayerSettingsSheet: View {
     init(spec: Binding<WidgetSpec>, layerIndex: Int) {
         self._spec = spec
         self.layerIndex = layerIndex
-        // Safe access
-        let initialLayer = (layerIndex >= 0 && layerIndex < (spec.wrappedValue.layers?.count ?? 0))
-            ? spec.wrappedValue.layers![layerIndex]
-            : WidgetLayer.newText() // Fallback
+        // Safe access — the layer at `layerIndex` may not exist (the
+        // editor can pass an out-of-range index when a layer was just
+        // deleted). Fall back to a fresh empty text layer instead of
+        // force-unwrapping a nil array.
+        let layers = spec.wrappedValue.layers ?? []
+        let initialLayer: WidgetLayer
+        if layerIndex >= 0 && layerIndex < layers.count {
+            initialLayer = layers[layerIndex]
+        } else {
+            initialLayer = WidgetLayer.newText()
+        }
         self._draft = State(initialValue: initialLayer)
     }
     

@@ -63,10 +63,18 @@
 	     unless a future build starts BT LE scan. Car link on iPhone = manual toggle. -->
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Drive Studio uses your photo library for custom vehicle images and widget layer artwork.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Drive Studio may save edited widget previews to your library when you export.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>Drive Studio uses the camera so you can photograph your car for widget artwork.</string>
+	<!-- NSPhotoLibraryAddUsageDescription intentionally absent. Drive Studio
+	currently only READS photos (PhotosPicker for vehicle / widget layer
+	artwork); it does not write to the user's library. Declaring
+	NSPhotoLibraryAddUsageDescription without an actual save path is a
+	rejection risk, so it stays out until a future Export feature is added
+	and a UIImageWriteToSavedPhotosAlbum (or equivalent) call site exists. -->
+	<!-- NSCameraUsageDescription intentionally absent. The editor currently
+	only imports images from the photo library (PhotosPicker); no
+	UIImagePickerController in `camera` mode is presented. Declaring the
+	camera permission without a real capture flow is a rejection risk.
+	Add it back when a capture-from-camera button is added to
+	`EditorScreen.swift`. -->
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Drive Studio uses your location while the app is open to show live GPS speed on speedometer widgets. Speed is never invented when GPS is unavailable.</string>
 	<!-- NSLocationAlwaysAndWhenInUseUsageDescription intentionally absent.

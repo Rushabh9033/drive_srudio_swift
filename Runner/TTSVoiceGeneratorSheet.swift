@@ -164,7 +164,11 @@ struct TTSVoiceGeneratorSheet: View {
 
         let filename = "tts_\(cleanName.replacingOccurrences(of: " ", with: "_"))_\(UUID().uuidString.prefix(4)).wav"
         let fm = FileManager.default
-        let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first!
+        guard let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            print("TTSVoiceGeneratorSheet: documents directory unavailable; cannot generate TTS")
+            isGenerating = false
+            return
+        }
         let outputURL = docs.appendingPathComponent(filename)
 
         if fm.fileExists(atPath: outputURL.path) {

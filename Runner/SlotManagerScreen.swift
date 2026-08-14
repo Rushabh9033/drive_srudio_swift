@@ -16,7 +16,7 @@ struct SlotManagerScreen: View {
                 DriveColors.background.ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                    Text("Drag slots to reorder. Position 1 automatically displays on CarPlay.")
+                    Text("Drag slots to reorder. Position 1 is your Home Screen primary slot.")
                         .font(.system(size: 13))
                         .foregroundColor(DriveColors.mutedFg)
                         .padding(.horizontal, 20)

@@ -33,6 +33,133 @@ extension Notification.Name {
     /// through `defaults.set` calls.
     static let significantSpeedDelta: Double = 1.0
 
+    /// Pure decision output. Decoupled from `WidgetCenter` so the
+    /// policy can be unit-tested without ever touching real
+    /// WidgetKit. The `reloadKind` is `nil` when no reload should
+    /// be requested at all (e.g. an unchanged reading within the
+    /// heartbeat window where persistence is also being skipped).
+    struct PersistenceDecision: Equatable {
+        let shouldPersist: Bool
+        let reloadKind: WidgetReloadKind?
+        let timestamp: Date
+
+        static func == (lhs: PersistenceDecision,
+                        rhs: PersistenceDecision) -> Bool {
+            return lhs.shouldPersist == rhs.shouldPersist
+                && lhs.reloadKind == rhs.reloadKind
+                && lhs.timestamp == rhs.timestamp
+        }
+    }
+
+    /// Pure telemetry persistence policy. No I/O, no shared state,
+    /// no `WidgetCenter`. The production code calls this from
+    /// `persistTelemetryIfMeaningful(...)` after gathering device
+    /// readings; tests call it directly with synthetic inputs to
+    /// verify exact reload-kind selection without spinning up a
+    /// real `TelemetryService`.
+    ///
+    /// Reload-kind selection (priority order):
+    /// 1. `chargingStateChange` if `isCharging` flipped.
+    /// 2. `connectionStateChange` if `carConnected` flipped.
+    /// 3. `batteryLevelChange` if `batteryPercent` flipped.
+    /// 4. `speedChange` if speed is available (non-nil) AND either
+    ///    (a) availability flipped (nil ↔ non-nil) or (b) speed
+    ///    drifted ≥ `significantSpeedDelta` from baseline or (c) the
+    ///    trigger was a heartbeat (which means the persisted
+    ///    timestamp is freshening and the widget needs to know the
+    ///    speed is still valid — otherwise the freshness policy
+    ///    would expire the speed after five minutes of GPS activity
+    ///    while the foreground app continues to heartbeat).
+    /// 5. `noVisibleChange` for heartbeat with unavailable speed
+    ///    and no other visible change (e.g. the device is
+    ///    stationary and the GPS fix has not arrived yet).
+    /// 6. `nil` for the "do not persist and do not reload" case.
+    enum TelemetryPersistencePolicy {
+        struct SnapshotShape: Equatable {
+            let carConnected: Bool
+            let batteryPercent: Int?
+            let isCharging: Bool
+            let speed: Double?
+        }
+
+        static func evaluate(
+            now: Date,
+            currentSpeed: Double?,
+            batteryPercent: Int?,
+            isCharging: Bool,
+            carConnected: Bool,
+            previousSnapshot: SnapshotShape?,
+            lastPersistenceDate: Date?,
+            heartbeatInterval: TimeInterval,
+            significantSpeedDelta: Double
+        ) -> PersistenceDecision {
+            let firstSnapshot = (previousSnapshot == nil)
+
+            let batteryChanged = previousSnapshot?.batteryPercent != batteryPercent
+            let chargingChanged = previousSnapshot?.isCharging != isCharging
+            let connectionChanged = previousSnapshot?.carConnected != carConnected
+            let availabilityChanged = (previousSnapshot?.speed == nil)
+                != (currentSpeed == nil)
+
+            let speedDeltaAgainstBaseline: Double = {
+                guard let baseline = previousSnapshot?.speed,
+                      let current = currentSpeed else { return 0 }
+                return abs(current - baseline)
+            }()
+            let speedMeaningful = speedDeltaAgainstBaseline >= significantSpeedDelta
+
+            let heartbeatDue: Bool = {
+                guard let last = lastPersistenceDate else { return true }
+                return now.timeIntervalSince(last) >= heartbeatInterval
+            }()
+
+            let shouldPersist = firstSnapshot
+                || batteryChanged || chargingChanged
+                || connectionChanged || availabilityChanged
+                || speedMeaningful || heartbeatDue
+
+            // No persist → no reload. Avoids burning WidgetKit
+            // budget for telemetry that did not actually change.
+            guard shouldPersist else {
+                return PersistenceDecision(
+                    shouldPersist: false,
+                    reloadKind: nil,
+                    timestamp: now
+                )
+            }
+
+            let reloadKind: WidgetReloadKind?
+            if chargingChanged {
+                reloadKind = .chargingStateChange
+            } else if connectionChanged {
+                reloadKind = .connectionStateChange
+            } else if batteryChanged {
+                reloadKind = .batteryLevelChange
+            } else if speedMeaningful || availabilityChanged {
+                reloadKind = .speedChange
+            } else if currentSpeed != nil {
+                // Heartbeat with valid speed: keep the widget's
+                // freshness timer alive by going through the
+                // `.speedChange` rate-limited path. Without this,
+                // `WidgetSnapshotFreshness` would expire the speed
+                // after five minutes of GPS activity even though the
+                // foreground keeps publishing heartbeat snapshots.
+                reloadKind = .speedChange
+            } else {
+                // Heartbeat with unavailable speed and no other
+                // visible change: nothing for the widget to render
+                // differently. Throttle performs zero reloads.
+                reloadKind = .noVisibleChange
+            }
+
+            return PersistenceDecision(
+                shouldPersist: true,
+                reloadKind: reloadKind,
+                timestamp: now
+            )
+        }
+    }
+
     private let locationManager = CLLocationManager()
     /// Latest GPS speed in km/h, exactly as Core Location reported it.
     /// `nil` means there is no valid fix yet. A genuine `0` means the
@@ -50,6 +177,14 @@ extension Notification.Name {
     /// defaults. Cleared by `resetPersistenceState()` between tests.
     private var lastPersistenceDate: Date? = nil
 
+    /// Test seam. Production code calls
+    /// `WidgetReloadThrottle.shared.requestReload(kind:now:)`; tests
+    /// inject a counting closure so they can assert exact
+    /// `WidgetCenter` call counts without ever touching real
+    /// WidgetKit. The closure receives the same `(kind, now)`
+    /// tuple that production would feed to the throttle.
+    var reloadRequester: ((WidgetReloadKind, Date) -> Void)?
+
     private var lastWasConnected: Bool = false
 
     /// Whether the phone currently considers itself connected to a car
@@ -64,6 +199,15 @@ extension Notification.Name {
         self.clock = { Date() }
         super.init()
         Self.configureShared(self)
+        // Production reload path goes through the shared throttle.
+        // The throttle itself handles rate limiting; we only forward
+        // `(kind, now)` and trust it not to call `WidgetCenter` more
+        // than once per five minutes for `.speedChange`.
+        self.reloadRequester = { kind, now in
+            if #available(iOS 14.0, *) {
+                WidgetReloadThrottle.shared.requestReload(kind: kind, now: now)
+            }
+        }
     }
 
     /// Designated test initializer. Pass a fixed-clock closure (or a
@@ -74,6 +218,8 @@ extension Notification.Name {
         self.clock = clock
         super.init()
         Self.configureShared(self)
+        // Tests can override `reloadRequester` directly after init.
+        self.reloadRequester = nil
     }
 
     /// Reset persistence state. Test-only — production code never
@@ -502,44 +648,36 @@ extension Notification.Name {
             prev = nil
         }
 
-        let firstSnapshot = (prev == nil)
+        let prevShape = prev.map {
+            TelemetryPersistencePolicy.SnapshotShape(
+                carConnected: $0.carConnected,
+                batteryPercent: $0.batteryPercent,
+                isCharging: $0.isCharging,
+                speed: $0.speed
+            )
+        }
 
-        let batteryChanged = prev?.batteryPercent != batteryPercent
-        let chargingChanged = prev?.isCharging != isCharging
-        let connectionChanged = prev?.carConnected != resolvedCarConnected
-        let availabilityChanged = (prev?.speed == nil) != (currentSpeed == nil)
-
-        // Compare against the LAST PERSISTED speed so accumulated
-        // sub-threshold drift eventually trips the meaningful-speed
-        // boundary and a fresh snapshot is published.
-        let speedDeltaAgainstBaseline: Double = {
-            guard let baseline = prev?.speed, let current = currentSpeed else {
-                return 0
-            }
-            return abs(current - baseline)
-        }()
-        let speedMeaningful = speedDeltaAgainstBaseline >= Self.significantSpeedDelta
-
-        let heartbeatDue: Bool = {
-            guard let last = lastPersistenceDate else { return true }
-            return now.timeIntervalSince(last) >= Self.heartbeatPersistenceInterval
-        }()
-
-        let shouldPersist = firstSnapshot
-            || batteryChanged || chargingChanged
-            || connectionChanged || availabilityChanged
-            || speedMeaningful || heartbeatDue
-        guard shouldPersist else { return }
+        // Pure decision: should we persist, which reload kind, and
+        // the snapshot timestamp (injected clock value).
+        let decision = TelemetryPersistencePolicy.evaluate(
+            now: now,
+            currentSpeed: currentSpeed,
+            batteryPercent: batteryPercent,
+            isCharging: isCharging,
+            carConnected: resolvedCarConnected,
+            previousSnapshot: prevShape,
+            lastPersistenceDate: lastPersistenceDate,
+            heartbeatInterval: Self.heartbeatPersistenceInterval,
+            significantSpeedDelta: Self.significantSpeedDelta
+        )
+        guard decision.shouldPersist else { return }
 
         let telemetry = Snapshot(
             carConnected: resolvedCarConnected,
             batteryPercent: batteryPercent,
             isCharging: isCharging,
             speed: currentSpeed,
-            // Use the injected clock value as the snapshot timestamp
-            // so tests can assert exact equality without depending
-            // on the system clock.
-            timestamp: now
+            timestamp: decision.timestamp
         )
         guard let data = try? JSONEncoder().encode(telemetry) else { return }
 
@@ -547,26 +685,8 @@ extension Notification.Name {
         defaults.set(data, forKey: AppGroupContract.legacyTelemetryKey)
         lastPersistenceDate = now
 
-        // Decide reload kind based on what actually changed. The
-        // throttle rate-limits speed-driven reloads to once per 5
-        // min; battery / charging / connection changes request
-        // immediate reloads because they reflect user-meaningful
-        // signal transitions. **An identical snapshot performs zero
-        // WidgetCenter reloads** — no `.other` bypass.
-        let kind: WidgetReloadKind
-        if chargingChanged {
-            kind = .chargingStateChange
-        } else if connectionChanged {
-            kind = .connectionStateChange
-        } else if batteryChanged {
-            kind = .batteryLevelChange
-        } else if speedMeaningful {
-            kind = .speedChange
-        } else {
-            kind = .noVisibleChange
-        }
-        if #available(iOS 14.0, *) {
-            WidgetReloadThrottle.shared.requestReload(kind: kind, now: now)
+        if let kind = decision.reloadKind, let requester = reloadRequester {
+            requester(kind, now)
         }
     }
 

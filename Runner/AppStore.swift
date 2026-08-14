@@ -27,6 +27,10 @@ class AppStore: ObservableObject {
     static let activeSlotKey = "drive_studio_active_slot"
 
     private let suiteName = "group.com.drivestudio.shared"
+    /// Same string as `suiteName` but exposed as `static` so
+    /// `nonisolated static` helpers (e.g. asset staging) can reach
+    /// it without going through an instance.
+    nonisolated static let appGroupSuite = "group.com.drivestudio.shared"
     private let draftsKey = "drive_studio_drafts"
 
     private init() {
@@ -347,9 +351,36 @@ class AppStore: ObservableObject {
 
         let installResult: StateInstallResult
         do {
+            // **Pure asset plan.** Compute the set of image filenames
+            // that the new generation references. We resolve this
+            // up-front (before any I/O happens in the installer) so
+            // the staging closure itself can be a thin filesystem
+            // operation and the plan is testable independently.
+            let imagesToSync = Self.referencedImageFilenames(in: newSlots)
+
             installResult = try Self.installState(
                 stateData: stateData,
                 sharedContainer: sharedURL,
+                stageAssets: { staged in
+                    // The installer wrote a brand-new
+                    // `state_<gen>.json` and verified it byte-for-byte.
+                    // Now copy every referenced image into the new
+                    // generation's directory BEFORE we publish the new
+                    // metadata — so any reader who sees the new
+                    // generation through metadata will also be able to
+                    // find its assets on disk.
+                    let destFolder = staged.assetDirectory
+                        ?? sharedURL
+                            .appendingPathComponent("SharedImages")
+                            .appendingPathComponent("generation_\(staged.generation)")
+                    try Self.copyReferencedImages(
+                        filenames: imagesToSync,
+                        into: destFolder,
+                        sourceDirectories: Self.imageSourceDirectories(),
+                        bundle: Bundle.main,
+                        preserveCustomVehicleImage: self.vehicleImage != nil ? "home_vehicle.png" : nil
+                    )
+                },
                 publish: { metaData in
                     defaults.set(metaData, forKey: AppGroupContract.v2MetadataKey)
                 },
@@ -368,10 +399,12 @@ class AppStore: ObservableObject {
             )
         } catch {
             // Replacement failed — the previous valid generation
-            // is still readable. Bail without invalidating the cache.
+            // is still readable. Bail without invalidating the cache,
+            // bail without requesting a widget reload, and bail
+            // without staging any partial asset directory.
             return
         }
-        let generation = installResult.generation
+        _ = installResult.generation
 
         // **Cache invalidation.** The installer published the new
         // generation's checksum, generation, and timestamp. Now drop
@@ -381,31 +414,8 @@ class AppStore: ObservableObject {
         // generation's cached value.
         AppGroupState.invalidateCache()
 
-        // Sync referenced image files into the App Group so the widget
-        // extension can render the same assets as the editor.
-        let destFolder = sharedURL.appendingPathComponent("SharedImages").appendingPathComponent("generation_\(generation)")
-        try? FileManager.default.createDirectory(at: destFolder, withIntermediateDirectories: true)
-
-        if let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-            var imagesToSync = Set<String>()
-            for slot in newSlots {
-                if let bgSrc = slot.spec?.background?.imageSrc { imagesToSync.insert(bgSrc) }
-                for layer in slot.spec?.layers ?? [] {
-                    if layer.kind == "image", let src = layer.src { imagesToSync.insert(src) }
-                }
-            }
-
-            for img in imagesToSync {
-                let sourceURL = docs.appendingPathComponent(img)
-                let destURL = destFolder.appendingPathComponent(img)
-                if FileManager.default.fileExists(atPath: sourceURL.path) {
-                    try? FileManager.default.copyItem(at: sourceURL, to: destURL)
-                } else if let bundleURL = Bundle.main.url(forResource: img, withExtension: nil) {
-                    try? FileManager.default.copyItem(at: bundleURL, to: destURL)
-                }
-            }
-        }
-
+        // **WidgetKit reload.** Only after metadata publish + cache
+        // invalidation succeeds do we tell WidgetKit to refresh.
         WidgetReloadThrottle.shared.requestReload(kind: .slotChange)
     }
 
@@ -521,31 +531,58 @@ class AppStore: ObservableObject {
         /// Verifying the staged file (re-reading and byte-comparing)
         /// did not produce the exact `stateData` we wrote.
         case verificationFailed(expectedBytes: Int, actualBytes: Int)
+        /// The asset-stage closure threw. The new generation file
+        /// and any partially-staged assets are removed; the previous
+        /// generation's metadata is unchanged.
+        case assetStageFailed(String)
         /// The metadata publish closure threw. The new generation
-        /// file has been removed; the previous generation remains
-        /// canonical.
+        /// file and any staged assets are removed; the previous
+        /// generation remains canonical.
         case metadataPublishFailed(String)
     }
 
     struct StateInstallResult: Equatable {
         let generation: String
         let publishedFilename: String
+        let assetDirectory: URL?
     }
 
-    /// Crash-safe state installer. Writes a fresh
-    /// `state_<generation>.json`, verifies it, then asks the caller
-    /// to publish a metadata blob pointing at it. The previous
-    /// generation's metadata entry is only overwritten once `publish`
-    /// returns successfully.
+    /// Crash-safe state installer with optional asset staging.
+    /// Writes a fresh `state_<generation>.json`, verifies it, then
+    /// runs an asset-stage closure BEFORE publishing metadata. The
+    /// previous generation's metadata entry is only overwritten once
+    /// `publish` returns successfully.
     ///
-    /// Marked `nonisolated` because the transaction is pure —
-    /// it touches the filesystem and the caller-supplied `publish`
-    /// closure but never reads any actor-isolated state — so tests
-    /// can call it without hopping through `MainActor.run`.
+    /// Transaction order:
+    ///   1. Write + verify `state_<generation>.json`.
+    ///   2. Run `stageAssets(...)` so referenced generation image
+    ///      assets land in
+    ///      `SharedImages/generation_<generation>/` before any reader
+    ///      can observe the new metadata.
+    ///   3. Publish metadata as the commit point. Until this returns,
+    ///      readers continue to see the previous generation.
+    ///   4. Best-effort cleanup of older generations preserving at
+    ///      least the new and previous ones.
+    ///
+    /// Failure semantics:
+    /// - State write/verify failure: temp file removed, throw —
+    ///   previous metadata is untouched, no asset stage ever runs.
+    /// - Asset stage failure: state file AND any partially-staged
+    ///   assets removed, throw — previous metadata is untouched,
+    ///   `publish` is never invoked, no widget reload fires.
+    /// - Metadata publish failure: state file AND any staged assets
+    ///   removed, throw — previous metadata is untouched, no
+    ///   cleanup hook runs.
+    ///
+    /// Marked `nonisolated` because the transaction is pure — it
+    /// touches the filesystem and the caller-supplied closures but
+    /// never reads any actor-isolated state — so tests can call it
+    /// without hopping through `MainActor.run`.
     nonisolated static func installState(
         stateData: Data,
         sharedContainer: URL,
         clock: () -> Date = { Date() },
+        stageAssets: ((StateInstallResult) throws -> Void)? = nil,
         publish: (Data) throws -> Void,
         cleanupOlderGenerations: (Set<String>) -> Void = { _ in }
     ) throws -> StateInstallResult {
@@ -590,7 +627,30 @@ class AppStore: ObservableObject {
             )
         }
 
-        // Step 3: build the metadata blob. Checksum is over the
+        let assetDirectory = sharedContainer
+            .appendingPathComponent("SharedImages")
+            .appendingPathComponent("generation_\(newGeneration)")
+        let staged = StateInstallResult(
+            generation: newGeneration,
+            publishedFilename: newFilename,
+            assetDirectory: assetDirectory
+        )
+
+        // Step 3: stage generation assets BEFORE metadata publish.
+        // If this throws, the staged state file and any partially-
+        // staged assets are cleaned up; `publish` is never called.
+        if let stageAssets = stageAssets {
+            do {
+                try stageAssets(staged)
+            } catch {
+                try? fm.removeItem(at: newURL)
+                try? fm.removeItem(at: assetDirectory)
+                throw StateInstallError.assetStageFailed(
+                    "asset stage closure threw: \(error)")
+            }
+        }
+
+        // Step 4: build the metadata blob. Checksum is over the
         // verified bytes, timestamp comes from the injected clock.
         let checksum = SHA256.hash(data: stateData)
             .compactMap { String(format: "%02x", $0) }
@@ -607,29 +667,28 @@ class AppStore: ObservableObject {
             metaData = try JSONSerialization.data(withJSONObject: metadata, options: [])
         } catch {
             try? fm.removeItem(at: newURL)
+            try? fm.removeItem(at: assetDirectory)
             throw StateInstallError.metadataPublishFailed(
                 "metadata serialization failed: \(error)")
         }
 
-        // Step 4: atomic metadata publication. If this throws, the
-        // previous metadata entry is unchanged and the new file is
-        // removed so the next install starts clean.
+        // Step 5: atomic metadata publication. If this throws, the
+        // previous metadata entry is unchanged, the new state file
+        // is removed, and any staged assets are removed.
         do {
             try publish(metaData)
         } catch {
             try? fm.removeItem(at: newURL)
+            try? fm.removeItem(at: assetDirectory)
             throw StateInstallError.metadataPublishFailed(
                 "publish closure threw: \(error)")
         }
 
-        // Step 5: best-effort cleanup of older generation files,
+        // Step 6: best-effort cleanup of older generation files,
         // preserving the at-least-two-generation invariant.
         cleanupOlderGenerations(Set([newGeneration]))
 
-        return StateInstallResult(
-            generation: newGeneration,
-            publishedFilename: newFilename
-        )
+        return staged
     }
 
     /// Read the generation UUID currently published in the metadata
@@ -669,6 +728,102 @@ class AppStore: ObservableObject {
                 .replacingOccurrences(of: ".json", with: "")
             guard !keep.contains(stripped) else { continue }
             try? fm.removeItem(at: container.appendingPathComponent(entry))
+        }
+    }
+
+    // MARK: - Asset staging (gap 2 — stage before metadata publish)
+
+    /// Pure: enumerate the image filenames referenced by the slot
+    /// specs being saved. Order-independent (returns a Set) so the
+    /// caller can run it before any I/O and so the test can pin it.
+    nonisolated static func referencedImageFilenames(in slots: [Slot]) -> Set<String> {
+        var names: Set<String> = []
+        for slot in slots {
+            if let bgSrc = slot.spec?.background?.imageSrc {
+                names.insert(bgSrc)
+            }
+            for layer in slot.spec?.layers ?? [] {
+                if layer.kind == "image", let src = layer.src {
+                    names.insert(src)
+                }
+            }
+        }
+        return names
+    }
+
+    /// Pure: enumerate every URL the asset-stager should look in
+    /// when copying referenced images. Documents dir is the primary
+    /// source for user-imported artwork; the App Group SharedImages
+    /// folder is a fallback for legacy hand-copied assets. We do NOT
+    /// pass `Bundle.main` as a source here so the test seam is
+    /// deterministic.
+    nonisolated static func imageSourceDirectories() -> [URL] {
+        var sources: [URL] = []
+        if let docs = FileManager.default.urls(
+            for: .documentDirectory, in: .userDomainMask).first {
+            sources.append(docs)
+        }
+        if let shared = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: appGroupSuite) {
+            sources.append(shared.appendingPathComponent("SharedImages"))
+        }
+        return sources
+    }
+
+    /// Pure-with-filesystem: copy every filename in `filenames`
+    /// into `destinationFolder`, looking for the source in each of
+    /// `sourceDirectories` in order. Missing files are silently
+    /// skipped — a referenced image the user deleted on disk is a
+    /// render-time concern, not a save-time error. Throws if the
+    /// destination folder cannot be created.
+    ///
+    /// `bundle` is the production fallback for catalog stock images
+    /// shipped in the app bundle (e.g. stock widget thumbnails that
+    /// don't live in Documents). It is parameterized so the test
+    /// seam does not require a real Bundle.main to function.
+    ///
+    /// `preserveCustomVehicleImage` is the existing `vehicleImage`
+    /// filename (e.g. `home_vehicle.png`) that has been uploaded by
+    /// the user. We never overwrite or remove it during staging;
+    /// the user-imported artwork lives independently of any
+    /// generation.
+    nonisolated static func copyReferencedImages(
+        filenames: Set<String>,
+        into destinationFolder: URL,
+        sourceDirectories: [URL],
+        bundle: Bundle? = nil,
+        preserveCustomVehicleImage: String? = nil
+    ) throws {
+        let fm = FileManager.default
+        try fm.createDirectory(
+            at: destinationFolder,
+            withIntermediateDirectories: true)
+        for name in filenames {
+            // Honor the legacy fallback: the widget extension can
+            // still read `SharedImages/<file>` (no generation
+            // prefix) and `home_vehicle.png` is user artwork that
+            // must always survive any staging pass.
+            if name == preserveCustomVehicleImage { continue }
+            let destURL = destinationFolder.appendingPathComponent(name)
+            try? fm.removeItem(at: destURL)
+            var copied = false
+            for sourceDir in sourceDirectories {
+                let srcURL = sourceDir.appendingPathComponent(name)
+                if fm.fileExists(atPath: srcURL.path) {
+                    do {
+                        try fm.copyItem(at: srcURL, to: destURL)
+                        copied = true
+                    } catch {
+                        // Try next source.
+                        continue
+                    }
+                    break
+                }
+            }
+            if !copied, let bundle = bundle,
+               let bundleURL = bundle.url(forResource: name, withExtension: nil) {
+                try? fm.copyItem(at: bundleURL, to: destURL)
+            }
         }
     }
 }

@@ -1266,6 +1266,400 @@ func testActiveSlotKeyContractIsStable() {
                        "Cleanup hook must NOT run when metadata publish fails")
     }
 
+    // MARK: - Gap 2 — Stage assets BEFORE metadata publication
+    //
+    // The production `installState` transaction now runs an
+    // `stageAssets` closure between state-file write/verify and
+    // metadata publish. These tests pin the contract:
+    //
+    //   1. Successful staging publishes metadata exactly once and
+    //      every referenced image lands in the staged folder before
+    //      publish is called.
+    //   2. A staging failure (closure throws) NEVER publishes
+    //      metadata, removes the staged state file AND any
+    //      partially-staged assets, and preserves the previous
+    //      generation file untouched.
+    //   3. A metadata-publish failure (publish throws) cleans up
+    //      BOTH the staged state file AND the staged asset folder.
+    //   4. The cleanup hook only fires on a fully successful
+    //      transaction; on asset-stage or publish failure it does
+    //      not run.
+    //   5. The custom vehicle image (e.g. `home_vehicle.png`) is
+    //      never touched or removed by staging, and the legacy
+    //      SharedImages fallback path is preserved.
+
+    /// Successful staging writes all referenced images into the
+    /// new generation folder BEFORE metadata is published. We
+    /// confirm the order by capturing, inside the publish closure,
+    /// whether the staged asset folder already contains the image.
+    func testInstallStateAssetStageRunsBeforeMetadataPublish() throws {
+        let dir = makeTempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+
+        // Seed a "documents"-like source directory with one
+        // image that the staging closure will find.
+        let sourceDir = makeTempDir()
+        defer { try? FileManager.default.removeItem(at: sourceDir) }
+        let assetName = "test_image_\(UUID().uuidString).png"
+        let assetBytes = Data([0xDE, 0xAD, 0xBE, 0xEF])
+        try assetBytes.write(to: sourceDir.appendingPathComponent(assetName))
+
+        var publishInvocations: Int = 0
+        var publishObservedAssetFolder: URL?
+        var publishObservedAssetPresent: Bool = false
+        // The staging closure records the assetDirectory it was
+        // handed; the publish closure then checks that folder
+        // already contains the staged image. This proves the
+        // asset-stage step happened BEFORE publish.
+        let result = try AppStore.installState(
+            stateData: Data("HELLO-V1".utf8),
+            sharedContainer: dir,
+            stageAssets: { staged in
+                publishObservedAssetFolder = staged.assetDirectory
+                try AppStore.copyReferencedImages(
+                    filenames: [assetName],
+                    into: staged.assetDirectory!,
+                    sourceDirectories: [sourceDir]
+                )
+            },
+            publish: { _ in
+                publishInvocations += 1
+                if let folder = publishObservedAssetFolder {
+                    publishObservedAssetPresent = FileManager.default.fileExists(
+                        atPath: folder.appendingPathComponent(assetName).path)
+                }
+            }
+        )
+        XCTAssertEqual(publishInvocations, 1,
+                       "Metadata publish must be invoked exactly once on success")
+        XCTAssertNotNil(result.assetDirectory,
+                        "Staging result must carry a non-nil assetDirectory")
+        let assetFolder = result.assetDirectory!
+        XCTAssertTrue(FileManager.default.fileExists(atPath: assetFolder.path),
+                      "Staged asset folder must exist after successful install")
+        let stagedImage = assetFolder.appendingPathComponent(assetName)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: stagedImage.path),
+                      "Referenced image must be staged into the generation folder before publish")
+        let readBack = try Data(contentsOf: stagedImage)
+        XCTAssertEqual(readBack, assetBytes,
+                       "Staged image must be byte-identical to the source")
+        XCTAssertEqual(publishObservedAssetFolder, assetFolder,
+                       "Publish closure must observe the staged asset folder already in place")
+        XCTAssertTrue(publishObservedAssetPresent,
+                      "Publish closure must observe the staged image already on disk")
+    }
+
+    /// Asset-stage failure (closure throws) must not publish
+    /// metadata, must remove the staged state file AND any
+    /// partially-staged asset directory, and must preserve the
+    /// previous generation file untouched.
+    func testInstallStateAssetStageFailureDoesNotPublishAndPreservesPrevious() throws {
+        let dir = makeTempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        // Pre-existing previous generation file.
+        let previousGeneration = "PREV-\(UUID().uuidString)"
+        let previousFilename = "state_\(previousGeneration).json"
+        let previousBytes = Data("PREVIOUS-PAYLOAD".utf8)
+        try previousBytes.write(to: dir.appendingPathComponent(previousFilename))
+
+        var publishInvocations: Int = 0
+        struct StageBoom: Error, Equatable { let tag: String }
+        XCTAssertThrowsError(
+            try AppStore.installState(
+                stateData: Data("NEW-PAYLOAD".utf8),
+                sharedContainer: dir,
+                stageAssets: { staged in
+                    // Create a partial asset directory so we can
+                    // assert it gets removed on failure.
+                    let partial = staged.assetDirectory!
+                    try FileManager.default.createDirectory(
+                        at: partial,
+                        withIntermediateDirectories: true)
+                    let stub = partial.appendingPathComponent("half-baked.png")
+                    try Data([0x00]).write(to: stub)
+                    throw StageBoom(tag: "simulated-asset-failure")
+                },
+                publish: { _ in publishInvocations += 1 }
+            )
+        ) { error in
+            guard case AppStore.StateInstallError.assetStageFailed = error else {
+                XCTFail("Expected assetStageFailed, got \(error)")
+                return
+            }
+        }
+
+        XCTAssertEqual(publishInvocations, 0,
+                       "Metadata publish must NOT be invoked when asset staging fails")
+
+        // The new staged state file must be removed.
+        let leftoverStateFiles = (try? FileManager.default.contentsOfDirectory(atPath: dir.path))?
+            .filter { $0.hasPrefix("state_") && $0.hasSuffix(".json") }
+            .sorted() ?? []
+        XCTAssertEqual(leftoverStateFiles, [previousFilename],
+                       "Staged state file must be removed on asset-stage failure; previous file must survive")
+
+        // No asset directories must exist on disk after failure.
+        let sharedImages = dir.appendingPathComponent("SharedImages")
+        let assetEntries = (try? FileManager.default.contentsOfDirectory(atPath: sharedImages.path)) ?? []
+        XCTAssertEqual(assetEntries, [],
+                       "No partially-staged asset directory may survive asset-stage failure")
+
+        // Previous generation file byte-identical.
+        let readBack = try Data(contentsOf: dir.appendingPathComponent(previousFilename))
+        XCTAssertEqual(readBack, previousBytes,
+                       "Previous generation must remain byte-identical after asset-stage failure")
+    }
+
+    /// Metadata-publish failure (publish throws) must clean up
+    /// BOTH the staged state file AND the staged asset folder.
+    func testInstallStateMetadataPublishFailureRemovesStagedAssets() throws {
+        let dir = makeTempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let sourceDir = makeTempDir()
+        defer { try? FileManager.default.removeItem(at: sourceDir) }
+        let assetName = "test_image_\(UUID().uuidString).png"
+        try Data([0x01, 0x02]).write(to: sourceDir.appendingPathComponent(assetName))
+
+        // Previous generation must survive.
+        let previousGeneration = "PREV-\(UUID().uuidString)"
+        let previousFilename = "state_\(previousGeneration).json"
+        let previousBytes = Data("PREVIOUS-PAYLOAD".utf8)
+        try previousBytes.write(to: dir.appendingPathComponent(previousFilename))
+
+        struct PublishBoom: Error, Equatable { let tag: String }
+        XCTAssertThrowsError(
+            try AppStore.installState(
+                stateData: Data("NEW-PAYLOAD".utf8),
+                sharedContainer: dir,
+                stageAssets: { staged in
+                    try AppStore.copyReferencedImages(
+                        filenames: [assetName],
+                        into: staged.assetDirectory!,
+                        sourceDirectories: [sourceDir]
+                    )
+                },
+                publish: { _ in throw PublishBoom(tag: "simulated-publish-failure") }
+            )
+        ) { error in
+            guard case AppStore.StateInstallError.metadataPublishFailed = error else {
+                XCTFail("Expected metadataPublishFailed, got \(error)")
+                return
+            }
+        }
+
+        // Staged state file removed.
+        let leftover = (try? FileManager.default.contentsOfDirectory(atPath: dir.path))?
+            .filter { $0.hasPrefix("state_") && $0.hasSuffix(".json") }
+            .sorted() ?? []
+        XCTAssertEqual(leftover, [previousFilename],
+                       "Staged state file must be removed on publish failure")
+
+        // Staged asset folder removed.
+        let sharedImages = dir.appendingPathComponent("SharedImages")
+        let assetEntries = (try? FileManager.default.contentsOfDirectory(atPath: sharedImages.path)) ?? []
+        XCTAssertEqual(assetEntries, [],
+                       "Staged asset folder must be removed on publish failure")
+
+        // Previous generation still readable.
+        let readBack = try Data(contentsOf: dir.appendingPathComponent(previousFilename))
+        XCTAssertEqual(readBack, previousBytes)
+    }
+
+    /// The cleanup hook fires only when BOTH staging AND metadata
+    /// publish succeed; on either failure it is never invoked.
+    func testInstallStateCleanupHookRunsOnlyAfterAssetStageAndPublishSucceed() throws {
+        let dir = makeTempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        var cleanupCalls: [Set<String>] = []
+
+        // Success — staging and publish both succeed, cleanup runs.
+        _ = try AppStore.installState(
+            stateData: Data("HELLO-V1".utf8),
+            sharedContainer: dir,
+            stageAssets: { _ in /* no-op */ },
+            publish: { _ in },
+            cleanupOlderGenerations: { keep in cleanupCalls.append(keep) }
+        )
+        XCTAssertEqual(cleanupCalls.count, 1,
+                       "Cleanup hook must run exactly once on full success")
+
+        // Asset-stage failure — cleanup does NOT run.
+        struct StageBoom: Error, Equatable {}
+        XCTAssertThrowsError(
+            try AppStore.installState(
+                stateData: Data("HELLO-V2".utf8),
+                sharedContainer: dir,
+                stageAssets: { _ in throw StageBoom() },
+                publish: { _ in },
+                cleanupOlderGenerations: { keep in cleanupCalls.append(keep) }
+            )
+        )
+        XCTAssertEqual(cleanupCalls.count, 1,
+                       "Cleanup hook must NOT run on asset-stage failure")
+
+        // Publish failure — cleanup does NOT run.
+        struct PublishBoom: Error, Equatable {}
+        XCTAssertThrowsError(
+            try AppStore.installState(
+                stateData: Data("HELLO-V3".utf8),
+                sharedContainer: dir,
+                stageAssets: { _ in /* no-op */ },
+                publish: { _ in throw PublishBoom() },
+                cleanupOlderGenerations: { keep in cleanupCalls.append(keep) }
+            )
+        )
+        XCTAssertEqual(cleanupCalls.count, 1,
+                       "Cleanup hook must NOT run on metadata-publish failure")
+    }
+
+    /// Staging must never overwrite, remove, or relocate the
+    /// custom vehicle image (`home_vehicle.png`) — that artwork
+    /// is user-imported and lives independently of any generation.
+    func testInstallStateAssetStagePreservesCustomVehicleImage() throws {
+        let dir = makeTempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let sourceDir = makeTempDir()
+        defer { try? FileManager.default.removeItem(at: sourceDir) }
+        // Custom vehicle image sits in the source directory.
+        let vehicleBytes = Data([0xCA, 0xFE, 0xBA, 0xBE])
+        try vehicleBytes.write(to: sourceDir.appendingPathComponent("home_vehicle.png"))
+
+        _ = try AppStore.installState(
+            stateData: Data("HELLO".utf8),
+            sharedContainer: dir,
+            stageAssets: { staged in
+                try AppStore.copyReferencedImages(
+                    filenames: ["home_vehicle.png"],
+                    into: staged.assetDirectory!,
+                    sourceDirectories: [sourceDir],
+                    preserveCustomVehicleImage: "home_vehicle.png"
+                )
+            },
+            publish: { _ in }
+        )
+        // The source vehicle image must remain byte-identical —
+        // staging should never touch user-imported artwork.
+        let stillThere = try Data(contentsOf: sourceDir.appendingPathComponent("home_vehicle.png"))
+        XCTAssertEqual(stillThere, vehicleBytes,
+                       "Staging must not touch or remove the custom vehicle image source")
+    }
+
+    /// `referencedImageFilenames(in:)` is a pure helper: given
+    /// slot specs that reference both background and image layers,
+    /// it must enumerate every filename without duplication.
+    func testReferencedImageFilenamesEnumeratesAllImageSources() {
+        let slot0 = Slot(
+            index: 0,
+            draftId: "draft-A",
+            spec: WidgetSpec(
+                background: WidgetBackground(
+                    type: "image",
+                    from: nil,
+                    to: nil,
+                    imageSrc: "bg_night.png"),
+                layers: [
+                    WidgetLayer(
+                        id: "L1",
+                        kind: "image",
+                        label: nil,
+                        text: nil,
+                        src: "car_red.png",
+                        x: nil, y: nil, w: nil, h: nil,
+                        fontSize: nil, weight: nil,
+                        align: nil, color: nil,
+                        opacity: nil, radius: nil,
+                        hidden: nil, strokes: nil,
+                        format: nil, groupId: nil),
+                    WidgetLayer(
+                        id: "L2",
+                        kind: "text",
+                        label: nil,
+                        text: "no image here",
+                        src: nil,
+                        x: nil, y: nil, w: nil, h: nil,
+                        fontSize: nil, weight: nil,
+                        align: nil, color: nil,
+                        opacity: nil, radius: nil,
+                        hidden: nil, strokes: nil,
+                        format: nil, groupId: nil),
+                ]
+            )
+        )
+        let slot1 = Slot(
+            index: 1,
+            draftId: "draft-B",
+            spec: WidgetSpec(
+                background: WidgetBackground(type: "solid", from: "000000", to: nil, imageSrc: nil),
+                layers: [
+                    WidgetLayer(
+                        id: "L3",
+                        kind: "image",
+                        label: nil,
+                        text: nil,
+                        src: "bg_night.png",
+                        x: nil, y: nil, w: nil, h: nil,
+                        fontSize: nil, weight: nil,
+                        align: nil, color: nil,
+                        opacity: nil, radius: nil,
+                        hidden: nil, strokes: nil,
+                        format: nil, groupId: nil)
+                ]
+            )
+        )
+        let names = AppStore.referencedImageFilenames(in: [slot0, slot1])
+        XCTAssertEqual(names, Set(["bg_night.png", "car_red.png"]),
+                       "Image enumeration must deduplicate and skip non-image layers")
+    }
+
+    /// `copyReferencedImages` falls back through source
+    /// directories in order, so an image present in the second
+    /// source but missing from the first is still staged.
+    func testCopyReferencedImagesFallsThroughSourceDirectories() throws {
+        let dir = makeTempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let primaryDir = makeTempDir()
+        defer { try? FileManager.default.removeItem(at: primaryDir) }
+        let fallbackDir = makeTempDir()
+        defer { try? FileManager.default.removeItem(at: fallbackDir) }
+
+        // "thumb.png" only exists in the fallback source dir.
+        let fallbackBytes = Data([0xFA, 0x11])
+        try fallbackBytes.write(to: fallbackDir.appendingPathComponent("thumb.png"))
+
+        try AppStore.copyReferencedImages(
+            filenames: ["thumb.png"],
+            into: dir,
+            sourceDirectories: [primaryDir, fallbackDir]
+        )
+        let staged = try Data(contentsOf: dir.appendingPathComponent("thumb.png"))
+        XCTAssertEqual(staged, fallbackBytes,
+                       "copyReferencedImages must walk the source directory list until it finds the file")
+    }
+
+    /// `copyReferencedImages` does not throw when a referenced
+    /// image is missing on disk — that's a render-time concern,
+    /// not a save-time one. A render-time missing image should not
+    /// block the entire save transaction.
+    func testCopyReferencedImagesSilentlySkipsMissingFiles() throws {
+        let dir = makeTempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let sourceDir = makeTempDir()
+        defer { try? FileManager.default.removeItem(at: sourceDir) }
+
+        XCTAssertNoThrow(
+            try AppStore.copyReferencedImages(
+                filenames: ["does_not_exist.png"],
+                into: dir,
+                sourceDirectories: [sourceDir]
+            )
+        )
+        // Destination folder was created; the missing file is
+        // simply absent.
+        XCTAssertTrue(FileManager.default.fileExists(atPath: dir.path))
+        XCTAssertFalse(FileManager.default.fileExists(
+            atPath: dir.appendingPathComponent("does_not_exist.png").path))
+    }
+
     // MARK: - Helper for atomic install tests
 
     private func makeTempDir() -> URL {
@@ -1312,6 +1706,25 @@ func testActiveSlotKeyContractIsStable() {
             return nil
         }
         return try? JSONDecoder().decode(TelemetryTestSnapshot.self, from: data)
+    }
+
+    /// Build a fresh `TelemetryService` with the injected clock and
+    /// an empty reloadRequester so the persistence tests never touch
+    /// `WidgetReloadThrottle.shared` (and therefore never touch real
+    /// `WidgetCenter`). Reload-kind tests inject their own counting
+    /// closure on the returned service.
+    private func makeTelemetryServiceForTest(
+        now: Date,
+        defaults: UserDefaults
+    ) -> TelemetryService {
+        var clockNow = now
+        let service = TelemetryService(clock: { clockNow })
+        service.resetPersistenceState()
+        // Belt-and-braces: ensure no shared throttle call slips
+        // through even if a test forgets to override the requester.
+        service.reloadRequester = nil
+        _ = defaults // silence unused warning
+        return service
     }
 
     /// Initial snapshot (no prior App Group blob) persists
@@ -1527,6 +1940,267 @@ func testActiveSlotKeyContractIsStable() {
         service._persistForTest(previousSpeed: 50.0, currentSpeed: 75.0)
         XCTAssertEqual(decodeSnapshot(from: defaults)?.speed, 75.0,
                        "25 km/h delta from baseline must persist immediately")
+    }
+
+    // MARK: - Telemetry reload-kind policy (gap 1 — keep speed alive)
+    //
+    // The previous policy classified a heartbeat-driven persistence
+    // write with unchanged speed as `.noVisibleChange`. That made
+    // `WidgetReloadThrottle` skip the call entirely, so the widget
+    // never got a reload and `WidgetSnapshotFreshness` would expire
+    // the speed after five minutes even though the foreground app
+    // kept publishing heartbeat snapshots. The fix routes heartbeat
+    // + valid speed through `.speedChange` so the throttle rate-
+    // limits actual `WidgetCenter` calls but at least one reload is
+    // issued every five minutes to refresh the widget timeline.
+    //
+    // Each test below uses an injected reload-requester closure to
+    // capture the exact `(kind, now)` tuples the policy emits. No
+    // test ever calls real `WidgetCenter`.
+
+    /// Heartbeat-driven persistence with stable valid speed must
+    /// request `.speedChange` (not `.noVisibleChange`) so the widget
+    /// gets a refresh request that `WidgetReloadThrottle` will
+    /// rate-limit.
+    func testTelemetryHeartbeatWithValidSpeedRequestsSpeedChangeReload() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+        _ = telemetryTestDefaults()
+        var reloads: [(WidgetReloadKind, Date)] = []
+        service.reloadRequester = { kind, when in
+            reloads.append((kind, when))
+        }
+
+        // Seed an initial snapshot — that already persists and
+        // requests a reload, but we don't assert on that here.
+        service.currentSpeed = 50.0
+        service._persistForTest(previousSpeed: nil, currentSpeed: 50.0)
+        let reloadsAfterSeed = reloads.count
+
+        // Heartbeat fires (unchanged reading past the heartbeat
+        // window). The reload kind MUST be `.speedChange`, not
+        // `.noVisibleChange`, otherwise the widget's freshness timer
+        // expires the speed.
+        now = now.addingTimeInterval(TelemetryService.heartbeatPersistenceInterval + 1)
+        service._persistForTest(previousSpeed: 50.0, currentSpeed: 50.0)
+        XCTAssertGreaterThan(reloads.count, reloadsAfterSeed,
+                             "Heartbeat must request at least one reload")
+        XCTAssertEqual(reloads.last?.0, .speedChange,
+                       "Heartbeat with valid speed must request .speedChange, " +
+                       "got \(String(describing: reloads.last?.0))")
+        XCTAssertEqual(reloads.last?.1, now,
+                       "Reload request must carry the injected clock value")
+    }
+
+    /// `nil → 0` availability transition requests `.speedChange`.
+    func testTelemetryNilToZeroAvailabilityTransitionRequestsSpeedChangeReload() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+        _ = telemetryTestDefaults()
+        var reloads: [(WidgetReloadKind, Date)] = []
+        service.reloadRequester = { kind, when in
+            reloads.append((kind, when))
+        }
+
+        service.currentSpeed = nil
+        service._persistForTest(previousSpeed: nil, currentSpeed: nil)
+        reloads.removeAll() // ignore the initial-snapshot reload
+
+        now = now.addingTimeInterval(2)
+        service.currentSpeed = 0.0
+        service._persistForTest(previousSpeed: nil, currentSpeed: 0.0)
+        XCTAssertEqual(reloads.last?.0, .speedChange,
+                       "nil → 0 availability transition must request .speedChange")
+    }
+
+    /// `0 → nil` availability transition requests `.speedChange`.
+    func testTelemetryZeroToNilAvailabilityTransitionRequestsSpeedChangeReload() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+        _ = telemetryTestDefaults()
+        var reloads: [(WidgetReloadKind, Date)] = []
+        service.reloadRequester = { kind, when in
+            reloads.append((kind, when))
+        }
+
+        service.currentSpeed = 0.0
+        service._persistForTest(previousSpeed: nil, currentSpeed: 0.0)
+        reloads.removeAll()
+
+        now = now.addingTimeInterval(2)
+        service.currentSpeed = nil
+        service._persistForTest(previousSpeed: 0.0, currentSpeed: nil)
+        XCTAssertEqual(reloads.last?.0, .speedChange,
+                       "0 → nil availability transition must request .speedChange")
+    }
+
+    /// Heartbeat with unavailable speed and no other visible change
+    /// requests `.noVisibleChange` — the throttle then performs zero
+    /// actual `WidgetCenter` calls. This is the policy carve-out that
+    /// keeps the foreground from spamming the widget when there is
+    /// genuinely nothing to render.
+    func testTelemetryHeartbeatWithUnavailableSpeedRequestsNoVisibleChangeReload() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+        _ = telemetryTestDefaults()
+        var reloads: [(WidgetReloadKind, Date)] = []
+        service.reloadRequester = { kind, when in
+            reloads.append((kind, when))
+        }
+
+        // Seed with unavailable speed so the first snapshot's
+        // reload-kind is already `.noVisibleChange`.
+        service.currentSpeed = nil
+        service._persistForTest(previousSpeed: nil, currentSpeed: nil)
+        reloads.removeAll()
+
+        // Heartbeat past the window with speed still unavailable
+        // and no battery/charging/connection change.
+        now = now.addingTimeInterval(TelemetryService.heartbeatPersistenceInterval + 1)
+        service._persistForTest(previousSpeed: nil, currentSpeed: nil)
+        XCTAssertEqual(reloads.last?.0, .noVisibleChange,
+                       "Heartbeat with unavailable speed and no visible change " +
+                       "must request .noVisibleChange")
+    }
+
+    /// Battery transition has priority over speed in the reload
+    /// kind selection — even if the speed is also changing, the
+    /// widget gets an immediate battery reload.
+    func testTelemetryBatteryTransitionPriorityOverSpeedReload() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+        _ = telemetryTestDefaults()
+        var reloads: [(WidgetReloadKind, Date)] = []
+        service.reloadRequester = { kind, when in
+            reloads.append((kind, when))
+        }
+
+        service.currentSpeed = 50.0
+        service._persistForTest(previousSpeed: nil, currentSpeed: 50.0,
+                                batteryPercent: 30)
+        reloads.removeAll()
+
+        now = now.addingTimeInterval(2)
+        service._persistForTest(previousSpeed: 50.0, currentSpeed: 75.0,
+                                batteryPercent: 31)
+        XCTAssertEqual(reloads.last?.0, .batteryLevelChange,
+                       "Battery transition must beat speed-change in priority")
+    }
+
+    /// Charging transition has top priority in reload kind selection.
+    func testTelemetryChargingTransitionPriorityOverSpeedReload() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+        _ = telemetryTestDefaults()
+        var reloads: [(WidgetReloadKind, Date)] = []
+        service.reloadRequester = { kind, when in
+            reloads.append((kind, when))
+        }
+
+        service.currentSpeed = 50.0
+        service._persistForTest(previousSpeed: nil, currentSpeed: 50.0,
+                                isCharging: false)
+        reloads.removeAll()
+
+        now = now.addingTimeInterval(2)
+        service._persistForTest(previousSpeed: 50.0, currentSpeed: 75.0,
+                                isCharging: true)
+        XCTAssertEqual(reloads.last?.0, .chargingStateChange,
+                       "Charging transition must have top priority")
+    }
+
+    /// Connection transition priority: must beat both speed and
+    /// battery.
+    func testTelemetryConnectionTransitionTopPriorityReload() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+        _ = telemetryTestDefaults()
+        var reloads: [(WidgetReloadKind, Date)] = []
+        service.reloadRequester = { kind, when in
+            reloads.append((kind, when))
+        }
+
+        service.currentSpeed = 50.0
+        service._persistForTest(previousSpeed: nil, currentSpeed: 50.0,
+                                batteryPercent: 30, carConnected: false)
+        reloads.removeAll()
+
+        now = now.addingTimeInterval(2)
+        service._persistForTest(previousSpeed: 50.0, currentSpeed: 75.0,
+                                batteryPercent: 31, carConnected: true)
+        XCTAssertEqual(reloads.last?.0, .connectionStateChange,
+                       "Connection transition priority")
+    }
+
+    /// `WidgetReloadThrottle` rate-limits `.speedChange` to at most
+    /// one actual reload call per five minutes. We exercise this by
+    /// running the policy through a counting closure that simulates
+    /// the throttle behavior (first request fires, subsequent
+    /// requests within five minutes are coalesced). The policy
+    /// itself issues the request — the throttle (or our counting
+    /// surrogate) decides whether to actually forward to WidgetCenter.
+    func testTelemetryThrottleLimitsSpeedChangeReloadsToOnePerFiveMinutes() {
+        // Direct unit test of the policy decision counts: the
+        // policy emits reload requests on every heartbeat with
+        // valid speed; the throttle is the gatekeeper. We simulate
+        // the throttle by passing the requests through a counting
+        // closure that only forwards the first request within any
+        // five-minute window.
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+        _ = telemetryTestDefaults()
+
+        var actualReloads = 0
+        var lastReload: Date? = nil
+        service.reloadRequester = { kind, when in
+            // Throttle surrogate: forward at most one `.speedChange`
+            // per five minutes.
+            if kind == .speedChange {
+                if let last = lastReload,
+                   when.timeIntervalSince(last) < 5 * 60 {
+                    return
+                }
+                lastReload = when
+            }
+            actualReloads += 1
+        }
+
+        // Seed.
+        service.currentSpeed = 50.0
+        service._persistForTest(previousSpeed: nil, currentSpeed: 50.0)
+        XCTAssertEqual(actualReloads, 1,
+                       "Initial seed must produce exactly one actual reload")
+
+        // Three heartbeats within five minutes of each other.
+        // Throttle coalesces them — only the first fires.
+        now = now.addingTimeInterval(TelemetryService.heartbeatPersistenceInterval + 1)
+        service._persistForTest(previousSpeed: 50.0, currentSpeed: 50.0)
+        XCTAssertEqual(actualReloads, 2, "First heartbeat fires exactly one reload")
+
+        now = now.addingTimeInterval(60)
+        service._persistForTest(previousSpeed: 50.0, currentSpeed: 50.0)
+        XCTAssertEqual(actualReloads, 2,
+                       "Second heartbeat within 5 min must be coalesced by throttle")
+
+        now = now.addingTimeInterval(60)
+        service._persistForTest(previousSpeed: 50.0, currentSpeed: 50.0)
+        XCTAssertEqual(actualReloads, 2,
+                       "Third heartbeat within 5 min must be coalesced by throttle")
+
+        // After five minutes since the last reload, the next
+        // heartbeat fires one more reload.
+        now = now.addingTimeInterval(5 * 60)
+        service._persistForTest(previousSpeed: 50.0, currentSpeed: 50.0)
+        XCTAssertEqual(actualReloads, 3,
+                       "Heartbeat after 5 min must fire one reload")
     }
 
     // MARK: - Permission path tightening (gap 9)

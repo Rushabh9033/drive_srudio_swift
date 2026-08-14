@@ -522,14 +522,16 @@ struct DesignSpaceLayerView: View {
             case "image":
                 let src = layer.src ?? ""
                 if ImageSource.symbolicVehicleGuideNames.contains(src) {
-                    // Symbolic editor guide — should not appear on the
-                    // home-screen widget. The editor places `template_car`
-                    // guides into a draft to mark "drop your photo here";
-                    // the user must replace the guide with their own
-                    // image before the design is meaningful on the home
-                    // screen. Until then, show a quiet placeholder so
-                    // the user understands the layer is empty.
-                    EmptyView()
+                    // Symbolic guide — `template_car` is an editor-only
+                    // placeholder ("drop your photo here"), not a real
+                    // file. Render the neutral CAR PHOTO guide box the
+                    // same way the editor does, with the dashed border
+                    // and `car.side.fill` glyph. The guide is
+                    // aspect-ratio-fit (1:1) so it sits inside the
+                    // layer's frame instead of overflowing it; once the
+                    // user replaces the guide with a real image, this
+                    // branch stops firing and the photo renders below.
+                    VehiclePositionGuideBox()
                 } else if !src.isEmpty, let img = DriveStudioImageLoader.load(
                     from: src, generation: generation) {
                     Image(uiImage: img).resizable().aspectRatio(contentMode: .fit)

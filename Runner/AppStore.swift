@@ -209,6 +209,11 @@ class AppStore: ObservableObject {
             try? pngData?.write(to: sharedImagesURL)
         }
 
+        // Flush the in-memory image cache so SlotCell previews (WidgetCanvas)
+        // and the home-screen widget immediately pick up the new artwork on
+        // their very next render pass — without waiting for a process restart.
+        DriveStudioImageLoader.invalidateCache()
+
         trySaveStateLoggingFailure()
     }
 
@@ -483,6 +488,10 @@ class AppStore: ObservableObject {
         // re-fetch and re-hash instead of returning the previous
         // generation's cached value.
         AppGroupState.invalidateCache()
+        // Also flush the image loader's NSCache so SlotCell previews
+        // (WidgetCanvas inside DashboardView) immediately show the new
+        // generation's images on their next render pass.
+        DriveStudioImageLoader.invalidateCache()
 
         // **WidgetKit reload.** Only after metadata publish + cache
         // invalidation succeeds do we tell WidgetKit to refresh.

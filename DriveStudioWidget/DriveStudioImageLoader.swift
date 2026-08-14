@@ -125,4 +125,13 @@ struct DriveStudioImageLoader {
     static func _clearCacheForTest() {
         imageCache.removeAllObjects()
     }
+
+    /// Production cache invalidation — call this whenever a new image
+    /// is written to disk (e.g. after `saveVehicleImage` or after
+    /// `installState` publishes a new generation). Clears all cached
+    /// entries so the very next `load(from:)` call re-reads from disk
+    /// and picks up the new bytes.
+    static func invalidateCache() {
+        imageCache.removeAllObjects()
+    }
 }

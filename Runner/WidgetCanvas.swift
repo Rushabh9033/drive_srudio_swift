@@ -383,14 +383,23 @@ struct LayerView: View {
             let src = layer.src ?? ""
             if ImageSource.symbolicVehicleGuideNames.contains(src) {
                 // Symbolic editor guide (`template_car`) — render the
-                // neutral guide box. We never search for these names
-                // on disk; there is no such file.
-                VehiclePositionGuideBox(
-                    primary: DriveColors.primary,
-                    label: "CAR PHOTO"
-                )
+                // neutral guide box OR the user's uploaded vehicle image
+                // if one exists, so the slot card preview looks live.
+                if let vehicleImg = AppStore.shared.vehicleImage {
+                    Image(uiImage: vehicleImg).resizable().scaledToFit()
+                } else {
+                    VehiclePositionGuideBox(
+                        primary: DriveColors.primary,
+                        label: "CAR PHOTO"
+                    )
+                }
             } else if let uiImage = DriveStudioImageLoader.load(from: src) {
                 Image(uiImage: uiImage).resizable().scaledToFit()
+            } else if let vehicleImg = AppStore.shared.vehicleImage {
+                // Disk load failed (file not yet staged into SharedImages)
+                // but the user already uploaded a photo this session —
+                // use the in-memory copy so the preview is never blank.
+                Image(uiImage: vehicleImg).resizable().scaledToFit()
             } else {
                 // Real image, but the load failed (truly missing).
                 // Surface the same neutral guide so the user knows

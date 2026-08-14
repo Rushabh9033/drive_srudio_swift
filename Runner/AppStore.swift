@@ -336,11 +336,11 @@ class AppStore: ObservableObject {
                 }
             }
 
-            // Inject custom vehicle image into slot spec if present
+            // Inject custom vehicle image into slot spec ONLY if src is template_car
             if self.vehicleImage != nil, var spec = slotSpec, let rawLayers = spec.layers {
                 var updatedLayers = rawLayers
                 for idx in updatedLayers.indices {
-                    if updatedLayers[idx].kind == "image" || updatedLayers[idx].src == "template_car" {
+                    if updatedLayers[idx].src == "template_car" {
                         updatedLayers[idx].src = "home_vehicle.png"
                     }
                 }

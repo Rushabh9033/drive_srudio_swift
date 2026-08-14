@@ -425,7 +425,12 @@ struct ScaledLayerView: View {
         Group {
             switch layer.kind {
             case "text":
-                let text = layer.text?.isEmpty == false ? layer.text! : (layer.label ?? " ")
+                // The check above (`!= ""`) already proves `layer.text`
+                // is non-nil; the explicit `??` here lets the compiler
+                // see the optional is unwrapped safely without a `!`.
+                let text = layer.text?.isEmpty == false
+                    ? (layer.text ?? "")
+                    : (layer.label ?? " ")
                 Text(text)
                     .font(.system(size: fontSize, weight: weight(for: layer.weight ?? 400), design: .rounded))
                     .foregroundColor(layerColor)

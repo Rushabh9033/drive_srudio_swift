@@ -1110,203 +1110,423 @@ func testActiveSlotKeyContractIsStable() {
 /// persists the clamped integer to App Group defaults. This guards
 /// against a user-supplied Shortcut parameter or corrupted App
 /// Group blob pointing the host at a non-existent slot.
-func testActiveSlotIsClampedToValidRange() async {
-    let defaults = UserDefaults(suiteName: AppGroupContract.suiteName)
-        ?? UserDefaults.standard
-    defaults.removeObject(forKey: AppStore.activeSlotKey)
-    await MainActor.run {
-        AppStore.shared.setActiveSlot(99)
-        XCTAssertEqual(AppStore.shared.activeSlotIndex, 3,
-                       "setActiveSlot(99) must clamp to slot index 3")
-        XCTAssertEqual(defaults.integer(forKey: AppStore.activeSlotKey), 3,
-                       "Clamped value must be persisted to App Group defaults")
-        AppStore.shared.setActiveSlot(-5)
-        XCTAssertEqual(AppStore.shared.activeSlotIndex, 0,
-                       "setActiveSlot(-5) must clamp to slot index 0")
-        XCTAssertEqual(defaults.integer(forKey: AppStore.activeSlotKey), 0,
-                       "Clamped value must be persisted to App Group defaults")
-    }
-
-    // MARK: - Atomic state replacement (gap 1)
-
-    /// Successful replacement installs the new complete state. The
-    /// destination file ends up containing the bytes we asked for,
-    /// not the old payload.
-    func testAtomicStateReplacementProducesNewState() async throws {
-        let dir = FileManager.default.temporaryDirectory
-            .appendingPathComponent("ds_test_\(UUID().uuidString)", isDirectory: true)
-        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        defer { try? FileManager.default.removeItem(at: dir) }
-
-        let dest = dir.appendingPathComponent("widget_state_v2.json")
-        let oldData = Data("OLD-PAYLOAD".utf8)
-        try oldData.write(to: dest)
-
-        let newData = Data("NEW-PAYLOAD".utf8)
-        let temp = dir.appendingPathComponent(
-            ".\(dest.lastPathComponent).tmp.\(UUID().uuidString)"
-        )
-        try newData.write(to: temp)
-
-        let generation: String? = try await MainActor.run {
-            AppStore.tryInstallState(
-                stateData: newData,
-                destination: dest,
-                metadataKey: "test_metadata_key_\(UUID().uuidString)",
-                defaults: makeIsolatedDefaults()
-            )
+    func testActiveSlotIsClampedToValidRange() async {
+        let defaults = UserDefaults(suiteName: AppGroupContract.suiteName)
+            ?? UserDefaults.standard
+        defaults.removeObject(forKey: AppStore.activeSlotKey)
+        await MainActor.run {
+            AppStore.shared.setActiveSlot(99)
+            XCTAssertEqual(AppStore.shared.activeSlotIndex, 3,
+                           "setActiveSlot(99) must clamp to slot index 3")
+            XCTAssertEqual(defaults.integer(forKey: AppStore.activeSlotKey), 3,
+                           "Clamped value must be persisted to App Group defaults")
+            AppStore.shared.setActiveSlot(-5)
+            XCTAssertEqual(AppStore.shared.activeSlotIndex, 0,
+                           "setActiveSlot(-5) must clamp to slot index 0")
+            XCTAssertEqual(defaults.integer(forKey: AppStore.activeSlotKey), 0,
+                           "Clamped value must be persisted to App Group defaults")
         }
-        XCTAssertNotNil(generation, "Successful replacement must return a generation")
-        let readBack = try Data(contentsOf: dest)
-        XCTAssertEqual(readBack, newData,
-                       "Destination must hold the new payload after successful replacement")
     }
 
-    /// A simulated failure (temp path is a directory, so the swap
-    /// throws) leaves the previous valid file unchanged.
-    func testAtomicStateReplacementFailurePreservesOld() async throws {
-        let dir = FileManager.default.temporaryDirectory
-            .appendingPathComponent("ds_test_\(UUID().uuidString)", isDirectory: true)
-        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+    // MARK: - Atomic state installation (gap 1)
+    //
+    // The transaction under test is `AppStore.installState(...)` —
+    // a pure helper that writes a generation-specific
+    // `state_<generation>.json`, byte-verifies it, then hands the
+    // metadata blob to a caller-supplied `publish` closure. The
+    // previous generation's metadata entry is only overwritten
+    // once `publish` returns successfully. Failure tests pass a
+    // broken publish closure or a non-existent destination so we
+    // can prove the old file stays canonical without depending on
+    // the production algorithm's specific implementation details.
+
+    /// Successful install writes the supplied state bytes to a new
+    /// generation-specific file, publishes metadata pointing at it,
+    /// and returns the new generation UUID.
+    func testAtomicStateInstallSucceeds() throws {
+        let dir = makeTempDir()
         defer { try? FileManager.default.removeItem(at: dir) }
+        let defaults = makeIsolatedDefaults()
+        let metadataKey = "test_metadata_\(UUID().uuidString)"
+        var published: [Data] = []
 
-        let dest = dir.appendingPathComponent("widget_state_v2.json")
-        let oldData = Data("OLD-PAYLOAD-INTACT".utf8)
-        try oldData.write(to: dest)
-
-        // Force the swap to fail: temp is a directory, so moveItem
-        // and replaceItemAt will both throw.
-        let temp = dir.appendingPathComponent(
-            ".\(dest.lastPathComponent).tmp.\(UUID().uuidString)"
+        let result = try AppStore.installState(
+            stateData: Data("HELLO-V1".utf8),
+            sharedContainer: dir,
+            publish: { metaData in published.append(metaData) }
         )
-        try FileManager.default.createDirectory(at: temp, withIntermediateDirectories: true)
+        XCTAssertEqual(result.publishedFilename, "state_\(result.generation).json")
+        XCTAssertEqual(published.count, 1, "Metadata must be published exactly once")
+        // File on disk contains the bytes we asked for.
+        let writtenURL = dir.appendingPathComponent(result.publishedFilename)
+        let readBack = try Data(contentsOf: writtenURL)
+        XCTAssertEqual(readBack, Data("HELLO-V1".utf8),
+                       "Generation file must contain the supplied bytes")
+    }
 
-        let generation: String? = try await MainActor.run {
-            AppStore.tryInstallState(
+    /// Pre-publication failure (write to a non-existent container
+    /// throws) must not publish metadata, must not leak a file
+    /// on disk, and must surface the underlying error to the
+    /// caller.
+    func testAtomicStateInstallPrePublicationFailureDoesNotPublishMetadata() throws {
+        let dir = makeTempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        // Container URL points inside a parent that does not exist.
+        let bogusContainer = dir
+            .appendingPathComponent("missing-parent")
+            .appendingPathComponent("container")
+        var published: [Data] = []
+
+        XCTAssertThrowsError(
+            try AppStore.installState(
+                stateData: Data("HELLO".utf8),
+                sharedContainer: bogusContainer,
+                publish: { metaData in published.append(metaData) }
+            )
+        ) { error in
+            guard case AppStore.StateInstallError.destinationDirectoryMissing = error else {
+                XCTFail("Expected destinationDirectoryMissing, got \(error)")
+                return
+            }
+        }
+        XCTAssertEqual(published.count, 0,
+                       "Metadata publish must NOT be invoked when the destination is missing")
+    }
+
+    /// Metadata publication failure (publish throws) must remove the
+    /// staged generation file, leave the previous canonical file
+    /// untouched, and surface the publish error to the caller.
+    func testAtomicStateInstallMetadataPublishFailureCleansUpStagedFile() throws {
+        let dir = makeTempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        // Pre-existing previous generation file.
+        let previousGeneration = "PREV-\(UUID().uuidString)"
+        let previousFilename = "state_\(previousGeneration).json"
+        let previousBytes = Data("PREVIOUS-PAYLOAD".utf8)
+        try previousBytes.write(to: dir.appendingPathComponent(previousFilename))
+
+        struct PublishBoom: Error, Equatable { let tag: String }
+        XCTAssertThrowsError(
+            try AppStore.installState(
                 stateData: Data("NEW-PAYLOAD".utf8),
-                destination: dest,
-                metadataKey: "test_metadata_key_\(UUID().uuidString)",
-                defaults: makeIsolatedDefaults()
+                sharedContainer: dir,
+                publish: { _ in throw PublishBoom(tag: "simulated") }
             )
+        ) { error in
+            guard case AppStore.StateInstallError.metadataPublishFailed = error else {
+                XCTFail("Expected metadataPublishFailed, got \(error)")
+                return
+            }
         }
-        XCTAssertNil(generation, "Failed replacement must return nil")
 
-        // Old file is preserved byte-for-byte.
-        let readBack = try Data(contentsOf: dest)
-        XCTAssertEqual(readBack, oldData,
-                       "Failed replacement must leave the previous valid file intact")
-        // Orphan temp is cleaned up.
-        XCTAssertFalse(FileManager.default.fileExists(atPath: temp.path),
-                       "Failed replacement must remove the orphan temp")
+        // Previous generation file is still byte-identical.
+        let readBack = try Data(contentsOf: dir.appendingPathComponent(previousFilename))
+        XCTAssertEqual(readBack, previousBytes,
+                       "Previous generation file must remain byte-identical after metadata publish failure")
+
+        // The staged `state_<new-uuid>.json` must not be left on
+        // disk after the publish failure.
+        let leftover = (try? FileManager.default.contentsOfDirectory(atPath: dir.path))?
+            .filter { $0.hasPrefix("state_") && $0.hasSuffix(".json") }
+            .sorted() ?? []
+        XCTAssertEqual(leftover, [previousFilename],
+                       "Staged generation file must be cleaned up after publish failure")
     }
 
-    /// Failed replacement must not advance the metadata key. The
-    /// caller uses the metadata to decide which generation to read;
-    /// if it advanced after a failed swap the widget would point at
-    /// a missing file.
-    func testAtomicStateReplacementDoesNotPublishMetadataOnFailure() async throws {
-        let dir = FileManager.default.temporaryDirectory
-            .appendingPathComponent("ds_test_\(UUID().uuidString)", isDirectory: true)
-        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+    /// The cleanup hook runs only after a successful metadata
+    /// publish and receives the new generation UUID in its `keep`
+    /// set.
+    func testAtomicStateInstallCleanupHookRunsOnlyOnSuccess() throws {
+        let dir = makeTempDir()
         defer { try? FileManager.default.removeItem(at: dir) }
+        var cleanupCalls: [Set<String>] = []
 
-        let dest = dir.appendingPathComponent("widget_state_v2.json")
-        try Data("OLD-PAYLOAD".utf8).write(to: dest)
-        let temp = dir.appendingPathComponent(
-            ".\(dest.lastPathComponent).tmp.\(UUID().uuidString)"
+        // Successful install — cleanup hook called once with the
+        // new generation in its keep set.
+        let result = try AppStore.installState(
+            stateData: Data("HELLO".utf8),
+            sharedContainer: dir,
+            publish: { _ in },
+            cleanupOlderGenerations: { keep in cleanupCalls.append(keep) }
         )
-        try FileManager.default.createDirectory(at: temp, withIntermediateDirectories: true)
+        XCTAssertEqual(cleanupCalls.count, 1)
+        XCTAssertTrue(cleanupCalls[0].contains(result.generation))
 
-        let suite = makeIsolatedDefaults()
-        let metadataKey = "test_metadata_key_\(UUID().uuidString)"
-        // Pre-condition: no metadata present.
-        suite.removeObject(forKey: metadataKey)
-
-        let generation: String? = try await MainActor.run {
-            AppStore.tryInstallState(
-                stateData: Data("NEW-PAYLOAD".utf8),
-                destination: dest,
-                metadataKey: metadataKey,
-                defaults: suite
+        // Failed install (bogus publish) — cleanup hook NOT called.
+        struct Boom: Error, Equatable {}
+        XCTAssertThrowsError(
+            try AppStore.installState(
+                stateData: Data("HELLO".utf8),
+                sharedContainer: dir,
+                publish: { _ in throw Boom() },
+                cleanupOlderGenerations: { keep in cleanupCalls.append(keep) }
             )
-        }
-        XCTAssertNil(generation)
-        XCTAssertNil(suite.data(forKey: metadataKey),
-                     "Failed replacement must not publish a metadata blob")
+        )
+        XCTAssertEqual(cleanupCalls.count, 1,
+                       "Cleanup hook must NOT run when metadata publish fails")
     }
 
-    // MARK: - Telemetry persistence throttling (gap 2)
+    // MARK: - Helper for atomic install tests
 
-    /// Sub-display-threshold speed changes do not persist. We inject
-    /// a fixed clock and feed two consecutive fixes that differ by
-    /// less than `significantSpeedDelta` km/h — neither write should
-    /// touch the App Group defaults.
-    func testTelemetrySubThresholdSpeedChangeDoesNotPersist() {
+    private func makeTempDir() -> URL {
+        let dir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("ds_test_\(UUID().uuidString)",
+                                    isDirectory: true)
+        try! FileManager.default.createDirectory(
+            at: dir, withIntermediateDirectories: true)
+        return dir
+    }
+
+    // MARK: - Telemetry persistence policy (gap 2)
+    //
+    // The production policy is implemented by
+    // `TelemetryService.persistTelemetryIfMeaningful(previousSpeed:)`.
+    // Each test below drives that exact code path with an injected
+    // clock so we can assert exact write counts without depending on
+    // `Date()` or shared App Group state from prior tests.
+    //
+    // Policy (executable form):
+    //   * First valid snapshot (no `prev` blob) — persist.
+    //   * Battery / charging / connection / availability transition
+    //     vs `prev` — persist.
+    //   * Speed |current - prev.speed| ≥ `significantSpeedDelta`
+    //     (compared against the LAST PERSISTED speed, not just the
+    //     immediately previous GPS sample) — persist.
+    //   * Heartbeat window elapsed since the last write — persist.
+    //   * Otherwise — silent.
+    //
+    // The persisted snapshot's `timestamp` field is the injected
+    // clock value, so tests can decode it back and assert exact
+    // equality without touching `Date()`.
+
+    private func telemetryTestDefaults() -> UserDefaults {
+        let defaults = UserDefaults(suiteName: AppGroupContract.suiteName)
+            ?? UserDefaults.standard
+        defaults.removeObject(forKey: AppGroupContract.liveTelemetryKey)
+        defaults.removeObject(forKey: AppGroupContract.legacyTelemetryKey)
+        return defaults
+    }
+
+    private func decodeSnapshot(from defaults: UserDefaults) -> TelemetryTestSnapshot? {
+        guard let data = defaults.data(forKey: AppGroupContract.liveTelemetryKey) else {
+            return nil
+        }
+        return try? JSONDecoder().decode(TelemetryTestSnapshot.self, from: data)
+    }
+
+    /// Initial snapshot (no prior App Group blob) persists
+    /// immediately and the encoded timestamp is the injected clock
+    /// value, not `Date()`.
+    func testTelemetryInitialSnapshotPersistsImmediately() {
         var now = Date(timeIntervalSince1970: 1_726_000_000)
         let service = TelemetryService(clock: { now })
         defer { service.resetPersistenceState() }
-        let defaults = UserDefaults(suiteName: AppGroupContract.suiteName)
-        defaults?.removeObject(forKey: AppGroupContract.liveTelemetryKey)
+        let defaults = telemetryTestDefaults()
 
-        // Seed currentSpeed (normally Core Location would do this).
         service.currentSpeed = 30.0
-        service._persistForTest(previousSpeed: 30.0, currentSpeed: 30.4)
-        XCTAssertNil(defaults?.data(forKey: AppGroupContract.liveTelemetryKey),
-                     "0.4 km/h delta must NOT persist App Group defaults")
+        service._persistForTest(previousSpeed: nil, currentSpeed: 30.0)
+        let snapshot = decodeSnapshot(from: defaults)
+        XCTAssertNotNil(snapshot, "Initial snapshot must persist immediately")
+        XCTAssertEqual(snapshot?.timestamp, now,
+                       "Persisted timestamp must come from the injected clock")
+        XCTAssertEqual(snapshot?.speed, 30.0)
+    }
+
+    /// Unchanged reading within the heartbeat window after an
+    /// initial write does NOT trigger another write. We assert this
+    /// by checking that no fresh blob is published (the initial
+    /// blob is the only one).
+    func testTelemetryUnchangedReadingBeforeHeartbeatDoesNotPersist() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+        let defaults = telemetryTestDefaults()
+
+        service.currentSpeed = 30.0
+        service._persistForTest(previousSpeed: nil, currentSpeed: 30.0)
+        let firstSnapshot = defaults.data(forKey: AppGroupContract.liveTelemetryKey)
+        XCTAssertNotNil(firstSnapshot)
 
         now = now.addingTimeInterval(5)
-        service._persistForTest(previousSpeed: 30.4, currentSpeed: 30.0)
-        XCTAssertNil(defaults?.data(forKey: AppGroupContract.liveTelemetryKey),
-                     "Reversing sub-threshold delta must NOT persist either")
-        defaults?.removeObject(forKey: AppGroupContract.liveTelemetryKey)
+        service._persistForTest(previousSpeed: 30.0, currentSpeed: 30.0)
+        XCTAssertEqual(
+            defaults.data(forKey: AppGroupContract.liveTelemetryKey),
+            firstSnapshot,
+            "Identical reading within the heartbeat window must NOT publish a fresh snapshot"
+        )
     }
 
     /// After the heartbeat window has elapsed since the last write,
-    /// a fresh persistence pass is allowed even when nothing visibly
-    /// changed. The timestamp must refresh.
-    func testTelemetryHeartbeatTriggersPersistenceAfterWindow() {
+    /// a fresh snapshot is published even when nothing visibly
+    /// changed. The new timestamp is the injected clock at the
+    /// moment of the heartbeat write.
+    func testTelemetryUnchangedReadingAfterHeartbeatPersists() {
         var now = Date(timeIntervalSince1970: 1_726_000_000)
         let service = TelemetryService(clock: { now })
         defer { service.resetPersistenceState() }
-        let defaults = UserDefaults(suiteName: AppGroupContract.suiteName)
-        defaults?.removeObject(forKey: AppGroupContract.liveTelemetryKey)
+        let defaults = telemetryTestDefaults()
 
         service.currentSpeed = 50.0
-        service._persistForTest(previousSpeed: 50.0, currentSpeed: 50.0)
-        XCTAssertNil(defaults?.data(forKey: AppGroupContract.liveTelemetryKey),
-                     "Identical speed without prior write must NOT persist (no heartbeat yet)")
+        service._persistForTest(previousSpeed: nil, currentSpeed: 50.0)
+        let firstTimestamp = decodeSnapshot(from: defaults)?.timestamp
+        XCTAssertEqual(firstTimestamp, now)
 
-        // First write happens via heartbeat.
         now = now.addingTimeInterval(TelemetryService.heartbeatPersistenceInterval + 1)
         service._persistForTest(previousSpeed: 50.0, currentSpeed: 50.0)
-        XCTAssertNotNil(defaults?.data(forKey: AppGroupContract.liveTelemetryKey),
-                        "Heartbeat window elapsed must allow a fresh write")
-
-        // Within the heartbeat window — nothing changed — no further write.
-        defaults?.removeObject(forKey: AppGroupContract.liveTelemetryKey)
-        now = now.addingTimeInterval(5)
-        service._persistForTest(previousSpeed: 50.0, currentSpeed: 50.0)
-        XCTAssertNil(defaults?.data(forKey: AppGroupContract.liveTelemetryKey),
-                     "Subsequent identical reading within the heartbeat window must NOT write again")
-        defaults?.removeObject(forKey: AppGroupContract.liveTelemetryKey)
+        let heartbeatTimestamp = decodeSnapshot(from: defaults)?.timestamp
+        XCTAssertEqual(heartbeatTimestamp, now,
+                       "Heartbeat write must use the injected clock at the heartbeat moment")
     }
 
-    /// A meaningful speed delta (≥ 1 km/h) persists immediately,
-    /// even within the heartbeat window — battery / charging /
-    /// connection / availability transitions and meaningful speed
-    /// changes always persist.
+    /// Battery transition (e.g. 30 → 31 percent) persists immediately,
+    /// even within the heartbeat window. The simulator's
+    /// `UIDevice.current.batteryLevel` is `-1` (unknown) so we drive
+    /// both the seed and the transition through the test seam's
+    /// override parameters.
+    func testTelemetryBatteryTransitionPersistsImmediately() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+        let defaults = telemetryTestDefaults()
+
+        // Seed an initial snapshot at batteryPercent = 30 with no
+        // speed so the policy has a stable baseline.
+        service.currentSpeed = nil
+        service._persistForTest(previousSpeed: nil, currentSpeed: nil,
+                                batteryPercent: 30)
+        XCTAssertEqual(decodeSnapshot(from: defaults)?.batteryPercent, 30,
+                       "Seed snapshot must use the override batteryPercent")
+
+        now = now.addingTimeInterval(2)
+        service._persistForTest(previousSpeed: nil, currentSpeed: nil,
+                                batteryPercent: 31)
+        XCTAssertEqual(decodeSnapshot(from: defaults)?.batteryPercent, 31,
+                       "Battery transition must persist immediately")
+    }
+
+    /// Charging transition (charging ↔ not-charging) persists
+    /// immediately.
+    func testTelemetryChargingTransitionPersistsImmediately() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+        let defaults = telemetryTestDefaults()
+
+        service.currentSpeed = nil
+        service._persistForTest(previousSpeed: nil, currentSpeed: nil,
+                                isCharging: false)
+        XCTAssertEqual(decodeSnapshot(from: defaults)?.isCharging, false)
+
+        now = now.addingTimeInterval(2)
+        service._persistForTest(previousSpeed: nil, currentSpeed: nil,
+                                isCharging: true)
+        XCTAssertEqual(decodeSnapshot(from: defaults)?.isCharging, true,
+                       "Charging transition must persist immediately")
+    }
+
+    /// Connection transition (carConnected ↔ !carConnected) persists
+    /// immediately.
+    func testTelemetryConnectionTransitionPersistsImmediately() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+        let defaults = telemetryTestDefaults()
+
+        service.currentSpeed = nil
+        service._persistForTest(previousSpeed: nil, currentSpeed: nil,
+                                carConnected: false)
+        XCTAssertEqual(decodeSnapshot(from: defaults)?.carConnected, false)
+
+        now = now.addingTimeInterval(2)
+        service._persistForTest(previousSpeed: nil, currentSpeed: nil,
+                                carConnected: true)
+        XCTAssertEqual(decodeSnapshot(from: defaults)?.carConnected, true,
+                       "Connection transition must persist immediately")
+    }
+
+    /// Speed availability transitions (nil → 0 and 0 → nil) persist
+    /// immediately because the widget needs to render the
+    /// "speed unknown" → "speed known" change.
+    func testTelemetrySpeedAvailabilityTransitionPersistsImmediately() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+        let defaults = telemetryTestDefaults()
+
+        service.currentSpeed = nil
+        service._persistForTest(previousSpeed: nil, currentSpeed: nil)
+        XCTAssertNil(decodeSnapshot(from: defaults)?.speed)
+
+        now = now.addingTimeInterval(2)
+        service.currentSpeed = 0.0
+        service._persistForTest(previousSpeed: nil, currentSpeed: 0.0)
+        XCTAssertEqual(decodeSnapshot(from: defaults)?.speed, 0.0,
+                       "nil → 0 availability transition must persist")
+
+        now = now.addingTimeInterval(2)
+        service.currentSpeed = nil
+        service._persistForTest(previousSpeed: 0.0, currentSpeed: nil)
+        XCTAssertNil(decodeSnapshot(from: defaults)?.speed,
+                     "0 → nil availability transition must persist")
+    }
+
+    /// Accumulated sub-threshold deltas cannot evade persistence
+    /// forever — once the cumulative drift from the last persisted
+    /// speed reaches `significantSpeedDelta`, a fresh snapshot is
+    /// published and the baseline advances.
+    func testTelemetryAccumulatedSmallSpeedChangesPersistWhenBaselineReachesThreshold() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+        let defaults = telemetryTestDefaults()
+
+        // Initial baseline at 30 km/h.
+        service.currentSpeed = 30.0
+        service._persistForTest(previousSpeed: nil, currentSpeed: 30.0)
+        XCTAssertEqual(decodeSnapshot(from: defaults)?.speed, 30.0)
+
+        // Three sub-threshold fixes within the heartbeat window.
+        // None of these should publish a new snapshot because the
+        // cumulative drift from 30 km/h has not reached 1 km/h yet.
+        now = now.addingTimeInterval(1)
+        service._persistForTest(previousSpeed: 30.0, currentSpeed: 30.3)
+        XCTAssertEqual(decodeSnapshot(from: defaults)?.speed, 30.0,
+                       "0.3 km/h drift must not publish")
+
+        now = now.addingTimeInterval(1)
+        service._persistForTest(previousSpeed: 30.3, currentSpeed: 30.6)
+        XCTAssertEqual(decodeSnapshot(from: defaults)?.speed, 30.0,
+                       "0.6 km/h cumulative drift must not publish")
+
+        now = now.addingTimeInterval(1)
+        service._persistForTest(previousSpeed: 30.6, currentSpeed: 30.9)
+        XCTAssertEqual(decodeSnapshot(from: defaults)?.speed, 30.0,
+                       "0.9 km/h cumulative drift must not publish")
+
+        // Crossing 1 km/h cumulative drift publishes.
+        now = now.addingTimeInterval(1)
+        service._persistForTest(previousSpeed: 30.9, currentSpeed: 31.2)
+        XCTAssertEqual(decodeSnapshot(from: defaults)?.speed, 31.2,
+                       "1.2 km/h cumulative drift must publish")
+    }
+
+    /// A meaningful (≥ 1 km/h) speed delta persists immediately
+    /// even within the heartbeat window, because the threshold
+    /// is checked against the persisted baseline.
     func testTelemetryMeaningfulSpeedChangePersistsImmediately() {
         var now = Date(timeIntervalSince1970: 1_726_000_000)
         let service = TelemetryService(clock: { now })
         defer { service.resetPersistenceState() }
-        let defaults = UserDefaults(suiteName: AppGroupContract.suiteName)
-        defaults?.removeObject(forKey: AppGroupContract.liveTelemetryKey)
+        let defaults = telemetryTestDefaults()
 
         service.currentSpeed = 50.0
+        service._persistForTest(previousSpeed: nil, currentSpeed: 50.0)
+        XCTAssertEqual(decodeSnapshot(from: defaults)?.speed, 50.0)
+
+        now = now.addingTimeInterval(2)
         service._persistForTest(previousSpeed: 50.0, currentSpeed: 75.0)
-        XCTAssertNotNil(defaults?.data(forKey: AppGroupContract.liveTelemetryKey),
-                        "25 km/h delta must persist immediately")
-        defaults?.removeObject(forKey: AppGroupContract.liveTelemetryKey)
+        XCTAssertEqual(decodeSnapshot(from: defaults)?.speed, 75.0,
+                       "25 km/h delta from baseline must persist immediately")
     }
 
     // MARK: - Permission path tightening (gap 9)
@@ -1463,67 +1683,101 @@ func testActiveSlotIsClampedToValidRange() async {
     }
 
     // MARK: - Force-unwrap audit (gap 4)
+    //
+    // Token-level audit: walk every production source file in
+    // `Runner/` and `DriveStudioWidget/`, strip comments and string
+    // literals, and assert the file contains no `EXPR!` force-unwrap
+    // sites. The previous regex-based audit misclassified ordinary
+    // `let`/`var` declarations as force-unwraps; this one is a
+    // character-level pass that explicitly excludes the well-known
+    // lookalikes (`!=`, `as!`, `is!`, `!!`).
+    //
+    // We deliberately do NOT use `swift-syntax` — it would require
+    // adding a SwiftPM dependency just for one audit. The audit is
+    // good enough to catch every reachable `!`-after-identifier site;
+    // it may produce a false positive for some `let foo: Int = bar!`
+    // forms where the source has already been guarded upstream — those
+    // false positives get the appropriate guard added at the
+    // production site.
 
-    /// Stronger audit than a property-style regex: list every force
-    /// unwrap reachable in production and assert none of them sit on
-    /// a value that can be nil in practice. We intentionally scan
-    /// production sources only (`Runner/`, `DriveStudioWidget/`),
-    /// strip comments, and exclude `as!` casts (covered separately)
-    /// and the `[idx]!` subscript-on-Array pattern (covered
-    /// separately). We then assert the remaining set is empty.
     func testNoReachableProductionForceUnwraps() throws {
         let repoRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
         let fm = FileManager.default
-        let offenders: [(file: String, line: Int, snippet: String)] = []
-        // The Runner + widget extension sources. Test target is
-        // out of scope.
         let scanDirs = [
             repoRoot.appendingPathComponent("Runner"),
             repoRoot.appendingPathComponent("DriveStudioWidget"),
         ]
         var found: [String] = []
         for dir in scanDirs {
-            if let it = fm.enumerator(atPath: dir.path) {
-                while let file = it.nextObject() as? String {
-                    guard file.hasSuffix(".swift") else { continue }
-                    let url = dir.appendingPathComponent(file)
-                    let raw = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
-                    let stripped = stripSwiftComments(raw)
-                    let lines = stripped.split(separator: "\n", omittingEmptySubsequences: false)
-                    for (idx, line) in lines.enumerated() {
-                        let trimmed = line.trimmingCharacters(in: .whitespaces)
-                        // Skip the well-known allowed sites — these
-                        // are guarded by code that runs before the
-                        // unwrap (e.g. `let bar = foo!` only after a
-                        // nil-check earlier in the function).
-                        if trimmed.hasPrefix("let ") || trimmed.hasPrefix("var ") {
-                            // Force-unwrap: identifier followed by
-                            // `!` followed by an operator or end of
-                            // statement. Avoid `as!`, avoid `!` as
-                            // part of `!=`.
-                            if let bangRange = trimmed.range(of: "!", options: []) {
-                                let afterBang = trimmed[bangRange.upperBound...]
-                                let isOperator = afterBang.first == "="
-                                    || afterBang.first == ")"
-                                    || afterBang.first == ","
-                                    || afterBang.first == "."
-                                    || afterBang.first == "]"
-                                    || afterBang.first == " "
-                                if isOperator { continue }
-                            }
-                            found.append("\(file):\(idx + 1): \(trimmed)")
-                        }
+            guard let it = fm.enumerator(atPath: dir.path) else { continue }
+            while let file = it.nextObject() as? String {
+                guard file.hasSuffix(".swift") else { continue }
+                let url = dir.appendingPathComponent(file)
+                let raw = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
+                let stripped = stripSwiftComments(raw)
+                let lines = stripped.split(separator: "\n", omittingEmptySubsequences: false)
+                for (idx, line) in lines.enumerated() {
+                    let trimmed = line.trimmingCharacters(in: .whitespaces)
+                    if Self.lineContainsForceUnwrap(trimmed) {
+                        found.append("\(file):\(idx + 1): \(trimmed)")
                     }
                 }
             }
         }
         XCTAssertEqual(found, [],
             "Reachable production force-unwraps found: \(found.joined(separator: ", "))")
-        _ = offenders // keep the type referenced
     }
-}
+
+    /// Character-level check: does this line (with comments and string
+    /// literals stripped by the caller) contain a Swift force-unwrap
+    /// site `EXPR!`?
+    private static func lineContainsForceUnwrap(_ line: String) -> Bool {
+        // Strip string literals so a `!` inside `"foo!"` doesn't match.
+        var scrubbed = ""
+        var inString = false
+        for ch in line {
+            if ch == "\"" {
+                inString.toggle()
+                continue
+            }
+            if !inString {
+                scrubbed.append(ch)
+            }
+        }
+
+        let chars = Array(scrubbed)
+        for i in 0..<chars.count {
+            guard chars[i] == "!" else { continue }
+
+            // Exclude `!=` and `!!`
+            let prev = i > 0 ? chars[i - 1] : Character(" ")
+            let next = i < chars.count - 1 ? chars[i + 1] : Character(" ")
+            if next == "=" { continue }
+            if prev == "=" { continue }
+            if next == "!" { continue }
+
+            // Exclude `as!` and `is!`
+            if prev == "s" && i >= 2 {
+                let before = chars[i - 2]
+                if before == "a" || before == "i" { continue }
+            }
+            // Exclude `as?`, `is?` lookalikes — no `!` though so N/A.
+
+            // Force unwrap must be preceded by an identifier-like
+            // character (letter, digit, `)`, `]`) and not be the
+            // first non-whitespace token on the line.
+            let isIdentifierTail = prev.isLetter
+                || prev.isNumber
+                || prev == ")"
+                || prev == "]"
+            guard isIdentifierTail else { continue }
+
+            return true
+        }
+        return false
+    }
 
 // MARK: - TelemetryService test seam
 //
@@ -1634,4 +1888,17 @@ func testApplyPersistedActiveSlotHonorsPersistedValue() async {
 /// fields; those are exercised in their own dedicated tests.
 struct SimpleTestEntry: TimelineEntry {
     let date: Date
+}
+
+/// Mirror of the private `Snapshot` struct inside
+/// `TelemetryService.persistTelemetryIfMeaningful`. Tests decode the
+/// persisted App Group blob into this so we can assert exact equality
+/// on the encoded values (especially `timestamp` which is the
+/// injected clock value).
+struct TelemetryTestSnapshot: Codable, Equatable {
+    let carConnected: Bool
+    let batteryPercent: Int?
+    let isCharging: Bool
+    var speed: Double?
+    let timestamp: Date?
 }

@@ -440,10 +440,19 @@ extension Notification.Name {
 
     /// Write the current telemetry to App Group defaults only when:
     ///
-    ///   1. A widget-visible signal flipped (battery %, charging,
-    ///      carConnected, speed availability).
-    ///   2. Speed changed by ≥ `significantSpeedDelta` km/h.
-    ///   3. The heartbeat window (`heartbeatPersistenceInterval`)
+    ///   1. **First valid snapshot** — when no previous telemetry
+    ///      exists in App Group defaults, persist immediately so
+    ///      the widget has something to render.
+    ///   2. A widget-visible signal flipped (battery %, charging,
+    ///      carConnected, speed availability nil↔non-nil).
+    ///   3. Speed changed by ≥ `significantSpeedDelta` km/h from the
+    ///      **last persisted** snapshot. Comparing against the
+    ///      persisted baseline (not just the immediately previous
+    ///      GPS sample) prevents many sub-1 km/h fixes from
+    ///      forever evading persistence: once the accumulated drift
+    ///      from the persisted baseline reaches the threshold we
+    ///      persist and reset the baseline.
+    ///   4. The heartbeat window (`heartbeatPersistenceInterval`)
     ///      has elapsed since the last write.
     ///
     /// In every other case the in-memory `currentSpeed` and the UI
@@ -452,18 +461,28 @@ extension Notification.Name {
     /// jitter doesn't write defaults 5+ times per second. Widget
     /// reload throttling is handled separately by
     /// `WidgetReloadThrottle.shared.requestReload(kind:)` below.
-    private func persistTelemetryIfMeaningful(previousSpeed: Double?) {
+    private func persistTelemetryIfMeaningful(
+        previousSpeed: Double?,
+        batteryOverride: Int? = nil,
+        chargingOverride: Bool? = nil,
+        connectionOverride: Bool? = nil
+    ) {
         let now = clock()
         let device = UIDevice.current
         let level = device.batteryLevel
         // Unknown battery (`batteryLevel == -1`) is propagated as
-        // `nil`. We never substitute a fake value.
-        let batteryPercent: Int? = level >= 0 ? Int(level * 100) : nil
+        // `nil`. We never substitute a fake value. Test overrides
+        // bypass the device read so simulator tests can simulate
+        // transitions.
+        let batteryPercent: Int? = batteryOverride
+            ?? (level >= 0 ? Int(level * 100) : nil)
         // Exact current charging state. Do not OR with any previously
         // cached state — if the device just unplugged, this must
         // flip to false on the next snapshot.
-        let isCharging = device.batteryState == .charging
-            || device.batteryState == .full
+        let isCharging = chargingOverride
+            ?? (device.batteryState == .charging
+                || device.batteryState == .full)
+        let resolvedCarConnected = connectionOverride ?? carConnected
 
         struct Snapshot: Codable {
             let carConnected: Bool
@@ -483,34 +502,44 @@ extension Notification.Name {
             prev = nil
         }
 
+        let firstSnapshot = (prev == nil)
+
         let batteryChanged = prev?.batteryPercent != batteryPercent
         let chargingChanged = prev?.isCharging != isCharging
-        let connectionChanged = prev?.carConnected != carConnected
+        let connectionChanged = prev?.carConnected != resolvedCarConnected
         let availabilityChanged = (prev?.speed == nil) != (currentSpeed == nil)
-        let speedDelta: Double = {
-            if let p = previousSpeed, let c = currentSpeed {
-                return abs(c - p)
+
+        // Compare against the LAST PERSISTED speed so accumulated
+        // sub-threshold drift eventually trips the meaningful-speed
+        // boundary and a fresh snapshot is published.
+        let speedDeltaAgainstBaseline: Double = {
+            guard let baseline = prev?.speed, let current = currentSpeed else {
+                return 0
             }
-            return 0
+            return abs(current - baseline)
         }()
-        let speedMeaningful = speedDelta >= Self.significantSpeedDelta
+        let speedMeaningful = speedDeltaAgainstBaseline >= Self.significantSpeedDelta
 
         let heartbeatDue: Bool = {
             guard let last = lastPersistenceDate else { return true }
             return now.timeIntervalSince(last) >= Self.heartbeatPersistenceInterval
         }()
 
-        let shouldPersist = batteryChanged || chargingChanged
+        let shouldPersist = firstSnapshot
+            || batteryChanged || chargingChanged
             || connectionChanged || availabilityChanged
             || speedMeaningful || heartbeatDue
         guard shouldPersist else { return }
 
         let telemetry = Snapshot(
-            carConnected: carConnected,
+            carConnected: resolvedCarConnected,
             batteryPercent: batteryPercent,
             isCharging: isCharging,
             speed: currentSpeed,
-            timestamp: Date()
+            // Use the injected clock value as the snapshot timestamp
+            // so tests can assert exact equality without depending
+            // on the system clock.
+            timestamp: now
         )
         guard let data = try? JSONEncoder().encode(telemetry) else { return }
 
@@ -546,9 +575,24 @@ extension Notification.Name {
     /// `@testable import Runner`. Production callers go through
     /// `locationManager(_:didUpdateLocations:)` which already
     /// supplies `previousSpeed` from the in-memory `currentSpeed`.
-    func _persistForTest(previousSpeed: Double?, currentSpeed: Double? = nil) {
+    ///
+    /// Optional overrides for `batteryPercent`, `isCharging`, and
+    /// `carConnected` let tests simulate transitions without having
+    /// to mutate `UIDevice.current` (which the simulator does not
+    /// support anyway). Pass `nil` to fall through to the real
+    /// device reading.
+    func _persistForTest(previousSpeed: Double?,
+                         currentSpeed: Double? = nil,
+                         batteryPercent: Int? = nil,
+                         isCharging: Bool? = nil,
+                         carConnected: Bool? = nil) {
         if let currentSpeed = currentSpeed { self.currentSpeed = currentSpeed }
-        persistTelemetryIfMeaningful(previousSpeed: previousSpeed)
+        persistTelemetryIfMeaningful(
+            previousSpeed: previousSpeed,
+            batteryOverride: batteryPercent,
+            chargingOverride: isCharging,
+            connectionOverride: carConnected
+        )
     }
 }
 

@@ -324,34 +324,54 @@ class AppStore: ObservableObject {
             widgetImagePath: nil
         )
 
-        // **Atomic replacement.** Encode once, then hand off to a
-        // dedicated installer that uses `FileManager.replaceItemAt`
-        // (APFS-atomic) and only publishes the new metadata / bumps
-        // the cache after the swap has actually succeeded. If the
-        // swap fails for any reason the previous valid file is
-        // preserved, the orphan temp file is removed, and we bail
-        // without advancing the generation — a crash window where
-        // the widget reads "metadata points at a missing file"
-        // is no longer reachable.
+        // **Crash-safe generation-specific replacement.** Encode
+        // once, then hand off to a dedicated installer that writes
+        // to a unique `state_<generation>.json`, byte-verifies it,
+        // and only publishes the new metadata after the staged file
+        // is durable on disk. If anything fails before metadata
+        // publication, the previous generation's metadata entry
+        // stays canonical and readers continue to read the previous
+        // (valid) generation file unchanged.
         guard let sharedURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: suiteName),
               let stateData = try? JSONEncoder().encode(envelope) else {
             return
         }
 
-        let stateFile = "widget_state_v2.json"
-        let fileURL = sharedURL.appendingPathComponent(stateFile)
-        let installedGeneration = Self.tryInstallState(
-            stateData: stateData,
-            destination: fileURL,
-            metadataKey: AppGroupContract.v2MetadataKey,
-            defaults: defaults
+        // Look up the previous generation so the install can
+        // preserve the at-least-two-generation invariant in its
+        // cleanup hook.
+        let previousGeneration = Self.readCurrentGeneration(
+            from: defaults,
+            metadataKey: AppGroupContract.v2MetadataKey
         )
-        guard let generation = installedGeneration else {
-            // Replacement failed — preserve the previous valid file,
-            // drop the orphan temp, and bail. Widget reads continue
-            // to see the previous (valid) state.
+
+        let installResult: StateInstallResult
+        do {
+            installResult = try Self.installState(
+                stateData: stateData,
+                sharedContainer: sharedURL,
+                publish: { metaData in
+                    defaults.set(metaData, forKey: AppGroupContract.v2MetadataKey)
+                },
+                cleanupOlderGenerations: { keepGenerations in
+                    // Preserve at least the new generation and the
+                    // previous one (when one exists) so a crash
+                    // between publish and reader-consume does not
+                    // orphan the previous file.
+                    var preserve = keepGenerations
+                    if let prev = previousGeneration { preserve.insert(prev) }
+                    Self.cleanupStateFilesExcept(
+                        in: sharedURL,
+                        keep: preserve
+                    )
+                }
+            )
+        } catch {
+            // Replacement failed — the previous valid generation
+            // is still readable. Bail without invalidating the cache.
             return
         }
+        let generation = installResult.generation
 
         // **Cache invalidation.** The installer published the new
         // generation's checksum, generation, and timestamp. Now drop
@@ -447,83 +467,208 @@ class AppStore: ObservableObject {
     ///   exists (APFS-atomic), and a plain move when it doesn't
     ///   (first-launch).
     /// - On failure, removes the orphan temp file and returns
-    ///   `nil` without touching metadata or the cache.
-    /// - On success, publishes a metadata blob (schemaVersion,
-    ///   generation UUID, stateFile name, SHA-256, timestamp) to
-    ///   `metadataKey` in `defaults`.
-    static func tryInstallState(stateData: Data,
-                                destination: URL,
-                                metadataKey: String,
-                                defaults: UserDefaults) -> String? {
+    // MARK: - Crash-safe state installation
+    //
+    // The previous installer overwrote a fixed
+    // `widget_state_v2.json` in place and then updated the metadata
+    // blob pointing at it. That left a crash window: the new bytes
+    // could land on disk while the metadata update was still in
+    // flight, so a process crash between file-write and
+    // metadata-publish left metadata pointing at the new bytes —
+    // and any reader who verified the checksum against the old
+    // metadata would either fail or (worse) trust the new bytes
+    // for which the checksum had not been re-validated.
+    //
+    // The new transaction:
+    //   1. Picks a fresh generation UUID and writes the new state
+    //      to a unique `state_<generation>.json` filename inside
+    //      the shared App Group container.
+    //   2. Reads the file back from disk and byte-compares against
+    //      the supplied `stateData` to make sure the write was
+    //      durable and not truncated.
+    //   3. Computes SHA-256 over the verified bytes and hands the
+    //      metadata blob to the caller-supplied `publish` closure.
+    //   4. If `publish` throws, the new generation file is removed
+    //      so the next install can write a clean file under the
+    //      same UUID. The previous generation remains canonical
+    //      because its metadata entry was never overwritten.
+    //   5. Only after a successful publish does the optional
+    //      `cleanupOlderGenerations` hook get to remove older
+    //      generation files. The new generation and (when known)
+    //      the previous generation are passed to the hook so it
+    //      can keep the at-least-two-generation invariant.
+    //
+    // **Failure semantics:**
+    // - Crash before step 1: nothing on disk changed.
+    // - Crash between step 1 and step 2: an orphan
+    //   `state_<uuid>.json` exists on disk; metadata still points at
+    //   the previous generation file, which is fully readable.
+    // - Crash between step 2 and step 3: same as above, with the
+    //   verification read-back guaranteeing the file is complete
+    //   (not a partial write).
+    // - Crash between step 3 and step 4 (publish): the previous
+    //   metadata entry is still valid, the new file is on disk but
+    //   invisible to readers. The next install's cleanup hook can
+    //   remove orphan state_*.json files if it wants.
+    // - `publish` throws: new file removed, previous metadata
+    //   unchanged, callers see a thrown error and can retry.
+
+    enum StateInstallError: Error, Equatable {
+        /// The shared container URL was not a usable directory.
+        case destinationDirectoryMissing(URL)
+        /// Writing the staged generation file failed.
+        case stageWriteFailed(URL)
+        /// Verifying the staged file (re-reading and byte-comparing)
+        /// did not produce the exact `stateData` we wrote.
+        case verificationFailed(expectedBytes: Int, actualBytes: Int)
+        /// The metadata publish closure threw. The new generation
+        /// file has been removed; the previous generation remains
+        /// canonical.
+        case metadataPublishFailed(String)
+    }
+
+    struct StateInstallResult: Equatable {
+        let generation: String
+        let publishedFilename: String
+    }
+
+    /// Crash-safe state installer. Writes a fresh
+    /// `state_<generation>.json`, verifies it, then asks the caller
+    /// to publish a metadata blob pointing at it. The previous
+    /// generation's metadata entry is only overwritten once `publish`
+    /// returns successfully.
+    ///
+    /// Marked `nonisolated` because the transaction is pure —
+    /// it touches the filesystem and the caller-supplied `publish`
+    /// closure but never reads any actor-isolated state — so tests
+    /// can call it without hopping through `MainActor.run`.
+    nonisolated static func installState(
+        stateData: Data,
+        sharedContainer: URL,
+        clock: () -> Date = { Date() },
+        publish: (Data) throws -> Void,
+        cleanupOlderGenerations: (Set<String>) -> Void = { _ in }
+    ) throws -> StateInstallResult {
         let fm = FileManager.default
-        let tempURL = destination.appendingPathComponent(
-            ".\(destination.lastPathComponent).tmp.\(UUID().uuidString)"
-        )
+        var isDir: ObjCBool = false
+        guard fm.fileExists(atPath: sharedContainer.path, isDirectory: &isDir),
+              isDir.boolValue else {
+            throw StateInstallError.destinationDirectoryMissing(sharedContainer)
+        }
 
-        // 1. Stage to a unique temp file.
+        // Step 1: pick a unique generation UUID and write the new
+        // state to a generation-specific filename.
+        let newGeneration = UUID().uuidString
+        let newFilename = "state_\(newGeneration).json"
+        let newURL = sharedContainer.appendingPathComponent(newFilename)
+
         do {
-            try stateData.write(to: tempURL, options: [.atomic])
+            try stateData.write(to: newURL, options: [.atomic])
         } catch {
-            return nil
+            // Pre-publication failure: stage write failed. Remove
+            // any partial file and bail. Previous generation's
+            // metadata is untouched.
+            try? fm.removeItem(at: newURL)
+            throw StateInstallError.stageWriteFailed(newURL)
         }
 
-        // 2. Atomic swap into the destination. `replaceItemAt`
-        //    guarantees (on APFS) that the destination is replaced
-        //    in place — no window where it is missing or partial.
-        //    If the swap fails we drop the orphan temp and bail.
-        let replaced: Bool
-        if fm.fileExists(atPath: destination.path) {
-            do {
-                try fm.replaceItemAt(
-                    destination,
-                    withItemAt: tempURL,
-                    backupItemName: nil,
-                    options: []
-                )
-                replaced = true
-            } catch {
-                try? fm.removeItem(at: tempURL)
-                replaced = false
-            }
-        } else {
-            // First launch — no destination exists yet. A plain
-            // move is safe and atomic on APFS.
-            do {
-                try fm.moveItem(at: tempURL, to: destination)
-                replaced = true
-            } catch {
-                try? fm.removeItem(at: tempURL)
-                replaced = false
-            }
+        // Step 2: re-read the staged file and byte-compare against
+        // the source data so we never advance metadata pointing at
+        // a partial or corrupt write.
+        let readBack: Data
+        do {
+            readBack = try Data(contentsOf: newURL)
+        } catch {
+            try? fm.removeItem(at: newURL)
+            throw StateInstallError.stageWriteFailed(newURL)
         }
-        if !replaced { return nil }
-
-        // 3. Best-effort cleanup of any orphaned `.tmp.*` files
-        //    left behind by previous installs which crashed before
-        //    their swap finished.
-        let parent = destination.deletingLastPathComponent()
-        if let entries = try? fm.contentsOfDirectory(atPath: parent.path) {
-            for entry in entries where entry.hasPrefix(".\(destination.lastPathComponent).tmp.") {
-                let url = parent.appendingPathComponent(entry)
-                try? fm.removeItem(at: url)
-            }
+        guard readBack == stateData else {
+            try? fm.removeItem(at: newURL)
+            throw StateInstallError.verificationFailed(
+                expectedBytes: stateData.count,
+                actualBytes: readBack.count
+            )
         }
 
-        // 4. Publish metadata only after the swap is durable.
-        let sha256 = SHA256.hash(data: stateData)
+        // Step 3: build the metadata blob. Checksum is over the
+        // verified bytes, timestamp comes from the injected clock.
+        let checksum = SHA256.hash(data: stateData)
             .compactMap { String(format: "%02x", $0) }
             .joined()
-        let generation = UUID().uuidString
         let metadata: [String: Any] = [
             "schemaVersion": 2,
-            "generation": generation,
-            "stateFile": destination.lastPathComponent,
-            "checksum": sha256,
-            "updatedAt": ISO8601DateFormatter().string(from: Date())
+            "generation": newGeneration,
+            "stateFile": newFilename,
+            "checksum": checksum,
+            "updatedAt": ISO8601DateFormatter().string(from: clock())
         ]
-        if let metaDataJSON = try? JSONSerialization.data(withJSONObject: metadata, options: []) {
-            defaults.set(metaDataJSON, forKey: metadataKey)
+        let metaData: Data
+        do {
+            metaData = try JSONSerialization.data(withJSONObject: metadata, options: [])
+        } catch {
+            try? fm.removeItem(at: newURL)
+            throw StateInstallError.metadataPublishFailed(
+                "metadata serialization failed: \(error)")
         }
-        return generation
+
+        // Step 4: atomic metadata publication. If this throws, the
+        // previous metadata entry is unchanged and the new file is
+        // removed so the next install starts clean.
+        do {
+            try publish(metaData)
+        } catch {
+            try? fm.removeItem(at: newURL)
+            throw StateInstallError.metadataPublishFailed(
+                "publish closure threw: \(error)")
+        }
+
+        // Step 5: best-effort cleanup of older generation files,
+        // preserving the at-least-two-generation invariant.
+        cleanupOlderGenerations(Set([newGeneration]))
+
+        return StateInstallResult(
+            generation: newGeneration,
+            publishedFilename: newFilename
+        )
+    }
+
+    /// Read the generation UUID currently published in the metadata
+    /// blob. Returns `nil` if the metadata is missing, malformed, or
+    /// was never written.
+    nonisolated private static func readCurrentGeneration(
+        from defaults: UserDefaults,
+        metadataKey: String
+    ) -> String? {
+        guard let data = defaults.data(forKey: metadataKey),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let gen = json["generation"] as? String else {
+            return nil
+        }
+        return gen
+    }
+
+    /// Remove all `state_<generation>.json` files in `container`
+    /// whose generation UUID is not in `keep`. Best-effort: failures
+    /// are logged and ignored so a cleanup hiccup never breaks a
+    /// successful install.
+    nonisolated private static func cleanupStateFilesExcept(
+        in container: URL,
+        keep: Set<String>
+    ) {
+        let fm = FileManager.default
+        guard let entries = try? fm.contentsOfDirectory(
+            atPath: container.path) else { return }
+        for entry in entries {
+            // Only act on generation-specific state files; leave any
+            // legacy `widget_state_v2.json` and image folders alone.
+            guard entry.hasPrefix("state_"),
+                  entry.hasSuffix(".json") else { continue }
+            // Entry format: state_<generation>.json
+            let stripped = entry
+                .replacingOccurrences(of: "state_", with: "")
+                .replacingOccurrences(of: ".json", with: "")
+            guard !keep.contains(stripped) else { continue }
+            try? fm.removeItem(at: container.appendingPathComponent(entry))
+        }
     }
 }

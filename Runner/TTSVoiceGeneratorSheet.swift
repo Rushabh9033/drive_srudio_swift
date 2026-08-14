@@ -211,10 +211,18 @@ struct TTSVoiceGeneratorSheet: View {
                 if let audioFile = self.activeAudioFile {
                     let targetFormat = audioFile.processingFormat
                     if let converter = AVAudioConverter(from: pcmBuffer.format, to: targetFormat) {
-                        let convertedBuffer = AVAudioPCMBuffer(
+                        // `AVAudioPCMBuffer(...)` can fail to allocate
+                        // (frameCapacity == 0 or format mismatch). Fall
+                        // back to writing the source buffer unchanged
+                        // so the recording path still produces output
+                        // rather than crashing the TTS pipeline.
+                        guard let convertedBuffer = AVAudioPCMBuffer(
                             pcmFormat: targetFormat,
                             frameCapacity: pcmBuffer.frameCapacity
-                        )!
+                        ) else {
+                            try? audioFile.write(from: pcmBuffer)
+                            return
+                        }
                         var error: NSError? = nil
                         var hasProvidedData = false
                         let inputBlock: AVAudioConverterInputBlock = { _, outStatus in

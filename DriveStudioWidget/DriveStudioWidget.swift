@@ -331,7 +331,7 @@ struct FitToCanvasLayers: View {
 
     var body: some View {
         let transform = Self.computeFitTransform(for: canvasSize)
-        ZStack {
+        ZStack(alignment: .topLeading) {
             ForEach(layers) { layer in
                 if layer.hidden != true {
                     ScaledLayerView(
@@ -346,17 +346,32 @@ struct FitToCanvasLayers: View {
                 }
             }
         }
-        .frame(width: canvasSize.width, height: canvasSize.height)
+        .frame(width: canvasSize.width, height: canvasSize.height, alignment: .topLeading)
     }
 
+    /// Maps the 340×340 design coordinate space onto the actual widget
+    /// canvas, with uniform aspect-ratio scaling.
+    ///
+    /// For .systemSmall (~158 pt) the design canvas is 340 pt. The
+    /// scale factor is 158/340 ≈ 0.465 — much smaller than the old
+    /// hardcoded 90%. The previous implementation only applied a scale
+    /// with no translation, so layers at the bottom/right of the design
+    /// overflowed the 158 pt canvas and were clipped by the widget
+    /// container's rounded rectangle.
+    ///
+    /// This transform:
+    ///   1. Scales the design space uniformly to fit inside the canvas.
+    ///   2. Translates so the scaled content is top-left-anchored
+    ///      within the canvas (matching the ZStack .topLeading alignment
+    ///      above), which is the natural origin for absolute-positioned
+    ///      layers whose (x, y) are % offsets from the top-left corner.
     private static func computeFitTransform(for canvas: CGSize) -> CGAffineTransform {
-        // For small 2x2 square widget (.systemSmall, canvas.width < 200),
-        // scale content down slightly (90% scale) so bottom car photos and top text
-        // sit comfortably inside the small rounded corner clipping mask!
-        let targetWidth = canvas.width < 200 ? canvas.width * 0.90 : canvas.width
-        let targetHeight = canvas.height < 200 ? canvas.height * 0.90 : canvas.height
-        let scaleX = targetWidth  / designSide
-        let scaleY = targetHeight / designSide
+        // Use the smaller dimension so portrait/landscape and non-square
+        // canvases (.systemMedium) still fit without cropping.
+        let scaleX = canvas.width  / designSide
+        let scaleY = canvas.height / designSide
+        // No extra inset — the widget container already applies its own
+        // safe-area / margin. Scaling to fill gives the crispest result.
         return CGAffineTransform.identity
             .scaledBy(x: scaleX, y: scaleY)
     }

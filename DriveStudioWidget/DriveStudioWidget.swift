@@ -10,114 +10,11 @@ import CryptoKit
 
 // Color extension is defined in DriveComponents.swift
 
-struct DriveStudioImageLoader {
-    /// Generation-aware cache. The key is the tuple
-    /// `(generationNamespace, src)`, where the namespace is one of:
-    ///   * `"g:\(generation)"` — a real generation (the most common
-    ///     path; guarantees two generations using the same filename
-    ///     don't collide).
-    ///   * `"legacy:v1"` — the legacy V1 cache, kept distinct so
-    ///     pre-generation reads cannot leak into the new flow.
-    ///   * `"bundle"` — bundled assets (Asset Catalog / Bundle.main)
-    ///     are generation-independent; their cache lives in one
-    ///     slot so we don't allocate the same bundled image once
-    ///     per generation.
-    private static let imageCache = NSCache<NSString, UIImage>()
-
-    /// Load an image by source path. The cache key includes the
-    /// `generation` argument when provided, so two generations using
-    /// the same filename cannot return the wrong bytes. When
-    /// `generation` is `nil`, the loader falls back to the legacy
-    /// path and uses a clearly-separated legacy cache namespace.
-    static func load(from src: String, generation: String? = nil) -> UIImage? {
-        if src.hasPrefix("data:image") {
-            guard let c = src.firstIndex(of: ","),
-                  let d = Data(base64Encoded: String(src[src.index(after: c)...])) else { return nil }
-            return UIImage(data: d)
-        }
-
-        let namespace = cacheNamespace(for: generation)
-        let cacheKey = "\(namespace)|\(src)" as NSString
-        if let cached = imageCache.object(forKey: cacheKey) { return cached }
-
-        // 1. Check Asset Catalog (bundle images) — generation-independent.
-        if let assetImg = UIImage(named: src) {
-            let bundleKey = "bundle|\(src)" as NSString
-            imageCache.setObject(assetImg, forKey: bundleKey)
-            imageCache.setObject(assetImg, forKey: cacheKey)
-            return assetImg
-        }
-
-        // 2. Check App Group Shared Container (permanent cross-process location)
-        if let shared = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppGroupContract.suiteName) {
-            // Check generation subfolder if snapshot is generation-tracked.
-            // The effective generation is the immutable entry-provided
-            // value, never the mutable AppGroupState.currentGeneration.
-            let gen = generation ?? AppGroupState.currentGeneration
-            if let g = gen {
-                let genURL = shared.appendingPathComponent("SharedImages").appendingPathComponent("generation_\(g)").appendingPathComponent(src)
-                if let img = UIImage(contentsOfFile: genURL.path) {
-                    imageCache.setObject(img, forKey: cacheKey)
-                    return img
-                }
-            }
-
-            // Check SharedImages root (legacy / home_vehicle.png).
-            let sharedImagesURL = shared.appendingPathComponent("SharedImages").appendingPathComponent(src)
-            if let img = UIImage(contentsOfFile: sharedImagesURL.path) {
-                imageCache.setObject(img, forKey: cacheKey)
-                return img
-            }
-
-            // Check App Group root.
-            let appGroupRootURL = shared.appendingPathComponent(src)
-            if let img = UIImage(contentsOfFile: appGroupRootURL.path) {
-                imageCache.setObject(img, forKey: cacheKey)
-                return img
-            }
-        }
-
-        // 3. Fallback: private Documents directory (when running inside app)
-        if let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-            let docsURL = docs.appendingPathComponent(src)
-            if let img = UIImage(contentsOfFile: docsURL.path) {
-                imageCache.setObject(img, forKey: cacheKey)
-                return img
-            }
-        }
-
-        // 4. Absolute path
-        if let img = UIImage(contentsOfFile: src) {
-            imageCache.setObject(img, forKey: cacheKey)
-            return img
-        }
-
-        return nil
-    }
-
-    /// Map an optional generation to a cache namespace string.
-    /// Bundled assets are namespaced separately so the same
-    /// bundled image loads once across all generations.
-    static func cacheNamespace(for generation: String?) -> String {
-        if let g = generation { return "g:\(g)" }
-        return "legacy:v1"
-    }
-
-    /// Test seam: compute the cache key the loader would use for
-    /// `(generation, src)`. Tests assert directly on this string
-    /// to prove the namespace rule: two different generations
-    /// produce different keys, and the legacy nil-generation
-    /// namespace is clearly separated.
-    static func _cacheKey(for src: String, generation: String?) -> String {
-        return "\(cacheNamespace(for: generation))|\(src)"
-    }
-
-    /// Test seam: clear the in-memory cache so tests start from
-    /// a deterministic baseline.
-    static func _clearCacheForTest() {
-        imageCache.removeAllObjects()
-    }
-}
+// `DriveStudioImageLoader` now lives in its own file
+// (`DriveStudioImageLoader.swift`) so the same loader is
+// available to both the in-app editor preview and the widget
+// extension — compiled into both targets via the
+// file-system-synchronized `DriveStudioWidget/` group.
 
 // MARK: - Widget
 

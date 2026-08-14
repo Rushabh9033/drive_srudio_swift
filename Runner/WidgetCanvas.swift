@@ -274,7 +274,7 @@ struct WidgetCanvas: View {
                 LinearGradient(colors: [Color(hex: from), Color(hex: to)],
                                startPoint: .top, endPoint: .bottom)
             } else if bg.type == "image", let src = bg.imageSrc,
-                      let uiImage = loadImage(path: src) {
+                      let uiImage = DriveStudioImageLoader.load(from: src) {
                 Image(uiImage: uiImage).resizable().scaledToFill()
             } else {
                 Color(hex: "18181A")
@@ -282,15 +282,6 @@ struct WidgetCanvas: View {
         } else {
             Color(hex: "18181A")
         }
-    }
-
-    func loadImage(path: String) -> UIImage? {
-        guard let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            return nil
-        }
-        let url = docs.appendingPathComponent(path)
-        if let data = try? Data(contentsOf: url) { return UIImage(data: data) }
-        return nil
     }
 }
 
@@ -389,7 +380,7 @@ struct LayerView: View {
             )
         } else if kind == "image" {
             // ── Image / Vehicle Position Guide ───────────────────────────
-            if let src = layer.src, let uiImage = loadImage(path: src) {
+            if let src = layer.src, let uiImage = DriveStudioImageLoader.load(from: src) {
                 Image(uiImage: uiImage).resizable().scaledToFit()
             } else {
                 // Vehicle Position Guide Box
@@ -474,14 +465,5 @@ struct LayerView: View {
         case "right", "trailing": return .trailing
         default:                  return .center
         }
-    }
-
-    func loadImage(path: String) -> UIImage? {
-        guard let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            return nil
-        }
-        let url = docs.appendingPathComponent(path)
-        if let data = try? Data(contentsOf: url) { return UIImage(data: data) }
-        return nil
     }
 }

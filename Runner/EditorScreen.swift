@@ -26,6 +26,7 @@ struct EditorScreen: View {
     @State private var showBackgroundPicker = false
     @State private var showWidgetSettings = false
     @State private var showDrawingSheet = false
+    @State private var showLayersPanel = false
 
     init(draftId: String) {
         self.draftId = draftId
@@ -53,6 +54,7 @@ struct EditorScreen: View {
         ("WIDGET", "square.grid.2x2"),
         ("DRAW",   "pencil"),
         ("BG",     "paintbrush"),
+        ("LAYERS", "square.3.stack.3d"),
     ]
     
     var canUndo: Bool { !_past.isEmpty }
@@ -270,42 +272,11 @@ struct EditorScreen: View {
                 }
 
                 // ── Editor Dock Bar (Liquid Glass Pill Design) ─────────────────
-                HStack(spacing: 0) {
-                    ForEach(dockItems, id: \.label) { item in
-                        Button(action: {
-                            activeDock = item.label
-                            handleDockTab(item.label)
-                        }) {
-                            VStack(spacing: 4) {
-                                Image(systemName: item.icon)
-                                    .font(.system(size: 18, weight: activeDock == item.label ? .bold : .medium))
-                                Text(item.label)
-                                    .font(.system(size: 9, weight: activeDock == item.label ? .bold : .medium, design: .monospaced))
-                                    .tracking(1.2)
-                            }
-                            .foregroundColor(activeDock == item.label ? DriveColors.primary : DriveColors.mutedFg)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(activeDock == item.label ? DriveColors.primary.opacity(0.18) : Color.clear)
-                            .cornerRadius(18)
-                        }
-                    }
-                }
-                .padding(6)
-                .background(.ultraThinMaterial, in: Capsule())
-                .overlay(
-                    Capsule()
-                        .stroke(
-                            LinearGradient(
-                                colors: [.white.opacity(0.7), .white.opacity(0.15), Color(hex: "00FFFF").opacity(0.35)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1.5
-                        )
+                DockBar(
+                    activeDock: $activeDock,
+                    items: dockItems,
+                    onTap: handleDockTab
                 )
-                .shadow(color: Color.black.opacity(0.4), radius: 16, x: 0, y: 8)
-                .shadow(color: DriveColors.primary.opacity(0.15), radius: 10, x: 0, y: 2)
                 .padding(.horizontal, 20)
                 .padding(.bottom, 2)
             }
@@ -384,6 +355,12 @@ struct EditorScreen: View {
                 addDrawnImageLayer(image: drawnImage)
             })
         }
+        .sheet(isPresented: $showLayersPanel) {
+            LayersPanelSheet(
+                spec: $spec,
+                selectedLayerIndex: $selectedLayerIndex
+            )
+        }
         .preferredColorScheme(.dark)
     }
     
@@ -430,6 +407,8 @@ struct EditorScreen: View {
             showDrawingSheet = true
         } else if tab == "BG" {
             showBackgroundPicker = true
+        } else if tab == "LAYERS" {
+            showLayersPanel = true
         }
     }
 

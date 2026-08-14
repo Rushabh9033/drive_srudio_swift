@@ -13,6 +13,8 @@
 		0DCC6F015E22082B82F6C2C4 /* 04_connect_system_online.wav in Resources */ = {isa = PBXBuildFile; fileRef = A4FCC65BC425611B49F9D616 /* 04_connect_system_online.wav */; };
 		14E802F773B364CE5BA6CCAB /* 03_disconnect_lock_vehicle.wav in Resources */ = {isa = PBXBuildFile; fileRef = 4565F88065ACFE3671C92C5D /* 03_disconnect_lock_vehicle.wav */; };
 		188B8D83EFBF37FB93FD3F0E /* LayerSettingsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 290DE2509893E8C531F9AF3C /* LayerSettingsSheet.swift */; };
+		8E1F2A3B4C5D6E7F8A9B0C1E /* LayersPanelSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E1F2A3B4C5D6E7F8A9B0C1D /* LayersPanelSheet.swift */; };
+		8E1F2A3B4C5D6E7F8A9B0C2E /* DockBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E1F2A3B4C5D6E7F8A9B0C2D /* DockBar.swift */; };
 		1FDBF70CF9533AE420076BE1 /* 21_connect_lucid_air.wav in Resources */ = {isa = PBXBuildFile; fileRef = 84D2DE227136EEB043E609EB /* 21_connect_lucid_air.wav */; };
 		2747AD96D7ED35123305790F /* 06_connect_byd_seal.wav in Resources */ = {isa = PBXBuildFile; fileRef = 96557ECEB57DB9C6EDF485FF /* 06_connect_byd_seal.wav */; };
 		2770C5EB0618301F74B55B78 /* lane-nudge.wav in Resources */ = {isa = PBXBuildFile; fileRef = 0FEB500AFE784962B9CCE530 /* lane-nudge.wav */; };
@@ -181,6 +183,8 @@
 		2324481032B66C10077DA831 /* 26_connect_nissan_gtr.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 26_connect_nissan_gtr.wav; sourceTree = "<group>"; };
 		2880B0FE2C88E92390F23A02 /* guide_step_1.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = guide_step_1.png; sourceTree = "<group>"; };
 		290DE2509893E8C531F9AF3C /* LayerSettingsSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LayerSettingsSheet.swift; sourceTree = "<group>"; };
+		8E1F2A3B4C5D6E7F8A9B0C1D /* LayersPanelSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LayersPanelSheet.swift; sourceTree = "<group>"; };
+		8E1F2A3B4C5D6E7F8A9B0C2D /* DockBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DockBar.swift; sourceTree = "<group>"; };
 		2A6D5D3330232AC7000A9968 /* DriveStudioWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DriveStudioWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A6D5D3530232AC7000A9968 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		2A6D5D3730232AC7000A9968 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -441,6 +445,8 @@
 				290DE2509893E8C531F9AF3C /* LayerSettingsSheet.swift */,
 				60E7D0E67750888581B833AE /* WidgetLibrarySheet.swift */,
 				47AB8B7726719A01CF486FC5 /* BackgroundSheet.swift */,
+				8E1F2A3B4C5D6E7F8A9B0C1D /* LayersPanelSheet.swift */,
+				8E1F2A3B4C5D6E7F8A9B0C2D /* DockBar.swift */,
 				5F28C38DC291569E48D49979 /* SlotManagerScreen.swift */,
 				8A3610995CEE5E9C9427A02F /* LayerEditorOverlay.swift */,
 				B05E7041929773B2FC64B6B1 /* Sounds */,
@@ -785,6 +791,8 @@
 				188B8D83EFBF37FB93FD3F0E /* LayerSettingsSheet.swift in Sources */,
 				F776AD3498A308A0CF09F98E /* WidgetLibrarySheet.swift in Sources */,
 				998A71B5EB4E1FA0055BDF57 /* BackgroundSheet.swift in Sources */,
+				8E1F2A3B4C5D6E7F8A9B0C1E /* LayersPanelSheet.swift in Sources */,
+				8E1F2A3B4C5D6E7F8A9B0C2E /* DockBar.swift in Sources */,
 				93770AD3DDEB14EBFC0CC5A9 /* SlotManagerScreen.swift in Sources */,
 				D05038E33AD1E6F663788289 /* LayerEditorOverlay.swift in Sources */,
 				51F8FBAE2A471F24A669BF22 /* StockWidgetArchitecture.swift in Sources */,

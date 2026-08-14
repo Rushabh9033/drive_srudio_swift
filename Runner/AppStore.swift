@@ -762,9 +762,12 @@ class AppStore: ObservableObject {
     /// Pure: enumerate every URL the asset-stager should look in
     /// when copying referenced images. Documents dir is the primary
     /// source for user-imported artwork; the App Group SharedImages
-    /// folder is a fallback for legacy hand-copied assets. We do NOT
-    /// pass `Bundle.main` as a source here so the test seam is
-    /// deterministic.
+    /// folder is the next immediate-write slot; the App Group root
+    /// covers the third write path used by `addVehicleLayer` /
+    /// `addDrawnImageLayer` / `saveVehicleImage` so a silent
+    /// failure of the SharedImages write doesn't strand the file
+    /// outside the stager's reach. We do NOT pass `Bundle.main`
+    /// as a source here so the test seam is deterministic.
     nonisolated static func imageSourceDirectories() -> [URL] {
         var sources: [URL] = []
         if let docs = FileManager.default.urls(
@@ -774,6 +777,7 @@ class AppStore: ObservableObject {
         if let shared = FileManager.default.containerURL(
             forSecurityApplicationGroupIdentifier: appGroupSuite) {
             sources.append(shared.appendingPathComponent("SharedImages"))
+            sources.append(shared)
         }
         return sources
     }

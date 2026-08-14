@@ -590,11 +590,26 @@ struct EditorScreen: View {
     }
 
     private func addVehicleLayer(image: UIImage) {
-        let filename = "vehicle_\(UUID().uuidString).png"
-        guard let pngData = image.pngData() else {
-            print("addVehicleLayer: image.pngData() returned nil")
+        // Try PNG first (lossless, alpha-preserving). For wide‑gamut /
+        // HDR / extended‑range photos `pngData()` can return nil —
+        // fall back to JPEG so the user always gets *something* on
+        // disk instead of a silent no-op. The loader uses
+        // `UIImage(contentsOfFile:)` which decodes any image format
+        // regardless of the on-disk extension, so a .jpg fallback
+        // still loads cleanly in the widget.
+        let baseName = "vehicle_\(UUID().uuidString)"
+        let encoded: (data: Data, ext: String)
+        if let png = image.pngData() {
+            encoded = (png, "png")
+        } else if let jpg = image.jpegData(compressionQuality: 0.95) {
+            print("addVehicleLayer: pngData() returned nil; falling back to JPEG")
+            encoded = (jpg, "jpg")
+        } else {
+            print("addVehicleLayer: image has no encodable representation")
             return
         }
+        let filename = "\(baseName).\(encoded.ext)"
+        let pngData = encoded.data
 
         // Capture the image's natural aspect ratio BEFORE we hand the
         // bytes off to disk so we can size the layer's frame to match.
@@ -657,6 +672,17 @@ struct EditorScreen: View {
         )
         spec.layers = merged.layers
         selectedLayerIndex = merged.selectedIndex
+
+        // Persist the spec change to App Group V2 metadata NOW
+        // instead of waiting for `saveAndExit()`. Otherwise the
+        // widget (which reads App Group V2 metadata) keeps seeing
+        // `template_car` and draws the dashed guide, while the
+        // editor canvas (which reads the in-memory spec) already
+        // shows the new photo. The two surfaces desync until the
+        // user taps Save & Exit — exactly the "some images work and
+        // some don't" pattern reported in the field.
+        DriveStudioImageLoader.invalidateCache()
+        store.trySaveStateLoggingFailure()
     }
 
     /// Write `data` to `url` and byte-compare the result against the

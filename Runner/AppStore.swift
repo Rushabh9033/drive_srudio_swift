@@ -179,7 +179,17 @@ class AppStore: ObservableObject {
     /// wrapper exists so callers that don't need to surface the
     /// error to the user still see it in the console rather than
     /// silently dropping the failure.
-    private func trySaveStateLoggingFailure() {
+    ///
+    /// Visibility note: this is `internal` (no `private`) on
+    /// purpose so views like `EditorScreen.addVehicleLayer` can
+    /// flush a freshly-added layer's spec change to App Group
+    /// metadata immediately, instead of waiting for `saveAndExit`.
+    /// Without that, the widget keeps reading the pre-image spec
+    /// (`template_car`) and renders the dashed guide, while the
+    /// editor canvas already shows the new photo — exactly the
+    /// "some images work and some don't" pattern reported in the
+    /// field.
+    func trySaveStateLoggingFailure() {
         do {
             try saveState()
         } catch let err as SaveStateError {

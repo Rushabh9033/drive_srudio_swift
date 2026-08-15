@@ -2789,6 +2789,64 @@ func testActiveSlotKeyContractIsStable() {
             "Speed appearing must record lastNonNilSpeedAt")
     }
 
+    /// GPS noise robustness: a stationary phone reports small positive
+    /// speeds (≤1 m/s) due to GPS drift. Those samples must NOT
+    /// refresh `lastNonNilSpeedAt`, otherwise the 5-min auto-flip-off
+    /// countdown would never elapse and `carConnected` would stay
+    /// pinned true even after the user parks. We require above the
+    /// `movementSpeedThreshold` (~2 m/s) to count as real motion.
+    func testCarConnectedIgnoresGPSNoiseBelowThreshold() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+
+        service.carConnected = false
+        service.lastNonNilSpeedAt = nil
+
+        // Sub-threshold speed: 0.5 m/s = 1.8 km/h (typical GPS noise
+        // on a stationary phone)
+        let drifting = CLLocation(
+            coordinate: CLLocationCoordinate2D(latitude: 0, longitude: 0),
+            altitude: 0,
+            horizontalAccuracy: 5,
+            verticalAccuracy: 5,
+            course: 0,
+            speed: 0.5,
+            timestamp: now
+        )
+        service.locationManager(CLLocationManager(),
+                                didUpdateLocations: [drifting])
+
+        XCTAssertNil(service.lastNonNilSpeedAt,
+            "GPS noise below threshold must NOT stamp lastNonNilSpeedAt")
+        XCTAssertFalse(service.carConnected,
+            "GPS noise must NOT auto-flip carConnected to true")
+    }
+
+    /// No-GPS fallback: when the user is on a simulator (or indoors
+    /// with no GPS signal), `lastNonNilSpeedAt` stays `nil` because
+    /// the delegate never gets called with a valid speed. In that
+    /// case the @AppStorage seed would otherwise pin
+    /// `carConnected = true` forever. Falling back to
+    /// `serviceStartedAt` ensures the auto-flip still happens —
+    /// 5 min after launch with no movement evidence, the heuristic
+    /// flips carConnected off.
+    func testCarConnectedAutoFlipsOffWhenNoGPSAtAll() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+
+        service.carConnected = true
+        service.lastNonNilSpeedAt = nil // No movement ever recorded
+        service.serviceStartedAt = now.addingTimeInterval(-360) // 6 min ago
+        service.currentSpeed = nil
+
+        service._persistForTest(previousSpeed: nil, currentSpeed: nil)
+
+        XCTAssertFalse(service.carConnected,
+            "6 min after launch with no GPS evidence must auto-flip off")
+    }
+
     // MARK: - Permission path tightening (gap 9)
 
     /// `startMonitoring` must NEVER present a permission prompt.

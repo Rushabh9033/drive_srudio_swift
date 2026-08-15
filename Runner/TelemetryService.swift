@@ -33,6 +33,14 @@ extension Notification.Name {
     /// through `defaults.set` calls.
     static let significantSpeedDelta: Double = 1.0
 
+    /// Speed (m/s) above which the user is considered "actually
+    /// moving" for the `carConnected` auto-detect heuristic. ~7 km/h.
+    /// Above walking pace and well above stationary GPS noise, so
+    /// a phone sitting on a desk (or drifting at <2 m/s) doesn't
+    /// continually refresh `lastNonNilSpeedAt` and starve the 5-min
+    /// auto-flip-off countdown.
+    static let movementSpeedThreshold: Double = 2.0
+
     /// Pure decision output. Decoupled from `WidgetCenter` so the
     /// policy can be unit-tested without ever touching real
     /// WidgetKit. The `reloadKind` is `nil` when no reload should
@@ -187,16 +195,34 @@ extension Notification.Name {
 
     private var lastWasConnected: Bool = false
 
-    /// Wall-clock instant of the most recent GPS fix whose speed was
-    /// `>= 0`. The auto-detect heuristic uses this to decide whether
-    /// the user has been stationary long enough that the "Car link"
-    /// status should auto-flip to false — see `snapshotAndSave`.
-    /// `nil` means "we haven't seen a valid speed yet this session."
+    /// Wall-clock instant of the most recent GPS fix whose speed
+    /// passed the "actually moving" threshold
+    /// (`Self.movementSpeedThreshold`). The auto-detect heuristic uses
+    /// this to decide whether the user has been stationary long
+    /// enough that the "Car link" status should auto-flip to false —
+    /// see `snapshotAndSave`.
     ///
-    /// Internal (not `private`) so tests using `@testable import
-    /// Runner` can drive the heuristic deterministically by injecting
-    /// a specific `lastMovementDate` value.
+    /// Crucially this is NOT updated on every valid speed sample —
+    /// CLLocation reports small positive speeds (≤1 m/s) due to GPS
+    /// noise even when the phone is genuinely stationary on a desk,
+    /// which would otherwise keep refreshing this timestamp and
+    /// starve the 5-min auto-flip-off countdown.
+    ///
+    /// `nil` means "we haven't seen above-threshold movement yet this
+    /// session." Internal (not `private`) so tests using
+    /// `@testable import Runner` can drive the heuristic
+    /// deterministically.
     var lastNonNilSpeedAt: Date? = nil
+
+    /// Wall-clock instant this service was instantiated. Used as a
+    /// fallback for the auto-flip-off countdown when there has NEVER
+    /// been a movement sample — e.g. the user is testing in a
+    /// simulator, or has the app open indoors with no GPS signal. In
+    /// that case the @AppStorage seed would otherwise pin
+    /// `carConnected = true` forever because `lastNonNilSpeedAt`
+    /// stays `nil`. After 5 minutes from launch with no movement,
+    /// the heuristic flips it off.
+    var serviceStartedAt: Date = Date()
 
     /// Whether the phone currently considers itself connected to a car
     /// (CarPlay, Bluetooth, or USB). Surfaced honestly to widgets via
@@ -245,6 +271,7 @@ extension Notification.Name {
         lastPersistenceDate = nil
         currentSpeed = nil
         lastNonNilSpeedAt = nil
+        serviceStartedAt = Date()
     }
 
     private static func configureShared(_ service: TelemetryService) {
@@ -366,16 +393,20 @@ extension Notification.Name {
         } else {
             currentSpeed = nil
         }
-        // **Auto-detect "car linked" from GPS movement.** A fresh
-        // valid speed means the user is moving (typically driving) —
-        // flip `carConnected` to true so the Dashboard reflects what
-        // the user is actually doing, not just whatever the Settings
-        // toggle last said. Without CarPlay / Bluetooth entitlements
-        // we have no way to know if a cable is plugged in, but we
-        // CAN observe motion, which is the more useful signal for a
-        // driving-mode widget. The user's manual toggle is respected
-        // momentarily but re-applies on the next speed update.
-        if currentSpeed != nil {
+        // **Auto-detect "car linked" from GPS movement.** A speed
+        // sample above the "actually moving" threshold means the user
+        // is driving — flip `carConnected` to true so the Dashboard
+        // reflects what the user is actually doing, not just whatever
+        // the Settings toggle last said. Without CarPlay / Bluetooth
+        // entitlements we have no way to know if a cable is plugged
+        // in, but we CAN observe real motion, which is the more
+        // useful signal for a driving-mode widget.
+        //
+        // We require > 2 m/s (~7 km/h) so GPS noise on a stationary
+        // phone doesn't continually refresh `lastNonNilSpeedAt` and
+        // starve the 5-min auto-flip-off countdown. Walking pace and
+        // idle desk drift both fall below this.
+        if let spd = currentSpeed, spd > Self.movementSpeedThreshold {
             lastNonNilSpeedAt = Date()
             if !carConnected {
                 carConnected = true
@@ -664,21 +695,26 @@ extension Notification.Name {
         let resolvedCarConnected = connectionOverride ?? carConnected
 
         // **Auto-detect "car unlinked" from sustained no-movement.**
-        // If the user was moving (carConnected was auto-flipped true)
-        // and we haven't seen a valid GPS speed for >5 minutes,
-        // assume they've stopped driving and flip back to false.
-        // This addresses the user complaint that "Car link" stays
-        // linked after they exit the car — without CarPlay
-        // entitlements we can't observe the cable unplug, but we
-        // CAN observe that the phone stopped reporting motion.
+        // Two cases flip `carConnected` to false:
         //
-        // The 5-minute window avoids spurious flips when the user
-        // is briefly stationary (red light, pull over, etc.) —
-        // GPS speed briefly goes nil but resumes within seconds.
-        if carConnected,
-           let lastMove = lastNonNilSpeedAt,
-           now.timeIntervalSince(lastMove) > 300 {
-            carConnected = false
+        //   1. The user was moving (`lastNonNilSpeedAt` is set) but
+        //      hasn't reported motion for >5 minutes. Without CarPlay
+        //      entitlements we can't observe the cable unplug, but we
+        //      CAN observe that the phone stopped reporting motion.
+        //      The 5-min window absorbs brief stationary intervals
+        //      (red lights, pull-overs).
+        //
+        //   2. We've NEVER seen above-threshold movement this session
+        //      (simulator, indoors, no GPS signal). In that case
+        //      `lastNonNilSpeedAt` is nil and case 1 would skip —
+        //      falling back to `serviceStartedAt` ensures the
+        //      `@AppStorage` seed doesn't pin `carConnected = true`
+        //      forever on devices with no real GPS.
+        if carConnected {
+            let lastReference: Date = lastNonNilSpeedAt ?? serviceStartedAt
+            if now.timeIntervalSince(lastReference) > 300 {
+                carConnected = false
+            }
         }
 
         struct Snapshot: Codable {

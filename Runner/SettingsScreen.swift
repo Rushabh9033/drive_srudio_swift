@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Settings Screen
 struct SettingsScreenView: View {
     @EnvironmentObject var store: AppStore
-    @AppStorage("settings.carConnected") private var carConnected = true
+    @AppStorage(AppStore.carConnectedPrefKey) private var carConnected = true
     @State private var showClearConfirm = false
     @State private var showAutomationGuide = false
     @State private var alertMessage = ""

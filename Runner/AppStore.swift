@@ -33,15 +33,29 @@ class AppStore: ObservableObject {
     nonisolated static let appGroupSuite = "group.com.drivestudio.shared"
     private let draftsKey = "drive_studio_drafts"
 
+    /// `UserDefaults` key backing the Settings screen "Car connected"
+    /// toggle. Defined here so `AppStore.init` can read it at launch
+    /// and seed `TelemetryService.shared.carConnected` — without this,
+    /// the toggle in Settings only takes effect AFTER the user actively
+    /// flips it, so a freshly-installed app always shows "car not
+    /// linked" on the Dashboard even though the toggle default is ON.
+    static let carConnectedPrefKey = "settings.carConnected"
+
     private init() {
         // TelemetryService.init() already enables UIDevice battery
         // monitoring — don't duplicate it here.
         loadState()
-        // Apply any slot preference the user saved via the
-        // "Switch Drive Studio Slot" Shortcut. The intent can only
-        // write to App Group defaults from its own process; the
-        // host app is the one that turns the persisted integer
-        // into an applied slot.
+        // Seed the car-connected flag from the user's persisted
+        // Settings preference at launch. Without this read, the
+        // Dashboard's "Car link" row would always render "car not
+        // linked" on first paint (TelemetryService defaults to false)
+        // even when the user has the toggle on — Settings' `onChange`
+        // only fires when the user actively flips the switch, not
+        // on cold start. Defaults to true when no preference is
+        // persisted yet (matches `SettingsScreen`'s `@AppStorage`).
+        let stored = UserDefaults.standard.object(
+            forKey: AppStore.carConnectedPrefKey) as? Bool
+        TelemetryService.shared.carConnected = stored ?? true
         applyPersistedActiveSlot()
         setupAutoRefresh()
     }

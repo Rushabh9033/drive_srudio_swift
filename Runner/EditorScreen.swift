@@ -681,6 +681,34 @@ struct EditorScreen: View {
         // shows the new photo. The two surfaces desync until the
         // user taps Save & Exit — exactly the "some images work and
         // some don't" pattern reported in the field.
+        //
+        // **Critical ordering:** `saveState()` reads the spec from
+        // `store.drafts[draftId].spec`, NOT from the editor's local
+        // `@State spec`. We MUST commit the updated spec to
+        // `store.drafts` first via `saveDraft(_:)` so the
+        // subsequent `trySaveStateLoggingFailure()` sees the new
+        // image. Without this, the slot still resolves to the
+        // pre-image spec and the widget keeps drawing the guide.
+        let actualDraftId: String
+        if draftId == "new" || draftId == "new_blank" {
+            // Brand-new draft — promote it to a real UUID so the
+            // slot can reference it. The slot binding happens in
+            // `saveAndExit`, but we mirror the draft into
+            // `store.drafts` here so `saveState()` can already
+            // pick it up if the user backgrounds the app before
+            // tapping Save & Exit.
+            actualDraftId = UUID().uuidString
+        } else {
+            actualDraftId = draftId
+        }
+        let draft = Draft(
+            id: actualDraftId,
+            name: widgetName,
+            spec: spec,
+            updatedAt: Date().timeIntervalSince1970
+        )
+        store.saveDraft(draft)
+
         DriveStudioImageLoader.invalidateCache()
         store.trySaveStateLoggingFailure()
     }

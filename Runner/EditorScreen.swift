@@ -717,22 +717,30 @@ struct EditorScreen: View {
     private static func buildCutoutDerivative(
         from data: Data, typeIdentifier: String?
     ) async throws -> ImageDerivativeService.Derivative {
+        // **Memory-safe Vision input.** Never feed a full-resolution
+        // `UIImage(data: data)` to Vision — a 48 MP JPEG decoded to
+        // RGBA is ~192 MB before Vision even sees it. Instead,
+        // build the same 1024 px long-edge derivative we use for
+        // the widget, then feed THAT CGImage to Vision. Peak
+        // memory stays at ~4 MB regardless of source resolution.
+        // The widget canvas is ~340 logical points (~1020 backing
+        // pixels), so a 1024 px mask is exactly the resolution we
+        // need — upscaling never happens.
+        let downsampled = try ImageDerivativeService.makeDerivative(
+            from: data, suggestedFilename: "pre-cutout"
+        )
         if #available(iOS 17.0, *) {
-            // Vision handles arbitrary input sizes natively; we feed
-            // it the picked bytes via a temporary UIImage so Vision
-            // can apply its own scaling. If Vision fails, fall
-            // through to the bounded-memory legacy pixel sampler.
-            guard let ui = UIImage(data: data),
+            guard let ui = UIImage(data: downsampled.data),
                   let cut = try? await BgCutoutService.removeBackground(from: ui),
                   let cutData = cut.pngData()
                     ?? cut.jpegData(compressionQuality: ImageDerivativeService.opaqueJPEGQuality) else {
-                return try await Self.legacyCutoutDerivative(from: data)
+                return try await Self.legacyCutoutDerivative(from: downsampled.data)
             }
             return try ImageDerivativeService.makeDerivative(
                 from: cutData, suggestedFilename: "cutout-vision"
             )
         }
-        return try await Self.legacyCutoutDerivative(from: data)
+        return try await Self.legacyCutoutDerivative(from: downsampled.data)
     }
 
     /// Legacy pixel-sampling background removal, but operating on a

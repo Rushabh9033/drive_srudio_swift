@@ -27,20 +27,30 @@ enum WidgetSnapshotFreshness {
     /// Maximum age of a snapshot before its speed reading is
     /// considered expired.
     ///
-    /// Speed is the time-sensitive telemetry field — a 5-min-old
-    /// speed almost never reflects the user's actual current speed.
-    /// Ninety seconds is short enough that a stationary user who
-    /// starts moving sees the widget switch from `—` (no fresh fix)
-    /// to a real number within one provider tick, and long enough
-    /// to absorb a single missed GPS sample.
+    /// Google Maps shows the last-known speed forever (until the
+    /// next fix arrives). We do the same: a 30-minute-old speed is
+    /// still better information than `—` for a user glancing at
+    /// their home-screen widget during a tunnel, brief GPS
+    /// dropout, or parking garage pull-in. The two layers of
+    /// protection that prevent abuse are unchanged:
     ///
-    /// The provider's entry cadence is still 5 minutes (Apple's
-    /// documented minimum for normal home-screen widgets), but
-    /// `projected` zeroes the speed on any entry more than
-    /// `maxAge` past the captured timestamp. That means entry 1
-    /// (just published) shows real speed; entries 2+ show `—`
-    /// until a `speedChange` reload triggers a new snapshot.
-    static let maxAge: TimeInterval = 90
+    ///   1. `WidgetReloadThrottle.minSpeedReloadInterval` (30 s)
+    ///      caps how often a speed change can request a widget
+    ///      reload — the visible widget will refresh at most twice
+    ///      per minute.
+    ///   2. `TelemetryPersistencePolicy.significantSpeedDelta`
+    ///      (1 km/h) ensures that parking produces a near-instant
+    ///      update (speed drops 60 → 0 → triggers a write within
+    ///      one fix), so a "stuck at 60 km/h" artifact never lasts
+    ///      more than a few seconds in normal driving.
+    ///
+    /// 30 minutes is a hard ceiling chosen to bound pathological
+    /// cases (e.g. the snapshot blob was written with stale
+    /// metadata and no new fixes are arriving) — but in normal
+    /// operation the speed field is updated by every GPS sample
+    /// and the widget will always display the freshest reading
+    /// within the throttle window.
+    static let maxAge: TimeInterval = 30 * 60
 
     /// Apply the freshness policy to `snapshot`. Returns a snapshot
     /// whose `speed` is `nil` when:

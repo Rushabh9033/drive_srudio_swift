@@ -735,7 +735,12 @@ class RunnerTests: XCTestCase {
     }
 
     func testFreshnessStaleSnapshotExpiresSpeed() {
-        let ts = Date().addingTimeInterval(-10 * 60) // 10 minutes ago
+        // 1 hour old — well past the 30-min maxAge ceiling. The
+        // ceiling only fires in pathological cases (snapshot blob
+        // stale because no fixes have arrived in 30+ min); for any
+        // real driving session GPS delivers new samples every
+        // second, so the speed field stays fresh.
+        let ts = Date().addingTimeInterval(-60 * 60) // 60 minutes ago
         let snap = TelemetrySnapshot(
             carConnected: true, batteryPercent: 80, isCharging: false,
             speed: 60, timestamp: ts
@@ -746,8 +751,7 @@ class RunnerTests: XCTestCase {
     }
 
     func testFreshnessAtBoundaryExpiresSpeed() {
-        // The boundary is now `maxAge` (90s); a snapshot exactly one
-        // second past it must be expired.
+        // Snapshot exactly one second past the 30-min ceiling.
         let ts = Date().addingTimeInterval(-(WidgetSnapshotFreshness.maxAge + 1))
         let snap = TelemetrySnapshot(
             carConnected: true, batteryPercent: 80, isCharging: false,
@@ -756,6 +760,56 @@ class RunnerTests: XCTestCase {
         let out = WidgetSnapshotFreshness.apply(to: snap, referenceDate: Date())
         XCTAssertNil(out.speed, "Snapshot just past maxAge must expire speed")
         XCTAssertEqual(out.batteryPercent, 80, "Battery remains latest-known")
+    }
+
+    func testFreshnessWithinTunnelWindowKeepsSpeed() {
+        // 5 minutes old — well inside the 30-min ceiling. A user in
+        // a tunnel, urban canyon, or parking garage pull-in sees the
+        // last-known speed instead of `—`, matching Google Maps
+        // behavior. The 1 km/h significantSpeedDelta + 30 s reload
+        // throttle ensure this never lingers once GPS recovers.
+        let ts = Date().addingTimeInterval(-5 * 60) // 5 minutes ago
+        let snap = TelemetrySnapshot(
+            carConnected: true, batteryPercent: 80, isCharging: false,
+            speed: 60, timestamp: ts
+        )
+        let out = WidgetSnapshotFreshness.apply(to: snap, referenceDate: Date())
+        XCTAssertEqual(out.speed, 60,
+            "5-min-old snapshot must keep its speed — typical tunnel/loss-of-GPS scenario")
+    }
+
+    /// Source-text regression: the Dashboard's speed MetricBar must
+    /// observe `TelemetryService.shared.currentSpeed` in real time,
+    /// not only on the 60-second heartbeat. The previous version
+    /// read `currentSpeed` inside `body` with no notification
+    /// subscription, so a SwiftUI re-render only fired when something
+    /// else (battery tick, foreground, slot change) invalidated the
+    /// body — meaning a moving user staring at the Dashboard saw a
+    /// frozen number.
+    ///
+    /// The fix mirrors `WidgetCanvas.speedTick` (which is already
+    /// tested via the editor canvas): bump a `@State` int on every
+    /// `telemetrySpeedUpdated` notification so SwiftUI re-reads the
+    /// service's current speed synchronously, like Google Maps.
+    func testDashboardObservesSpeedUpdatesInRealTime() throws {
+        let repoRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let dashboardURL = repoRoot.appendingPathComponent("Runner/DashboardView.swift")
+        let code = stripSwiftComments(try String(contentsOf: dashboardURL, encoding: .utf8))
+
+        // The view must declare a speedTick @State (mirrors the
+        // WidgetCanvas pattern) so a notification-driven bump forces
+        // a re-render.
+        XCTAssertTrue(code.contains("speedTick"),
+            "DashboardView must declare a `speedTick` @State so " +
+            "`TelemetryService.currentSpeed` updates trigger a body re-render.")
+
+        // The view must subscribe to the telemetrySpeedUpdated
+        // notification and bump that state inside the closure.
+        XCTAssertTrue(code.contains(".telemetrySpeedUpdated"),
+            "DashboardView must subscribe to .telemetrySpeedUpdated so " +
+            "GPS fixes re-render the speed MetricBar in real time.")
     }
 
     func testFreshnessFreshNilSpeedStaysNil() {
@@ -792,12 +846,13 @@ class RunnerTests: XCTestCase {
             carConnected: true, batteryPercent: 80, isCharging: false,
             speed: 60, timestamp: ts
         )
-        // An entry scheduled 10 minutes in the future must show speed
-        // as unavailable, even though the underlying snapshot is
-        // "fresh at capture time". This is the policy that makes a
-        // captured 60 km/h auto-expire without WidgetKit reloading.
+        // An entry scheduled 60 minutes in the future (well past
+        // the 30-min maxAge ceiling) must show speed as unavailable.
+        // The ceiling is intentionally generous so tunnel scenarios
+        // show last-known speed; entries an hour out are not
+        // representative of any real driving window.
         let projected = WidgetSnapshotFreshness.projected(
-            snapshot: snap, at: now.addingTimeInterval(10 * 60)
+            snapshot: snap, at: now.addingTimeInterval(60 * 60)
         )
         XCTAssertNil(projected.speed,
                      "Future entry older than maxAge past timestamp must show speed as unavailable")

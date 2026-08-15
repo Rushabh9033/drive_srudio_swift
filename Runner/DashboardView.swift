@@ -19,6 +19,15 @@ struct DashboardView: View {
     @State private var showSlotActionSheet = false
     @State private var showAutomationGuide = false
 
+    // Live speed tick — bumped on every GPS fix whose value changed
+    // (NotificationCenter.telemetrySpeedUpdated). Forces the Dashboard's
+    // MetricBar to re-read `TelemetryService.shared.currentSpeed`
+    // synchronously so changes feel instant, like Google Maps, instead
+    // of being gated by the 60-second clock/battery heartbeat. Same
+    // pattern as `WidgetCanvas.speedTick` (line 32) which already
+    // makes the editor canvas feel real-time.
+    @State private var speedTick: Int = 0
+
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 0) {
@@ -301,6 +310,13 @@ struct DashboardView: View {
         }
         .sheet(isPresented: $showAutomationGuide) {
             AutomationGuideSheet()
+        }
+        // Live speed: every GPS fix whose value differs from the last
+        // bumps `speedTick` so the body re-renders and the MetricBar
+        // shows the new km/h. Without this, Dashboard would only
+        // refresh on the 60s heartbeat timer — not real-time.
+        .onReceive(NotificationCenter.default.publisher(for: .telemetrySpeedUpdated)) { _ in
+            speedTick &+= 1
         }
     }
 }

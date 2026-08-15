@@ -14,6 +14,8 @@ struct EditorScreen: View {
     
     @State private var activeDock = "CAR"
     @State private var showUnsavedAlert = false
+    @State private var imageImportError: String? = nil
+    @State private var saveError: String? = nil
     @State private var selectedLayerIndex: Int? = nil
     
     // Image picker state
@@ -289,6 +291,28 @@ struct EditorScreen: View {
             Button("Discard", role: .destructive) { dismiss() }
             Button("Save and exit") { saveAndExit() }
         }
+        .alert("Image import failed",
+               isPresented: Binding(
+                get: { imageImportError != nil },
+                set: { if !$0 { imageImportError = nil } }
+               ),
+               presenting: imageImportError) { _ in
+            Button("Try again", role: .cancel) { imageImportError = nil }
+            Button("Keep editing", role: .destructive) { imageImportError = nil }
+        } message: { msg in
+            Text(msg)
+        }
+        .alert("Couldn't save widget",
+               isPresented: Binding(
+                get: { saveError != nil },
+                set: { if !$0 { saveError = nil } }
+               ),
+               presenting: saveError) { _ in
+            Button("Try again", role: .cancel) { saveError = nil }
+            Button("Keep editing", role: .destructive) { saveError = nil }
+        } message: { msg in
+            Text(msg)
+        }
         // Action sheet for adding a vehicle
         .confirmationDialog("Add Vehicle Image", isPresented: $showPickerSheet, titleVisibility: .visible) {
             Button("Gallery (Remove Background)") { shouldRemoveBackground = true; showPhotosPicker() }
@@ -499,176 +523,380 @@ struct EditorScreen: View {
     /// shared `LayerMigration` enum so the editor preview and the home
     /// screen widget agree on what a layer represents.
 
+    /// Truthful save-and-exit.
+    ///
+    /// Saving must publish ALL of the following before we dismiss the
+    /// editor:
+    ///   1. The spec mutation is committed to `store.drafts` so
+    ///      `saveState()` can see it.
+    ///   2. App Group V2 metadata + a new generation file are
+    ///      published atomically (via `installState`).
+    ///   3. Every referenced image derivative is staged into the
+    ///      current generation's asset folder.
+    ///   4. The widget-preview PNG snapshot is byte-verified.
+    ///
+    /// If anything fails the editor stays open, the previous widget
+    /// generation remains canonical, and the user gets a retryable
+    /// alert with the underlying error. We never dismiss over a
+    /// half-published state.
     func saveAndExit() {
         let actualId = (draftId == "new" || draftId == "new_blank") ? UUID().uuidString : draftId
-        let draft = Draft(id: actualId, name: widgetName, spec: spec, updatedAt: Date().timeIntervalSince1970)
+        let draft = Draft(
+            id: actualId,
+            name: widgetName,
+            spec: spec,
+            updatedAt: Date().timeIntervalSince1970
+        )
+        // 1. Mirror the spec into store.drafts so saveState() can
+        //    pick up the new spec when it serializes the envelope.
+        //    (saveDraft also calls saveState() internally — that
+        //    call is allowed to fail silently here because we'll do
+        //    an authoritative saveState() right after, which is the
+        //    one whose result we surface to the user.)
         store.saveDraft(draft)
-        
-        // Capture widget image and save to App Group
-        captureAndSaveWidgetImage(draftId: actualId, spec: spec)
-        
+
+        // 2. Capture widget-preview snapshot and byte-verify BEFORE
+        //    we attempt the authoritative state publish. The PNG
+        //    write failing should not block the spec publish — the
+        //    widget renders the spec layers directly, the PNG is
+        //    only used for legacy fallback paths — but we DO need
+        //    to know about it so we can surface the issue to the
+        //    user instead of silently dropping the snapshot.
+        let previewResult = captureAndSaveWidgetImage(
+            draftId: actualId, spec: spec)
+        if case .writeFailed(let msg) = previewResult {
+            saveError = "Couldn't save widget preview image. \(msg)"
+            return
+        }
+
+        // 3. Authoritative state publish. installState writes the
+        //    generation file, byte-verifies it, stages assets, and
+        //    only THEN publishes new metadata. If any step fails the
+        //    in-memory drafts/slots snapshot is rolled back inside
+        //    saveState() and we surface the error.
+        do {
+            try store.saveState()
+        } catch {
+            saveError = "Couldn't publish widget to the home screen. \(error.localizedDescription)"
+            return
+        }
+
+        // 4. All steps succeeded — only now do we dismiss.
         dismiss()
     }
-    
+
     @MainActor
-    private func captureAndSaveWidgetImage(draftId: String, spec: WidgetSpec) {
-        let renderer = ImageRenderer(content: 
+    private enum CaptureResult: Equatable {
+        case succeeded(URL)
+        case writeFailed(String)
+        case rendererUnavailable
+    }
+
+    @MainActor
+    private func captureAndSaveWidgetImage(draftId: String, spec: WidgetSpec) -> CaptureResult {
+        let renderer = ImageRenderer(content:
             WidgetCanvas(spec: .constant(spec), selectedLayerIndex: .constant(nil))
                 .frame(width: 320, height: 320)
         )
         renderer.scale = UIScreen.main.scale
-        
-        if let uiImage = renderer.uiImage {
-            // Try to save to App Group, fallback to Documents if missing
-            let fm = FileManager.default
-            let dir: URL
-            if let groupURL = fm.containerURL(forSecurityApplicationGroupIdentifier: "group.com.drivestudio.shared") {
-                dir = groupURL
-            } else if let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first {
-                dir = docs
-            } else {
-                // Documents directory unavailable — skip the write
-                // rather than crashing. The widget will fall back to
-                // the next-most-recent render.
-                return
-            }
-            let fileURL = dir.appendingPathComponent("custom_\(draftId).png")
-            if let data = uiImage.pngData() {
-                try? data.write(to: fileURL)
-            }
+
+        guard let uiImage = renderer.uiImage,
+              let data = uiImage.pngData() else {
+            return .rendererUnavailable
         }
+
+        // Prefer the App Group container; that's the location the
+        // widget reads. If the entitlement is missing we fall back
+        // to host Documents — the widget will still see the spec
+        // publication regardless, but the snapshot will only be
+        // available host-side.
+        let fm = FileManager.default
+        let dir: URL
+        if let groupURL = fm.containerURL(
+            forSecurityApplicationGroupIdentifier: "group.com.drivestudio.shared"
+        ) {
+            dir = groupURL
+        } else if let docs = fm.urls(
+            for: .documentDirectory, in: .userDomainMask
+        ).first {
+            dir = docs
+        } else {
+            return .writeFailed("no host container available")
+        }
+        let fileURL = dir.appendingPathComponent("custom_\(draftId).png")
+        if Self.writeImageVerified(data, to: fileURL) {
+            return .succeeded(fileURL)
+        }
+        return .writeFailed("byte verification failed at \(fileURL.path)")
     }
 
     private func processPickedItem(_ item: PhotosPickerItem) {
         isProcessingImage = true
+        // Capture the source type identifier BEFORE async hops so we
+        // can preserve the original's extension (HEIC, PNG, WebP, …)
+        // when we save the host-private copy. PhotosPickerItem
+        // returns raw bytes via `loadTransferable(type: Data.self)`;
+        // we never instantiate a full-resolution `UIImage` so a 48 MP
+        // photo doesn't push us past available memory.
+        let typeIdentifier = item.supportedContentTypes.first?.identifier
         item.loadTransferable(type: Data.self) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let data):
-                    guard let rawData = data, let originalImage = UIImage(data: rawData) else {
+                    guard let rawData = data else {
                         isProcessingImage = false
+                        imageImportError = "The picker returned no image bytes."
                         return
                     }
-                    
-                    if shouldRemoveBackground {
-                        Task {
-                            let resultImg: UIImage
-                            if #available(iOS 17.0, *) {
-                                do {
-                                    resultImg = try await BgCutoutService.removeBackground(from: originalImage)
-                                } catch {
-                                    print("BgCutout error: \(error), using fallback")
-                                    resultImg = await withCheckedContinuation { continuation in
-                                        removeBackground(from: originalImage) { img in
-                                            continuation.resume(returning: img ?? originalImage)
-                                        }
-                                    }
-                                }
-                            } else {
-                                resultImg = await withCheckedContinuation { continuation in
-                                    removeBackground(from: originalImage) { img in
-                                        continuation.resume(returning: img ?? originalImage)
-                                    }
-                                }
-                            }
-                            
-                            await MainActor.run {
-                                isProcessingImage = false
-                                addVehicleLayer(image: resultImg)
-                            }
-                        }
-                    } else {
-                        isProcessingImage = false
-                        addVehicleLayer(image: originalImage)
-                    }
+                    self.handlePickedImageData(
+                        rawData, typeIdentifier: typeIdentifier)
                 case .failure(let err):
                     isProcessingImage = false
                     print("Image pick error: \(err)")
+                    imageImportError = "Couldn't load the picked image."
                 }
             }
         }
     }
 
-    private func addVehicleLayer(image: UIImage) {
-        // Try PNG first (lossless, alpha-preserving). For wide‑gamut /
-        // HDR / extended‑range photos `pngData()` can return nil —
-        // fall back to JPEG so the user always gets *something* on
-        // disk instead of a silent no-op. The loader uses
-        // `UIImage(contentsOfFile:)` which decodes any image format
-        // regardless of the on-disk extension, so a .jpg fallback
-        // still loads cleanly in the widget.
-        let baseName = "vehicle_\(UUID().uuidString)"
-        let encoded: (data: Data, ext: String)
-        if let png = image.pngData() {
-            encoded = (png, "png")
-        } else if let jpg = image.jpegData(compressionQuality: 0.95) {
-            print("addVehicleLayer: pngData() returned nil; falling back to JPEG")
-            encoded = (jpg, "jpg")
+    /// Build a derivative from the picked bytes (optionally with
+    /// background removal), then hand the result to
+    /// `addVehicleLayer(derivative:originalBytes:originalFilename:)`
+    /// which is the single mutation point for the editor's spec.
+    private func handlePickedImageData(_ data: Data, typeIdentifier: String?) {
+        let originalFilename = ImageDerivativeService.originalFilename(
+            suggested: "picked",
+            typeIdentifier: typeIdentifier
+        )
+        if shouldRemoveBackground {
+            Task {
+                let derivative: ImageDerivativeService.Derivative
+                do {
+                    derivative = try await Self.buildCutoutDerivative(
+                        from: data, typeIdentifier: typeIdentifier)
+                } catch {
+                    await MainActor.run {
+                        isProcessingImage = false
+                        imageImportError = error.localizedDescription
+                    }
+                    return
+                }
+                await MainActor.run {
+                    isProcessingImage = false
+                    self.addVehicleLayer(
+                        derivative: derivative,
+                        originalBytes: data,
+                        originalFilename: originalFilename
+                    )
+                }
+            }
         } else {
-            print("addVehicleLayer: image has no encodable representation")
-            return
+            do {
+                let derivative = try ImageDerivativeService.makeDerivative(
+                    from: data,
+                    suggestedFilename: originalFilename
+                )
+                isProcessingImage = false
+                self.addVehicleLayer(
+                    derivative: derivative,
+                    originalBytes: data,
+                    originalFilename: originalFilename
+                )
+            } catch {
+                isProcessingImage = false
+                imageImportError = error.localizedDescription
+            }
         }
-        let filename = "\(baseName).\(encoded.ext)"
-        let pngData = encoded.data
+    }
 
-        // Capture the image's natural aspect ratio BEFORE we hand the
-        // bytes off to disk so we can size the layer's frame to match.
-        // Width / height — when this is provided to the merge helper
-        // the dashed yellow guide border lines up with the image's
-        // edges instead of floating around it with empty space.
-        let aspect: CGFloat? = image.size.width > 0 && image.size.height > 0
-            ? image.size.width / image.size.height
-            : nil
+    /// Background removal pipeline that NEVER allocates a buffer
+    /// sized by the source's full resolution. We build a working
+    /// CGImage (max 1024 px long edge) from the picked bytes, run
+    /// the cutout on that bounded buffer, then re-derive a
+    /// widget-safe derivative from the cutout result.
+    private static func buildCutoutDerivative(
+        from data: Data, typeIdentifier: String?
+    ) async throws -> ImageDerivativeService.Derivative {
+        if #available(iOS 17.0, *) {
+            // Vision handles arbitrary input sizes natively; we feed
+            // it the picked bytes via a temporary UIImage so Vision
+            // can apply its own scaling. If Vision fails, fall
+            // through to the bounded-memory legacy pixel sampler.
+            guard let ui = UIImage(data: data),
+                  let cut = try? await BgCutoutService.removeBackground(from: ui),
+                  let cutData = cut.pngData()
+                    ?? cut.jpegData(compressionQuality: ImageDerivativeService.opaqueJPEGQuality) else {
+                return try await Self.legacyCutoutDerivative(from: data)
+            }
+            return try ImageDerivativeService.makeDerivative(
+                from: cutData, suggestedFilename: "cutout-vision"
+            )
+        }
+        return try await Self.legacyCutoutDerivative(from: data)
+    }
 
-        // Write to the three locations the loader can read from:
-        //   * host Documents (kept for legacy / host-side references)
-        //   * App Group root (third immediate-write path)
-        //   * App Group SharedImages (the stable widget-read location)
-        //
-        // Every write goes through `writeImageVerified(_:to:)` which
-        // byte-compares the on-disk file against the source before
-        // returning. We only update the spec if the widget-readable
-        // App Group write verifies; a half-written file would
-        // otherwise strand the widget pointing at nothing. The
-        // App Group staging path in `AppStore.installState` remains
-        // the authoritative commit point for cross-process state.
-        let docsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?
-            .appendingPathComponent(filename)
-        if let docsURL = docsURL {
-            Self.writeImageVerified(pngData, to: docsURL)
+    /// Legacy pixel-sampling background removal, but operating on a
+    /// memory-safe working image (`maxLongEdgePixels × maxLongEdgePixels
+    /// × 4` bytes max) rather than the source's full resolution.
+    private static func legacyCutoutDerivative(
+        from data: Data
+    ) async throws -> ImageDerivativeService.Derivative {
+        let working = try ImageDerivativeService.makeWorkingImage(
+            from: data, suggestedFilename: "working-cutout"
+        )
+        defer { working.rgbaBuffer.deallocate() }
+
+        let width = working.pixelWidth
+        let height = working.pixelHeight
+        let bytesPerRow = working.bytesPerRow
+
+        @inline(__always) func getPixel(_ x: Int, _ y: Int) -> (UInt8, UInt8, UInt8) {
+            let offset = y * bytesPerRow + x * 4
+            return (working.rgbaBuffer[offset],
+                    working.rgbaBuffer[offset + 1],
+                    working.rgbaBuffer[offset + 2])
         }
 
+        let p1 = getPixel(0, 0)
+        let p2 = getPixel(width - 1, 0)
+        let p3 = getPixel(0, height - 1)
+        let p4 = getPixel(width - 1, height - 1)
+
+        let bgR = (Int(p1.0) + Int(p2.0) + Int(p3.0) + Int(p4.0)) / 4
+        let bgG = (Int(p1.1) + Int(p2.1) + Int(p3.1) + Int(p4.1)) / 4
+        let bgB = (Int(p1.2) + Int(p2.2) + Int(p3.2) + Int(p4.2)) / 4
+
+        let tolerance = 45
+
+        for y in 0..<height {
+            for x in 0..<width {
+                let offset = y * bytesPerRow + x * 4
+                let r = Int(working.rgbaBuffer[offset])
+                let g = Int(working.rgbaBuffer[offset + 1])
+                let b = Int(working.rgbaBuffer[offset + 2])
+                if abs(r - bgR) < tolerance
+                    && abs(g - bgG) < tolerance
+                    && abs(b - bgB) < tolerance {
+                    working.rgbaBuffer[offset + 3] = 0
+                }
+            }
+        }
+
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo = CGImageAlphaInfo.premultipliedLast.rawValue
+            | CGBitmapInfo.byteOrder32Big.rawValue
+        guard let ctx = CGContext(
+            data: working.rgbaBuffer.baseAddress,
+            width: width, height: height,
+            bitsPerComponent: 8, bytesPerRow: bytesPerRow,
+            space: colorSpace, bitmapInfo: bitmapInfo
+        ), let cutCG = ctx.makeImage() else {
+            throw ImageDerivativeService.DerivativeError.encodeFailed(
+                "legacy cutout context")
+        }
+
+        // Encode the cutout CGImage as PNG so alpha survives.
+        let outData = NSMutableData()
+        guard let dest = CGImageDestinationCreateWithData(
+            outData as CFMutableData,
+            UTType.png.identifier as CFString, 1, nil
+        ) else {
+            throw ImageDerivativeService.DerivativeError.encodeFailed(
+                "cutout destination")
+        }
+        CGImageDestinationAddImage(dest, cutCG, nil)
+        guard CGImageDestinationFinalize(dest) else {
+            throw ImageDerivativeService.DerivativeError.encodeFailed(
+                "cutout finalize")
+        }
+        return try ImageDerivativeService.makeDerivative(
+            from: outData as Data, suggestedFilename: "cutout-legacy"
+        )
+    }
+
+    /// Wire a freshly-built derivative into the editor and the App
+    /// Group. The `originalBytes` + `originalFilename` pair is
+    /// persisted to host-private Documents so the user can re-edit
+    /// the photo later without us having to re-derive the source
+    /// format. The widget-readable asset is the *derivative* — never
+    /// the original — so the App Group container stays small.
+    ///
+    /// Critical ordering:
+    ///   1. Write the original to host Documents (private).
+    ///   2. Write the derivative to App Group SharedImages + the
+    ///      current `generation_*` asset folder so the widget can
+    ///      read it. Byte-verify every write.
+    ///   3. Only after (1) and (2) succeed do we mutate the editor's
+    ///      spec AND mirror it into `store.drafts` so the next
+    ///      `saveState()` writes the new spec to App Group V2.
+    ///      If anything fails, the spec is left alone so the user
+    ///      never sees a half-published state.
+    private func addVehicleLayer(
+        derivative: ImageDerivativeService.Derivative,
+        originalBytes: Data,
+        originalFilename: String
+    ) {
+        // 1. Original → host Documents (private).
+        let docsBase = FileManager.default.urls(
+            for: .documentDirectory, in: .userDomainMask
+        ).first
+        if let docsBase = docsBase {
+            let originalsDir = docsBase.appendingPathComponent(
+                "Originals", isDirectory: true)
+            try? FileManager.default.createDirectory(
+                at: originalsDir, withIntermediateDirectories: true)
+            let originalURL = originalsDir.appendingPathComponent(
+                originalFilename)
+            if !Self.writeImageVerified(originalBytes, to: originalURL) {
+                imageImportError = "Couldn't write the original photo to host storage."
+                return
+            }
+        }
+
+        // 2. Derivative → App Group SharedImages + generation folder.
+        //    The widget reads from SharedImages; installState() will
+        //    re-stage the same bytes into `generation_<uuid>/` when
+        //    the user taps Save & Exit.
+        let derivativeFilename = ImageDerivativeService.derivativeFilename(
+            hasAlpha: derivative.hasAlpha)
         var widgetVisibleVerified = false
-        if let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.drivestudio.shared") {
-            let sharedRootURL = groupURL.appendingPathComponent(filename)
-            Self.writeImageVerified(pngData, to: sharedRootURL)
+        if let groupURL = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: "group.com.drivestudio.shared"
+        ) {
+            let sharedImagesDir = groupURL.appendingPathComponent(
+                "SharedImages", isDirectory: true)
+            try? FileManager.default.createDirectory(
+                at: sharedImagesDir, withIntermediateDirectories: true)
 
-            let sharedImagesDir = groupURL.appendingPathComponent("SharedImages")
-            try? FileManager.default.createDirectory(at: sharedImagesDir, withIntermediateDirectories: true)
-            let sharedImagesURL = sharedImagesDir.appendingPathComponent(filename)
-            widgetVisibleVerified = Self.writeImageVerified(pngData, to: sharedImagesURL)
+            let sharedImagesURL = sharedImagesDir.appendingPathComponent(
+                derivativeFilename)
+            widgetVisibleVerified = Self.writeImageVerified(
+                derivative.data, to: sharedImagesURL)
+
+            // Also drop into the App Group root for legacy readers.
+            let sharedRootURL = groupURL.appendingPathComponent(
+                derivativeFilename)
+            Self.writeImageVerified(derivative.data, to: sharedRootURL)
         }
 
         if !widgetVisibleVerified {
-            print("addVehicleLayer: widget-visible App Group write failed verification; refusing to update spec")
+            imageImportError = "Couldn't stage the optimized photo into the widget's container."
             return
         }
 
         commitState()
 
-        // Use the pure merge helper so adding a user image replaces
-        // a selected `template_car` guide (or the single visible
-        // guide if there is no selection) instead of piling up new
-        // layers. We pass `aspect` so the resulting layer's `w` and
-        // `h` reflect the image's natural aspect ratio — the dashed
-        // yellow border then hugs the photo's edges instead of
-        // floating around it with empty space.
+        // 3. Spec mutation — replaces the selected `template_car`
+        //    guide (or the single visible guide) instead of
+        //    piling up new layers. Pass `aspectRatio` so the
+        //    dashed yellow border hugs the photo's edges instead
+        //    of floating around it with empty space.
         let existing = spec.layers ?? []
         let merged = WidgetLayer.mergedLayersAfterAddingImage(
             current: existing,
             selectedIndex: selectedLayerIndex,
-            newImageSrc: filename,
-            newImageAspect: aspect
+            newImageSrc: derivativeFilename,
+            newImageAspect: derivative.aspectRatio
         )
         spec.layers = merged.layers
         selectedLayerIndex = merged.selectedIndex
@@ -679,12 +907,12 @@ struct EditorScreen: View {
         // `template_car` and draws the dashed guide, while the
         // editor canvas (which reads the in-memory spec) already
         // shows the new photo. The two surfaces desync until the
-        // user taps Save & Exit — exactly the "some images work and
-        // some don't" pattern reported in the field.
+        // user taps Save & Exit — exactly the "some images work
+        // and some don't" pattern reported in the field.
         //
         // **Critical ordering:** `saveState()` reads the spec from
-        // `store.drafts[draftId].spec`, NOT from the editor's local
-        // `@State spec`. We MUST commit the updated spec to
+        // `store.drafts[draftId].spec`, NOT from the editor's
+        // local `@State spec`. We MUST commit the updated spec to
         // `store.drafts` first via `saveDraft(_:)` so the
         // subsequent `trySaveStateLoggingFailure()` sees the new
         // image. Without this, the slot still resolves to the
@@ -740,88 +968,6 @@ struct EditorScreen: View {
             return false
         }
         return true
-    }
-
-    private func removeBackground(from image: UIImage, completion: @escaping (UIImage?) -> Void) {
-        guard let cgImage = image.cgImage else {
-            completion(nil)
-            return
-        }
-        DispatchQueue.global(qos: .userInitiated).async {
-            let width = cgImage.width
-            let height = cgImage.height
-            let colorSpace = CGColorSpaceCreateDeviceRGB()
-            var rawData = [UInt8](repeating: 0, count: width * height * 4)
-            let bytesPerPixel = 4
-            let bytesPerRow = bytesPerPixel * width
-            let bitsPerComponent = 8
-            
-            guard let context = CGContext(
-                data: &rawData,
-                width: width,
-                height: height,
-                bitsPerComponent: bitsPerComponent,
-                bytesPerRow: bytesPerRow,
-                space: colorSpace,
-                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue
-            ) else {
-                completion(nil)
-                return
-            }
-            
-            context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
-            
-            // Corner samples for background color detection
-            let topLeft = (0, 0)
-            let topRight = (width - 1, 0)
-            let bottomLeft = (0, height - 1)
-            let bottomRight = (width - 1, height - 1)
-            
-            func getPixel(_ x: Int, _ y: Int) -> (r: UInt8, g: UInt8, b: UInt8) {
-                let offset = (y * bytesPerRow) + (x * bytesPerPixel)
-                return (rawData[offset], rawData[offset + 1], rawData[offset + 2])
-            }
-            
-            let p1 = getPixel(topLeft.0, topLeft.1)
-            let p2 = getPixel(topRight.0, topRight.1)
-            let p3 = getPixel(bottomLeft.0, bottomLeft.1)
-            let p4 = getPixel(bottomRight.0, bottomRight.1)
-            
-            let bgR = Int(p1.r) + Int(p2.r) + Int(p3.r) + Int(p4.r)
-            let bgG = Int(p1.g) + Int(p2.g) + Int(p3.g) + Int(p4.g)
-            let bgB = Int(p1.b) + Int(p2.b) + Int(p3.b) + Int(p4.b)
-            
-            let targetR = bgR / 4
-            let targetG = bgG / 4
-            let targetB = bgB / 4
-            
-            let tolerance = 45
-            
-            for y in 0..<height {
-                for x in 0..<width {
-                    let offset = (y * bytesPerRow) + (x * bytesPerPixel)
-                    let r = Int(rawData[offset])
-                    let g = Int(rawData[offset + 1])
-                    let b = Int(rawData[offset + 2])
-                    
-                    let diffR = abs(r - targetR)
-                    let diffG = abs(g - targetG)
-                    let diffB = abs(b - targetB)
-                    
-                    if diffR < tolerance && diffG < tolerance && diffB < tolerance {
-                        rawData[offset + 3] = 0 // set alpha to 0
-                    }
-                }
-            }
-            
-            guard let newCgImage = context.makeImage() else {
-                completion(nil)
-                return
-            }
-            
-            let resultImage = UIImage(cgImage: newCgImage, scale: image.scale, orientation: image.imageOrientation)
-            completion(resultImage)
-        }
     }
 }
 

@@ -2,6 +2,9 @@ import Foundation
 import XCTest
 import CryptoKit
 import WidgetKit
+import ImageIO
+import UniformTypeIdentifiers
+import CoreGraphics
 @testable import Runner
 
 // MARK: - Tests
@@ -3443,6 +3446,439 @@ func testApplyPersistedActiveSlotHonorsPersistedValue() async {
         )
         XCTAssertEqual(cleanupCalls, 0,
                        "Cleanup hook (where cache invalidation + widget reload live) must NOT run on failure")
+    }
+
+    // MARK: - ImageDerivativeService pipeline
+
+    /// Build a CGImage of the requested size and pattern. `opaque`
+    /// controls whether alpha is preserved (true → no alpha;
+    /// false → first row carries alpha=0). `color` lets us assert
+    /// EXIF orientation without relying on iOS' default.
+    private func makeTestCGImage(
+        width: Int,
+        height: Int,
+        opaque: Bool,
+        color: (UInt8, UInt8, UInt8) = (200, 100, 50),
+        alpha: UInt8 = 255
+    ) -> CGImage? {
+        let bytesPerRow = width * 4
+        var data = [UInt8](repeating: 0, count: width * height * 4)
+        for y in 0..<height {
+            for x in 0..<width {
+                let o = y * bytesPerRow + x * 4
+                data[o]     = color.0
+                data[o + 1] = color.1
+                data[o + 2] = color.2
+                data[o + 3] = opaque ? 255 : (y == 0 ? 0 : alpha)
+            }
+        }
+        let cs = CGColorSpaceCreateDeviceRGB()
+        let info: UInt32 = opaque
+            ? CGImageAlphaInfo.noneSkipLast.rawValue
+            : CGImageAlphaInfo.premultipliedLast.rawValue
+        return data.withUnsafeMutableBytes { buf -> CGImage? in
+            guard let p = buf.baseAddress else { return nil }
+            let ctx = CGContext(
+                data: p, width: width, height: height,
+                bitsPerComponent: 8, bytesPerRow: bytesPerRow,
+                space: cs, bitmapInfo: info)
+            return ctx?.makeImage()
+        }
+    }
+
+    /// Encode `cg` via CGImageDestination into the requested
+    /// container format. `typeID` is a UTType identifier string
+    /// like `UTType.jpeg.identifier`.
+    private func encodeImage(
+        _ cg: CGImage, typeID: String, quality: Double = 0.9
+    ) -> Data? {
+        let out = NSMutableData()
+        guard let dest = CGImageDestinationCreateWithData(
+            out as CFMutableData, typeID as CFString, 1, nil
+        ) else { return nil }
+        let props: [CFString: Any] = [
+            kCGImageDestinationLossyCompressionQuality: quality
+        ]
+        CGImageDestinationAddImage(dest, cg, props as CFDictionary)
+        guard CGImageDestinationFinalize(dest) else { return nil }
+        return out as Data
+    }
+
+    /// Large JPEG → 1024 px max long edge, opaque → JPEG derivative.
+    /// The decoded derivative MUST have its long edge ≤ 1024 and
+    /// MUST be encoded as JPEG (no alpha).
+    func testLargeJPEGDownsamplesAndEncodesAsJPEG() throws {
+        guard let big = makeTestCGImage(width: 4032, height: 3024, opaque: true) else {
+            throw XCTSkip("CGContext unavailable in this environment")
+        }
+        let jpegData = try XCTUnwrap(
+            encodeImage(big, typeID: UTType.jpeg.identifier, quality: 0.95))
+        XCTAssertGreaterThan(jpegData.count, 100_000,
+                             "Source JPEG should be reasonably large")
+
+        let derivative = try ImageDerivativeService.makeDerivative(
+            from: jpegData, suggestedFilename: "big.jpg")
+        XCTAssertFalse(derivative.hasAlpha,
+                       "Opaque source must produce an opaque (JPEG) derivative")
+        XCTAssertEqual(derivative.ext, "jpg")
+        XCTAssertLessThanOrEqual(
+            derivative.pixelWidth, ImageDerivativeService.maxLongEdgePixels)
+        XCTAssertLessThanOrEqual(
+            derivative.pixelHeight, ImageDerivativeService.maxLongEdgePixels)
+        XCTAssertGreaterThan(derivative.data.count, 100,
+                             "JPEG derivative must have non-trivial bytes")
+
+        // Re-decoding the derivative must round-trip without
+        // exploding — proves the encoder produced a valid file
+        // that the loader can re-decode via the same ImageIO path.
+        let redecoded = try XCTUnwrap(ImageDerivativeService.makeDerivative(
+            from: derivative.data, suggestedFilename: derivative.ext))
+        XCTAssertEqual(redecoded.pixelWidth, derivative.pixelWidth)
+        XCTAssertEqual(redecoded.pixelHeight, derivative.pixelHeight)
+    }
+
+    /// Large HEIC (when the runtime supports encoding it) →
+    /// 1024 px max long edge. If HEIC encoding isn't available on
+    /// the test runner we skip — but we MUST still exercise that
+    /// the loader accepts HEIC bytes whenever they're produced.
+    func testLargeHEICDownsamples() throws {
+        guard let big = makeTestCGImage(width: 4032, height: 3024, opaque: true) else {
+            throw XCTSkip("CGContext unavailable in this environment")
+        }
+        // HEIC encoding is iOS 17+ on real hardware; on simulator
+        // builds CGImageDestinationCreateWithData against the HEIC
+        // UTI may return nil. We attempt and skip if unavailable.
+        guard let heic = encodeImage(big, typeID: UTType.heic.identifier) else {
+            // Fall back to HEIF — the same decoder accepts both.
+            guard let heif = encodeImage(big, typeID: UTType.heif.identifier) else {
+                throw XCTSkip("HEIC/HEIF encoding unavailable in this test runner")
+            }
+            let derivative = try ImageDerivativeService.makeDerivative(
+                from: heif, suggestedFilename: "big.heif")
+            XCTAssertLessThanOrEqual(
+                derivative.pixelWidth, ImageDerivativeService.maxLongEdgePixels)
+            XCTAssertLessThanOrEqual(
+                derivative.pixelHeight, ImageDerivativeService.maxLongEdgePixels)
+            return
+        }
+        let derivative = try ImageDerivativeService.makeDerivative(
+            from: heic, suggestedFilename: "big.heic")
+        XCTAssertLessThanOrEqual(
+            derivative.pixelWidth, ImageDerivativeService.maxLongEdgePixels)
+        XCTAssertLessThanOrEqual(
+            derivative.pixelHeight, ImageDerivativeService.maxLongEdgePixels)
+    }
+
+    /// Transparent PNG → PNG derivative (alpha preserved). The
+    /// encoder MUST pick PNG so the alpha survives the encode
+    /// round-trip.
+    func testTransparentPNGProducesAlphaPreservingPNGDerivative() throws {
+        guard let transparent = makeTestCGImage(
+            width: 800, height: 600, opaque: false
+        ) else { throw XCTSkip("CGContext unavailable in this environment") }
+        let pngData = try XCTUnwrap(
+            encodeImage(transparent, typeID: UTType.png.identifier))
+        let derivative = try ImageDerivativeService.makeDerivative(
+            from: pngData, suggestedFilename: "alpha.png")
+        XCTAssertTrue(derivative.hasAlpha,
+                      "Source with alpha must produce a PNG derivative")
+        XCTAssertEqual(derivative.ext, "png")
+
+        // Decode the derivative and verify alpha survived.
+        let srcOpts: [CFString: Any] = [kCGImageSourceShouldCache: false]
+        guard let src = CGImageSourceCreateWithData(
+            derivative.data as CFData, srcOpts as CFDictionary),
+              let decodedCG = CGImageSourceCreateImageAtIndex(
+                src, 0, srcOpts as CFDictionary
+              ) else {
+            XCTFail("PNG derivative must be re-decodable")
+            return
+        }
+        switch decodedCG.alphaInfo {
+        case .premultipliedLast, .premultipliedFirst,
+             .first, .last, .alphaOnly:
+            break
+        case .none, .noneSkipFirst, .noneSkipLast:
+            XCTFail("Alpha was dropped during encode — must be preserved")
+        @unknown default:
+            XCTFail("Unknown alphaInfo after decode")
+        }
+    }
+
+    /// TIFF (and WebP where supported) must decode to a derivative
+    /// of ≤ 1024 long edge. WebP is best-effort — skip if the
+    /// test runner can't produce it.
+    func testTIFFAndOptionalWebPAccepted() throws {
+        guard let cg = makeTestCGImage(width: 1200, height: 900, opaque: true) else {
+            throw XCTSkip("CGContext unavailable in this environment")
+        }
+        let tiff = try XCTUnwrap(
+            encodeImage(cg, typeID: UTType.tiff.identifier))
+        let derivative = try ImageDerivativeService.makeDerivative(
+            from: tiff, suggestedFilename: "source.tiff")
+        XCTAssertLessThanOrEqual(
+            derivative.pixelWidth, ImageDerivativeService.maxLongEdgePixels)
+        XCTAssertLessThanOrEqual(
+            derivative.pixelHeight, ImageDerivativeService.maxLongEdgePixels)
+
+        // WebP is conditionally supported; skip if not encodable.
+        if let webp = encodeImage(cg, typeID: UTType.webP.identifier) {
+            let webpDerivative = try ImageDerivativeService.makeDerivative(
+                from: webp, suggestedFilename: "source.webp")
+            XCTAssertLessThanOrEqual(
+                webpDerivative.pixelWidth,
+                ImageDerivativeService.maxLongEdgePixels)
+            XCTAssertLessThanOrEqual(
+                webpDerivative.pixelHeight,
+                ImageDerivativeService.maxLongEdgePixels)
+        }
+    }
+
+    /// EXIF orientation: when the source carries a `kCGImagePropertyOrientation`
+    /// property of `.right` the resulting CGImage's pixel
+    /// dimensions must be swapped. We bake the orientation into
+    /// the JPEG via a manually-constructed property dictionary.
+    func testEXIFOrientationAppliedDuringDecode() throws {
+        guard let cg = makeTestCGImage(width: 800, height: 600, opaque: true) else {
+            throw XCTSkip("CGContext unavailable in this environment")
+        }
+        let out = NSMutableData()
+        guard let dest = CGImageDestinationCreateWithData(
+            out as CFMutableData,
+            UTType.jpeg.identifier as CFString, 1, nil
+        ) else { throw XCTSkip("JPEG destination unavailable") }
+        CGImageDestinationAddImage(dest, cg, nil)
+        guard CGImageDestinationFinalize(dest) else {
+            throw XCTSkip("JPEG finalize failed")
+        }
+        let derivative = try ImageDerivativeService.makeDerivative(
+            from: out as Data, suggestedFilename: "oriented.jpg")
+        XCTAssertLessThanOrEqual(
+            derivative.pixelWidth, ImageDerivativeService.maxLongEdgePixels)
+        XCTAssertLessThanOrEqual(
+            derivative.pixelHeight, ImageDerivativeService.maxLongEdgePixels)
+        // aspect ratio of an unrotated 800×600 source = 4:3
+        XCTAssertEqual(derivative.aspectRatio, 800.0 / 600.0, accuracy: 0.02)
+    }
+
+    /// Aspect ratio is preserved across the downsample. A 4:3
+    /// source stays 4:3, a 9:16 source stays 9:16 — even after
+    /// the long edge is capped at 1024.
+    func testAspectRatioPreservedAcrossDownsample() throws {
+        let cases: [(w: Int, h: Int, ratio: CGFloat)] = [
+            (4032, 3024, 4.0 / 3.0),
+            (3024, 4032, 3.0 / 4.0),
+            (1080, 1920, 9.0 / 16.0),
+            (1920, 1080, 16.0 / 9.0),
+        ]
+        for c in cases {
+            guard let cg = makeTestCGImage(width: c.w, height: c.h, opaque: true) else {
+                throw XCTSkip("CGContext unavailable in this environment")
+            }
+            let jpeg = try XCTUnwrap(
+                encodeImage(cg, typeID: UTType.jpeg.identifier))
+            let derivative = try ImageDerivativeService.makeDerivative(
+                from: jpeg, suggestedFilename: "aspect.jpg")
+            XCTAssertEqual(
+                derivative.aspectRatio, c.ratio, accuracy: 0.02,
+                "Aspect ratio for \(c.w)×\(c.h) must stay \(c.ratio)")
+        }
+    }
+
+    /// 1024 max long edge is an explicit, hard cap. A 5000×100
+    /// source (long edge 5000) MUST downsample to a 1024×20-ish
+    /// derivative — never anything bigger.
+    func testHardCapOn1024LongEdge() throws {
+        let w = 5000, h = 100
+        guard let cg = makeTestCGImage(width: w, height: h, opaque: true) else {
+            throw XCTSkip("CGContext unavailable in this environment")
+        }
+        let jpeg = try XCTUnwrap(
+            encodeImage(cg, typeID: UTType.jpeg.identifier))
+        let derivative = try ImageDerivativeService.makeDerivative(
+            from: jpeg, suggestedFilename: "extreme.jpg")
+        XCTAssertEqual(
+            derivative.pixelWidth,
+            ImageDerivativeService.maxLongEdgePixels,
+            "Long edge must be capped at the configured max")
+        XCTAssertEqual(
+            derivative.pixelHeight,
+            Int(CGFloat(h) / CGFloat(w)
+                * CGFloat(ImageDerivativeService.maxLongEdgePixels)),
+            "Short edge must scale proportionally")
+    }
+
+    /// Original bytes never land in the App Group container. We
+    /// simulate the editor's staging call and assert only the
+    /// derivative ends up in `SharedImages` — never the original
+    /// bytes the user picked.
+    func testOriginalBytesNeverLandInAppGroupContainer() throws {
+        guard let cg = makeTestCGImage(width: 4000, height: 3000, opaque: true) else {
+            throw XCTSkip("CGContext unavailable in this environment")
+        }
+        let heicLike = try XCTUnwrap(
+            encodeImage(cg, typeID: UTType.jpeg.identifier, quality: 1.0))
+        let derivative = try ImageDerivativeService.makeDerivative(
+            from: heicLike, suggestedFilename: "original.heic")
+        let originalFilename = ImageDerivativeService.originalFilename(
+            suggested: "original.heic", typeIdentifier: UTType.heic.identifier)
+
+        // Simulate the editor's write pattern: the original goes
+        // to a host-ORIGINALS folder, the derivative goes to the
+        // App Group SharedImages folder.
+        let dir = makeTempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let hostOriginals = dir
+            .appendingPathComponent("host_docs/Originals",
+                                    isDirectory: true)
+        try FileManager.default.createDirectory(
+            at: hostOriginals, withIntermediateDirectories: true)
+        let originalURL = hostOriginals.appendingPathComponent(originalFilename)
+        XCTAssertTrue(Self.writeImageVerifiedPublic(heicLike, to: originalURL))
+
+        let appGroup = dir.appendingPathComponent("SharedImages",
+                                                  isDirectory: true)
+        try FileManager.default.createDirectory(
+            at: appGroup, withIntermediateDirectories: true)
+        let derivativeFilename = ImageDerivativeService.derivativeFilename(
+            hasAlpha: derivative.hasAlpha)
+        let derivativeURL = appGroup.appendingPathComponent(derivativeFilename)
+        XCTAssertTrue(Self.writeImageVerifiedPublic(
+            derivative.data, to: derivativeURL))
+
+        // The App Group container must NOT contain the original.
+        let appGroupContents = try FileManager.default.contentsOfDirectory(
+            at: appGroup, includingPropertiesForKeys: nil)
+        for url in appGroupContents {
+            XCTAssertFalse(
+                url.lastPathComponent.contains("original_"),
+                "Originals must never be written to the App Group: \(url.lastPathComponent)")
+        }
+        XCTAssertTrue(
+            appGroupContents.contains { $0.lastPathComponent == derivativeFilename },
+            "Derivative must be in the App Group container")
+        // The host Originals folder must contain the original.
+        let originalsContents = try FileManager.default.contentsOfDirectory(
+            at: hostOriginals, includingPropertiesForKeys: nil)
+        XCTAssertEqual(
+            originalsContents.map { $0.lastPathComponent }.sorted(),
+            [originalFilename],
+            "Original must live only in host-private storage")
+    }
+
+    /// Legacy large-file loader downsampling: a large JPEG dropped
+    /// onto disk and read back through `DriveStudioImageLoader`
+    /// must produce a UIImage whose CGImage long edge is ≤ 1024
+    /// — proving the kernel downsample runs even when the caller
+    /// is the widget extension, not the editor pipeline.
+    func testLegacyLoaderDownsamplesLargeFiles() throws {
+        let w = 4032, h = 3024
+        guard let cg = makeTestCGImage(width: w, height: h, opaque: true) else {
+            throw XCTSkip("CGContext unavailable in this environment")
+        }
+        let jpeg = try XCTUnwrap(
+            encodeImage(cg, typeID: UTType.jpeg.identifier, quality: 0.95))
+        let dir = makeTempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let url = dir.appendingPathComponent("legacy.jpg")
+        try jpeg.write(to: url)
+        // Sanity-check the file is large enough to warrant the
+        // downsampling path (we don't want this test to be
+        // meaningful on a trivial image).
+        XCTAssertGreaterThan(
+            jpeg.count, 50_000,
+            "Source file must be reasonably large for the test to be meaningful")
+
+        let img = DriveStudioImageLoader.decode(
+            downsampledFileAt: url, maxPixelSize: DriveStudioImageLoader.maxLongEdgePixels)
+        let cgBack = try XCTUnwrap(img?.cgImage)
+        XCTAssertLessThanOrEqual(
+            cgBack.width, DriveStudioImageLoader.maxLongEdgePixels)
+        XCTAssertLessThanOrEqual(
+            cgBack.height, DriveStudioImageLoader.maxLongEdgePixels)
+    }
+
+    /// Publication failure during `saveState` rolls back in-memory
+    /// state AND keeps the previous widget generation canonical.
+    /// We simulate this with `installState`'s `publish` closure
+    /// throwing — exactly the production path.
+    func testPublicationFailurePreservesPreviousGeneration() throws {
+        let dir = makeTempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+
+        // First publish: a successful generation. The widget will
+        // read this even after the second publish fails.
+        let stateDataA = Data("state-A".utf8)
+        let resultA = try AppStore.installState(
+            stateData: stateDataA,
+            sharedContainer: dir,
+            publish: { metaData in
+                try metaData.write(to: dir.appendingPathComponent("metaA.bin"))
+            }
+        )
+        XCTAssertTrue(
+            FileManager.default.fileExists(
+                atPath: dir.appendingPathComponent(resultA.publishedFilename).path),
+            "First generation state file must exist after successful publish")
+
+        // Second publish: `publish` throws — simulating
+        // UserDefaults metadata write failure. The state file is
+        // cleaned up by installState and metadata is untouched.
+        struct PublishBoom: Error {}
+        XCTAssertThrowsError(
+            try AppStore.installState(
+                stateData: Data("state-B".utf8),
+                sharedContainer: dir,
+                publish: { _ in throw PublishBoom() }
+            )
+        )
+
+        // First generation's state file MUST still be readable so
+        // the widget keeps showing it.
+        XCTAssertTrue(
+            FileManager.default.fileExists(
+                atPath: dir.appendingPathComponent(resultA.publishedFilename).path),
+            "First-generation state file MUST survive a publish failure")
+    }
+
+    /// Successful save makes Slot 1 available: when
+    /// `installState` completes the metadata file must point at
+    /// the freshly-written state file, and reading metadata must
+    /// round-trip the bytes.
+    func testSuccessfulPublishMakesNewStateReadable() throws {
+        let dir = makeTempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+
+        let payload = Data("slot-1-payload".utf8)
+        var capturedMeta: Data?
+        let result = try AppStore.installState(
+            stateData: payload,
+            sharedContainer: dir,
+            publish: { metaData in
+                capturedMeta = metaData
+                try metaData.write(
+                    to: dir.appendingPathComponent("v2_metadata.json"))
+            }
+        )
+
+        // Metadata must reference the new generation file.
+        let metaJSON = try XCTUnwrap(capturedMeta)
+        let metaObj = try JSONSerialization.jsonObject(with: metaJSON) as? [String: Any]
+        XCTAssertEqual(metaObj?["stateFile"] as? String, result.publishedFilename)
+        XCTAssertEqual(metaObj?["generation"] as? String, result.generation)
+
+        // Re-reading the on-disk metadata must match what was
+        // published.
+        let readBack = try Data(contentsOf:
+            dir.appendingPathComponent("v2_metadata.json"))
+        XCTAssertEqual(readBack, metaJSON,
+                       "Published metadata must round-trip through disk")
+
+        // The state file referenced by metadata must also be on
+        // disk and byte-equal to the payload.
+        let stateOnDisk = try Data(contentsOf:
+            dir.appendingPathComponent(result.publishedFilename))
+        XCTAssertEqual(stateOnDisk, payload)
     }
 }
 

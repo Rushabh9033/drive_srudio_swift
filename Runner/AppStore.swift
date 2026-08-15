@@ -33,6 +33,19 @@ class AppStore: ObservableObject {
     nonisolated static let appGroupSuite = "group.com.drivestudio.shared"
     private let draftsKey = "drive_studio_drafts"
 
+    /// 60-second periodic heartbeat. The carConnected auto-detect
+    /// heuristic (`TelemetryService.snapshotAndSave`) only fires on
+    /// battery change and foreground events by default — but in a
+    /// stable foreground idle app (battery steady at e.g. 85%, no
+    /// user interaction) the heuristic never gets a chance to
+    /// evaluate the 5-min "no movement → unlinked" countdown, and
+    /// `carConnected` stays pinned to its seeded value forever.
+    /// This timer forces `refreshDeviceTelemetry()` to run every
+    /// 60s so the countdown progresses. The internal
+    /// `TelemetryPersistencePolicy` decides whether each call
+    /// actually writes the App Group blob, so the timer is cheap.
+    private var refreshTimer: Timer?
+
     /// `UserDefaults` key backing the Settings screen "Car connected"
     /// toggle. Defined here so `AppStore.init` can read it at launch
     /// and seed `TelemetryService.shared.carConnected` — without this,
@@ -83,6 +96,23 @@ class AppStore: ObservableObject {
                 // into a focused slot.
                 self?.applyPersistedActiveSlot()
             }
+        }
+
+        // **60-second periodic heartbeat.** The observers above only
+        // fire on transitions (battery % boundary, plug/unplug,
+        // foreground). In a stable foreground idle app none of those
+        // happen, so `snapshotAndSave` never runs and the
+        // `carConnected` auto-detect heuristic never evaluates the
+        // 5-min "no movement → unlinked" countdown — pinning the
+        // value to its `@AppStorage` seed forever. A 60s timer is
+        // cheap (the internal persistence policy skips writing the
+        // App Group blob when nothing meaningful changed) and
+        // guarantees the countdown progresses.
+        refreshTimer?.invalidate()
+        refreshTimer = Timer.scheduledTimer(
+            withTimeInterval: 60.0, repeats: true
+        ) { [weak self] _ in
+            Task { @MainActor in self?.refreshDeviceTelemetry() }
         }
     }
 

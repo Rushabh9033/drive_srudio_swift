@@ -1,6 +1,7 @@
 import Foundation
 import XCTest
 import CryptoKit
+import CoreLocation
 import WidgetKit
 import ImageIO
 import UniformTypeIdentifiers
@@ -2710,6 +2711,82 @@ func testActiveSlotKeyContractIsStable() {
         service._persistForTest(previousSpeed: 50.0, currentSpeed: 50.0)
         XCTAssertEqual(actualReloads, 3,
                        "Heartbeat after 5 min must fire one reload")
+    }
+
+    /// GPS heuristic: when speed has been unavailable for >5 minutes
+    /// while `carConnected` was true, the next snapshot must auto-flip
+    /// it back to false. This is what addresses the user complaint
+    /// that "Car link" stays linked after the user exits the car —
+    /// without CarPlay entitlements we can't observe cable unplug, but
+    /// we CAN observe that the phone stopped reporting motion.
+    func testCarConnectedAutoFlipsOffAfterFiveMinutesNoMovement() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+
+        // Simulate: user was moving, carConnected was auto-set true,
+        // lastNonNilSpeedAt recorded. Then they parked 6 min ago.
+        service.carConnected = true
+        service.lastNonNilSpeedAt = now.addingTimeInterval(-360) // 6 min ago
+        service.currentSpeed = nil
+
+        service._persistForTest(previousSpeed: nil, currentSpeed: nil)
+
+        XCTAssertFalse(service.carConnected,
+            "After 5+ min with no movement, carConnected must auto-flip false")
+    }
+
+    /// GPS heuristic: when speed was last reported recently (within
+    /// 5 min), the heuristic must NOT auto-flip carConnected to false.
+    /// This guards against spurious flips when the user is briefly
+    /// stationary (red light, pull over) — GPS briefly goes nil but
+    /// resumes within seconds, well inside the 5-min window.
+    func testCarConnectedStaysTrueWhenRecentMovement() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+
+        service.carConnected = true
+        service.lastNonNilSpeedAt = now.addingTimeInterval(-30) // 30s ago
+        service.currentSpeed = nil
+
+        service._persistForTest(previousSpeed: nil, currentSpeed: nil)
+
+        XCTAssertTrue(service.carConnected,
+            "Recent movement (30s) must NOT trigger auto-flip off")
+    }
+
+    /// GPS heuristic: when carConnected is already true and we see a
+    /// fresh speed, no change. When carConnected is false and we see
+    /// a fresh speed, auto-flip to true. The auto-flip-on path lives
+    /// in the location delegate, so we drive it through a synthetic
+    /// `CLLocation` with a valid speed value.
+    func testCarConnectedAutoFlipsOnWhenSpeedAppears() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+
+        // Case 1: speed appears while carConnected is false → flips on
+        service.carConnected = false
+        service.lastNonNilSpeedAt = nil
+        service.currentSpeed = nil
+
+        let moving = CLLocation(
+            coordinate: CLLocationCoordinate2D(latitude: 0, longitude: 0),
+            altitude: 0,
+            horizontalAccuracy: 5,
+            verticalAccuracy: 5,
+            course: 0,
+            speed: 15, // m/s → 54 km/h after * 3.6 in the delegate
+            timestamp: now
+        )
+        service.locationManager(CLLocationManager(),
+                                didUpdateLocations: [moving])
+
+        XCTAssertTrue(service.carConnected,
+            "Speed appearing must auto-flip carConnected to true")
+        XCTAssertNotNil(service.lastNonNilSpeedAt,
+            "Speed appearing must record lastNonNilSpeedAt")
     }
 
     // MARK: - Permission path tightening (gap 9)

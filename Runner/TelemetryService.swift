@@ -187,10 +187,27 @@ extension Notification.Name {
 
     private var lastWasConnected: Bool = false
 
+    /// Wall-clock instant of the most recent GPS fix whose speed was
+    /// `>= 0`. The auto-detect heuristic uses this to decide whether
+    /// the user has been stationary long enough that the "Car link"
+    /// status should auto-flip to false — see `snapshotAndSave`.
+    /// `nil` means "we haven't seen a valid speed yet this session."
+    ///
+    /// Internal (not `private`) so tests using `@testable import
+    /// Runner` can drive the heuristic deterministically by injecting
+    /// a specific `lastMovementDate` value.
+    var lastNonNilSpeedAt: Date? = nil
+
     /// Whether the phone currently considers itself connected to a car
     /// (CarPlay, Bluetooth, or USB). Surfaced honestly to widgets via
     /// `snapshotAndSave`. Mutable so the Settings screen toggle and the
     /// App Intents "Switch Slot" intent can affect what widgets show.
+    ///
+    /// The auto-detect heuristic writes this too: a fresh valid
+    /// GPS speed flips it to `true` (user is moving → driving), and
+    /// 5 minutes of no valid speed flips it to `false` (user stopped).
+    /// The Settings toggle can override at any time; the heuristic
+    /// simply re-applies on the next speed update or heartbeat.
     var carConnected: Bool = false
 
     private let suiteName = AppGroupContract.suiteName
@@ -227,6 +244,7 @@ extension Notification.Name {
     func resetPersistenceState() {
         lastPersistenceDate = nil
         currentSpeed = nil
+        lastNonNilSpeedAt = nil
     }
 
     private static func configureShared(_ service: TelemetryService) {
@@ -347,6 +365,21 @@ extension Notification.Name {
             currentSpeed = location.speed * 3.6
         } else {
             currentSpeed = nil
+        }
+        // **Auto-detect "car linked" from GPS movement.** A fresh
+        // valid speed means the user is moving (typically driving) —
+        // flip `carConnected` to true so the Dashboard reflects what
+        // the user is actually doing, not just whatever the Settings
+        // toggle last said. Without CarPlay / Bluetooth entitlements
+        // we have no way to know if a cable is plugged in, but we
+        // CAN observe motion, which is the more useful signal for a
+        // driving-mode widget. The user's manual toggle is respected
+        // momentarily but re-applies on the next speed update.
+        if currentSpeed != nil {
+            lastNonNilSpeedAt = Date()
+            if !carConnected {
+                carConnected = true
+            }
         }
         // **Foreground UI keeps feeling live.** Every real speed
         // change triggers a notification so SwiftUI re-renders. This
@@ -629,6 +662,24 @@ extension Notification.Name {
             ?? (device.batteryState == .charging
                 || device.batteryState == .full)
         let resolvedCarConnected = connectionOverride ?? carConnected
+
+        // **Auto-detect "car unlinked" from sustained no-movement.**
+        // If the user was moving (carConnected was auto-flipped true)
+        // and we haven't seen a valid GPS speed for >5 minutes,
+        // assume they've stopped driving and flip back to false.
+        // This addresses the user complaint that "Car link" stays
+        // linked after they exit the car — without CarPlay
+        // entitlements we can't observe the cable unplug, but we
+        // CAN observe that the phone stopped reporting motion.
+        //
+        // The 5-minute window avoids spurious flips when the user
+        // is briefly stationary (red light, pull over, etc.) —
+        // GPS speed briefly goes nil but resumes within seconds.
+        if carConnected,
+           let lastMove = lastNonNilSpeedAt,
+           now.timeIntervalSince(lastMove) > 300 {
+            carConnected = false
+        }
 
         struct Snapshot: Codable {
             let carConnected: Bool

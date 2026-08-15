@@ -2923,6 +2923,132 @@ func testActiveSlotKeyContractIsStable() {
             "must flip carConnected off after 5+ min with no GPS evidence")
     }
 
+    /// Source-text regression: the old bug captured a `resolvedCarConnected`
+    /// local BEFORE the auto-flip ran, then fed that stale local into
+    /// both the policy and the persisted snapshot. Lock in the
+    /// structural fix: no `resolvedCarConnected` declaration may exist
+    /// in `persistTelemetryIfMeaningful`, and both the policy call and
+    /// the `Snapshot(...)` initializer must reference the in-memory
+    /// `carConnected` directly (post-flip).
+    func testPersistTelemetryUsesPostFlipCarConnected() throws {
+        let repoRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let serviceURL = repoRoot.appendingPathComponent("Runner/TelemetryService.swift")
+        let code = stripSwiftComments(try String(contentsOf: serviceURL, encoding: .utf8))
+
+        guard let range = code.range(of: "func persistTelemetryIfMeaningful"),
+              let endRange = code.range(of: "func ", range: range.upperBound..<code.endIndex) else {
+            XCTFail("Could not locate persistTelemetryIfMeaningful in TelemetryService.swift")
+            return
+        }
+        let body = String(code[range.lowerBound..<endRange.lowerBound])
+
+        // The buggy pre-capture pattern must not exist.
+        XCTAssertFalse(body.contains("let resolvedCarConnected"),
+            "persistTelemetryIfMeaningful must not capture `resolvedCarConnected` " +
+            "BEFORE the auto-flip. Capture was the root cause of the widget staying " +
+            "pinned to 'car linked' after the user unplugged from CarPlay.")
+
+        // The auto-flip block must reference the `carConnected` field
+        // (i.e. `if carConnected { ... carConnected = false }`), so the
+        // structural shape is preserved.
+        XCTAssertTrue(body.contains("carConnected = false"),
+            "persistTelemetryIfMeaningful must still contain the auto-flip-to-false " +
+            "path that keeps the heuristic functional.")
+    }
+
+    /// Regression: when the in-memory `carConnected` value auto-flips
+    /// inside `snapshotAndSave`, the App Group snapshot written to
+    /// disk must reflect the POST-flip value. The widget extension
+    /// reads its state from that snapshot, so writing the PRE-flip
+    /// value would pin the widget to "car linked" forever even after
+    /// the user unplugged from CarPlay.
+    ///
+    /// A previous version of `persistTelemetryIfMeaningful` captured
+    /// `let resolvedCarConnected = connectionOverride ?? carConnected`
+    /// BEFORE the auto-flip block ran, then passed that stale value to
+    /// both the policy and the `Snapshot(...)` initializer. The in-memory
+    /// state flipped correctly, but the App Group blob stayed pinned to
+    /// the pre-flip value — the widget kept showing "car linked".
+    ///
+    /// This test sets up the exact preconditions, calls the production
+    /// entry point, decodes the persisted snapshot back, and asserts
+    /// that `carConnected == false` in the persisted blob.
+    func testAutoFlipPersistsPostFlipCarConnectedToAppGroup() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+        let defaults = telemetryTestDefaults()
+
+        // Preconditions that mirror AppStore.init seed: carConnected
+        // starts true, no movement has ever been recorded (simulator /
+        // no GPS), service launched 6 min ago.
+        service.carConnected = true
+        service.lastNonNilSpeedAt = nil
+        service.serviceStartedAt = now.addingTimeInterval(-360) // 6 min ago
+        service.currentSpeed = nil
+
+        // Drive the production heartbeat entry point that AppStore
+        // invokes every 60s. The auto-flip must run BEFORE the
+        // snapshot is written, so the App Group blob carries the
+        // post-flip `carConnected: false`.
+        service.snapshotAndSave()
+
+        let persisted = decodeSnapshot(from: defaults)
+        XCTAssertNotNil(persisted,
+            "Auto-flip scenario must still produce a persisted snapshot")
+        XCTAssertEqual(persisted?.carConnected, false,
+            "App Group snapshot must reflect the POST-flip carConnected=false. " +
+            "If the widget keeps showing 'car linked' after unplug, this assertion " +
+            "is failing — the snapshot is using a stale value captured before the " +
+            "auto-flip modified the in-memory state.")
+    }
+
+    /// Companion to the above for the inverse direction: when
+    /// `carConnected` is true and we see fresh speed, the persisted
+    /// snapshot must carry `carConnected: true` (the auto-flip-on
+    /// path also must not be lost between in-memory state and
+    /// persisted blob).
+    func testAutoFlipOnPersistsPostFlipCarConnectedToAppGroup() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+        let defaults = telemetryTestDefaults()
+
+        // Start with carConnected=false (never seeded true); no
+        // movement recorded yet.
+        service.carConnected = false
+        service.lastNonNilSpeedAt = nil
+        service.currentSpeed = nil
+
+        // Inject a fresh, above-threshold speed sample via the
+        // location delegate (the auto-flip-on path lives there).
+        let moving = CLLocation(
+            coordinate: CLLocationCoordinate2D(latitude: 0, longitude: 0),
+            altitude: 0,
+            horizontalAccuracy: 5,
+            verticalAccuracy: 5,
+            course: 0,
+            speed: 15, // m/s → 54 km/h after * 3.6 in the delegate
+            timestamp: now
+        )
+        service.locationManager(CLLocationManager(),
+                                didUpdateLocations: [moving])
+
+        // Then drive the production heartbeat so the App Group blob
+        // gets the new value written.
+        service.snapshotAndSave()
+
+        XCTAssertTrue(service.carConnected,
+            "In-memory state must auto-flip to true after a real speed sample")
+
+        let persisted = decodeSnapshot(from: defaults)
+        XCTAssertEqual(persisted?.carConnected, true,
+            "App Group snapshot must reflect the POST-flip carConnected=true. " +
+            "The previous code captured the pre-flip value into the persisted blob.")
+    }
+
     // MARK: - Permission path tightening (gap 9)
 
     /// `startMonitoring` must NEVER present a permission prompt.

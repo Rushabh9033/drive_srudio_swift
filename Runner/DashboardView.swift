@@ -224,13 +224,6 @@ struct DashboardView: View {
                                   label: "Battery reporting", value: batteryValueText(for: store))
                         Divider().background(DriveColors.border).padding(.vertical, 12)
                         StatusRow(
-                            icon: TelemetryService.shared.carConnected ? "checkmark.circle" : "circle.dashed",
-                            iconColor: TelemetryService.shared.carConnected ? DriveColors.success : DriveColors.warning,
-                            label: "Car link",
-                            value: connectionStatusText(for: store)
-                        )
-                        Divider().background(DriveColors.border).padding(.vertical, 12)
-                        StatusRow(
                             icon: "checkmark.circle",
                             iconColor: store.slots.compactMap({$0}).isEmpty ? DriveColors.warning : DriveColors.success,
                             label: "WidgetKit sync",
@@ -344,16 +337,10 @@ private func batteryProgress(for store: AppStore) -> Double {
 // MARK: - Truthful status helpers
 //
 // The dashboard previously hardcoded "car linked · GPS speed available"
-// regardless of state. This helper surfaces each claim only when the
-// underlying signal is actually true.
-@MainActor
-private func connectionStatusText(for store: AppStore) -> String {
-    if TelemetryService.shared.carConnected {
-        return "car linked"
-    }
-    return "car not linked"
-}
-
+// regardless of state. That helper was removed when the Car link row
+// was dropped from the home screen — the car-link state is now
+// exclusively surfaced through the live widget itself, which reads the
+// auto-detected value straight from the App Group snapshot.
 @MainActor
 private func gpsStatusText() -> String {
     switch CLLocationManager.authorizationStatus() {
@@ -456,7 +443,7 @@ private func batterySummary(for store: AppStore) -> String {
         battery = "—"
     }
     let charging = store.liveIsCharging ? "charging · " : ""
-    return "Battery \(battery) · \(charging)\(connectionStatusText(for: store)) · \(gpsStatusText())"
+    return "Battery \(battery) · \(charging)\(gpsStatusText())"
 }
 
 // MARK: - Slot Cell

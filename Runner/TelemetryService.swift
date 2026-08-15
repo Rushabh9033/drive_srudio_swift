@@ -692,7 +692,16 @@ extension Notification.Name {
         let isCharging = chargingOverride
             ?? (device.batteryState == .charging
                 || device.batteryState == .full)
-        let resolvedCarConnected = connectionOverride ?? carConnected
+        // Apply the test-only override to the in-memory state BEFORE
+        // the auto-flip runs. Production never passes a
+        // `connectionOverride`, so this is a no-op in production.
+        // Tests pass `true` to seed specific scenarios; the auto-flip
+        // still runs on top of the override so an override that
+        // conflicts with the elapsed-time countdown still gets
+        // corrected.
+        if let override = connectionOverride {
+            carConnected = override
+        }
 
         // **Auto-detect "car unlinked" from sustained no-movement.**
         // Two cases flip `carConnected` to false:
@@ -710,6 +719,11 @@ extension Notification.Name {
         //      falling back to `serviceStartedAt` ensures the
         //      `@AppStorage` seed doesn't pin `carConnected = true`
         //      forever on devices with no real GPS.
+        //
+        // The auto-flip MUST run before the policy + snapshot write
+        // (see below) so the persisted snapshot reflects the new
+        // value — otherwise the App Group blob stays pinned to the
+        // pre-flip value and the widget renders "car linked" forever.
         if carConnected {
             let lastReference: Date = lastNonNilSpeedAt ?? serviceStartedAt
             if now.timeIntervalSince(lastReference) > 300 {
@@ -746,12 +760,17 @@ extension Notification.Name {
 
         // Pure decision: should we persist, which reload kind, and
         // the snapshot timestamp (injected clock value).
+        // Pass the POST-auto-flip `carConnected` so the policy sees
+        // the new value when deciding whether the connection state
+        // changed (and therefore whether to fire
+        // `.connectionStateChange` reloads and mark the snapshot
+        // shape as different from the previous write).
         let decision = TelemetryPersistencePolicy.evaluate(
             now: now,
             currentSpeed: currentSpeed,
             batteryPercent: batteryPercent,
             isCharging: isCharging,
-            carConnected: resolvedCarConnected,
+            carConnected: carConnected,
             previousSnapshot: prevShape,
             lastPersistenceDate: lastPersistenceDate,
             heartbeatInterval: Self.heartbeatPersistenceInterval,
@@ -759,8 +778,15 @@ extension Notification.Name {
         )
         guard decision.shouldPersist else { return }
 
+        // Use the POST-auto-flip `carConnected` so the persisted
+        // App Group snapshot reflects the new value. The previous
+        // code captured `resolvedCarConnected = connectionOverride
+        // ?? carConnected` BEFORE the auto-flip ran, so the snapshot
+        // stayed pinned to the pre-flip value even when the in-memory
+        // state had correctly flipped — and the widget kept showing
+        // "car linked" after the user unplugged from CarPlay.
         let telemetry = Snapshot(
-            carConnected: resolvedCarConnected,
+            carConnected: carConnected,
             batteryPercent: batteryPercent,
             isCharging: isCharging,
             speed: currentSpeed,

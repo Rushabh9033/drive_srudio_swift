@@ -141,6 +141,44 @@ enum WidgetDisplayMath {
         return max(0.0, min(1.0, kmh / scale))
     }
 
+    // MARK: - Unit-aware speed display
+
+    /// App Group key for the user's selected speed unit. Mirrored by
+    /// `SettingsScreenView`'s `@AppStorage` so the widget reads the
+    /// same value the host last wrote. Default `kmh` matches the
+    /// legacy km/h-only renderers.
+    static let speedUnitPrefKey = "settings.speedUnit"
+
+    /// User's selected speed unit: `"kmh"` (default) or `"mph"`.
+    /// Reads from the App Group suite so it stays in sync with the
+    /// host app's Settings toggle.
+    static func speedUnit() -> String {
+        let raw = UserDefaults(suiteName: AppGroupContract.suiteName)?
+            .string(forKey: speedUnitPrefKey)
+        return (raw == "mph") ? "mph" : "kmh"
+    }
+
+    /// Speed text with the user's selected unit suffix, e.g. `"72 km/h"`
+    /// or `"45 mph"`. `nil` renders as `"—"` (no unit suffix to avoid
+    /// `"— km/h"` clutter).
+    static func formattedSpeed(kmh: Double?) -> String {
+        guard let kmh else { return "—" }
+        let unit = speedUnit()
+        if unit == "mph" {
+            // Convert km/h → mph. 1 km/h ≈ 0.621371 mph.
+            let mph = kmh * 0.621371
+            return "\(Int(mph.rounded())) mph"
+        }
+        return "\(Int(kmh)) km/h"
+    }
+
+    /// Standalone unit suffix for renderers that print the integer
+    /// in one Text and the unit label in a separate Text (so the unit
+    /// can use a different font/weight/color than the number).
+    static func speedUnitSuffix() -> String {
+        speedUnit() == "mph" ? "mph" : "km/h"
+    }
+
     /// Vehicle label used by production renderers. Returns `nil` when
     /// no vehicle is selected — caller must render an unavailable
     /// marker; we never substitute `"Tesla Model 3"` or any other

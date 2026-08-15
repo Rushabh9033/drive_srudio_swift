@@ -186,9 +186,9 @@ struct VortexDriveView: View {
                     VStack(spacing: 2) {
                         Text(e.date.timeString).font(.system(size: s*0.14, weight: .black, design: .rounded)).foregroundColor(.white)
                         if let kmh = e.speed {
-                            Text("\(Int(kmh)) km/h").font(.system(size: s*0.07, weight: .bold)).foregroundColor(Color(hex: "F97316"))
+                            Text(WidgetDisplayMath.formattedSpeed(kmh: kmh)).font(.system(size: s*0.07, weight: .bold)).foregroundColor(Color(hex: "F97316"))
                         } else {
-                            Text("-- km/h").font(.system(size: s*0.07, weight: .bold)).foregroundColor(Color(hex: "F97316"))
+                            Text("--").font(.system(size: s*0.07, weight: .bold)).foregroundColor(Color(hex: "F97316"))
                         }
                     }.position(x: cx, y: cy)
                 }
@@ -224,7 +224,7 @@ struct GridHUDView: View {
                             } else {
                                 Text("--").font(.system(size: 26, weight: .black, design: .rounded)).foregroundColor(Color(hex: "00F0FF"))
                             }
-                            Text("km/h").font(.system(size: 10)).foregroundColor((Color(hex: "00F0FF")).opacity(0.5))
+                            Text(WidgetDisplayMath.speedUnitSuffix()).font(.system(size: 10)).foregroundColor((Color(hex: "00F0FF")).opacity(0.5))
                         }
                     }
                     // Battery tile
@@ -321,9 +321,9 @@ struct CockpitView: View {
                     ZStack {
                         RoundedRectangle(cornerRadius: 8).fill(Color(hex: "1A0A0A"))
                         if let kmh = e.speed {
-                            Text("\(Int(kmh)) km/h").font(.system(size: 13, weight: .bold, design: .rounded)).foregroundColor(Color(hex: "FF6B35"))
+                            Text(WidgetDisplayMath.formattedSpeed(kmh: kmh)).font(.system(size: 13, weight: .bold, design: .rounded)).foregroundColor(Color(hex: "FF6B35"))
                         } else {
-                            Text("-- km/h").font(.system(size: 13, weight: .bold, design: .rounded)).foregroundColor(Color(hex: "FF6B35"))
+                            Text("--").font(.system(size: 13, weight: .bold, design: .rounded)).foregroundColor(Color(hex: "FF6B35"))
                         }
                     }.frame(width: 80, height: 26).position(x: cx, y: cy+R+18)
                 }
@@ -548,9 +548,9 @@ struct NeonStripView: View {
                 ZStack {
                     Color(hex: "111111")
                     if let kmh = e.speed {
-                        Text("\(Int(kmh)) km/h · speed").font(.system(size: 9, weight: .bold)).foregroundColor(Color(hex: "FF2D6B"))
+                        Text("\(WidgetDisplayMath.formattedSpeed(kmh: kmh)) · speed").font(.system(size: 9, weight: .bold)).foregroundColor(Color(hex: "FF2D6B"))
                     } else {
-                        Text("-- km/h · speed").font(.system(size: 9, weight: .bold)).foregroundColor(Color(hex: "FF2D6B"))
+                        Text("-- · speed").font(.system(size: 9, weight: .bold)).foregroundColor(Color(hex: "FF2D6B"))
                     }
                 }.frame(height: 18).clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 22, bottomTrailingRadius: 22))
             }

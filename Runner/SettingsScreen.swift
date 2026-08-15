@@ -1,18 +1,50 @@
 import SwiftUI
 
+// MARK: - App Group UserDefaults (for widget-shared preferences)
+//
+// Settings that must be visible to the widget extension (speed unit)
+// live in the App Group suite rather than the standard suite. Sound
+// triggers already use the App Group suite (see `SoundsScreen.swift`)
+// so the Settings screen reads them from the same place.
+private let settingsAppGroupStore = UserDefaults(suiteName: "group.com.drivestudio.shared")
+
+/// Section header style — uppercase mono label with horizontal padding
+/// matching the card width below it. Inlined into each section header
+/// to avoid an escaping-closure capture issue when wrapping content.
+private func sectionHeader(_ title: String) -> some View {
+    MonoLabel(text: title.uppercased())
+        .padding(.horizontal, 20)
+}
+
 // MARK: - Settings Screen
 struct SettingsScreenView: View {
     @EnvironmentObject var store: AppStore
-    @AppStorage(AppStore.carConnectedPrefKey) private var carConnected = true
     @State private var showClearConfirm = false
     @State private var showAutomationGuide = false
     @State private var alertMessage = ""
     @State private var showAlertMessage = false
     @State private var selectedLegalType: LegalContentType? = nil
 
+    // MARK: - Sound triggers (App Group)
+    //
+    // Reads the same `trigger_*` keys that `SoundsScreen.swift` writes
+    // (`group.com.drivestudio.shared` suite). Defaults match the
+    // bundled fallbacks in `TelemetryService.fallbackSound(for:)`.
+    @AppStorage("trigger_Connect", store: settingsAppGroupStore) private var connectTrigger: String = "Welcome Back"
+    @AppStorage("trigger_Disconnect", store: settingsAppGroupStore) private var disconnectTrigger: String = "Goodbye"
+    @AppStorage("trigger_Reminder", store: settingsAppGroupStore) private var reminderTrigger: String = "Phone Keys Wallet"
+
+    // MARK: - Speed unit (App Group)
+    //
+    // Stored in the App Group suite so the widget extension can read
+    // the same value at render time. Default `kmh` matches today's
+    // behavior — every speed site currently renders km/h — so the
+    // change is a no-op until the user actively picks mph.
+    @AppStorage("settings.speedUnit", store: settingsAppGroupStore) private var speedUnit: String = "kmh"
+
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 14) {
 
                 // Header
                 Text("Settings")
@@ -21,77 +53,71 @@ struct SettingsScreenView: View {
                     .foregroundColor(DriveColors.foreground)
                     .padding(.horizontal, 20)
                     .padding(.top, 20)
-                    .padding(.bottom, 8)
+                    .padding(.bottom, 4)
 
-                // Card 1: Telemetry Status
-                SurfaceCard {
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                MonoLabel(text: "This iPhone")
-                                HStack(spacing: 8) {
-                                    Image(systemName: "iphone")
-                                        .font(.system(size: 16))
-                                        .foregroundColor(DriveColors.primary)
-                                    Text("Live telemetry enabled")
-                                        .font(.system(size: 14, weight: .semibold))
-                                        .foregroundColor(DriveColors.foreground)
-                                }
-                            }
-                            Spacer()
-                            DrivePill(label: "Live", selected: true)
-                        }
-                        Text("Battery level, charging state, and GPS speed are read in real time from this device and written to your widgets.")
-                            .font(.system(size: 12))
-                            .lineSpacing(5)
-                            .foregroundColor(DriveColors.mutedFg)
+                // Driving
+                sectionHeader("Driving")
+                SurfaceCard(padding: .init(top: 16, leading: 16, bottom: 16, trailing: 16)) {
+                    VStack(spacing: 0) {
+                        statusRow(
+                            icon: "iphone",
+                            iconColor: DriveColors.primary,
+                            title: "Live telemetry",
+                            subtitle: "Battery, charging state, and GPS speed are read in real time from this device and written to your widgets.",
+                            trailing: AnyView(DrivePill(label: "Live", selected: true))
+                        )
+                        divider()
+                        statusRow(
+                            icon: "location.viewfinder",
+                            iconColor: DriveColors.success,
+                            title: "Auto-detect driving",
+                            subtitle: "Car link status is set automatically from GPS motion: linked above 7 km/h, unlinked after 5 minutes of no movement. No manual override.",
+                            trailing: nil
+                        )
                     }
                 }
                 .padding(.horizontal, 20)
 
-                // Card 2: Background Removal
-                SurfaceCard {
-                    HStack(spacing: 8) {
-                        Image(systemName: "checkmark.shield.fill")
-                            .font(.system(size: 16))
-                            .foregroundColor(DriveColors.success)
-                        Text("Background removal")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(DriveColors.foreground)
-                    }
-                    Text("Vehicle images are automatically processed to remove backgrounds for a clean widget look.")
-                        .font(.system(size: 12))
-                        .lineSpacing(5)
-                        .foregroundColor(DriveColors.mutedFg)
-                        .padding(.top, 8)
-                }
-                .padding(.horizontal, 20)
-
-                // Card 3: Device Sync
-                SurfaceCard {
-                    VStack(alignment: .leading, spacing: 0) {
-                        MonoLabel(text: "Device sync").padding(.bottom, 8)
-
-                        ToggleRow(label: "Car connected",
-                                  hint: "Manual override for the car link state",
-                                  isOn: $carConnected)
+                // Display
+                sectionHeader("Display")
+                SurfaceCard(padding: .init(top: 16, leading: 16, bottom: 16, trailing: 16)) {
+                    VStack(spacing: 0) {
+                        speedUnitRow
+                        divider()
+                        infoRow(
+                            icon: "checkmark.shield.fill",
+                            iconColor: DriveColors.success,
+                            title: "Background removal",
+                            subtitle: "Uploaded vehicle images are automatically processed to remove backgrounds for a clean widget look."
+                        )
                     }
                 }
                 .padding(.horizontal, 20)
 
+                // Sounds
+                sectionHeader("Sounds")
+                SurfaceCard(padding: .init(top: 16, leading: 16, bottom: 16, trailing: 16)) {
+                    VStack(spacing: 0) {
+                        triggerRow(icon: "link.circle.fill", iconColor: DriveColors.primary, label: "Connect", assigned: connectTrigger)
+                        divider()
+                        triggerRow(icon: "power", iconColor: DriveColors.destructive, label: "Disconnect", assigned: disconnectTrigger)
+                        divider()
+                        triggerRow(icon: "bell.fill", iconColor: Color.orange, label: "Reminder", assigned: reminderTrigger)
+                    }
+                }
+                .padding(.horizontal, 20)
 
-
-                // Card 4: Local Data
-                SurfaceCard {
-                    VStack(alignment: .leading, spacing: 0) {
-                        MonoLabel(text: "Local data")
+                // Local Data
+                sectionHeader("Local data")
+                SurfaceCard(padding: .init(top: 16, leading: 16, bottom: 16, trailing: 16)) {
+                    VStack(spacing: 0) {
                         Text("Last local sync: just now")
                             .font(.system(size: 12))
                             .foregroundColor(DriveColors.mutedFg)
-                            .padding(.top, 4)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.bottom, 8)
 
-                        Button(action: {
+                        localDataButton("Export drafts to clipboard") {
                             if let data = try? JSONEncoder().encode(store.drafts),
                                let json = String(data: data, encoding: .utf8) {
                                 UIPasteboard.general.string = json
@@ -101,16 +127,9 @@ struct SettingsScreenView: View {
                                 alertMessage = "No drafts available to export."
                                 showAlertMessage = true
                             }
-                        }) {
-                            Text("Export drafts to clipboard")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(DriveColors.foreground)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.vertical, 12)
                         }
-                        Divider().background(DriveColors.border)
-
-                        Button(action: {
+                        divider()
+                        localDataButton("Import drafts from clipboard") {
                             if let json = UIPasteboard.general.string,
                                let data = json.data(using: .utf8),
                                let importedDrafts = try? JSONDecoder().decode([Draft].self, from: data) {
@@ -123,41 +142,20 @@ struct SettingsScreenView: View {
                                 alertMessage = "Clipboard does not contain valid draft JSON."
                                 showAlertMessage = true
                             }
-                        }) {
-                            Text("Import drafts from clipboard")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(DriveColors.foreground)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.vertical, 12)
                         }
-                        Divider().background(DriveColors.border)
-
-                        Button(action: {
+                        divider()
+                        localDataButton("Clear custom vehicle image") {
                             store.clearCustomVehicleImage()
                             alertMessage = "Custom vehicle image cleared!"
                             showAlertMessage = true
-                        }) {
-                            Text("Clear custom vehicle image")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(DriveColors.foreground)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.vertical, 12)
                         }
-                        Divider().background(DriveColors.border)
-
-                        Button(action: {
+                        divider()
+                        localDataButton("Reset introduction") {
                             UserDefaults.standard.set(false, forKey: "has_seen_intro")
                             alertMessage = "Introduction reset!"
                             showAlertMessage = true
-                        }) {
-                            Text("Reset introduction")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(DriveColors.foreground)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.vertical, 12)
                         }
-                        Divider().background(DriveColors.border)
-
+                        divider()
                         Button(action: { showClearConfirm = true }) {
                             Text("Clear drafts")
                                 .font(.system(size: 14, weight: .semibold))
@@ -169,46 +167,26 @@ struct SettingsScreenView: View {
                 }
                 .padding(.horizontal, 20)
 
-                // Card 5: About & Legal
-                SurfaceCard {
-                    VStack(alignment: .leading, spacing: 0) {
-                        MonoLabel(text: "About & legal")
+                // About & Legal
+                sectionHeader("About & legal")
+                SurfaceCard(padding: .init(top: 16, leading: 16, bottom: 16, trailing: 16)) {
+                    VStack(spacing: 0) {
                         Text("Drive Studio · Version 1.0.0")
                             .font(.system(size: 12))
                             .foregroundColor(DriveColors.mutedFg)
-                            .padding(.top, 4)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.bottom, 12)
 
-                        Button(action: {
+                        localDataButton("Privacy Policy") {
                             selectedLegalType = .privacyPolicy
-                        }) {
-                            Text("Privacy Policy")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(DriveColors.foreground)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.vertical, 12)
                         }
-                        Divider().background(DriveColors.border)
-
-                        Button(action: {
+                        divider()
+                        localDataButton("Terms of Use") {
                             selectedLegalType = .termsOfUse
-                        }) {
-                            Text("Terms of Use")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(DriveColors.foreground)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.vertical, 12)
                         }
-                        Divider().background(DriveColors.border)
-
-                        Button(action: {
+                        divider()
+                        localDataButton("Setup guide") {
                             showAutomationGuide = true
-                        }) {
-                            Text("Setup guide")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(DriveColors.foreground)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.vertical, 12)
                         }
                     }
                 }
@@ -218,12 +196,6 @@ struct SettingsScreenView: View {
             }
         }
         .background(DriveColors.background)
-        .onChange(of: carConnected) { newValue in
-            // Push the user's manual car-link state into TelemetryService so the
-            // next snapshotAndSave() reflects it on the widget timeline.
-            TelemetryService.shared.carConnected = newValue
-            TelemetryService.shared.snapshotAndSave()
-        }
         .alert("Clear all drafts?", isPresented: $showClearConfirm) {
             Button("Cancel", role: .cancel) {}
             Button("Clear", role: .destructive) {
@@ -244,9 +216,123 @@ struct SettingsScreenView: View {
             LegalSheetView(contentType: legalType)
         }
     }
+
+    // MARK: - Row builders
+
+    private func statusRow(icon: String, iconColor: Color, title: String, subtitle: String, trailing: AnyView?) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(iconColor)
+                .frame(width: 22)
+                .padding(.top, 2)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(DriveColors.foreground)
+                Text(subtitle)
+                    .font(.system(size: 12))
+                    .lineSpacing(4)
+                    .foregroundColor(DriveColors.mutedFg)
+            }
+            Spacer(minLength: 8)
+            if let trailing = trailing {
+                trailing
+            }
+        }
+    }
+
+    private func infoRow(icon: String, iconColor: Color, title: String, subtitle: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(iconColor)
+                .frame(width: 22)
+                .padding(.top, 2)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(DriveColors.foreground)
+                Text(subtitle)
+                    .font(.system(size: 12))
+                    .lineSpacing(4)
+                    .foregroundColor(DriveColors.mutedFg)
+            }
+            Spacer(minLength: 8)
+        }
+    }
+
+    private func localDataButton(_ label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(DriveColors.foreground)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.vertical, 12)
+        }
+    }
+
+    private var speedUnitRow: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "speedometer")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(DriveColors.primary)
+                .frame(width: 22)
+                .padding(.top, 6)
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Speed unit")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(DriveColors.foreground)
+                Picker("Speed unit", selection: $speedUnit) {
+                    Text("km/h").tag("kmh")
+                    Text("mph").tag("mph")
+                }
+                .pickerStyle(.segmented)
+                .frame(maxWidth: 220)
+            }
+            Spacer(minLength: 8)
+        }
+    }
+
+    private func triggerRow(icon: String, iconColor: Color, label: String, assigned: String) -> some View {
+        HStack(alignment: .center, spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(iconColor)
+                .frame(width: 22)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(DriveColors.foreground)
+                Text(displayName(for: assigned))
+                    .font(.system(size: 12))
+                    .foregroundColor(displayColor(for: assigned))
+            }
+            Spacer(minLength: 8)
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func displayName(for value: String) -> String {
+        if value.isEmpty || value == "none" { return "Not assigned" }
+        return value
+    }
+
+    private func displayColor(for value: String) -> Color {
+        if value.isEmpty || value == "none" { return DriveColors.mutedFg }
+        return DriveColors.primary
+    }
+
+    private func divider() -> some View {
+        Divider().background(DriveColors.border)
+    }
 }
 
 // MARK: - Toggle Row
+//
+// Kept here because some sheets may still reference it; no longer used
+// by `SettingsScreenView` after the manual `carConnected` toggle was
+// removed (the car-link state is auto-detected from GPS).
 struct ToggleRow: View {
     let label: String
     let hint: String?

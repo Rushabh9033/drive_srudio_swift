@@ -219,13 +219,18 @@ struct SettingsScreenView: View {
 
     // MARK: - Row builders
 
+    // All rows share the same icon column (28pt, center-aligned at the
+    // top of the row) and the same HStack spacing so multi-line content
+    // rows don't visually drift apart when stacked in a single card.
+    private let iconColumnWidth: CGFloat = 28
+    private let rowSpacing: CGFloat = 14
+
     private func statusRow(icon: String, iconColor: Color, title: String, subtitle: String, trailing: AnyView?) -> some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: rowSpacing) {
             Image(systemName: icon)
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(iconColor)
-                .frame(width: 22)
-                .padding(.top, 2)
+                .frame(width: iconColumnWidth, alignment: .center)
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.system(size: 14, weight: .semibold))
@@ -243,12 +248,11 @@ struct SettingsScreenView: View {
     }
 
     private func infoRow(icon: String, iconColor: Color, title: String, subtitle: String) -> some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: rowSpacing) {
             Image(systemName: icon)
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(iconColor)
-                .frame(width: 22)
-                .padding(.top, 2)
+                .frame(width: iconColumnWidth, alignment: .center)
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.system(size: 14, weight: .semibold))
@@ -273,13 +277,12 @@ struct SettingsScreenView: View {
     }
 
     private var speedUnitRow: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: rowSpacing) {
             Image(systemName: "speedometer")
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(DriveColors.primary)
-                .frame(width: 22)
-                .padding(.top, 6)
-            VStack(alignment: .leading, spacing: 6) {
+                .frame(width: iconColumnWidth, alignment: .center)
+            VStack(alignment: .leading, spacing: 8) {
                 Text("Speed unit")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(DriveColors.foreground)
@@ -288,18 +291,17 @@ struct SettingsScreenView: View {
                     Text("mph").tag("mph")
                 }
                 .pickerStyle(.segmented)
-                .frame(maxWidth: 220)
             }
             Spacer(minLength: 8)
         }
     }
 
     private func triggerRow(icon: String, iconColor: Color, label: String, assigned: String) -> some View {
-        HStack(alignment: .center, spacing: 12) {
+        HStack(alignment: .center, spacing: rowSpacing) {
             Image(systemName: icon)
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(iconColor)
-                .frame(width: 22)
+                .frame(width: iconColumnWidth, alignment: .center)
             VStack(alignment: .leading, spacing: 2) {
                 Text(label)
                     .font(.system(size: 14, weight: .semibold))
@@ -310,7 +312,6 @@ struct SettingsScreenView: View {
             }
             Spacer(minLength: 8)
         }
-        .padding(.vertical, 4)
     }
 
     private func displayName(for value: String) -> String {

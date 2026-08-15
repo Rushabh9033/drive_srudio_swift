@@ -27,6 +27,16 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
+		<!-- `location` enables CLLocationManager to keep delivering
+		     GPS fixes while the app is in the background. The host
+		     app uses those fixes to update the App Group telemetry
+		     snapshot and request widget reloads so the home-screen
+		     speedometer reflects real-time speed without the user
+		     opening the app. Apple requires both this entry AND a
+		     matching always-authorization purpose string (see below)
+		     AND `allowsBackgroundLocationUpdates = true` on the
+		     location manager. -->
+		<string>location</string>
 	</array>
 	<!-- BGTaskSchedulerPermittedIdentifiers intentionally absent.
 	The host app removed its BGAppRefreshTask implementation because
@@ -77,14 +87,25 @@
 	`EditorScreen.swift`. -->
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Drive Studio uses your location while the app is open to show live GPS speed on speedometer widgets. Speed is never invented when GPS is unavailable.</string>
-	<!-- NSLocationAlwaysAndWhenInUseUsageDescription intentionally absent.
-	The host app uses foreground-only GPS for this milestone
-	(requestWhenInUseAuthorization in TelemetryService). There is no
-	verified background-location feature today, so we do not request
-	Always authorization nor declare the matching purpose string. If
-	a future feature requires background GPS, add it back here AND
-	add the `location` UIBackgroundModes entry plus a working
-	background-update path. -->
+	<!-- Always-authorization purpose string. Required by Apple for any
+	app that calls `requestAlwaysAuthorization()`. Drive Studio now
+	declares the `location` UIBackgroundModes entry and enables
+	background GPS so the home-screen speedometer stays accurate
+	while driving without the app being open. iOS will surface this
+	string on the second-step "Always Allow" prompt. -->
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Drive Studio keeps reading GPS speed in the background while you're driving so the home-screen speedometer, Lock-Screen widget, and Dynamic Island update in real time without unlocking your phone. Background location stops automatically when you've been parked for 5 minutes. You can disable background location at any time in Settings → Drive Studio → Location.</string>
+	<!-- Live Activities: required for ActivityKit-based Dynamic Island
+	     + Lock Screen UI. Without this key, ActivityKit.start() is a
+	     no-op and ActivityConfiguration widgets never appear. -->
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<!-- Frequency API for Live Activities (iOS 16.2+): lets us declare
+	     an update budget. Set to "frequent" so the Dynamic Island can
+	     refresh every ~30s with new speed without iOS aggressively
+	     throttling — this matches Google Maps' real-time behavior. -->
+	<key>NSSupportsLiveActivitiesFrequentUpdates</key>
+	<true/>
 	<!-- Flutter / go_router deep links for drivestudio:// -->
 	<key>FlutterDeepLinkingEnabled</key>
 	<true/>

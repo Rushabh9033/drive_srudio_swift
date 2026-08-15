@@ -25,12 +25,12 @@ class RunnerTests: XCTestCase {
 
     // MARK: - Widget bundle inventory
 
-    /// The DriveStudioWidgetBundle registers exactly 22 widgets —
+    /// The DriveStudioWidgetBundle registers exactly 23 widgets —
     /// no widget was removed by this milestone. Source-text scan is
     /// the only available check; we deliberately do not instantiate
     /// `WidgetBundle.body` from a unit test (it would require a real
     /// widget host process).
-    func testAllTwentyTwoWidgetConfigurationsRemainRegistered() throws {
+    func testAllTwentyThreeWidgetConfigurationsRemainRegistered() throws {
         let bundleURL = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent() // RunnerTests/
             .deletingLastPathComponent() // repo root
@@ -910,8 +910,14 @@ class RunnerTests: XCTestCase {
             }
         }
         let totalWidgets = widgetFilesWithWrapping.map(\.count).reduce(0, +)
+        // The 22 home-screen widgets wrap content in `MinuteClockView`.
+        // The Live Activity widget (`DriveStudioLiveActivityWidget`) is
+        // an `ActivityConfiguration`, not a regular `Widget`, so it
+        // does NOT use the minute clock — ActivityKit supplies its own
+        // refresh cadence. The DriveStudioWidget bundle registers
+        // 23 widgets total; the MinuteClockView count is 22.
         XCTAssertEqual(totalWidgets, 22,
-                       "Expected 22 widgets wrapped in MinuteClockView, found \(totalWidgets) — missing files: \(widgetFilesWithoutWrapping)")
+                       "Expected 22 home-screen widgets wrapped in MinuteClockView, found \(totalWidgets) — missing files: \(widgetFilesWithoutWrapping)")
     }
 
     /// Source-text audit: the closure passed to `TimelineView(.everyMinute)`
@@ -3512,38 +3518,55 @@ func testApplyPersistedActiveSlotHonorsPersistedValue() async {
     /// Location authorization is foreground-only: `requestWhenInUseAuthorization`
     /// is the call site, and `NSLocationAlwaysAndWhenInUseUsageDescription`
     /// is absent from Info.plist.
-    func testLocationAuthIsForegroundOnly() throws {
+    func testLocationAuthAndBackgroundModeAreWiredForLiveActivities() throws {
+        // Drive Studio now supports background-GPS so the home-screen
+        // speedometer and the Dynamic Island Live Activity keep
+        // updating while the app is backgrounded. Apple requires the
+        // entry-point permission, the Always prompt, the `location`
+        // UIBackgroundModes entry, and `allowsBackgroundLocationUpdates`
+        // to all be present together. This test pins all four.
+
         let repoRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
+
+        // 1. Info.plist declares the Always-purpose string.
         let infoPlistURL = repoRoot.appendingPathComponent("Runner/Info.plist")
         let raw = try String(contentsOf: infoPlistURL, encoding: .utf8)
         let stripped = stripPlistComments(raw)
-        XCTAssertFalse(stripped.contains("NSLocationAlwaysAndWhenInUseUsageDescription"),
-            "Info.plist must not declare the Always-location purpose string when no background feature exists")
-        // Code path: ensure requestAlwaysAuthorization is NOT called anywhere
-        // in Runner, and that the When-In-Use call exists somewhere.
+        XCTAssertTrue(stripped.contains("NSLocationAlwaysAndWhenInUseUsageDescription"),
+            "Info.plist must declare NSLocationAlwaysAndWhenInUseUsageDescription for background GPS")
+
+        // 2. Info.plist declares the `location` UIBackgroundModes entry.
+        XCTAssertTrue(stripped.contains("UIBackgroundModes"),
+            "Info.plist must declare UIBackgroundModes for background GPS")
+        XCTAssertTrue(stripped.contains("<string>location</string>"),
+            "Info.plist must include `location` in UIBackgroundModes")
+
+        // 3. Runner source calls `requestAlwaysAuthorization` to upgrade
+        // from When-In-Use, and `requestWhenInUseAuthorization` for the
+        // initial prompt.
         let fm = FileManager.default
         let runnerDir = repoRoot.appendingPathComponent("Runner")
         var hasWhenInUse = false
-        var alwaysAuthorizationFiles: [String] = []
+        var hasAlways = false
+        var hasBackgroundUpdates = false
         if let it = fm.enumerator(atPath: runnerDir.path) {
             while let file = it.nextObject() as? String {
                 guard file.hasSuffix(".swift") else { continue }
                 let url = runnerDir.appendingPathComponent(file)
                 let code = stripSwiftComments(try String(contentsOf: url, encoding: .utf8))
-                if code.contains("requestAlwaysAuthorization") {
-                    alwaysAuthorizationFiles.append(file)
-                }
-                if code.contains("requestWhenInUseAuthorization") {
-                    hasWhenInUse = true
-                }
+                if code.contains("requestWhenInUseAuthorization") { hasWhenInUse = true }
+                if code.contains("requestAlwaysAuthorization") { hasAlways = true }
+                if code.contains("allowsBackgroundLocationUpdates = true") { hasBackgroundUpdates = true }
             }
         }
-        XCTAssertTrue(alwaysAuthorizationFiles.isEmpty,
-            "Runner must not call requestAlwaysAuthorization; offenders: \(alwaysAuthorizationFiles)")
         XCTAssertTrue(hasWhenInUse,
-            "Runner must call requestWhenInUseAuthorization somewhere (foreground-only GPS)")
+            "Runner must call requestWhenInUseAuthorization somewhere")
+        XCTAssertTrue(hasAlways,
+            "Runner must call requestAlwaysAuthorization to upgrade from When-In-Use")
+        XCTAssertTrue(hasBackgroundUpdates,
+            "Runner must set allowsBackgroundLocationUpdates = true on the CLLocationManager")
     }
 
     // MARK: - Custom widget image pipeline (Fixes 1–5)
@@ -4556,6 +4579,230 @@ func testApplyPersistedActiveSlotHonorsPersistedValue() async {
             XCTAssertLessThanOrEqual(visible.maxY, canvasSide,
                 "visible chrome must not extend below canvas (\(c.why))")
         }
+    }
+
+    // MARK: - LiveActivityCoordinator lifecycle
+    //
+    // The production coordinator wraps ActivityKit's `Activity.request`,
+    // `update`, and `end` and is internally gated on iOS 16.1+,
+    // `ActivityAuthorizationInfo.areActivitiesEnabled`, and above-/
+    // below-threshold speed. Tests inject the closure seams so the
+    // deterministic decision logic can be exercised without spinning
+    // up ActivityKit or touching real CLLocation.
+
+    /// Tracking closure captures request / update / end events so the
+    /// tests can assert sequencing and rate-limiting without ever
+    /// calling ActivityKit.
+    private final class LiveActivityTracker {
+        var requests: [DriveStudioActivityAttributes.ContentState] = []
+        var updates: [DriveStudioActivityAttributes.ContentState] = []
+        var ends: Int = 0
+    }
+
+    /// First fix above the start threshold requests a live activity.
+    @available(iOS 16.1, *)
+    func testLiveActivityStartsOnFirstMovingFix() {
+        let coord = LiveActivityCoordinator.shared
+        let tracker = LiveActivityTracker()
+        coord.activityRequester = { state in tracker.requests.append(state) }
+        defer {
+            coord.activityRequester = { _ in
+                Task { await LiveActivityCoordinator.shared._realRequestActivityTest() }
+            }
+        }
+
+        // Stationary snapshot — no activity yet.
+        coord._setActivityActiveForTest(false)
+        coord.telemetrySource = {
+            LiveActivityTelemetrySnapshot(speed: 0, batteryPercent: 80, isCharging: false,
+                              carConnected: true, speedUnit: "kmh")
+        }
+        coord.onTelemetryUpdate(now: Date())
+        XCTAssertEqual(tracker.requests.count, 0,
+                       "Stationary snapshot must not start an activity")
+
+        // First moving snapshot — request fires.
+        coord.telemetrySource = {
+            LiveActivityTelemetrySnapshot(speed: 8.0, batteryPercent: 80, isCharging: false,
+                              carConnected: true, speedUnit: "kmh")
+        }
+        coord.onTelemetryUpdate(now: Date())
+        XCTAssertEqual(tracker.requests.count, 1,
+                       "First moving snapshot must request a Live Activity")
+        XCTAssertEqual(tracker.requests.first?.speedKmh, 8.0)
+    }
+
+    /// `update` is rate-limited to `updateInterval`. Two calls within
+    /// the window must produce only one update — the second is
+    /// suppressed even when the speed delta is non-trivial.
+    @available(iOS 16.1, *)
+    func testLiveActivityUpdatesAreRateLimited() {
+        let coord = LiveActivityCoordinator.shared
+        let tracker = LiveActivityTracker()
+        // Pre-seed the activity as active so the coordinator takes
+        // the update path instead of the start path.
+        coord._setActivityActiveForTest(true)
+        coord._setLastUpdateAtForTest(nil)
+        coord.activityRequester = { state in tracker.requests.append(state) }
+        coord.activityUpdater = { state in
+            tracker.updates.append(state)
+            // Mirror the production side effect of setting
+            // `lastUpdateAt` to the call's wall-clock timestamp so
+            // the rate-limit gate can fire on subsequent samples.
+            coord._setLastUpdateAtForTest(Date())
+        }
+        coord.activityEnder = { tracker.ends += 1 }
+        defer {
+            coord.activityRequester = { _ in
+                Task { await LiveActivityCoordinator.shared._realRequestActivityTest() }
+            }
+            coord.activityUpdater = { _ in
+                Task { await LiveActivityCoordinator.shared._realUpdateActivityTest() }
+            }
+            coord.activityEnder = {
+                Task { await LiveActivityCoordinator.shared._realEndActivityTest() }
+            }
+        }
+
+        let t0 = Date(timeIntervalSince1970: 1_726_000_000)
+        coord.telemetrySource = {
+            LiveActivityTelemetrySnapshot(speed: 10.0, batteryPercent: 80, isCharging: false,
+                              carConnected: true, speedUnit: "kmh")
+        }
+        // First update pushes one speed sample.
+        coord.onTelemetryUpdate(now: t0)
+        XCTAssertEqual(tracker.updates.count, 1,
+                       "First moving snapshot past the start threshold must push exactly one update")
+        // The stub's `Date()` is "now" (2001-11-28 or later), so t0+1
+        // is well past the 30s window from the stub's perspective.
+        // The published update goes out, but the rate-limit gate
+        // compares against the stub's `Date()`, not the test's
+        // t0. To exercise the rate-limit we synthetically set
+        // `lastUpdateAt` to a fixed reference and then check the
+        // gate at subsequent offsets.
+        coord._setLastUpdateAtForTest(t0)
+        // Now the last update was at t0. The next call within
+        // t0+<30s must NOT push.
+        coord.onTelemetryUpdate(now: t0.addingTimeInterval(1))
+        XCTAssertEqual(tracker.updates.count, 1,
+                       "Sample within updateInterval must NOT push another update")
+        // Reset and try past the window.
+        coord._setLastUpdateAtForTest(t0)
+        coord.onTelemetryUpdate(now: t0.addingTimeInterval(31))
+        XCTAssertEqual(tracker.updates.count, 2,
+                       "Sample past updateInterval must push exactly one more update")
+    }
+
+    /// Stationary for >= `stationaryEndInterval` ends the activity.
+    @available(iOS 16.1, *)
+    func testLiveActivityEndsAfterFiveMinutesStationary() {
+        let coord = LiveActivityCoordinator.shared
+        let tracker = LiveActivityTracker()
+        coord._setActivityActiveForTest(true)
+        coord.activityRequester = { state in tracker.requests.append(state) }
+        coord.activityUpdater = { state in tracker.updates.append(state) }
+        coord.activityEnder = { tracker.ends += 1 }
+        defer {
+            coord.activityRequester = { _ in
+                Task { await LiveActivityCoordinator.shared._realRequestActivityTest() }
+            }
+            coord.activityUpdater = { _ in
+                Task { await LiveActivityCoordinator.shared._realUpdateActivityTest() }
+            }
+            coord.activityEnder = {
+                Task { await LiveActivityCoordinator.shared._realEndActivityTest() }
+            }
+        }
+
+        let t0 = Date(timeIntervalSince1970: 1_726_000_000)
+        // First moving fix resets the movement timer.
+        coord.telemetrySource = {
+            LiveActivityTelemetrySnapshot(speed: 10.0, batteryPercent: 80, isCharging: false,
+                              carConnected: true, speedUnit: "kmh")
+        }
+        coord.onTelemetryUpdate(now: t0)
+
+        // Now go stationary at t0 + 60s.
+        coord.telemetrySource = {
+            LiveActivityTelemetrySnapshot(speed: 0, batteryPercent: 80, isCharging: false,
+                              carConnected: true, speedUnit: "kmh")
+        }
+        coord.onTelemetryUpdate(now: t0.addingTimeInterval(60))
+        XCTAssertEqual(tracker.ends, 0,
+                       "1 min of stationary must NOT end the activity yet")
+
+        // t0 + 4 min — still within 5-min window.
+        coord.onTelemetryUpdate(now: t0.addingTimeInterval(240))
+        XCTAssertEqual(tracker.ends, 0,
+                       "4 min of stationary must NOT end the activity yet")
+
+        // t0 + 6 min — past the 5-min window.
+        coord.onTelemetryUpdate(now: t0.addingTimeInterval(360))
+        XCTAssertEqual(tracker.ends, 1,
+                       "5+ min of stationary must end the activity exactly once")
+    }
+
+    /// The shared `ContentState` mapper produces the same shape the
+    /// widget extension renders. Speed of nil → `gpsLost = true`,
+    /// which the Dynamic Island layout uses to swap the gauge icon
+    /// for a slashed-location marker.
+    func testContentStateMapperPreservesGpsLost() {
+        let withSpeed = LiveActivityTelemetrySnapshot(speed: 50.0, batteryPercent: 80,
+                                          isCharging: false, carConnected: true,
+                                          speedUnit: "kmh")
+        XCTAssertEqual(withSpeed.asContentState().gpsLost, false)
+        XCTAssertEqual(withSpeed.asContentState().speedKmh, 50.0)
+
+        let nilSpeed = LiveActivityTelemetrySnapshot(speed: nil, batteryPercent: nil,
+                                         isCharging: false, carConnected: false,
+                                         speedUnit: "mph")
+        XCTAssertNil(nilSpeed.asContentState().speedKmh)
+        XCTAssertTrue(nilSpeed.asContentState().gpsLost,
+                      "Nil speed must surface as gpsLost=true")
+        XCTAssertEqual(nilSpeed.asContentState().speedUnit, "mph")
+    }
+
+    /// The `TelemetryService` drives the coordinator on every
+    /// `didUpdateLocations` callback. Source-text guard: the wiring
+    /// must exist in `TelemetryService.swift` so a future refactor
+    /// can't silently drop the bridge.
+    func testTelemetryServiceCallsCoordinatorOnEveryUpdate() throws {
+        let repoRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let telemetryURL = repoRoot.appendingPathComponent("Runner/TelemetryService.swift")
+        let code = stripSwiftComments(try String(contentsOf: telemetryURL, encoding: .utf8))
+        XCTAssertTrue(code.contains("LiveActivityCoordinator.shared.onTelemetryUpdate"),
+            "TelemetryService.didUpdateLocations must call LiveActivityCoordinator.shared.onTelemetryUpdate")
+    }
+
+    /// Source-text guard: the host Info.plist must declare both
+    /// `NSSupportsLiveActivities` and the frequent-update supplement
+    /// so ActivityKit delivers the start/update calls.
+    func testInfoPlistEnablesLiveActivities() throws {
+        let repoRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let plistURL = repoRoot.appendingPathComponent("Runner/Info.plist")
+        let data = try Data(contentsOf: plistURL)
+        let plist = try PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any]
+        XCTAssertEqual(plist?["NSSupportsLiveActivities"] as? Bool, true,
+            "Info.plist must declare NSSupportsLiveActivities=true")
+        XCTAssertEqual(plist?["NSSupportsLiveActivitiesFrequentUpdates"] as? Bool, true,
+            "Info.plist must declare NSSupportsLiveActivitiesFrequentUpdates=true")
+    }
+
+    /// Source-text guard: `LiveActivityCoordinator` is registered
+    /// in the widget bundle so ActivityKit sees the widget
+    /// configuration when the activity starts.
+    func testLiveActivityWidgetIsRegisteredInBundle() throws {
+        let repoRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let bundleURL = repoRoot.appendingPathComponent("DriveStudioWidget/DriveStudioWidgetBundle.swift")
+        let source = try String(contentsOf: bundleURL, encoding: .utf8)
+        XCTAssertTrue(source.contains("DriveStudioLiveActivityWidget()"),
+            "DriveStudioWidgetBundle must register DriveStudioLiveActivityWidget()")
     }
 }
 

@@ -13,8 +13,6 @@
 		0DCC6F015E22082B82F6C2C4 /* 04_connect_system_online.wav in Resources */ = {isa = PBXBuildFile; fileRef = A4FCC65BC425611B49F9D616 /* 04_connect_system_online.wav */; };
 		14E802F773B364CE5BA6CCAB /* 03_disconnect_lock_vehicle.wav in Resources */ = {isa = PBXBuildFile; fileRef = 4565F88065ACFE3671C92C5D /* 03_disconnect_lock_vehicle.wav */; };
 		188B8D83EFBF37FB93FD3F0E /* LayerSettingsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 290DE2509893E8C531F9AF3C /* LayerSettingsSheet.swift */; };
-		8E1F2A3B4C5D6E7F8A9B0C1E /* LayersPanelSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E1F2A3B4C5D6E7F8A9B0C1D /* LayersPanelSheet.swift */; };
-		8E1F2A3B4C5D6E7F8A9B0C2E /* DockBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E1F2A3B4C5D6E7F8A9B0C2D /* DockBar.swift */; };
 		1FDBF70CF9533AE420076BE1 /* 21_connect_lucid_air.wav in Resources */ = {isa = PBXBuildFile; fileRef = 84D2DE227136EEB043E609EB /* 21_connect_lucid_air.wav */; };
 		2747AD96D7ED35123305790F /* 06_connect_byd_seal.wav in Resources */ = {isa = PBXBuildFile; fileRef = 96557ECEB57DB9C6EDF485FF /* 06_connect_byd_seal.wav */; };
 		2770C5EB0618301F74B55B78 /* lane-nudge.wav in Resources */ = {isa = PBXBuildFile; fileRef = 0FEB500AFE784962B9CCE530 /* lane-nudge.wav */; };
@@ -51,6 +49,7 @@
 		67D58798E2A0F3269D38EC83 /* 27_connect_peugeot_508.wav in Resources */ = {isa = PBXBuildFile; fileRef = F008E473116CB847B8D0ABD4 /* 27_connect_peugeot_508.wav */; };
 		6A41D771BEF4245AFD1D1CD1 /* 14_connect_hyundai_ioniq_5.wav in Resources */ = {isa = PBXBuildFile; fileRef = 80C441E7075A5BFC4E981B1D /* 14_connect_hyundai_ioniq_5.wav */; };
 		6B290C2896065F3DAA192D79 /* 09_connect_chrysler_300.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3CC62CC284960AC3BB893F50 /* 09_connect_chrysler_300.wav */; };
+		702C655212446C20699D6971 /* LiveActivityCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF0D12A48A3CBB17A0C5464 /* LiveActivityCoordinator.swift */; };
 		7034E898CC16B69B6E3529B4 /* 19_connect_land_rover_defender.wav in Resources */ = {isa = PBXBuildFile; fileRef = 7AF367E9251005E4907B7919 /* 19_connect_land_rover_defender.wav */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		76286BB6BDB6F2CB8992C28C /* 01_disconnect_phone_reminder.wav in Resources */ = {isa = PBXBuildFile; fileRef = 7953A87399DF4B4B5130AC65 /* 01_disconnect_phone_reminder.wav */; };
@@ -68,6 +67,8 @@
 		89D6A7721C443BF7340FEA35 /* DriveComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E504478C0B10C1E1AE1C64B8 /* DriveComponents.swift */; };
 		8B51D97ABC01C997C025F462 /* 06_disconnect_goodbye.wav in Resources */ = {isa = PBXBuildFile; fileRef = CEAE715B4761B11491E94E4A /* 06_disconnect_goodbye.wav */; };
 		8DD82D678BC95E076EB4D454 /* 08_disconnect_check_back_seat.wav in Resources */ = {isa = PBXBuildFile; fileRef = 21B0D72DFA826D81CF899A78 /* 08_disconnect_check_back_seat.wav */; };
+		8E1F2A3B4C5D6E7F8A9B0C1E /* LayersPanelSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E1F2A3B4C5D6E7F8A9B0C1D /* LayersPanelSheet.swift */; };
+		8E1F2A3B4C5D6E7F8A9B0C2E /* DockBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E1F2A3B4C5D6E7F8A9B0C2D /* DockBar.swift */; };
 		8F4D3F20072B81543869C946 /* 13_connect_gmc_hummer_ev.wav in Resources */ = {isa = PBXBuildFile; fileRef = 95BB96906E9682F461095666 /* 13_connect_gmc_hummer_ev.wav */; };
 		90DD926C477FBE21C9E384EC /* 30_connect_volvo_xc90.wav in Resources */ = {isa = PBXBuildFile; fileRef = 52F165366784E29A50F66ECB /* 30_connect_volvo_xc90.wav */; };
 		93770AD3DDEB14EBFC0CC5A9 /* SlotManagerScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F28C38DC291569E48D49979 /* SlotManagerScreen.swift */; };
@@ -178,13 +179,12 @@
 		1E9908EE1FE8F3A921A1FFCF /* 02_connect_alfa_romeo_giulia.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 02_connect_alfa_romeo_giulia.wav; sourceTree = "<group>"; };
 		1F24B93C96B96D9F9D29B3FF /* 17_connect_kia_ev6.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 17_connect_kia_ev6.wav; sourceTree = "<group>"; };
 		1FB9EE6D29D899BFCA96478B /* soft-chime.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = "soft-chime.wav"; sourceTree = "<group>"; };
+		1FF0D12A48A3CBB17A0C5464 /* LiveActivityCoordinator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveActivityCoordinator.swift; sourceTree = "<group>"; };
 		21B0D72DFA826D81CF899A78 /* 08_disconnect_check_back_seat.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 08_disconnect_check_back_seat.wav; sourceTree = "<group>"; };
 		22BCAAA79114361AF6BA8148 /* StockWidgetArchitecture.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StockWidgetArchitecture.swift; sourceTree = "<group>"; };
 		2324481032B66C10077DA831 /* 26_connect_nissan_gtr.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 26_connect_nissan_gtr.wav; sourceTree = "<group>"; };
 		2880B0FE2C88E92390F23A02 /* guide_step_1.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = guide_step_1.png; sourceTree = "<group>"; };
 		290DE2509893E8C531F9AF3C /* LayerSettingsSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LayerSettingsSheet.swift; sourceTree = "<group>"; };
-		8E1F2A3B4C5D6E7F8A9B0C1D /* LayersPanelSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LayersPanelSheet.swift; sourceTree = "<group>"; };
-		8E1F2A3B4C5D6E7F8A9B0C2D /* DockBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DockBar.swift; sourceTree = "<group>"; };
 		2A6D5D3330232AC7000A9968 /* DriveStudioWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DriveStudioWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A6D5D3530232AC7000A9968 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		2A6D5D3730232AC7000A9968 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -230,6 +230,8 @@
 		84D2DE227136EEB043E609EB /* 21_connect_lucid_air.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 21_connect_lucid_air.wav; sourceTree = "<group>"; };
 		8A3610995CEE5E9C9427A02F /* LayerEditorOverlay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LayerEditorOverlay.swift; sourceTree = "<group>"; };
 		8A6B04BCA28EAC35AAF855FC /* LegalWebSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LegalWebSheet.swift; sourceTree = "<group>"; };
+		8E1F2A3B4C5D6E7F8A9B0C1D /* LayersPanelSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LayersPanelSheet.swift; sourceTree = "<group>"; };
+		8E1F2A3B4C5D6E7F8A9B0C2D /* DockBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DockBar.swift; sourceTree = "<group>"; };
 		8E9E62C0E765347DD0E9D153 /* power-down.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = "power-down.wav"; sourceTree = "<group>"; };
 		95217042F5850DE659B476FE /* 09_connect_connection_successful.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 09_connect_connection_successful.wav; sourceTree = "<group>"; };
 		95BB96906E9682F461095666 /* 13_connect_gmc_hummer_ev.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = 13_connect_gmc_hummer_ev.wav; sourceTree = "<group>"; };
@@ -458,6 +460,7 @@
 				9A6E4D54E0227CFE192FC27F /* guide_step_3.png */,
 				6A13087F4C864B00188DE2BA /* guide_step_4.png */,
 				8A6B04BCA28EAC35AAF855FC /* LegalWebSheet.swift */,
+				1FF0D12A48A3CBB17A0C5464 /* LiveActivityCoordinator.swift */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -799,6 +802,7 @@
 				4BF63422536E2C87BA2703FD /* StockWidgetCatalog.swift in Sources */,
 				A94CA52A1D548C2320C8A711 /* AutomationGuideSheet.swift in Sources */,
 				966BA16559399209EC7DB918 /* LegalWebSheet.swift in Sources */,
+				702C655212446C20699D6971 /* LiveActivityCoordinator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

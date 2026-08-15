@@ -282,6 +282,22 @@ extension Notification.Name {
         service.locationManager.activityType = .automotiveNavigation
         service.locationManager.distanceFilter = kCLDistanceFilterNone
         service.locationManager.pausesLocationUpdatesAutomatically = false
+        // **Background GPS for real-time widget updates.** With the
+        // `location` UIBackgroundModes entry declared in Info.plist
+        // and a granted Always authorization, this lets CLLocationManager
+        // keep delivering fixes while the app is in the background.
+        // Each fix updates the App Group telemetry snapshot and
+        // requests a widget reload so the home-screen speedometer
+        // reflects real-time speed without the user opening the app.
+        //
+        // Apple REQUIRES `allowsBackgroundLocationUpdates = true` for
+        // background GPS to fire. It also requires the matching
+        // UIBackgroundModes entry AND a granted Always authorization;
+        // if any of those three is missing, iOS silently suspends the
+        // location updates within minutes of backgrounding.
+        service.locationManager.allowsBackgroundLocationUpdates = true
+        service.locationManager.showsBackgroundLocationIndicator = false
+
         // **No automatic permission request at init.**
         // iOS permission prompts are only shown in response to an
         // explicit user action. `beginLocationIfAuthorized()` is the
@@ -289,7 +305,8 @@ extension Notification.Name {
         // authorization, requests When-In-Use if undetermined, and
         // either begins monitoring (when granted) or surfaces a
         // "denied" state that the Dashboard renders with a Settings
-        // shortcut. We never request Always authorization.
+        // shortcut. We upgrade to Always once When-In-Use is granted
+        // (see `locationManagerDidChangeAuthorization`).
     }
 
     /// Explicit, user-driven entry point. Call from a button in
@@ -356,8 +373,20 @@ extension Notification.Name {
         // React to any authorization change (initial prompt result,
         // Settings round-trip, restriction flips).
         switch manager.authorizationStatus {
-        case .authorizedAlways, .authorizedWhenInUse:
+        case .authorizedAlways:
+            // Full background-GPS authority. Start monitoring and
+            // remember the upgrade so we don't re-prompt.
             manager.startUpdatingLocation()
+        case .authorizedWhenInUse:
+            // Foreground-only. Start monitoring so the in-app
+            // dashboard and foreground widgets work, and ask the
+            // user to upgrade to Always so the widget also updates
+            // when the app is backgrounded. iOS shows the second-step
+            // "Always Allow" prompt; the user can decline and we
+            // fall back to When-In-Use (which still works while the
+            // app is open).
+            manager.startUpdatingLocation()
+            manager.requestAlwaysAuthorization()
         case .denied, .restricted:
             manager.stopUpdatingLocation()
         case .notDetermined:
@@ -421,6 +450,16 @@ extension Notification.Name {
             NotificationCenter.default.post(name: .telemetrySpeedUpdated, object: self)
         }
         persistTelemetryIfMeaningful(previousSpeed: prevSpeed)
+
+        // **Live Activity (Dynamic Island + Lock Screen).** Fire on
+        // every GPS update so the coordinator can decide whether to
+        // start a new activity, push an update, or end. The
+        // coordinator is internally rate-limited and gated on the
+        // `ActivityAuthorizationInfo.areActivitiesEnabled` system
+        // switch, so this is safe to call on every fix.
+        if #available(iOS 16.1, *) {
+            LiveActivityCoordinator.shared.onTelemetryUpdate()
+        }
     }
 
     // MARK: - Play Sound Cues

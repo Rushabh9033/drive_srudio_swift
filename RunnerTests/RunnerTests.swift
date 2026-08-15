@@ -2847,6 +2847,82 @@ func testActiveSlotKeyContractIsStable() {
             "6 min after launch with no GPS evidence must auto-flip off")
     }
 
+    /// Regression: the 60s heartbeat (`AppStore.refreshDeviceTelemetry()`)
+    /// MUST drive the auto-flip countdown on every tick. A previous
+    /// version gated `snapshotAndSave()` behind a battery/charging
+    /// change check (`guard prev != curr else { return }`) which meant
+    /// a steady-state foreground idle app (battery steady, charger
+    /// steady, no GPS movement) never reached the heuristic — the
+    /// `carConnected` value was pinned to its seeded `true` forever,
+    /// even after unplugging from the CarPlay simulator.
+    ///
+    /// Source-text check: assert `refreshDeviceTelemetry()` calls
+    /// `TelemetryService.shared.snapshotAndSave()` exactly once AND
+    /// that the call is not gated behind the legacy battery/charging
+    /// change guard. The internal `TelemetryPersistencePolicy` already
+    /// throttles actual App Group writes via its own heartbeat check,
+    /// so the call is cheap even when nothing meaningful changed.
+    func testRefreshDeviceTelemetryCallsSnapshotAndSaveUnconditionally() throws {
+        let repoRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let appStoreURL = repoRoot.appendingPathComponent("Runner/AppStore.swift")
+        let code = stripSwiftComments(try String(contentsOf: appStoreURL, encoding: .utf8))
+
+        guard let range = code.range(of: "func refreshDeviceTelemetry()"),
+              let endRange = code.range(of: "func ", range: range.upperBound..<code.endIndex) else {
+            XCTFail("Could not locate refreshDeviceTelemetry function in AppStore.swift")
+            return
+        }
+        let body = String(code[range.lowerBound..<endRange.lowerBound])
+
+        // Exactly one snapshotAndSave() call — must not be wrapped in
+        // a battery/charging change gate that would skip the call in
+        // steady state (the original production bug).
+        let snapshotCallCount = body.components(
+            separatedBy: "TelemetryService.shared.snapshotAndSave()"
+        ).count - 1
+        XCTAssertEqual(snapshotCallCount, 1,
+            "refreshDeviceTelemetry must call snapshotAndSave() exactly once. " +
+            "Gating it behind a battery/charging change check broke the auto-flip countdown. " +
+            "Got \(snapshotCallCount) call(s).")
+
+        // Negative assertion: the legacy buggy pattern that gates the
+        // snapshotAndSave() call behind a battery/charging change guard
+        // must not be present.
+        let buggyGate = "guard prev != curr else {"
+        XCTAssertFalse(body.contains(buggyGate),
+            "snapshotAndSave() must not be gated behind \(buggyGate). " +
+            "Steady-state foreground idle apps would never reach the auto-flip heuristic.")
+    }
+
+    /// Behavioral companion to the source-text check above: confirms
+    /// that calling the production entry point (`snapshotAndSave()`)
+    /// with the auto-flip preconditions set up the way
+    /// `AppStore.init` would set them (carConnected=true,
+    /// lastNonNilSpeedAt=nil, serviceStartedAt=6 min ago) actually
+    /// flips the value off. This is the same scenario the regression
+    /// test reproduces end-to-end when AppStore.refreshDeviceTelemetry
+    /// invokes snapshotAndSave on every 60s tick.
+    func testSnapshotAndSaveDrivesAutoFlipFromAppStoreSeedState() {
+        var now = Date(timeIntervalSince1970: 1_726_000_000)
+        let service = TelemetryService(clock: { now })
+        defer { service.resetPersistenceState() }
+
+        // Mirror what AppStore.init() leaves the service in.
+        service.carConnected = true
+        service.lastNonNilSpeedAt = nil
+        service.serviceStartedAt = now.addingTimeInterval(-360) // 6 min ago
+        service.currentSpeed = nil
+
+        // Drive the production heartbeat entry point.
+        service.snapshotAndSave()
+
+        XCTAssertFalse(service.carConnected,
+            "snapshotAndSave() — the production heartbeat entry point — " +
+            "must flip carConnected off after 5+ min with no GPS evidence")
+    }
+
     // MARK: - Permission path tightening (gap 9)
 
     /// `startMonitoring` must NEVER present a permission prompt.

@@ -114,21 +114,34 @@ class AppStore: ObservableObject {
         // show "not charging" immediately.
         let charging = (state == .charging || state == .full)
 
-        // Single change-check on battery + charging only. The minute
-        // tick in `liveTimeString` is purely a UI label — it does NOT
-        // trigger a write to the App Group or a widget reload. Every
-        // tick would write the same telemetry JSON and burn through
-        // the WidgetCenter budget for no widget-visible change.
         let prev = (liveBatteryPercent, liveIsCharging)
         let curr = (level, charging)
-        guard prev != curr else {
-            // No battery / charging transition. Still refresh the UI
-            // label so the visible clock ticks.
-            self.liveTimeString = FormatterCache.hmmFormatter.string(from: Date())
-            return
+        if prev != curr {
+            (liveBatteryPercent, liveIsCharging) = curr
         }
-        (liveBatteryPercent, liveIsCharging) = curr
+        // Always refresh the visible clock label.
         self.liveTimeString = FormatterCache.hmmFormatter.string(from: Date())
+
+        // **Always drive the auto-flip countdown.** The 60s heartbeat
+        // timer (see `setupAutoRefresh`) and the foreground/battery
+        // observers all funnel through this method. The previous
+        // version gated `snapshotAndSave()` behind a battery /
+        // charging change check to avoid burning the App Group write
+        // budget — but in a steady-state foreground idle app (battery
+        // steady, charger steady, no GPS movement) that gate meant
+        // `snapshotAndSave()` never ran and the
+        // `carConnected` auto-flip countdown never got evaluated.
+        // Result: a freshly-installed app would pin
+        // `carConnected = true` forever (or until the user manually
+        // flipped a now-removed toggle).
+        //
+        // The internal `TelemetryPersistencePolicy.evaluate(...)`
+        // still throttles actual App Group writes via its own
+        // `heartbeatDue` check (gates at ~30s between writes), so
+        // calling `snapshotAndSave()` every minute is cheap when
+        // nothing meaningful changed. But the policy evaluation runs
+        // unconditionally — so the auto-flip heuristic runs on every
+        // tick and the 5-min countdown finally progresses.
         TelemetryService.shared.snapshotAndSave()
     }
 

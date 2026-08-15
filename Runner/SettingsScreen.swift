@@ -16,6 +16,46 @@ private func sectionHeader(_ title: String) -> some View {
         .padding(.horizontal, 20)
 }
 
+/// Bundle version (CFBundleShortVersionString) with build number
+/// (CFBundleVersion) appended when available, e.g. "1.0.0 (42)".
+/// Free function so the About card can evaluate it inline.
+private func appVersionString() -> String {
+    let info = Bundle.main.infoDictionary
+    let short = info?["CFBundleShortVersionString"] as? String ?? "—"
+    let build = info?["CFBundleVersion"] as? String
+    if let build = build, !build.isEmpty {
+        return "\(short) (\(build))"
+    }
+    return short
+}
+
+/// Format the most-recent App Group telemetry snapshot timestamp
+/// as a human-readable relative time. Free function (not a method
+/// on SettingsScreenView) so it can be evaluated at render time
+/// without capturing `self`.
+///
+/// `@MainActor` because `AppStore` is `@MainActor`-isolated and the
+/// body of this helper reaches into it.
+@MainActor
+private func lastSyncLabel(for store: AppStore) -> String {
+    guard let date = store.lastTelemetrySyncDate() else {
+        return "Last local sync: never"
+    }
+    let interval = Date().timeIntervalSince(date)
+    if interval < 60 {
+        return "Last local sync: just now"
+    } else if interval < 60 * 60 {
+        let mins = Int(interval / 60)
+        return "Last local sync: \(mins) min ago"
+    } else if interval < 60 * 60 * 24 {
+        let hours = Int(interval / (60 * 60))
+        return "Last local sync: \(hours) h ago"
+    } else {
+        let days = Int(interval / (60 * 60 * 24))
+        return "Last local sync: \(days) d ago"
+    }
+}
+
 // MARK: - Settings Screen
 struct SettingsScreenView: View {
     @EnvironmentObject var store: AppStore
@@ -111,7 +151,16 @@ struct SettingsScreenView: View {
                 sectionHeader("Local data")
                 SurfaceCard(padding: .init(top: 16, leading: 16, bottom: 16, trailing: 16)) {
                     VStack(spacing: 0) {
-                        Text("Last local sync: just now")
+                        // Real "last sync" label — reads the most
+                        // recent telemetry snapshot timestamp from the
+                        // App Group. The previous version hardcoded
+                        // "just now" which never updated. The label
+                        // re-renders whenever the body is invalidated
+                        // (settings open, app foreground, etc.) and
+                        // because AppStore is an `@EnvironmentObject`
+                        // any live-telemetry write will also invalidate
+                        // it.
+                        Text(lastSyncLabel(for: store))
                             .font(.system(size: 12))
                             .foregroundColor(DriveColors.mutedFg)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -171,7 +220,11 @@ struct SettingsScreenView: View {
                 sectionHeader("About & legal")
                 SurfaceCard(padding: .init(top: 16, leading: 16, bottom: 16, trailing: 16)) {
                     VStack(spacing: 0) {
-                        Text("Drive Studio · Version 1.0.0")
+                        // Bundle version + build, read from Info.plist
+                        // at runtime. The previous hardcoded "1.0.0"
+                        // would silently drift from the actual shipped
+                        // version as soon as the build number changed.
+                        Text("Drive Studio · Version \(appVersionString())")
                             .font(.system(size: 12))
                             .foregroundColor(DriveColors.mutedFg)
                             .frame(maxWidth: .infinity, alignment: .leading)

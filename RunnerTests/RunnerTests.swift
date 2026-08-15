@@ -741,7 +741,20 @@ class RunnerTests: XCTestCase {
             speed: 60, timestamp: ts
         )
         let out = WidgetSnapshotFreshness.apply(to: snap, referenceDate: Date())
-        XCTAssertNil(out.speed, "Snapshot older than 5 min must expire speed")
+        XCTAssertNil(out.speed, "Snapshot older than maxAge must expire speed")
+        XCTAssertEqual(out.batteryPercent, 80, "Battery remains latest-known")
+    }
+
+    func testFreshnessAtBoundaryExpiresSpeed() {
+        // The boundary is now `maxAge` (90s); a snapshot exactly one
+        // second past it must be expired.
+        let ts = Date().addingTimeInterval(-(WidgetSnapshotFreshness.maxAge + 1))
+        let snap = TelemetrySnapshot(
+            carConnected: true, batteryPercent: 80, isCharging: false,
+            speed: 60, timestamp: ts
+        )
+        let out = WidgetSnapshotFreshness.apply(to: snap, referenceDate: Date())
+        XCTAssertNil(out.speed, "Snapshot just past maxAge must expire speed")
         XCTAssertEqual(out.batteryPercent, 80, "Battery remains latest-known")
     }
 
@@ -787,7 +800,7 @@ class RunnerTests: XCTestCase {
             snapshot: snap, at: now.addingTimeInterval(10 * 60)
         )
         XCTAssertNil(projected.speed,
-                     "Future entry older than 5 min past timestamp must show speed as unavailable")
+                     "Future entry older than maxAge past timestamp must show speed as unavailable")
         XCTAssertEqual(projected.batteryPercent, 80,
                        "Battery remains latest-known on future entry")
     }
@@ -799,8 +812,11 @@ class RunnerTests: XCTestCase {
             carConnected: true, batteryPercent: 80, isCharging: false,
             speed: 60, timestamp: ts
         )
+        // Half of maxAge — well inside the freshness window. The
+        // captured speed must propagate unchanged so a freshly-published
+        // snapshot's first widget render shows real data, not `—`.
         let projected = WidgetSnapshotFreshness.projected(
-            snapshot: snap, at: now.addingTimeInterval(2 * 60)
+            snapshot: snap, at: now.addingTimeInterval(WidgetSnapshotFreshness.maxAge / 2)
         )
         XCTAssertEqual(projected.speed, 60,
                        "Entry within freshness window keeps the captured speed")
@@ -929,23 +945,29 @@ class RunnerTests: XCTestCase {
 
     // MARK: - WidgetReloadThrottle
 
-    /// Speed-driven reloads: first call → 1, within 5 min → 0,
-    /// after 5 min → 1. Verified with an injected counting closure
-    /// so the test never touches `WidgetCenter`.
+    /// Speed-driven reloads: first call → 1, within `minSpeedReloadInterval`
+    /// → 0, after `minSpeedReloadInterval` → 1. Verified with an injected
+    /// counting closure so the test never touches `WidgetCenter`. The
+    /// interval is intentionally tight (30s) so a moving user sees a
+    /// near-real-time widget refresh without burning WidgetKit's reload
+    /// budget.
     func testWidgetReloadThrottleSpeedChangeRateLimit() {
         var count = 0
         let throttle = WidgetReloadThrottle(reloadHook: { count += 1 })
         throttle.reset()
         let t0 = Date(timeIntervalSince1970: 1_726_000_000)
+        let interval = WidgetReloadThrottle.minSpeedReloadInterval
         // First speed reload → one call.
         _ = throttle.requestReload(kind: .speedChange, now: t0)
         XCTAssertEqual(count, 1, "First speed-driven reload must fire exactly once")
-        // Second request within 4 minutes → suppressed.
-        _ = throttle.requestReload(kind: .speedChange, now: t0.addingTimeInterval(60))
-        XCTAssertEqual(count, 1, "Speed reload within 5 min must perform zero additional calls")
-        // 5 minutes later → one more.
-        _ = throttle.requestReload(kind: .speedChange, now: t0.addingTimeInterval(5 * 60))
-        XCTAssertEqual(count, 2, "Speed reload after 5 min must perform exactly one additional call")
+        // Second request within `interval - 1s` → suppressed.
+        _ = throttle.requestReload(kind: .speedChange, now: t0.addingTimeInterval(interval - 1))
+        XCTAssertEqual(count, 1,
+            "Speed reload within minSpeedReloadInterval must perform zero additional calls")
+        // `interval` later → one more.
+        _ = throttle.requestReload(kind: .speedChange, now: t0.addingTimeInterval(interval))
+        XCTAssertEqual(count, 2,
+            "Speed reload after minSpeedReloadInterval must perform exactly one additional call")
     }
 
     /// `.noVisibleChange` performs zero reloads, regardless of
@@ -2898,18 +2920,27 @@ func testActiveSlotKeyContractIsStable() {
 
     /// Behavioral companion to the source-text check above: confirms
     /// that calling the production entry point (`snapshotAndSave()`)
-    /// with the auto-flip preconditions set up the way
-    /// `AppStore.init` would set them (carConnected=true,
-    /// lastNonNilSpeedAt=nil, serviceStartedAt=6 min ago) actually
-    /// flips the value off. This is the same scenario the regression
-    /// test reproduces end-to-end when AppStore.refreshDeviceTelemetry
-    /// invokes snapshotAndSave on every 60s tick.
+    /// with the auto-flip preconditions `carConnected = true`,
+    /// `lastNonNilSpeedAt = nil`, `serviceStartedAt = 6 min ago` (the
+    /// state of a user who *was* driving, parked, and now has no GPS)
+    /// actually flips the value off. This is the same scenario the
+    /// regression test reproduces end-to-end when
+    /// AppStore.refreshDeviceTelemetry invokes snapshotAndSave on every
+    /// 60s tick.
+    ///
+    /// Note: the production seed in `AppStore.init` is now `false`,
+    /// not `true` — a fresh install with no GPS evidence shouldn't
+    /// render "car linked". The auto-flip-off path is still important
+    /// because once a moving session auto-flips `carConnected` on,
+    /// the same heuristic must take it back off when the user parks.
     func testSnapshotAndSaveDrivesAutoFlipFromAppStoreSeedState() {
         var now = Date(timeIntervalSince1970: 1_726_000_000)
         let service = TelemetryService(clock: { now })
         defer { service.resetPersistenceState() }
 
-        // Mirror what AppStore.init() leaves the service in.
+        // Simulate: user was driving, carConnected auto-set true
+        // (via the location delegate's speed-driven auto-flip-on
+        // path), then parked 6 min ago with no movement since.
         service.carConnected = true
         service.lastNonNilSpeedAt = nil
         service.serviceStartedAt = now.addingTimeInterval(-360) // 6 min ago
@@ -2958,6 +2989,63 @@ func testActiveSlotKeyContractIsStable() {
             "path that keeps the heuristic functional.")
     }
 
+    /// Regression: a freshly-installed app must NOT seed
+    /// `carConnected = true`. The original seed made the home-screen
+    /// widget render a fake "car linked" pill for the first 5 minutes
+    /// (until the no-movement countdown kicked in), even when the
+    /// user was sitting indoors with no GPS at all. Defaulting to
+    /// `false` and letting the auto-flip-on path flip it back to
+    /// `true` on the first above-threshold speed sample keeps the
+    /// home-screen widget honest.
+    ///
+    /// Source-text check: `AppStore.init` must NOT contain
+    /// `TelemetryService.shared.carConnected = true`. Production code
+    /// path is the only one we can test deterministically; the
+    /// companion behavioral test (`testCarConnectedStartsFalseUntilGPSProvesMovement`)
+    /// exercises the speed-driven flip-on path through the location
+    /// delegate.
+    func testAppStoreSeedDoesNotPretendCarLinked() throws {
+        let repoRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let appStoreURL = repoRoot.appendingPathComponent("Runner/AppStore.swift")
+        let code = stripSwiftComments(try String(contentsOf: appStoreURL, encoding: .utf8))
+
+        guard let range = code.range(of: "private init()"),
+              let endRange = code.range(of: "func ", range: range.upperBound..<code.endIndex) else {
+            XCTFail("Could not locate AppStore.init in AppStore.swift")
+            return
+        }
+        let body = String(code[range.lowerBound..<endRange.lowerBound])
+
+        // The fake seed must not be present.
+        XCTAssertFalse(body.contains("carConnected = true"),
+            "AppStore.init must not seed carConnected = true. A fresh install " +
+            "has no GPS evidence the user is in their car; defaulting to true " +
+            "renders a fake 'car linked' pill on the home-screen widget until " +
+            "the 5-min no-movement countdown elapses.")
+
+        // The truthful seed (false) must be present.
+        XCTAssertTrue(body.contains("carConnected = false"),
+            "AppStore.init must explicitly seed carConnected = false so the " +
+            "auto-flip-on path (location delegate) is the only way to enter " +
+            "the linked state.")
+    }
+
+    /// Companion to `testAppStoreSeedDoesNotPretendCarLinked`: a
+    /// fresh service that has never seen a CLLocation update must
+    /// have `carConnected = false`. The speed-driven auto-flip-on
+    /// path is the only legitimate way to enter the linked state.
+    func testFreshServiceCarConnectedStartsFalse() {
+        let service = TelemetryService(clock: { Date() })
+        defer { service.resetPersistenceState() }
+
+        XCTAssertFalse(service.carConnected,
+            "A fresh TelemetryService (no GPS samples ever delivered) must " +
+            "start with carConnected = false. The user has not proven they " +
+            "are in the car yet.")
+    }
+
     /// Regression: when the in-memory `carConnected` value auto-flips
     /// inside `snapshotAndSave`, the App Group snapshot written to
     /// disk must reflect the POST-flip value. The widget extension
@@ -2981,9 +3069,12 @@ func testActiveSlotKeyContractIsStable() {
         defer { service.resetPersistenceState() }
         let defaults = telemetryTestDefaults()
 
-        // Preconditions that mirror AppStore.init seed: carConnected
-        // starts true, no movement has ever been recorded (simulator /
-        // no GPS), service launched 6 min ago.
+        // Preconditions: simulate a driving session that has parked
+        // (carConnected is currently true from the speed-driven
+        // auto-flip-on path; no movement for 6 min). The production
+        // seed in `AppStore.init` is `false`, but once a user starts
+        // moving the service flips itself on, and the same heuristic
+        // must take it back off when the user parks.
         service.carConnected = true
         service.lastNonNilSpeedAt = nil
         service.serviceStartedAt = now.addingTimeInterval(-360) // 6 min ago

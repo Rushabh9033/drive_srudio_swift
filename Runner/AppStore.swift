@@ -13,7 +13,12 @@ class AppStore: ObservableObject {
 
     @Published var liveBatteryPercent: Int? = nil
     @Published var liveIsCharging: Bool = false
-    @Published var liveTimeString: String = ""
+    // Seed with a real clock string so the Dashboard's "LIVE TELEMETRY
+    // · 8:42 AM" header doesn't briefly render as "Device telemetry"
+    // between `AppStore.init()` and the first `refreshDeviceTelemetry()`
+    // tick. The cached formatter is safe to call from `@Published`
+    // property initializers because it's a static let (lazy + thread-safe).
+    @Published var liveTimeString: String = FormatterCache.hmmFormatter.string(from: Date())
 
     /// Currently focused slot (0–3). Set by the App Intents
     /// "SwitchDriveStudioSlotIntent" via the App Group key
@@ -52,9 +57,17 @@ class AppStore: ObservableObject {
         loadState()
         // `carConnected` is auto-detected from GPS in TelemetryService
         // (the Settings screen no longer exposes a manual override).
-        // Default to `true` so a fresh install doesn't render "car not
-        // linked" before the first GPS fix arrives.
-        TelemetryService.shared.carConnected = true
+        // Default to `false` — a freshly-installed app has zero
+        // evidence the user is in their car, and seeding `true` would
+        // render a fake "car linked" pill on the home-screen widget
+        // until the 5-minute no-movement countdown elapses, even when
+        // the user is sitting indoors with no GPS signal at all.
+        //
+        // The auto-flip-on path (`TelemetryService.locationManager(_:didUpdateLocations:)`)
+        // flips `carConnected` to true on the first above-threshold
+        // speed sample, so a real driver sees the correct state within
+        // seconds of starting to move — not minutes.
+        TelemetryService.shared.carConnected = false
         applyPersistedActiveSlot()
         setupAutoRefresh()
     }
@@ -143,6 +156,21 @@ class AppStore: ObservableObject {
         // unconditionally — so the auto-flip heuristic runs on every
         // tick and the 5-min countdown finally progresses.
         TelemetryService.shared.snapshotAndSave()
+    }
+
+    /// Returns the timestamp of the most recent telemetry snapshot
+    /// persisted to the App Group, or `nil` if no snapshot has ever
+    /// been written. Used by the Settings screen to render a real
+    /// "last sync" label that updates as the host app's
+    /// `refreshDeviceTelemetry` writes new snapshots, instead of the
+    /// previous hardcoded "just now" string that was always wrong.
+    func lastTelemetrySyncDate() -> Date? {
+        let defaults = UserDefaults(suiteName: suiteName) ?? UserDefaults.standard
+        guard let data = defaults.data(forKey: AppGroupContract.liveTelemetryKey),
+              let snapshot = try? JSONDecoder().decode(TelemetrySnapshot.self, from: data) else {
+            return nil
+        }
+        return snapshot.timestamp
     }
 
     func loadState() {
@@ -415,15 +443,32 @@ class AppStore: ObservableObject {
         // widget renders "—".
         let selectedVehicle = currentSelectedVehicle()
 
-        // **Real telemetry from the host.** We do NOT re-encode a fresh
-        // telemetry snapshot here — that is `TelemetryService`'s job
-        // and runs through its freshness policy. We pass through the
-        // last `live_*` values the AppStore already tracks. Genuine 0
-        // and `nil` are preserved exactly.
+        // **Real telemetry from the device at this exact moment.**
+        // We do NOT use the cached `liveBatteryPercent` / `liveIsCharging`
+        // values from AppStore — those are last-known, refreshed on a
+        // 60-second heartbeat. The user just performed an action
+        // (slot assignment, design save) that requires writing a
+        // snapshot NOW; if the device state changed between the last
+        // heartbeat tick and this write (e.g. the user just unplugged
+        // from CarPlay AND the phone just unplugged from the charger),
+        // the cached value would be stale. Re-read `UIDevice` directly
+        // here so the snapshot carries the current state.
+        //
+        // `liveBatteryPercent` / `liveIsCharging` are still maintained
+        // for SwiftUI views (DashboardView, MetricBar) that bind to
+        // them as `@Published` state — but the snapshot written to
+        // the App Group must reflect the device, not the cache.
+        let device = UIDevice.current
+        let rawLevel = device.batteryLevel
+        let freshBatteryPercent: Int? = rawLevel >= 0
+            ? Int(round(rawLevel * 100)) : nil
+        let freshIsCharging = (device.batteryState == .charging
+            || device.batteryState == .full)
+
         let telemetry = TelemetrySnapshot(
             carConnected: TelemetryService.shared.carConnected,
-            batteryPercent: liveBatteryPercent,
-            isCharging: liveIsCharging,
+            batteryPercent: freshBatteryPercent,
+            isCharging: freshIsCharging,
             speed: TelemetryService.shared.currentSpeed,
             timestamp: Date()
         )

@@ -358,12 +358,16 @@ struct PhantomView: View {
                     }.padding(.top, 4)
                 }.frame(height: 60).clipShape(UnevenRoundedRectangle(topLeadingRadius: 22, topTrailingRadius: 22))
 
-                // Vehicle card — unavailable marker when no vehicle selected.
+                // Vehicle card — shows the live selected-vehicle label.
+                // The previous version rendered a hardcoded "Premium · EV"
+                // subtitle here regardless of the user's actual vehicle;
+                // removed so the widget never displays a category the
+                // user did not select. If no vehicle is selected,
+                // `WidgetDisplayMath.vehicleLabel` already returns "—".
                 ZStack {
                     Color(hex: "1A1230")
                     VStack(spacing: 3) {
                         Text(WidgetDisplayMath.vehicleLabel(e.vehicleName)).font(.system(size: 11, weight: .medium)).foregroundColor(Color(hex: "A78BFA"))
-                        Text("Premium · EV").font(.system(size: 13, weight: .bold)).foregroundColor(Color(hex: "7C3AED"))
                     }
                 }.frame(height: 46)
 

@@ -25,11 +25,22 @@ import Foundation
 enum WidgetSnapshotFreshness {
 
     /// Maximum age of a snapshot before its speed reading is
-    /// considered expired. Five minutes matches the Apple-documented
-    /// provider entry cadence; if WidgetKit hasn't asked the provider
-    /// for a new snapshot by then, the speed from the captured one
-    /// is no longer trustworthy enough to display.
-    static let maxAge: TimeInterval = 5 * 60
+    /// considered expired.
+    ///
+    /// Speed is the time-sensitive telemetry field — a 5-min-old
+    /// speed almost never reflects the user's actual current speed.
+    /// Ninety seconds is short enough that a stationary user who
+    /// starts moving sees the widget switch from `—` (no fresh fix)
+    /// to a real number within one provider tick, and long enough
+    /// to absorb a single missed GPS sample.
+    ///
+    /// The provider's entry cadence is still 5 minutes (Apple's
+    /// documented minimum for normal home-screen widgets), but
+    /// `projected` zeroes the speed on any entry more than
+    /// `maxAge` past the captured timestamp. That means entry 1
+    /// (just published) shows real speed; entries 2+ show `—`
+    /// until a `speedChange` reload triggers a new snapshot.
+    static let maxAge: TimeInterval = 90
 
     /// Apply the freshness policy to `snapshot`. Returns a snapshot
     /// whose `speed` is `nil` when:

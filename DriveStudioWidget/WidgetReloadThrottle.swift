@@ -33,9 +33,17 @@ final class WidgetReloadThrottle {
     static let shared = WidgetReloadThrottle()
 
     /// Minimum interval between speed-driven widget reload requests.
-    /// Five minutes matches Apple's documented provider cadence and
-    /// keeps WidgetKit budget sane.
-    static let minSpeedReloadInterval: TimeInterval = 5 * 60
+    ///
+    /// Speed is the one telemetry field the user notices when it's
+    /// stale — a moving user opening the home-screen widget will not
+    /// tolerate seeing `0 km/h` for 5 minutes after they started
+    /// driving. We therefore throttle speed reloads much more tightly
+    /// than other categories: one reload per 30 s. That is still well
+    /// under WidgetKit's per-app budget (~40 reloads/day per app) and
+    /// gives the moving user a near-real-time feel without burning
+    /// the budget on a stationary device (no speed changes → no
+    /// reload requests → zero cost).
+    static let minSpeedReloadInterval: TimeInterval = 30
 
     private var lastSpeedReload: Date? = nil
     private let lock = NSLock()

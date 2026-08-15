@@ -79,6 +79,15 @@ struct WidgetCanvas: View {
 
                             LayerView(layer: layer, canvasSide: side, batteryTick: batteryTick, speedTick: speedTick)
                                 .frame(width: w, height: h)
+                                // **Two-finger transform.** Editor pinch
+                                // + rotate writes `scale` and `rotation`
+                                // onto the spec. Apply them here (with
+                                // `.center` anchor) so the preview
+                                // matches what the widget will render.
+                                .scaleEffect(CGFloat(layer.scale ?? 1.0),
+                                             anchor: .center)
+                                .rotationEffect(.degrees(layer.rotation ?? 0),
+                                                anchor: .center)
                                 .position(x: x + w / 2, y: y + h / 2)
                                 .allowsHitTesting(false)
 
@@ -127,7 +136,9 @@ struct WidgetCanvas: View {
                     }
                 }
 
-                // ── Interaction overlay — NOT clipped so handles show at edges ──
+                // ── Interaction overlay — clipped inside the overlay itself
+                //    so the chrome can't extend over UI buttons outside
+                //    the canvas (e.g. the "Add Vehicle" button row). ──
                 LayerEditorOverlay(
                     spec: $spec,
                     selectedLayerIndex: $selectedLayerIndex,

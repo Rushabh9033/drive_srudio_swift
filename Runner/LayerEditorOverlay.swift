@@ -31,7 +31,27 @@ struct LayerEditorOverlay: View {
     @State private var groupStartBBox: CGRect? = nil
     @State private var groupSiblings: [(index: Int, frame: CGRect)] = []
 
+    // ── Two-finger transform state — captured ONCE at gesture start ──────────
+    /// `scale` at the moment the pinch gesture began (so the math is
+    /// `start × magnification` rather than multiplicative drift).
+    @State private var pinchStartScale: Double = 1.0
+    /// `rotation` in degrees at the moment the rotate gesture began.
+    @State private var rotationStartDegrees: Double = 0
+    /// `true` once the gesture has captured its start values; reset on
+    /// `.onEnded` so the next gesture re-captures.
+    @State private var transformDidStart: Bool = false
+
     var body: some View {
+        // The overlay's chrome and handles are clipped to the canvas's
+        // rounded-rect shape (matching the layer-content clip in
+        // `WidgetCanvas`). Without this clip, the yellow selection
+        // border would extend visually AND for hit-testing past the
+        // canvas edge whenever a layer is free-placed near (or
+        // outside) the canvas — covering UI buttons like "Add
+        // Vehicle" that sit in rows above/below the canvas and
+        // making them un-tappable. Clip restricts both the visual
+        // chrome and the gesture hit-region to the canvas's rounded
+        // rect so off-canvas buttons stay interactive.
         ZStack(alignment: .topLeading) {
 
             // ── Background tap-to-deselect ────────────────────────────────────
@@ -102,6 +122,42 @@ struct LayerEditorOverlay: View {
                             }
                             .onEnded { _ in isDragging = false }
                     )
+                    // Two-finger pinch + rotate on the layer body itself.
+                    // Composed as `SimultaneousGesture` so two thumbs can
+                    // both pinch AND rotate at the same time without one
+                    // gesture cancelling the other. SwiftUI's gesture
+                    // system routes single-finger drag to the gesture
+                    // above (via `minimumDistance: 12`) and two-finger
+                    // transforms here.
+                    .simultaneousGesture(
+                        SimultaneousGesture(
+                            MagnificationGesture(),
+                            RotationGesture()
+                        )
+                        .onChanged { val in
+                            // `val.first` / `val.second` are optional
+                            // because SimultaneousGesture delivers a
+                            // value from each gesture independently —
+                            // a pure pinch has no rotation (and vice
+                            // versa). Use 1.0 / 0 as the identity
+                            // fallback so the math stays well-defined.
+                            let scaleVal = val.first ?? 1.0
+                            let rotVal = val.second ?? .zero
+                            if !transformDidStart {
+                                transformDidStart = true
+                                pinchStartScale = layer.scale ?? 1.0
+                                rotationStartDegrees = layer.rotation ?? 0
+                            }
+                            let newScale = max(0.1, min(10.0,
+                                pinchStartScale * Double(scaleVal)))
+                            let newRotation = rotationStartDegrees
+                                + Double(rotVal.degrees)
+                            applyTransform(
+                                index: i, layer: layer,
+                                scale: newScale, rotation: newRotation)
+                        }
+                        .onEnded { _ in transformDidStart = false }
+                    )
                     .onTapGesture(count: 2) { onInspect?(i) }
 
                 // Handles — positioned at corners of the SAME tight chrome rect
@@ -148,10 +204,46 @@ struct LayerEditorOverlay: View {
                                     groupSiblings = []
                                 }
                         )
+                        // Pinch + rotate also work on the corner knobs
+                        // themselves (handy when the user wants to grab
+                        // a corner and two-thumb the layer without
+                        // aiming at the body). Same composition rules
+                        // as the body gesture above.
+                        .simultaneousGesture(
+                            SimultaneousGesture(
+                                MagnificationGesture(),
+                                RotationGesture()
+                            )
+                            .onChanged { val in
+                                let scaleVal = val.first ?? 1.0
+                                let rotVal = val.second ?? .zero
+                                if !transformDidStart {
+                                    transformDidStart = true
+                                    pinchStartScale = layer.scale ?? 1.0
+                                    rotationStartDegrees = layer.rotation ?? 0
+                                }
+                                let newScale = max(0.1, min(10.0,
+                                    pinchStartScale * Double(scaleVal)))
+                                let newRotation = rotationStartDegrees
+                                    + Double(rotVal.degrees)
+                                applyTransform(
+                                    index: i, layer: layer,
+                                    scale: newScale, rotation: newRotation)
+                            }
+                            .onEnded { _ in transformDidStart = false }
+                        )
                 }
             }
         }
         .frame(width: canvasSide, height: canvasSide)
+        // Clip the chrome + handles to the canvas's rounded rect so a
+        // layer free-placed near (or past) the canvas edge doesn't
+        // extend its yellow selection border over UI buttons (e.g.
+        // "Add Vehicle") sitting in the row above the canvas. The
+        // shape matches the layer-content clip in `WidgetCanvas` so
+        // the visible chrome and the rendered asset share the same
+        // outline.
+        .clipShape(RoundedRectangle(cornerRadius: 24))
     }
 
     // ── Frame calculations ────────────────────────────────────────────────────
@@ -199,63 +291,56 @@ struct LayerEditorOverlay: View {
 
     private func moveLayer(index: Int, layer: WidgetLayer, toX: Double, toY: Double) {
         guard var layers = spec.layers, index < layers.count else { return }
-        let w = layer.w ?? 20
-        let h = layer.h ?? 10
 
-        // ── Grouped layer: move every sibling by the same delta, then clamp
-        // the whole group's bounding box to the canvas together.
+        // ── Grouped layer: move every sibling by the same delta.
+        // NO clamp — the user wants full freedom to position layers
+        // (and entire composites) partially off-canvas.
         if let gid = layer.groupId {
-            let siblings = layers.enumerated()
-                .filter { $0.offset != index && $0.element.groupId == gid }
             let deltaX = (toX - (layer.x ?? 0))
             let deltaY = (toY - (layer.y ?? 0))
-
-            // Proposed new frames for the dragged layer + every sibling
-            var proposed: [(idx: Int, x: Double, y: Double, isImage: Bool)] = []
-            proposed.append((index, toX, toY, layer.kind == "image"))
-            for s in siblings {
-                let sX = (s.element.x ?? 0) + deltaX
-                let sY = (s.element.y ?? 0) + deltaY
-                proposed.append((s.offset, sX, sY, s.element.kind == "image"))
-            }
-
-            // Compute group bbox in 0-100 design space, then clamp so it fits
-            let xs = proposed.map { $0.x }
-            let ys = proposed.map { $0.y }
-            let ws = proposed.map { $0.x + ($0.isImage ? 100 : (layers[$0.idx].w ?? 20)) }
-            let hs = proposed.map { $0.y + ($0.isImage ? 100 : (layers[$0.idx].h ?? 10)) }
-            let groupMinX = xs.min() ?? 0
-            let groupMinY = ys.min() ?? 0
-            let groupMaxX = ws.max() ?? 100
-            let groupMaxY = hs.max() ?? 100
-            let groupW = groupMaxX - groupMinX
-            let groupH = groupMaxY - groupMinY
-
-            var clampDX: Double = 0
-            var clampDY: Double = 0
-            if groupMinX + clampDX < 0 { clampDX = -groupMinX }
-            if groupMinY + clampDY < 0 { clampDY = -groupMinY }
-            if groupMaxX + clampDX > 100 { clampDX = 100 - groupMaxX }
-            if groupMaxY + clampDY > 100 { clampDY = 100 - groupMaxY }
-
-            for p in proposed {
-                layers[p.idx].x = p.x + clampDX
-                layers[p.idx].y = p.y + clampDY
+            layers[index].x = toX
+            layers[index].y = toY
+            for i in layers.indices
+            where i != index && layers[i].groupId == gid {
+                layers[i].x = (layers[i].x ?? 0) + deltaX
+                layers[i].y = (layers[i].y ?? 0) + deltaY
             }
             spec.layers = layers
             return
         }
 
-        if layer.kind == "image" {
-            // Images can extend past the canvas edge intentionally —
-            // chrome just stops at the canvas border.
-            layers[index].x = toX
-            layers[index].y = toY
+        // Single layer: free placement — no canvas clamp. x/y can be
+        // negative or > 100 so the user can tuck an asset partially
+        // behind a neighboring widget edge or off the visible canvas
+        // entirely. The widget itself renders the spec as-stored, so
+        // off-canvas portions simply don't appear in the home-screen
+        // widget but stay available in the editor preview for
+        // repositioning.
+        layers[index].x = toX
+        layers[index].y = toY
+        spec.layers = layers
+    }
+
+    // ── Two-finger transform (scale + rotate) ────────────────────────────────
+
+    /// Apply a pinch-derived scale and rotation to the layer at `index`.
+    /// When the layer is part of a `groupId` group, the same transform
+    /// is applied to every sibling so the composite asset scales and
+    /// rotates as a unit. The transform is applied additively on top of
+    /// the group's existing per-layer scale/rotation so the user can
+    /// iterate (pinch once, pinch again — each gesture captures its own
+    /// start values, never multiplies on top of in-flight ones).
+    private func applyTransform(index: Int, layer: WidgetLayer,
+                                scale: Double, rotation: Double) {
+        guard var layers = spec.layers, index < layers.count else { return }
+        if let gid = layer.groupId {
+            for i in layers.indices where layers[i].groupId == gid {
+                layers[i].scale = scale
+                layers[i].rotation = rotation
+            }
         } else {
-            // `x` / `y` are the top-left of the frame in 0-100% design
-            // space. Clamp to keep the entire frame inside the canvas.
-            layers[index].x = max(0, min(100.0 - w, toX))
-            layers[index].y = max(0, min(100.0 - h, toY))
+            layers[index].scale = scale
+            layers[index].rotation = rotation
         }
         spec.layers = layers
     }
@@ -299,10 +384,9 @@ struct LayerEditorOverlay: View {
 
             if grp.size.width  < minPx * 2 { grp.size.width  = minPx * 2 }
             if grp.size.height < minPx * 2 { grp.size.height = minPx * 2 }
-            grp.origin.x = max(0, min(canvasSide - grp.size.width,  grp.origin.x))
-            grp.origin.y = max(0, min(canvasSide - grp.size.height, grp.origin.y))
-            grp.size.width  = min(grp.size.width,  canvasSide)
-            grp.size.height = min(grp.size.height, canvasSide)
+            // NO canvas clamp — free placement. Group bbox can extend
+            // past the canvas edges so the user has full creative
+            // freedom over the composite asset.
 
             let scaleX = grp.size.width  / startGroupBBox.size.width
             let scaleY = grp.size.height / startGroupBBox.size.height
@@ -357,12 +441,11 @@ struct LayerEditorOverlay: View {
         if fr.size.width  < minPx { fr.size.width  = minPx }
         if fr.size.height < minPx { fr.size.height = minPx }
 
-        if !isImage {
-            fr.origin.x = max(0, min(canvasSide - fr.size.width,  fr.origin.x))
-            fr.origin.y = max(0, min(canvasSide - fr.size.height, fr.origin.y))
-            fr.size.width  = min(fr.size.width,  canvasSide)
-            fr.size.height = min(fr.size.height, canvasSide)
-        }
+        // NO canvas clamp — free placement. The single layer can be
+        // resized past the canvas edges so the user has full freedom
+        // to size assets exactly how they want. Off-canvas portions
+        // are clipped by the widget's rounded-rect clip shape at
+        // render time, but the spec values themselves are unlimited.
 
         layers[index].x = Double(fr.origin.x    / canvasSide * 100)
         layers[index].y = Double(fr.origin.y    / canvasSide * 100)

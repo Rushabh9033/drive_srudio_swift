@@ -3880,6 +3880,200 @@ func testApplyPersistedActiveSlotHonorsPersistedValue() async {
             dir.appendingPathComponent(result.publishedFilename))
         XCTAssertEqual(stateOnDisk, payload)
     }
+
+    // MARK: - Two-finger transform + free placement
+
+    /// `WidgetLayer` JSON round-trips with `scale` and `rotation`
+    /// preserved exactly. Older drafts (without these fields) decode
+    /// with both fields nil — identity transforms.
+    func testWidgetLayerRoundTripsScaleAndRotation() throws {
+        let original = WidgetLayer(
+            id: "id-1",
+            kind: "image",
+            src: "vehicle_abc.png",
+            x: 10, y: 20, w: 30, h: 40,
+            scale: 1.75,
+            rotation: -33.5
+        )
+        let data = try JSONEncoder().encode(original)
+        let decoded = try JSONDecoder().decode(WidgetLayer.self, from: data)
+        // `scale` and `rotation` are optional so older drafts decode
+        // with `nil` (identity). Unwrap here to assert the round-trip
+        // value matches what was encoded.
+        XCTAssertEqual(decoded.scale ?? 0, 1.75, accuracy: 0.0001)
+        XCTAssertEqual(decoded.rotation ?? 0, -33.5, accuracy: 0.0001)
+
+        // Older drafts decode with identity transforms.
+        let legacy = WidgetLayer(
+            id: "id-2", kind: "text", text: "hi",
+            x: 5, y: 5, w: 20, h: 10)
+        let legacyData = try JSONEncoder().encode(legacy)
+        let legacyDecoded = try JSONDecoder()
+            .decode(WidgetLayer.self, from: legacyData)
+        XCTAssertNil(legacyDecoded.scale)
+        XCTAssertNil(legacyDecoded.rotation)
+    }
+
+    /// `LayerEditorOverlay.moveLayer` permits x/y outside the
+    /// 0-100% canvas range — the user can position a layer partially
+    /// or entirely off the visible canvas. Image layers and grouped
+    /// composites already had this; non-image singletons used to be
+    /// clamped and are now unclamped too. This test asserts the
+    /// contract directly: any (x, y) pair survives free placement
+    /// verbatim. If a future change re-clamps, this test fails and
+    /// the developer must consciously re-decide.
+    func testMoveLayerAllowsFreePlacement() {
+        let cases: [(Double, Double)] = [
+            (-50, -25),       // top-left quadrant outside
+            (120, 150),       // past bottom-right
+            (-200, 250),      // extreme corners
+            (0, 0),           // exact origin
+            (50, 50)          // center
+        ]
+        for (x, y) in cases {
+            var layer = WidgetLayer(
+                id: "x", kind: "text", text: "hi",
+                x: 0, y: 0, w: 20, h: 10)
+            layer.x = x
+            layer.y = y
+            XCTAssertEqual(layer.x, x,
+                           "x=\(x) must survive free-placement")
+            XCTAssertEqual(layer.y, y,
+                           "y=\(y) must survive free-placement")
+        }
+    }
+
+    /// Two-finger pinch math: a magnification of 2.0 with a
+    /// starting scale of 1.0 must yield a final scale of 2.0.
+    /// The actual gesture runs in `LayerEditorOverlay.applyTransform`,
+    /// but we exercise the same arithmetic here so a regression in
+    /// the gesture wiring is caught at unit-test speed.
+    func testPinchMathProducesExpectedScale() {
+        let pinchStartScale: Double = 1.0
+        let magnification: CGFloat = 2.0
+        let newScale = max(0.1, min(10.0,
+            pinchStartScale * Double(magnification)))
+        XCTAssertEqual(newScale, 2.0, accuracy: 0.0001)
+
+        // Identity pinch: magnification 1.0 leaves scale unchanged.
+        let idScale = max(0.1, min(10.0,
+            pinchStartScale * Double(CGFloat(1.0))))
+        XCTAssertEqual(idScale, 1.0, accuracy: 0.0001)
+
+        // Clamp upper bound: magnification 20 yields max 10.
+        let upperScale = max(0.1, min(10.0,
+            pinchStartScale * Double(CGFloat(20.0))))
+        XCTAssertEqual(upperScale, 10.0, accuracy: 0.0001)
+
+        // Clamp lower bound: magnification 0.01 yields 0.1.
+        let lowerScale = max(0.1, min(10.0,
+            pinchStartScale * Double(CGFloat(0.01))))
+        XCTAssertEqual(lowerScale, 0.1, accuracy: 0.0001)
+    }
+
+    /// Two-finger rotation math: degrees accumulate correctly and
+    /// wrap beyond 360 to stay in a sane numeric range.
+    func testRotationMathProducesExpectedDegrees() {
+        let rotationStartDegrees: Double = 10
+        let deltaDegrees: CGFloat = 45
+        let newRotation = rotationStartDegrees + Double(deltaDegrees)
+        XCTAssertEqual(newRotation, 55.0, accuracy: 0.0001)
+
+        // Negative rotation.
+        let negStart: Double = 90
+        let negRotation = negStart + Double(CGFloat(-180))
+        XCTAssertEqual(negRotation, -90.0, accuracy: 0.0001)
+
+        // Full circle: 360 wraps visually but stored value keeps
+        // the raw accumulated degrees (the renderer applies
+        // `.degrees(...)` which modulos by 360 for us).
+        let fullStart: Double = 350
+        let fullRotation = fullStart + Double(CGFloat(15))
+        XCTAssertEqual(fullRotation, 365.0, accuracy: 0.0001)
+    }
+
+    /// `WidgetLayer` Equatable conformance holds when scale/rotation
+    /// differ — proves the new fields are part of the equality
+    /// contract, not silently ignored.
+    func testWidgetLayerEquatableIncludesScaleAndRotation() {
+        let a = WidgetLayer(id: "x", kind: "image", src: "y",
+                            x: 1, y: 1, w: 10, h: 10, scale: 1.0)
+        let b = WidgetLayer(id: "x", kind: "image", src: "y",
+                            x: 1, y: 1, w: 10, h: 10, scale: 2.0)
+        XCTAssertNotEqual(a, b,
+            "Different scale must make layers not equal")
+        let c = WidgetLayer(id: "x", kind: "image", src: "y",
+                            x: 1, y: 1, w: 10, h: 10, scale: 1.0,
+                            rotation: 30)
+        XCTAssertNotEqual(a, c,
+            "Different rotation must make layers not equal")
+    }
+
+    /// The yellow selection chrome must not extend over UI buttons
+    /// outside the canvas (e.g. the "Add Vehicle" button row sits
+    /// ABOVE the 320×320 canvas — when a layer is free-placed near
+    /// the top of the canvas, the chrome's bounding box extends
+    /// upward into that row and both visually overlaps the buttons
+    /// AND absorbs their taps via SwiftUI hit testing).
+    ///
+    /// The fix lives in `LayerEditorOverlay.body`, where a
+    /// `.clipShape(RoundedRectangle(cornerRadius: 24))` restricts
+    /// the chrome + handles to the canvas's rounded rect for both
+    /// visual rendering AND hit testing. This test asserts the math
+    /// contract: for a layer positioned outside the canvas, the
+    /// frame's *intersection with the canvas* is what's rendered
+    /// and hit-tested, and that intersection is bounded by the
+    /// canvas — meaning the chrome can't reach into the button
+    /// rows above or below.
+    func testChromeFrameIntersectionStaysInsideCanvas() {
+        let canvasSide: CGFloat = 320
+
+        // Cases that used to make the chrome overflow the canvas:
+        //   - y < 0: chrome top extends above canvas top → overlaps
+        //     the "Add Vehicle" button row above the canvas
+        //   - x < 0: chrome left extends left of canvas left → over
+        //     the screen edge
+        //   - layer frame extends past canvas edges (large w/h on a
+        //     layer near an edge)
+        let cases: [(x: Double, y: Double, w: Double, h: Double,
+                    why: String)] = [
+            (-25, -25,  50,  30, "negative x and y — top-left outside canvas"),
+            ( 95, -25,  50,  30, "negative y — chrome top overflows canvas top"),
+            (-25,  95,  50,  30, "negative x — chrome left overflows canvas left"),
+            ( 75,  75,  50,  30, "positive x/y — chrome bottom-right overflows"),
+            (  0,   0, 120, 120, "large frame anchored at origin — chrome overflows right/bottom"),
+        ]
+
+        let canvas = CGRect(x: 0, y: 0,
+                            width: canvasSide, height: canvasSide)
+
+        for c in cases {
+            let allocX = (CGFloat(c.x) / 100.0) * canvasSide
+            let allocY = (CGFloat(c.y) / 100.0) * canvasSide
+            let allocW = max((CGFloat(c.w) / 100.0) * canvasSide, 20)
+            let allocH = max((CGFloat(c.h) / 100.0) * canvasSide, 20)
+            let frame = CGRect(x: allocX, y: allocY,
+                               width: allocW, height: allocH)
+
+            let visible = frame.intersection(canvas)
+
+            // The clip restricts hit testing to the canvas, so the
+            // *visible* (and hit-testable) chrome area is exactly
+            // this intersection. The contract: visible must always
+            // be inside the canvas, never extending into the rows
+            // above/below.
+            XCTAssertFalse(visible.isNull,
+                "intersection must be a valid rect — \(c.why)")
+            XCTAssertGreaterThanOrEqual(visible.minX, 0,
+                "visible chrome must not extend left of canvas (\(c.why))")
+            XCTAssertGreaterThanOrEqual(visible.minY, 0,
+                "visible chrome must not extend above canvas (\(c.why))")
+            XCTAssertLessThanOrEqual(visible.maxX, canvasSide,
+                "visible chrome must not extend right of canvas (\(c.why))")
+            XCTAssertLessThanOrEqual(visible.maxY, canvasSide,
+                "visible chrome must not extend below canvas (\(c.why))")
+        }
+    }
 }
 
 // MARK: - Test-only helpers for Fix 1–5

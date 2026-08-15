@@ -48,6 +48,15 @@ struct WidgetLayer: Codable, Identifiable, Equatable {
     /// composite asset behaves as a single unit on the canvas.
     var groupId: String?
 
+    /// Uniform scale multiplier applied by the editor's pinch gesture.
+    /// `nil` or `1.0` = identity. Stored as an optional so older
+    /// drafts (which never wrote these fields) decode unchanged.
+    var scale: Double?
+    /// Rotation in degrees, counter-clockwise, applied by the
+    /// editor's two-finger rotation gesture. `nil` or `0` =
+    /// identity.
+    var rotation: Double?
+
     // Default initializers for editor creation
     static func newText() -> WidgetLayer {
         WidgetLayer(

@@ -562,6 +562,14 @@ struct DesignSpaceLayerView: View {
         // edge — the PM-clipping bug on the clock layer.
         .frame(maxWidth: rect.width, maxHeight: rect.height,
                alignment: parseAlignment(layer.align ?? "center"))
+        // **Two-finger transform.** Editor pinch + rotate writes
+        // `scale` and `rotation` onto the spec; the widget applies
+        // them here so the home-screen render matches the editor
+        // preview exactly. Anchor `.center` keeps the layer's center
+        // point stable under the transform so off-center rotations
+        // pivot around the layer, not the canvas origin.
+        .scaleEffect(CGFloat(layer.scale ?? 1.0), anchor: .center)
+        .rotationEffect(.degrees(layer.rotation ?? 0), anchor: .center)
         .position(x: rect.midX, y: rect.midY)
     }
 

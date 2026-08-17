@@ -37,17 +37,20 @@
 		     AND `allowsBackgroundLocationUpdates = true` on the
 		     location manager. -->
 		<string>location</string>
+		<!-- `fetch` enables BGTaskScheduler-driven BGAppRefreshTask
+		     runs. iOS wakes the app for ~30 seconds at OS-chosen
+		     intervals (typically minutes to hours) so the widget
+		     gallery stays fresh even when the user hasn't driven
+		     in a while. The matching handler lives in
+		     AppDelegate.swift's `handleAppRefresh(_:)` and calls
+		     TelemetryService.shared.snapshotAndSave() +
+		     WidgetCenter.shared.reloadAllTimelines(). -->
+		<string>fetch</string>
 	</array>
-	<!-- BGTaskSchedulerPermittedIdentifiers intentionally absent.
-	The host app removed its BGAppRefreshTask implementation because
-	background refresh cannot provide real-time speed. Telemetry
-	freshness comes from foreground collection plus WidgetKit's
-	normal timeline policy.
-	The `fetch` UIBackgroundModes entry was also removed because no
-	application:performFetchWithCompletionHandler: implementation
-	exists in the codebase. Apple requires a real background-fetch
-	handler for every declared `fetch` mode; declaring it without one
-	is a rejection risk. -->
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.drivestudio.app.refresh</string>
+	</array>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Drive Studio needs access to your microphone to record custom vehicle audio prompts and cues.</string>
 	<key>UILaunchStoryboardName</key>

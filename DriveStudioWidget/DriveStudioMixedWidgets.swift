@@ -95,7 +95,7 @@ struct CommandCenterView: View {
                         .padding(s * 0.04)
 
                     VStack(spacing: s * 0.02) {
-                        Text(e.date.timeString)
+                        Text(e.date, style: .time)
                             .font(.system(size: s * 0.16, weight: .black, design: .rounded))
                             .foregroundColor(Color(hex: "00E5FF"))
 
@@ -184,7 +184,7 @@ struct VortexDriveView: View {
                     // Center
                     Circle().fill(bgColor).frame(width: s*0.44).position(x: cx, y: cy)
                     VStack(spacing: 2) {
-                        Text(e.date.timeString).font(.system(size: s*0.14, weight: .black, design: .rounded)).foregroundColor(.white)
+                        Text(e.date, style: .time).font(.system(size: s*0.14, weight: .black, design: .rounded)).foregroundColor(.white)
                         if let kmh = e.speed {
                             Text(WidgetDisplayMath.formattedSpeed(kmh: kmh)).font(.system(size: s*0.07, weight: .bold)).foregroundColor(Color(hex: "F97316"))
                         } else {
@@ -251,8 +251,8 @@ struct GridHUDView: View {
                 ZStack {
                     RoundedRectangle(cornerRadius: 12).fill(Color(hex: "1A2020"))
                     VStack(spacing: 3) {
-                        Text(e.date.timeString).font(.system(size: 30, weight: .black, design: .rounded)).foregroundColor(.white)
-                        Text(e.date.dateString).font(.system(size: 10, weight: .medium)).foregroundColor(Color(hex: "4DC98A"))
+                        Text(e.date, style: .time).font(.system(size: 30, weight: .black, design: .rounded)).foregroundColor(.white)
+                        Text(e.date, style: .date).font(.system(size: 10, weight: .medium)).foregroundColor(Color(hex: "4DC98A"))
                     }
                 }.padding(.horizontal, 10).padding(.bottom, 10)
             }
@@ -353,7 +353,7 @@ struct PhantomView: View {
                 ZStack {
                     LinearGradient(colors: [Color(hex: "4F46E5"), Color(hex: "7C3AED")], startPoint: .leading, endPoint: .trailing)
                     VStack(spacing: 2) {
-                        Text(e.date.timeString).font(.system(size: 30, weight: .black, design: .rounded)).foregroundColor(.white)
+                        Text(e.date, style: .time).font(.system(size: 30, weight: .black, design: .rounded)).foregroundColor(.white)
                         Text(e.date.ampm).font(.system(size: 9, weight: .medium)).foregroundColor(.white.opacity(0.5))
                     }.padding(.top, 4)
                 }.frame(height: 60).clipShape(UnevenRoundedRectangle(topLeadingRadius: 22, topTrailingRadius: 22))
@@ -413,8 +413,8 @@ struct SplitPanelView: View {
                 ZStack {
                     Color(hex: "0D1A1A")
                     VStack(spacing: 3) {
-                        Text(e.date.timeString).font(.system(size: 34, weight: .black, design: .rounded)).foregroundColor(Color(hex: "00F0FF"))
-                        Text(e.date.dateString).font(.system(size: 10, weight: .medium)).foregroundColor(Color(hex: "4DC98A"))
+                        Text(e.date, style: .time).font(.system(size: 34, weight: .black, design: .rounded)).foregroundColor(Color(hex: "00F0FF"))
+                        Text(e.date, style: .date).font(.system(size: 10, weight: .medium)).foregroundColor(Color(hex: "4DC98A"))
                     }
                 }
                 Divider().background((Color(hex: "00F0FF")).opacity(0.2))
@@ -487,8 +487,8 @@ struct SolarDashView: View {
                             .frame(width: R*2).rotationEffect(.degrees(-90)).position(x: cx, y: cy)
                     }
                     Circle().fill(bgColor).frame(width: s*0.24).position(x: cx, y: cy)
-                    Text(e.date.timeString).font(.system(size: s*0.13, weight: .black, design: .rounded)).foregroundColor(.white).position(x: cx, y: cy-s*0.02)
-                    Text(e.date.dateString).font(.system(size: s*0.065, weight: .medium)).foregroundColor(Color(hex: "4DC98A")).position(x: cx, y: g.size.height-14)
+                    Text(e.date, style: .time).font(.system(size: s*0.13, weight: .black, design: .rounded)).foregroundColor(.white).position(x: cx, y: cy-s*0.02)
+                    Text(e.date, style: .date).font(.system(size: s*0.065, weight: .medium)).foregroundColor(Color(hex: "4DC98A")).position(x: cx, y: g.size.height-14)
                 }
             }
         }.clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
@@ -531,8 +531,8 @@ struct NeonStripView: View {
                 }.frame(height: 4).padding(.horizontal, 16).padding(.bottom, 8)
 
                 // Clock + date
-                Text(e.date.timeString).font(.system(size: 22, weight: .black, design: .rounded)).foregroundColor(.white)
-                Text(e.date.dateString).font(.system(size: 10, weight: .medium)).foregroundColor(Color(hex: "00E5FF"))
+                Text(e.date, style: .time).font(.system(size: 22, weight: .black, design: .rounded)).foregroundColor(.white)
+                Text(e.date, style: .date).font(.system(size: 10, weight: .medium)).foregroundColor(Color(hex: "00E5FF"))
                 if let frac = batteryFrac {
                     Text("\(Int(frac * 100))% battery").font(.system(size: 10)).foregroundColor((Color(hex: "00E5FF")).opacity(0.6)).padding(.top, 4)
                 } else {
@@ -625,10 +625,10 @@ struct CarbonView: View {
                                 }
                             }.frame(height: 6).padding(.horizontal, 10)
                             if let frac = batteryFrac {
-                                Text("\(Int(frac * 100))% batt · " + e.date.dateString)
+                                Text("\(Int(frac * 100))% batt · ") + Text(e.date, style: .date)
                                     .font(.system(size: 9, weight: .medium)).foregroundColor(Color(hex: "22C55E"))
                             } else {
-                                Text("— batt · " + e.date.dateString)
+                                Text("— batt · ") + Text(e.date, style: .date)
                                     .font(.system(size: 9, weight: .medium)).foregroundColor(Color(hex: "22C55E"))
                             }
                         }
@@ -688,7 +688,7 @@ struct RadarView: View {
                     Text("KM/H").font(.system(size: s*0.065)).foregroundColor((Color(hex: "00E5FF")).opacity(0.5)).position(x: cx, y: cy+s*0.09)
 
                     // Clock
-                    Text(e.date.timeString).font(.system(size: s*0.085, weight: .bold, design: .rounded)).foregroundColor(.white).position(x: cx, y: cy+s*0.21)
+                    Text(e.date, style: .time).font(.system(size: s*0.085, weight: .bold, design: .rounded)).foregroundColor(.white).position(x: cx, y: cy+s*0.21)
 
                     // Battery bar — empty track when battery unknown.
                     ZStack(alignment: .leading) {
@@ -727,8 +727,8 @@ struct TriZoneView: View {
                 ZStack {
                     RoundedRectangle(cornerRadius: 12).fill(Color(hex: "0D1020"))
                     VStack(spacing: 2) {
-                        Text(e.date.timeString).font(.system(size: 30, weight: .black, design: .rounded)).foregroundColor(.white)
-                        Text(e.date.dateString).font(.system(size: 10, weight: .medium)).foregroundColor(Color(hex: "4F46E5"))
+                        Text(e.date, style: .time).font(.system(size: 30, weight: .black, design: .rounded)).foregroundColor(.white)
+                        Text(e.date, style: .date).font(.system(size: 10, weight: .medium)).foregroundColor(Color(hex: "4F46E5"))
                     }
                 }.frame(maxWidth: .infinity, maxHeight: .infinity)
 
@@ -806,7 +806,7 @@ struct GalaxyView: View {
                     }
 
                     Circle().fill(bgColor).frame(width: s*0.28).position(x: cx, y: cy)
-                    Text(e.date.timeString).font(.system(size: s*0.10, weight: .black, design: .rounded)).foregroundColor(.white).position(x: cx, y: cy-s*0.015)
+                    Text(e.date, style: .time).font(.system(size: s*0.10, weight: .black, design: .rounded)).foregroundColor(.white).position(x: cx, y: cy-s*0.015)
                     if let kmh = e.speed {
                         Text("\(Int(kmh))km").font(.system(size: s*0.055)).foregroundColor((Color(hex: "7C3AED")).opacity(0.6)).position(x: cx, y: cy+s*0.07)
                     } else {

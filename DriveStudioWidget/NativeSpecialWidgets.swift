@@ -109,12 +109,12 @@ struct OrbitDateWidgetView: View {
                         .frame(width: (trackR - strokeW) * 2, height: (trackR - strokeW) * 2)
                         .position(x: cx, y: cy)
 
-                    Text(timeString)
+                    Text(entry.date, style: .time)
                         .font(.system(size: size * 0.22, weight: .black, design: .rounded))
                         .foregroundColor(.white)
                         .position(x: cx, y: cy - size * 0.04)
 
-                    Text(dateString)
+                    Text(entry.date, style: .date)
                         .font(.system(size: size * 0.07, weight: .medium, design: .rounded))
                         .foregroundColor(Color(hex: "378ADD"))
                         .position(x: cx, y: cy + size * 0.15)
@@ -182,7 +182,7 @@ struct NoirGoldWidgetView: View {
                 .padding(6)
 
             VStack(spacing: 4) {
-                Text(timeString)
+                Text(entry.date, style: .time)
                     .font(.system(size: 48, weight: .black, design: .rounded))
                     .foregroundColor(Color(hex: "F0C040"))
                     .minimumScaleFactor(0.5)
@@ -300,12 +300,12 @@ struct SegmentsWidgetView: View {
                         .frame(width: (innerR - sw) * 2, height: (innerR - sw) * 2)
                         .position(x: cx, y: cy)
 
-                    Text(timeString)
+                    Text(entry.date, style: .time)
                         .font(.system(size: size * 0.20, weight: .black, design: .rounded))
                         .foregroundColor(Color(hex: "DBEAFE"))
                         .position(x: cx, y: cy - size * 0.03)
 
-                    Text(dateString)
+                    Text(entry.date, style: .date)
                         .font(.system(size: size * 0.065, weight: .medium))
                         .foregroundColor(Color(hex: "F59E0B"))
                         .position(x: cx, y: cy + size * 0.15)
@@ -431,7 +431,7 @@ struct AuroraRingWidgetView: View {
                         .frame(width: 5, height: 5)
                         .position(x: cx, y: cy)
 
-                    Text(timeString)
+                    Text(entry.date, style: .time)
                         .font(.system(size: size * 0.08, weight: .medium, design: .rounded))
                         .foregroundColor(Color(hex: "E9D5FF"))
                         .position(x: cx, y: cy + innerR + sw + 10)
@@ -547,7 +547,7 @@ struct BatteryPieWidgetView: View {
                     }
                     .position(x: cx, y: cy + size * 0.02)
 
-                    Text(dateString)
+                    Text(entry.date, style: .date)
                         .font(.system(size: size * 0.065, weight: .regular))
                         .foregroundColor(Color(hex: "6B2020"))
                         .position(x: cx, y: cy + size * 0.42)
@@ -613,7 +613,7 @@ struct MinimalDateWidgetView: View {
             VStack(spacing: 0) {
                 Spacer()
 
-                Text(timeString)
+                Text(entry.date, style: .time)
                     .font(.system(size: 52, weight: .black, design: .rounded))
                     .foregroundColor(.white)
                     .minimumScaleFactor(0.5)
@@ -624,7 +624,7 @@ struct MinimalDateWidgetView: View {
                     .padding(.horizontal, 28)
                     .padding(.vertical, 8)
 
-                Text(dateString)
+                Text(entry.date, style: .date)
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundColor(Color(hex: "4DC98A"))
 

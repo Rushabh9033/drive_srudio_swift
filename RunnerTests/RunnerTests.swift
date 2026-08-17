@@ -532,27 +532,12 @@ class RunnerTests: XCTestCase {
     /// notes we left behind ("intentionally removed", "intentionally
     /// absent") do not trip the scan.
     func testNoBGAppRefreshRemains() throws {
-        let repoRoot = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent() // RunnerTests/
-            .deletingLastPathComponent() // repo root
-
-        let runnerInfoPlist = repoRoot.appendingPathComponent("Runner/Info.plist")
-        let infoPlistContent = stripPlistComments(try String(contentsOf: runnerInfoPlist, encoding: .utf8))
-        XCTAssertFalse(infoPlistContent.contains("BGTaskSchedulerPermittedIdentifiers"),
-            "Info.plist must not declare BGTaskSchedulerPermittedIdentifiers")
-
-        let runnerDir = repoRoot.appendingPathComponent("Runner")
-        let fm = FileManager.default
-        let files = try fm.subpathsOfDirectory(atPath: runnerDir.path)
-            .filter { $0.hasSuffix(".swift") }
-        for file in files {
-            let url = runnerDir.appendingPathComponent(file)
-            let content = stripSwiftComments(try String(contentsOf: url, encoding: .utf8))
-            XCTAssertFalse(content.contains("BGAppRefreshTask"),
-                "\(file) must not register a BGAppRefreshTask")
-            XCTAssertFalse(content.contains("BGTaskScheduler"),
-                "\(file) must not import or call BGTaskScheduler")
-        }
+        // Replaced by the BGTaskScheduler tests further down (see
+        // testInfoPlistRegistersBackgroundRefreshIdentifier /
+        // testInfoPlistEnablesBackgroundFetchMode /
+        // testAppDelegateRegistersHandlerForBackgroundRefresh /
+        // testAppDelegateRefreshHandlerReschedulesNext) now that
+        // the app ships a real BGAppRefreshTask.
     }
 
     // MARK: - V2 metadata envelope round-trip (preserved)
@@ -3486,33 +3471,11 @@ func testApplyPersistedActiveSlotHonorsPersistedValue() async {
     /// `application:performFetchWithCompletionHandler:` implementation
     /// exists. The `audio` mode may remain.
     func testInfoPlistHasNoBackgroundFetchDeclaration() throws {
-        let repoRoot = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-        let infoPlistURL = repoRoot.appendingPathComponent("Runner/Info.plist")
-        let raw = try String(contentsOf: infoPlistURL, encoding: .utf8)
-        // We look at executable code only — strip HTML comments so
-        // notes about absence do not count.
-        let stripped = stripPlistComments(raw)
-        // The `fetch` entry must not appear in executable key/values.
-        XCTAssertFalse(stripped.contains("<string>fetch</string>"),
-            "Info.plist must not declare UIBackgroundModes → fetch (no handler exists)")
-
-        // The codebase must not contain a `performFetchWithCompletionHandler`
-        // selector or `setMinimumBackgroundFetchInterval`.
-        let fm = FileManager.default
-        let runnerDir = repoRoot.appendingPathComponent("Runner")
-        if let it = fm.enumerator(atPath: runnerDir.path) {
-            while let file = it.nextObject() as? String {
-                guard file.hasSuffix(".swift") else { continue }
-                let url = runnerDir.appendingPathComponent(file)
-                let code = stripSwiftComments(try String(contentsOf: url, encoding: .utf8))
-                XCTAssertFalse(code.contains("performFetchWithCompletionHandler"),
-                    "\(file) must not implement background fetch")
-                XCTAssertFalse(code.contains("setMinimumBackgroundFetchInterval"),
-                    "\(file) must not configure minimum background fetch interval")
-            }
-        }
+        // Replaced by testInfoPlistEnablesBackgroundFetchMode and
+        // testInfoPlistRegistersBackgroundRefreshIdentifier — the
+        // app now ships a real BGAppRefreshTask handler, so the
+        // plist correctly declares `fetch` plus the corresponding
+        // BGTaskSchedulerPermittedIdentifiers entry.
     }
 
     /// Location authorization is foreground-only: `requestWhenInUseAuthorization`
@@ -4803,6 +4766,114 @@ func testApplyPersistedActiveSlotHonorsPersistedValue() async {
         let source = try String(contentsOf: bundleURL, encoding: .utf8)
         XCTAssertTrue(source.contains("DriveStudioLiveActivityWidget()"),
             "DriveStudioWidgetBundle must register DriveStudioLiveActivityWidget()")
+    }
+
+    // MARK: - Background-refresh wiring (BGTaskScheduler)
+
+    /// `BGTaskSchedulerPermittedIdentifiers` must contain the
+    /// refresh-task identifier we register in AppDelegate —
+    /// otherwise iOS silently drops the task.
+    func testInfoPlistRegistersBackgroundRefreshIdentifier() throws {
+        let plist = try loadInfoPlist()
+        let ids = (plist["BGTaskSchedulerPermittedIdentifiers"] as? [String]) ?? []
+        XCTAssertTrue(ids.contains("com.drivestudio.app.refresh"),
+            "Info.plist must declare com.drivestudio.app.refresh in BGTaskSchedulerPermittedIdentifiers")
+    }
+
+    /// `UIBackgroundModes` must include `fetch` so iOS will
+    /// schedule BGAppRefreshTask runs. Declaring the identifier
+    /// without `fetch` is a silent failure.
+    func testInfoPlistEnablesBackgroundFetchMode() throws {
+        let plist = try loadInfoPlist()
+        let modes = (plist["UIBackgroundModes"] as? [String]) ?? []
+        XCTAssertTrue(modes.contains("fetch"),
+            "Info.plist must declare 'fetch' in UIBackgroundModes so BGTaskScheduler can wake the app")
+    }
+
+    /// AppDelegate must register the handler for the matching
+    /// identifier during `didFinishLaunchingWithOptions`. Tests
+    /// grep the source rather than spawning a UIApplication —
+    /// spawning UIApplicationDelegate in unit tests runs into
+    /// bundle-isolation issues, and the source-based check is
+    /// how the Live Activity wiring already asserts this.
+    func testAppDelegateRegistersHandlerForBackgroundRefresh() throws {
+        let repoRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let appDelegateURL = repoRoot.appendingPathComponent("Runner/AppDelegate.swift")
+        let source = try String(contentsOf: appDelegateURL, encoding: .utf8)
+        XCTAssertTrue(source.contains("BGTaskScheduler.shared.register"),
+            "AppDelegate must call BGTaskScheduler.shared.register for the refresh task")
+        XCTAssertTrue(source.contains("com.drivestudio.app.refresh"),
+            "AppDelegate must reference the same identifier declared in Info.plist")
+        XCTAssertTrue(source.contains("snapshotAndSave"),
+            "Refresh handler must refresh the App Group telemetry snapshot")
+        XCTAssertTrue(source.contains("reloadAllTimelines"),
+            "Refresh handler must request widget reloads so the new snapshot reaches the widgets")
+    }
+
+    /// The handler must re-queue the next refresh attempt before
+    /// the work runs. Otherwise a single successful refresh would
+    /// be the last one until the user reopens the app.
+    func testAppDelegateRefreshHandlerReschedulesNext() throws {
+        let repoRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let appDelegateURL = repoRoot.appendingPathComponent("Runner/AppDelegate.swift")
+        let source = try String(contentsOf: appDelegateURL, encoding: .utf8)
+        XCTAssertTrue(source.contains("scheduleNextRefresh"),
+            "AppDelegate handleAppRefresh(_:) must call scheduleNextRefresh() to continue the refresh cycle")
+        XCTAssertTrue(source.contains("BGAppRefreshTaskRequest"),
+            "scheduleNextRefresh() must submit a BGAppRefreshTaskRequest to iOS")
+    }
+
+    // MARK: - Live widget clock (Text(date, style:))
+
+    /// Widgets that display the clock time must use
+    /// `Text(date, style: .time)` so WidgetKit auto-updates the
+    /// display. Sites using `Text(date.timeString)` freeze the
+    /// string at timeline-entry creation time, which is the bug
+    /// that forced the user to open the app to see the current
+    /// time on the home-screen widget.
+    func testWidgetClockUsesLiveTimeText() throws {
+        let repoRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        for rel in [
+            "DriveStudioWidget/DriveStudioMixedWidgets.swift",
+            "DriveStudioWidget/NativeSpecialWidgets.swift"
+        ] {
+            let source = try String(
+                contentsOf: repoRoot.appendingPathComponent(rel),
+                encoding: .utf8
+            )
+            XCTAssertFalse(
+                source.contains("Text(e.date.timeString)") ||
+                source.contains("Text(dateString)") ||
+                source.contains("Text(timeString)"),
+                "\(rel) must not freeze the clock via Text(...timeString); use Text(date, style: .time)"
+            )
+            XCTAssertTrue(
+                source.contains("style: .time"),
+                "\(rel) must use Text(date, style: .time) for live-updating clock displays"
+            )
+        }
+    }
+
+    // MARK: - Helpers
+
+    private func loadInfoPlist() throws -> [String: Any] {
+        let repoRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let url = repoRoot.appendingPathComponent("Runner/Info.plist")
+        let data = try Data(contentsOf: url)
+        guard let plist = try PropertyListSerialization
+            .propertyList(from: data, format: nil) as? [String: Any] else {
+            XCTFail("Info.plist did not parse as a dictionary")
+            return [:]
+        }
+        return plist
     }
 }
 

@@ -32,38 +32,47 @@ import WidgetKit
 enum WidgetTimelineSchedule {
 
     /// Default number of entries a normal home-screen widget provider
-    /// should ship ahead of time. With a 5-minute cadence and 12
+    /// should ship ahead of time. With a 60-second cadence and 60
     /// entries this is ~1 hour of coverage — enough headroom for
     /// WidgetKit batching without spending the system timeline
     /// budget on entries that will never be rendered.
-    static let defaultProviderEntryCount = 12
+    static let defaultProviderEntryCount = 60
 
     /// Maximum number of entries the provider helper will emit, regardless
     /// of what the caller asks for. WidgetKit itself caps how many
     /// pre-rendered entries it keeps.
-    static let maxProviderEntryCount = 24
+    static let maxProviderEntryCount = 60
 
-    /// Apple-recommended minimum spacing between provider entries for
-    /// normal home-screen widgets. Five minutes is the documented
-    /// threshold; tighter spacing is wasted budget.
-    static let minProviderCadenceSeconds: TimeInterval = 5 * 60
+    /// Some widgets (e.g. battery-only with no clock) want to fall
+    /// back to the Apple-documented 5-minute cadence. `makeProviderTimeline`
+    /// accepts any value ≥ 60 s.
+    static let minProviderCadenceSeconds: TimeInterval = 60
 
     /// Upper bound on provider entry spacing. Beyond an hour, an entry
     /// is so stale when it renders that a single fresh `.after` request
     /// would be cheaper.
     static let maxProviderCadenceSeconds: TimeInterval = 60 * 60
 
-    /// Default provider cadence: 5 minutes — the Apple-documented
-    /// minimum for normal widgets.
-    static let defaultProviderCadenceSeconds: TimeInterval = 5 * 60
+    /// Default provider cadence: 60 seconds — the granularity every
+    /// minute-boundary clock widget needs.
+    static let defaultProviderCadenceSeconds: TimeInterval = 60
 
     /// Build a Timeline whose first entry's date is `start`, and whose
-    /// subsequent entries are `cadenceSeconds` apart. Each entry is
-    /// produced by `factory`, which receives the scheduled date.
+    /// subsequent entries are `cadenceSeconds` apart, aligned to the
+    /// top of each minute. Each entry is produced by `factory`, which
+    /// receives the scheduled date.
     ///
-    /// First entry is always `start`. There are no entries between `start`
-    /// and `start + cadenceSeconds`. Output is bounded to
-    /// `providerEntryCount` (clamped to `1...maxProviderEntryCount`).
+    /// **Why minute-alignment:** `Text(e.date, style: .time)` only
+    /// updates when the widget is re-rendered. WidgetKit re-renders a
+    /// widget at the next timeline entry's date. If the next entry's
+    /// date is `11:29:37` (i.e. just `+300s` after a 11:24:37 entry),
+    /// the widget will still show "11:24 AM" at 11:30 because the
+    /// widget never re-rendered with the 11:29:37 entry's date in
+    /// the meantime. Aligning future entries to minute boundaries
+    /// (11:25:00, 11:26:00, …) guarantees iOS has a fresh entry to
+    /// switch to at the top of each minute, so the clock displays the
+    /// current minute without depending on `TimelineView(.everyMinute)`
+    /// firing.
     static func makeProviderTimeline<Entry: TimelineEntry>(
         startingAt start: Date,
         providerEntryCount: Int,
@@ -75,8 +84,30 @@ enum WidgetTimelineSchedule {
                           min(maxProviderCadenceSeconds, cadenceSeconds))
         var entries: [Entry] = []
         entries.reserveCapacity(boundedCount)
-        for offset in 0..<boundedCount {
-            let scheduled = start.addingTimeInterval(TimeInterval(offset) * cadence)
+
+        // First entry uses the actual start time. The widget renders
+        // this immediately; the current minute is captured here.
+        entries.append(factory(start))
+
+        // Subsequent entries are aligned to clean minute boundaries.
+        // - start = 11:29:37 → next boundary = 11:30:00
+        // - start = 11:30:00 → next boundary = 11:31:00
+        // The seconds-component of `start` is subtracted to round
+        // down to the top of the current minute, then `+ 60s` for
+        // each subsequent entry.
+        let calendar = Calendar.current
+        let secondsComponent = TimeInterval(
+            calendar.component(.second, from: start)
+        )
+        let nanosecondsComponent = TimeInterval(
+            calendar.component(.nanosecond, from: start)
+        ) / 1_000_000_000
+        let topOfCurrentMinute = start
+            .addingTimeInterval(-(secondsComponent + nanosecondsComponent))
+
+        for offset in 1..<boundedCount {
+            let scheduled = topOfCurrentMinute
+                .addingTimeInterval(TimeInterval(offset) * cadence)
             entries.append(factory(scheduled))
         }
         return Timeline(entries: entries, policy: .atEnd)
@@ -92,8 +123,23 @@ enum WidgetTimelineSchedule {
         let boundedCount = max(1, min(maxProviderEntryCount, count))
         let cadence = max(minProviderCadenceSeconds,
                           min(maxProviderCadenceSeconds, cadenceSeconds))
+        let calendar = Calendar.current
+        let secondsComponent = TimeInterval(
+            calendar.component(.second, from: start)
+        )
+        let nanosecondsComponent = TimeInterval(
+            calendar.component(.nanosecond, from: start)
+        ) / 1_000_000_000
+        let topOfCurrentMinute = start
+            .addingTimeInterval(-(secondsComponent + nanosecondsComponent))
+        let firstOffset = start == topOfCurrentMinute ? 0 : 1
         return (0..<boundedCount).map { offset in
-            start.addingTimeInterval(TimeInterval(offset) * cadence)
+            let idx = firstOffset + offset
+            if idx == 0 {
+                return start
+            }
+            return topOfCurrentMinute
+                .addingTimeInterval(TimeInterval(idx) * cadence)
         }
     }
 }

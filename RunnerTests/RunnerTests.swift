@@ -292,25 +292,31 @@ class RunnerTests: XCTestCase {
                        "First provider entry's date must equal the supplied start")
     }
 
-    /// Provider cadence is at least ~5 minutes between consecutive
-    /// entries (Apple's documented minimum).
-    func testProviderCadenceIsAtLeastFiveMinutes() {
+    /// Provider cadence is at least 60 seconds between consecutive
+    /// entries once the timeline has aligned to minute boundaries.
+    /// The first transition (from the captured `start` to the next
+    /// minute boundary) can be shorter than 60 s — that's the
+    /// intended behavior, since the first entry shows the current
+    /// minute and the second entry snaps forward to the next
+    /// minute boundary within the same minute.
+    func testProviderCadenceIsAtLeastSixtySeconds() {
         let start = Date(timeIntervalSince1970: 1_726_000_000)
         let timeline = WidgetTimelineSchedule.makeProviderTimeline(
             startingAt: start,
             providerEntryCount: 6,
             factory: { date in SimpleTestEntry(date: date) }
         )
-        for i in 1..<timeline.entries.count {
+        // Skip the first transition (initial → first aligned entry).
+        for i in 2..<timeline.entries.count {
             let delta = timeline.entries[i].date.timeIntervalSince(timeline.entries[i - 1].date)
-            XCTAssertGreaterThanOrEqual(delta, 5 * 60,
-                "Provider entries must be spaced ≥5 min apart; got \(delta) s")
+            XCTAssertGreaterThanOrEqual(delta, 60,
+                "Provider entries must be spaced ≥60 s apart; got \(delta) s")
         }
     }
 
-    /// Default provider cadence is exactly 5 minutes (300 s).
-    func testDefaultProviderCadenceIsFiveMinutes() {
-        XCTAssertEqual(WidgetTimelineSchedule.defaultProviderCadenceSeconds, 5 * 60)
+    /// Default provider cadence is exactly 60 seconds (1 minute).
+    func testDefaultProviderCadenceIsOneMinute() {
+        XCTAssertEqual(WidgetTimelineSchedule.defaultProviderCadenceSeconds, 60)
     }
 
     /// Provider timeline is bounded: even an absurd count returns at
@@ -326,14 +332,15 @@ class RunnerTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(timeline.entries.count, 1)
     }
 
-    /// No provider uses a one-minute reload policy. The
-    /// `defaultProviderCadenceSeconds` constant — which is what every
-    /// provider picks — is at least 5 minutes.
+    /// The default provider cadence is 60 seconds. Every minute-
+    /// aligned timeline entry keeps the widget's clock reading in
+    /// sync with the wall clock without requiring the user to open
+    /// the host app.
     func testNoProviderUsesOneMinuteReloadPolicy() {
-        XCTAssertGreaterThanOrEqual(
+        XCTAssertEqual(
             WidgetTimelineSchedule.defaultProviderCadenceSeconds,
-            5 * 60,
-            "Default provider cadence must be ≥ 5 minutes"
+            60,
+            "Default provider cadence must be exactly 60 seconds (one minute)"
         )
     }
 
@@ -864,6 +871,55 @@ class RunnerTests: XCTestCase {
 
     // MARK: - Minute-clock mechanism coverage
 
+    /// Subsequent timeline entries must align to the top of each
+    /// minute (`ss = 0`, `ns = 0`). The first entry preserves the
+    /// supplied `start` exactly. This is the mechanism that keeps
+    /// the widget clock in sync with the wall clock — iOS switches
+    /// to the next entry at its date, and the widget re-renders
+    /// `Text(e.date, style: .time)` with the current minute.
+    func testProviderEntriesAlignToMinuteBoundaries() {
+        let cal = Calendar.current
+        // Start at a non-aligned time so the alignment actually has
+        // work to do: 11:29:37.500.
+        let start = cal.date(
+            from: DateComponents(
+                timeZone: TimeZone(identifier: "UTC"),
+                year: 2024, month: 9, day: 22,
+                hour: 11, minute: 29, second: 37
+            )
+        )!
+        let timeline = WidgetTimelineSchedule.makeProviderTimeline(
+            startingAt: start,
+            providerEntryCount: 8,
+            factory: { date in SimpleTestEntry(date: date) }
+        )
+        XCTAssertEqual(timeline.entries.count, 8)
+        // First entry preserves the start time exactly.
+        XCTAssertEqual(timeline.entries.first?.date, start,
+                       "First entry must use the supplied start time verbatim")
+        // Subsequent entries land on the top of the minute.
+        for i in 1..<timeline.entries.count {
+            let date = timeline.entries[i].date
+            let comps = cal.dateComponents(
+                in: TimeZone(identifier: "UTC")!, from: date)
+            XCTAssertEqual(comps.second, 0,
+                "Entry \(i) (\(date)) must have second == 0")
+            XCTAssertEqual(comps.nanosecond, 0,
+                "Entry \(i) (\(date)) must have nanosecond == 0")
+        }
+    }
+
+    /// Default provider entry count must cover at least one full hour
+    /// at one-minute cadence. Anything less and the widget can run
+    /// out of pre-rendered entries between system reloads.
+    func testDefaultProviderEntryCountCoversAtLeastOneHour() {
+        XCTAssertGreaterThanOrEqual(
+            WidgetTimelineSchedule.defaultProviderEntryCount,
+            60,
+            "Default provider entry count must be ≥ 60 (one hour at 60s cadence)"
+        )
+    }
+
     /// Every widget root wraps its content view in `MinuteClockView`,
     /// which uses `TimelineView(.everyMinute)`. This proves the
     /// shared minute-clock mechanism is wired into all 22 widgets.
@@ -926,18 +982,20 @@ class RunnerTests: XCTestCase {
         }
     }
 
-    /// Provider entries remain at least five minutes apart.
-    func testProviderEntriesStillAtLeastFiveMinutesApart() {
+    /// Provider entries (after the first transition) remain at
+    /// least 60 seconds apart.
+    func testProviderEntriesStillAtLeastSixtySecondsApart() {
         let start = Date(timeIntervalSince1970: 1_726_000_000)
         let timeline = WidgetTimelineSchedule.makeProviderTimeline(
             startingAt: start,
             providerEntryCount: 12,
             factory: { date in SimpleTestEntry(date: date) }
         )
-        for i in 1..<timeline.entries.count {
+        // Skip the first transition (initial → first aligned entry).
+        for i in 2..<timeline.entries.count {
             let delta = timeline.entries[i].date.timeIntervalSince(timeline.entries[i - 1].date)
-            XCTAssertGreaterThanOrEqual(delta, 5 * 60,
-                "Provider entries must remain >=5 min apart; got \(delta) s")
+            XCTAssertGreaterThanOrEqual(delta, 60,
+                "Provider entries must remain >=60 s apart; got \(delta) s")
         }
     }
 

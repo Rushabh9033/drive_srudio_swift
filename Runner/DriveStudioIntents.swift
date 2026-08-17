@@ -21,7 +21,7 @@ import WidgetKit
 struct RefreshDriveStudioWidgetIntent: AppIntent {
     static var title: LocalizedStringResource = "Refresh Drive Studio"
     static var description = IntentDescription(
-        "Reloads the Drive Studio widget on your Home Screen so it shows the latest vehicle, battery, and slot data."
+        "Reloads the Drive Studio widget on your Home Screen so it shows the latest vehicle, battery, slot data, and clock. Wire this to a Personal Automation (Time of Day, every minute) to keep the widget clock advancing without opening the app."
     )
 
     static var openAppWhenRun: Bool = false
@@ -29,17 +29,15 @@ struct RefreshDriveStudioWidgetIntent: AppIntent {
     @MainActor
     func perform() async throws -> some IntentResult {
         // `snapshotAndSave()` writes the latest live telemetry into the
-        // App Group JSON and then asks the throttle for a widget reload.
-        // If anything actually changed (battery / charging / connection /
-        // speed), the throttle fires one reload. If nothing changed
-        // (`.noVisibleChange`) the throttle performs zero reloads — the
-        // widget is already showing the latest data, so a forced reload
-        // would burn WidgetKit budget for no user-visible effect.
-        //
-        // We deliberately do NOT call `WidgetReloadThrottle.shared.forceReload()`
-        // here: that would double the reload count for the common case
-        // where the snapshot also triggered one.
+        // App Group JSON. We then ALWAYS force a widget reload — even
+        // if nothing visible changed — because the user's intent here
+        // is to advance the widget clock. WidgetReloadThrottle's
+        // `.noVisibleChange` branch would otherwise skip the reload
+        // and leave the widget clock frozen at its previous entry's
+        // date. `forceReload()` bypasses the throttle so the widget
+        // is re-rendered no matter what.
         TelemetryService.shared.snapshotAndSave()
+        WidgetReloadThrottle.shared.forceReload()
         return .result()
     }
 }
